@@ -1,0 +1,1 @@
+import{j as o}from"./vendor-DGJAU7LJ.js";function l({logoUrl:r,title:t,subtitle:e,eyebrow:n}){return e?o.jsx("div",{style:{padding:"10px 20px",marginBottom:"10px",textAlign:"center",color:"#636e72",fontSize:"0.95rem",fontStyle:"italic"},children:e}):null}export{l as H};

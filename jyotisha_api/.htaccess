@@ -1,0 +1,5 @@
+# Block direct access to configuration, data, and source files in this folder
+<FilesMatch "\.(env|json|ts)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

@@ -1,0 +1,1 @@
+Restart file for Phusion Passenger. Modifying or uploading this file triggers a server restart on the next request.

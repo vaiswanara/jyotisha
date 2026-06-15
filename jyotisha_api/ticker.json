@@ -1,0 +1,18 @@
+{
+  "speed": "slow",
+  "tickers": [
+    {
+      "id": "default",
+      "startDate": "2026-06-09",
+      "endDate": "2026-06-15",
+      "updates": [
+        "Dear Friends 🙏",
+        "Thank you very much for showing interest in helping test the e-Jyotisha application.",
+        "The app has now reached its final stage of development. In the coming days, I will share the application URL in this group, along with a short YouTube video explaining its features and how to use it.",
+        "After that, you may explore and test the application at your convenience. If you come across any bugs, errors, layout issues, or suggestions for improvement, please feel free to share them in the group.",
+        "Your feedback and support will be extremely valuable in helping make the application more stable, reliable, and useful for everyone.",
+        "Thank you once again for being part of this effort and for your willingness to contribute. 🙏"
+      ]
+    }
+  ]
+}

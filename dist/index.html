@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#8a3b24" />
+  <meta name="description"
+    content="Vedic Astrology web app for horoscopes, graha positions, charts, Vimshottari dasha, and Jyotisha learning." />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="e-JYOTISHA" />
+  <link rel="icon" type="image/png" href="/jyotisha/logo.png" />
+  <link rel="apple-touch-icon" href="/jyotisha/icons/icon-192.png" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Mallanna&family=Noto+Serif+Kannada:wght@400;700&display=swap"
+    rel="stylesheet" />
+
+  <!-- Open Graph / Social Media Meta Tags -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://vaiswanara.com/jyotisha/" />
+  <meta property="og:title" content="e-JYOTISHA – Modern Vedic Astrology Platform" />
+  <meta property="og:description"
+    content="Vedic Astrology web app for horoscopes, graha positions, charts, Vimshottari dasha, and Jyotisha learning." />
+  <meta property="og:image" content="https://vaiswanara.com/jyotisha/icons/icon-512.png" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="e-JYOTISHA – Modern Vedic Astrology Platform" />
+  <meta name="twitter:description"
+    content="Vedic Astrology web app for horoscopes, graha positions, charts, Vimshottari dasha, and Jyotisha learning." />
+  <meta name="twitter:image" content="https://vaiswanara.com/jyotisha/icons/icon-512.png" />
+
+  <title>e-JYOTISHA – Modern Vedic Astrology Platform</title>
+
+  <!-- iOS Splash Screen Auto-Generator (No static images required!) -->
+  <script>
+    (function () {
+      if (/iPhone|iPad|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) {
+        var canvas = document.createElement("canvas");
+        var ctx = canvas.getContext("2d");
+        var dpr = window.devicePixelRatio || 1;
+        var w = window.screen.width * dpr;
+        var h = window.screen.height * dpr;
+        canvas.width = w;
+        canvas.height = h;
+
+        var img = new Image();
+        img.src = "/jyotisha/logo.png";
+        img.onload = function () {
+          // White background
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, w, h);
+
+          var imgSize = 160 * dpr; // Logo size
+          var gap = 30 * dpr; // Line space (gap)
+          var fontSize = 38 * dpr;
+          var totalHeight = imgSize + gap + fontSize;
+          var startY = (h - totalHeight) / 2; // Set to the middle of the screen
+
+          // Draw Logo
+          ctx.drawImage(img, (w - imgSize) / 2, startY, imgSize, imgSize);
+
+          // Main Title (e-JYOTISHA)
+          ctx.fillStyle = "#2d3436";
+          ctx.font = "bold " + fontSize + "px sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
+          ctx.fillText("e-JYOTISHA", w / 2, startY + imgSize + gap);
+
+          // Set the generated image as the splash screen
+          var link = document.createElement("link");
+          link.rel = "apple-touch-startup-image";
+          link.href = canvas.toDataURL("image/png");
+          document.head.appendChild(link);
+        };
+      }
+    })();
+  </script>
+
+  <script type="module" crossorigin src="/jyotisha/assets/index-4QWafhvJ.js"></script>
+  <link rel="modulepreload" crossorigin href="/jyotisha/assets/vendor-DGJAU7LJ.js">
+  <link rel="stylesheet" crossorigin href="/jyotisha/assets/index-v-myN5X7.css">
+<link rel="manifest" href="/jyotisha/manifest.webmanifest"></head>
+
+<body>
+  <div id="root"></div>
+</body>
+
+</html>

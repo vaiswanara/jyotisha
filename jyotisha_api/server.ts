@@ -1,0 +1,2842 @@
+import "dotenv/config";
+import express, { Request, Response } from "express";
+import cors from "cors";
+import * as SunCalc from "suncalc";
+import crypto from "crypto";
+import rateLimit from "express-rate-limit";
+import fs from "fs";
+import path from "path";
+import webpush from "web-push";
+import { VedicAstroEngine } from "./engine/VedicAstroEngine";
+import { Planet } from "./engine/constants";
+
+const serverStartTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// ఫాల్‌బ్యాక్ CORS: cPanel/Apache లో కొన్నిసార్లు 204 కి హెడర్స్ స్ట్రిప్ అవుతాయి.
+// కాబట్టి డైరెక్ట్ గా 200 OK ఇచ్చి అన్నీ అనుమతించడం ఉత్తమం.
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, x-api-token, x-admin-password",
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  next();
+});
+
+// VAPID Keys for Web Push Notifications (పాత generate_keys.php లోనివి)
+webpush.setVapidDetails(
+  "mailto:vaiswanara@gmail.com",
+  "BBHl1damc8zA6nXsJXiyVFLRMeJnLbSa9xVjE4SsJJDHxAmlCtyozMquuvZZGyClgzJ5sIs5sYkyxkszRRf1zFs",
+  "Ivw-HxJE6pNmsrsrfsk8OcukKHDN8HPvfRn2-MN9Smc",
+);
+
+// బేస్ రూట్స్ (లోకల్ మరియు cPanel కి సపోర్ట్ చేయడానికి)
+const healthPaths = ["/", "/jyotisha_api", "/jyotisha_node_api", "/node"];
+const apiPaths = [
+  "/api",
+  "/jyotisha_api/api",
+  "/jyotisha_node_api/api",
+  "/node/api",
+];
+
+// ఏపీఐ సెట్టింగ్స్ (API Configuration)
+const CONFIG = {
+  CACHE_TTL_SECONDS: parseInt(process.env.CACHE_TTL_SECONDS || "3600", 10),
+  ENABLE_PANCHANGA_LIMIT: process.env.ENABLE_PANCHANGA_LIMIT !== "false", // డీఫాల్ట్‌గా లిమిట్ ఆన్‌లో ఉంటుంది (true)
+  MAX_PANCHANGA_DAYS: parseInt(process.env.MAX_PANCHANGA_DAYS || "90", 10),
+  ALLOWED_DOMAINS: (
+    process.env.ALLOWED_DOMAINS ||
+    "localhost,vaiswanara.com,www.vaiswanara.com,api.vaiswanara.com"
+  )
+    .split(",")
+    .map((d) => d.trim()),
+  ENABLE_FAST_MODE: process.env.ENABLE_FAST_MODE !== "false", // .env లో false ఇస్తే ఫాస్ట్ మోడ్ ఆఫ్ అవుతుంది (డీఫాల్ట్ true)
+};
+
+// Layer 1: Strict CORS - కేవలం మీ వెబ్‌సైట్ మరియు లోకల్ హోస్ట్ నుండి మాత్రమే అనుమతి
+app.use(
+  cors({
+    origin: "*", // టోకెన్ భద్రత ఉంది కాబట్టి ఇక్కడ * వాడటం 100% సురక్షితం. ఇది CORS సమస్యలను శాశ్వతంగా ఆపుతుంది.
+    methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+    allowedHeaders: [
+      "Content-Type",
+      "x-api-token",
+      "x-admin-password",
+      "Origin",
+      "Accept",
+    ],
+    optionsSuccessStatus: 200,
+  }),
+);
+
+// Preflight (OPTIONS) రిక్వెస్ట్‌లను వెంటనే అనుమతించి పంపేయడం (టోకెన్ వెరిఫికేషన్ వల్ల బ్లాక్ అవ్వకుండా)
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  next();
+});
+
+// Layer 2: Origin & Referer Validation - టోకెన్ దొంగిలించినా డైరెక్ట్ కాల్స్ చేయకుండా బ్లాక్ చేయడం
+app.use(apiPaths, (req, res, next) => {
+  if (req.method === "OPTIONS") return next(); // Preflight కి బైపాస్
+
+  const origin = req.headers.origin;
+  const referer = req.headers.referer;
+
+  if (!origin && !referer) {
+    return res
+      .status(403)
+      .json({ error: "Forbidden. Direct API access is blocked." });
+  }
+  next();
+});
+
+// Layer 3: రేట్ లిమిటింగ్ (DDoS మరియు బ్రూట్ ఫోర్స్ ఎటాక్స్ నివారించడానికి)
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 నిమిషం విండో
+  max: 30, // ఒక్కో IP కి 1 నిమిషంలో గరిష్టంగా 30 రిక్వెస్ట్‌లు మాత్రమే
+  message: {
+    error: "Too many requests",
+    detail: "Slow down! Max 30 requests per minute.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(apiPaths, apiLimiter);
+
+// సాధారణ ఇన్-మెమరీ కాషింగ్ (In-memory Caching)
+const cache = new Map<string, { data: any; expiresAt: number }>();
+const CACHE_TTL_SECONDS = CONFIG.CACHE_TTL_SECONDS; // 1 గంట కాష్
+
+// గడువు ముగిసిన కాష్ ఎంట్రీలను క్రమానుగతంగా శుభ్రపరచడం
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of cache.entries()) {
+    if (value.expiresAt < now) {
+      cache.delete(key);
+    }
+  }
+}, CACHE_TTL_SECONDS * 1000).unref(); // గంటకు ఒకసారి క్లీనప్, ప్రాసెస్ దీనికోసం ఆగదు
+
+const isSyncEnabled = (): boolean => {
+  const settingsFile = path.join(process.cwd(), "sync_settings.json");
+  if (fs.existsSync(settingsFile)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(settingsFile, "utf-8"));
+      return data.enableUserSync === true;
+    } catch (e) {}
+  }
+  return false;
+};
+
+// భద్రత కోసం API Token Verification
+const API_SECRET_TOKEN = process.env.API_SECRET_TOKEN || "";
+
+// cPanel హెల్త్ చెక్ కోసం (దీనికి టోకెన్ అవసరం లేదు, cPanel కి ఎర్రర్ రాకుండా ఉండటానికి)
+app.get(healthPaths, (req, res) => {
+  res.status(200).send(`Jyotisha API is running securely. Started at: ${serverStartTime} (IST)`);
+});
+
+
+app.use(apiPaths, (req, res, next) => {
+  const token = req.headers["x-api-token"] || req.query.token;
+
+  // 3. టోకెన్ ఖచ్చితంగా ఉండాలి (లేకపోతే రిజెక్ట్ చేస్తుంది)
+  if (token !== API_SECRET_TOKEN) {
+    return res
+      .status(401)
+      .json({ error: "Unauthorized", detail: "Valid token required." });
+  }
+  next();
+});
+
+// --- MUHURTHA & PANCHANGA HELPER FUNCTIONS ---
+function findExactTime(
+  approxTs: number,
+  type: string,
+  targetVal: number,
+  lat: number,
+  lon: number,
+  tz: number,
+  ayKey: string,
+  fastMode: boolean = false,
+): number {
+  let ts = approxTs;
+  for (let i = 0; i < 4; i++) {
+    const offsetMs = tz * 3600 * 1000;
+    const localDt = new Date(ts * 1000 + offsetMs);
+    const engine = VedicAstroEngine.fromBirthData(
+      localDt.getUTCFullYear(),
+      localDt.getUTCMonth() + 1,
+      localDt.getUTCDate(),
+      localDt.getUTCHours(),
+      localDt.getUTCMinutes(),
+      tz,
+      ayKey,
+      localDt.getUTCSeconds(),
+    );
+    if (fastMode && typeof (engine as any).setSwetest === "function") {
+      (engine as any).setSwetest(false);
+    }
+    const pl = engine.calculateAll(lat, lon);
+    const mLon = pl[Planet.Moon]?.longitude || 0.0;
+    const mSpd = pl[Planet.Moon]?.speed || 13.176;
+    const sLon = pl[Planet.Sun]?.longitude || 0.0;
+    const sSpd = pl[Planet.Sun]?.speed || 0.9856;
+    let val = 0,
+      spd = 0;
+    if (type === "tithi" || type === "karana") {
+      val = (mLon - sLon + 360.0) % 360.0;
+      spd = mSpd - sSpd;
+    } else if (type === "nakshatra") {
+      val = mLon;
+      spd = mSpd;
+    } else {
+      val = (mLon + sLon) % 360.0;
+      spd = mSpd + sSpd;
+    }
+    spd = Math.max(0.1, spd);
+    let err = targetVal - val;
+    while (err <= -180.0) err += 360.0;
+    while (err > 180.0) err -= 360.0;
+    if (Math.abs(err) < 0.001) break;
+    ts += (err / spd) * 86400.0;
+  }
+  return Math.round(ts);
+}
+
+function getPreciseSunriseSunset(
+  timestamp: number,
+  lat: number,
+  lon: number,
+  tz: number,
+): { sunrise: number; sunset: number } {
+  const dt = new Date(timestamp * 1000);
+  const offsetMs = tz * 3600 * 1000;
+  const localDt = new Date(timestamp * 1000 + offsetMs);
+  const year = localDt.getUTCFullYear();
+  const month = localDt.getUTCMonth() + 1;
+  const day = localDt.getUTCDate();
+
+  const dateStr = `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+
+  const sunInfo = SunCalc.getTimes(dt, lat, lon);
+  let sunrise = sunInfo.sunrise ? Math.floor(sunInfo.sunrise.getTime() / 1000) : timestamp - 43200;
+  let sunset = sunInfo.sunset ? Math.floor(sunInfo.sunset.getTime() / 1000) : timestamp + 43200;
+
+  if (VedicAstroEngine.isSwetestEnabled()) {
+    const riseSet = VedicAstroEngine.getRiseSetTimes(0, dateStr, lon, lat, tz);
+    if (riseSet.rise !== null) sunrise = riseSet.rise;
+    if (riseSet.set !== null) sunset = riseSet.set;
+  }
+  return { sunrise, sunset };
+}
+
+function buildChartGrid(planets: any) {
+  const grid = Array(12)
+    .fill(null)
+    .map(() => [] as any[]);
+  const planetCodeMap: Record<string, string> = {
+    [Planet.Ascendant]: "Lg",
+    [Planet.Sun]: "Su",
+    [Planet.Moon]: "Ch",
+    [Planet.Mars]: "Ku",
+    [Planet.Mercury]: "Bu",
+    [Planet.Jupiter]: "Gu",
+    [Planet.Venus]: "Sk",
+    [Planet.Saturn]: "Sa",
+    [Planet.Rahu]: "Ra",
+    [Planet.Ketu]: "Ke",
+  };
+  for (const body of [
+    Planet.Ascendant,
+    Planet.Sun,
+    Planet.Moon,
+    Planet.Mars,
+    Planet.Mercury,
+    Planet.Jupiter,
+    Planet.Venus,
+    Planet.Saturn,
+    Planet.Rahu,
+    Planet.Ketu,
+  ]) {
+    if (!planets[body] || planets[body].rashi === undefined) continue;
+    const idx = Math.max(0, Math.min(11, planets[body].rashi - 1));
+    grid[idx].push({
+      id: planetCodeMap[body],
+      isR:
+        !!planets[body].retrograde &&
+        !["Ascendant", "Rahu", "Ketu"].includes(body),
+      isC: !!planets[body].combust,
+    });
+  }
+  return grid;
+}
+
+function panchakaResult(
+  vaaraNum: number,
+  tithiNum: number,
+  nakNum: number,
+  lagnaRashi: number,
+) {
+  const names: Record<number, string> = {
+    1: "Mrityu Panchaka",
+    2: "Agni Panchaka",
+    4: "Raja Panchaka",
+    6: "Chora Panchaka",
+    8: "Roga Panchaka",
+  };
+  const value = (vaaraNum + tithiNum + nakNum + lagnaRashi) % 9;
+  if (names[value]) return { label: names[value], is_good: false };
+  return { label: "Shubha", is_good: true };
+}
+
+function getPushkaraInfo(
+  lagnaRashi: number,
+  navamsaRashi: number,
+  ascDeg: number,
+  timestamp: number,
+  tz: number,
+) {
+  const pushkaraNavamsas: Record<number, number[]> = {
+    1: [7, 9],
+    2: [3, 5],
+    3: [6, 8],
+    4: [1, 3],
+    5: [7, 9],
+    6: [3, 5],
+    7: [6, 8],
+    8: [1, 3],
+    9: [7, 9],
+    10: [3, 5],
+    11: [6, 8],
+    12: [1, 3],
+  };
+  const navIndex = Math.max(
+    1,
+    Math.min(9, Math.floor(ascDeg / (30.0 / 9.0)) + 1),
+  );
+  const isPushkara = (pushkaraNavamsas[lagnaRashi] || []).includes(navIndex);
+  if (!isPushkara) return { label: "N/A", is_pushkara: false, window: "-" };
+  const rashiNames = [
+    "",
+    "Mesha",
+    "Vrishabha",
+    "Mithuna",
+    "Karka",
+    "Simha",
+    "Kanya",
+    "Tula",
+    "Vrischika",
+    "Dhanu",
+    "Makara",
+    "Kumbha",
+    "Meena",
+  ];
+  const navSizeDeg = 30.0 / 9.0;
+  const startOffset = Math.floor((navIndex - 1) * navSizeDeg * 240);
+  const endOffset = Math.ceil(navIndex * navSizeDeg * 240);
+  const rashiStartTs = timestamp - Math.floor(ascDeg * 240);
+  const fmt = (ts: number) => {
+    const d = new Date((ts + tz * 3600) * 1000);
+    let h = d.getUTCHours();
+    const m = d.getUTCMinutes().toString().padStart(2, "0");
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12;
+    if (h === 0) h = 12;
+    return `${h.toString().padStart(2, "0")}:${m} ${ampm}`;
+  };
+  return {
+    label: rashiNames[navamsaRashi] + " Navamsha",
+    is_pushkara: true,
+    window: `${fmt(rashiStartTs + startOffset)} - ${fmt(rashiStartTs + endOffset)}`,
+  };
+}
+
+function evaluateMuhurthaDoshas(
+  planets: any,
+  panchanga: any,
+  muhurthaInfo: any,
+) {
+  const doshas: string[] = [];
+  const lagnaRashi = planets[Planet.Ascendant].rashi;
+  const lagnaDeg = planets[Planet.Ascendant].degree;
+  const moonHouse = planets[Planet.Moon]?.house || 0;
+  const marsHouse = planets[Planet.Mars]?.house || 0;
+  const venusHouse = planets[Planet.Venus]?.house || 0;
+  const houseHasMalefic: Record<number, boolean> = {};
+  for (const p of [
+    Planet.Mars,
+    Planet.Saturn,
+    Planet.Rahu,
+    Planet.Ketu,
+    Planet.Sun,
+  ]) {
+    if (planets[p]?.house) houseHasMalefic[planets[p].house] = true;
+  }
+  if (houseHasMalefic[12] && houseHasMalefic[2])
+    doshas.push("Papakartari Lagna");
+  if (houseHasMalefic[1]) doshas.push("Papa Lagna");
+  if (planets[Planet.Saturn]?.house === 7 || houseHasMalefic[7])
+    doshas.push("Saptamastha Graha");
+  if (houseHasMalefic[8]) doshas.push("Ashtamastha Graha");
+  if ([6, 8, 12].includes(moonHouse)) doshas.push("Shashtashta Chandra");
+  if (venusHouse === 6) doshas.push("Bhrigu Shatka");
+  if (marsHouse === 8) doshas.push("Ashtamastha Kuja");
+  const tithiNum = panchanga.tithi_number || 0;
+  if ([4, 9, 14, 19, 24, 29].includes(tithiNum)) doshas.push("Riktha Tithi");
+  if (tithiNum === 30) doshas.push("Amavasya Tithi");
+  if (panchanga.karana === "Vishti") doshas.push("Vishti Karana");
+  if (["Vyatipata", "Vaidhriti"].includes(panchanga.yoga))
+    doshas.push("Malefic Yoga");
+  if (
+    ["Ashlesha", "Jyeshtha", "Revati"].includes(
+      planets[Planet.Moon]?.nakshatra,
+    ) &&
+    planets[Planet.Moon]?.pada === 4
+  )
+    doshas.push("Gandanta (Moon)");
+  if (lagnaDeg < 1 || lagnaDeg > 29) doshas.push("Gandanta (Lagna)");
+  if (planets[Planet.Jupiter]?.combust || planets[Planet.Venus]?.combust)
+    doshas.push("Asthangatha (Combustion)");
+  if (!muhurthaInfo.is_good) doshas.push("Krura Muhurtha");
+  const sl = planets[Planet.Sun]?.longitude;
+  const ml = planets[Planet.Moon]?.longitude;
+  const rl = planets[Planet.Rahu]?.longitude;
+  const kl = planets[Planet.Ketu]?.longitude;
+  if (sl !== undefined && rl !== undefined) {
+    for (const pair of [
+      [sl, rl],
+      [ml, rl],
+      [sl, kl],
+      [ml, kl],
+    ]) {
+      if (pair[0] === undefined || pair[1] === undefined) continue;
+      let diff = Math.abs(pair[0] - pair[1]);
+      diff = Math.min(diff, 360 - diff);
+      if (diff <= 15) {
+        doshas.push("Grahanam (Eclipse)");
+        break;
+      }
+    }
+  }
+  if ([1, 4, 7, 10].some((h) => houseHasMalefic[h])) doshas.push("Kendra Papa");
+  if ([5, 9].some((h) => houseHasMalefic[h])) doshas.push("Trikona Papa");
+  if ([1, 2, 4, 7, 8, 12].includes(marsHouse)) doshas.push("Kuja Dosha");
+  if (houseHasMalefic[1] && houseHasMalefic[7]) doshas.push("Udayasta Shuddhi");
+  return Array.from(new Set(doshas));
+}
+
+function formatTsLocal(ts: number, tz: number) {
+  const d = new Date((ts + tz * 3600) * 1000);
+  let h = d.getUTCHours();
+  const m = d.getUTCMinutes().toString().padStart(2, "0");
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12;
+  if (h === 0) h = 12;
+  return `${h.toString().padStart(2, "0")}:${m} ${ampm}`;
+}
+
+function getDiffLon(
+  eng: any,
+  lat: number,
+  lon: number,
+  fastMode: boolean = false,
+) {
+  if (fastMode && typeof (eng as any).setSwetest === "function") {
+    (eng as any).setSwetest(false);
+  }
+  const pl = eng.calculateAll(lat, lon);
+  const ml = pl[Planet.Moon]?.longitude || 0;
+  const sl = pl[Planet.Sun]?.longitude || 0;
+  return { diff: (ml - sl + 360) % 360, sl };
+}
+
+function getMidnightSunLon(
+  ts: number,
+  lat: number,
+  lon: number,
+  tz: number,
+  ayKey: string,
+  fastMode: boolean = false,
+) {
+  const d = new Date((ts + tz * 3600) * 1000);
+  const eng = VedicAstroEngine.fromBirthData(
+    d.getUTCFullYear(),
+    d.getUTCMonth() + 1,
+    d.getUTCDate(),
+    0,
+    0,
+    tz,
+    ayKey,
+  );
+  if (fastMode && typeof (eng as any).setSwetest === "function") {
+    (eng as any).setSwetest(false);
+  }
+  return eng.calculateAll(lat, lon)[Planet.Sun]?.longitude || 0;
+}
+function checkMoonAboveHorizon(date: Date, lat: number, lon: number): boolean {
+  try {
+    const pos = SunCalc.getMoonPosition(date, lat, lon);
+    const altDeg = pos.altitude * (180 / Math.PI);
+    return altDeg >= -1.0; 
+  } catch (e) {
+    return false;
+  }
+}
+
+function checkSunAboveHorizon(date: Date, lat: number, lon: number): boolean {
+  try {
+    const pos = SunCalc.getPosition(date, lat, lon);
+    const altDeg = pos.altitude * (180 / Math.PI);
+    return altDeg >= -1.0; 
+  } catch (e) {
+    return false;
+  }
+}
+
+function getCorrectContactUtcTime(maxUtc: Date | null, contactTimeStr: string): Date | null {
+  if (!maxUtc || !contactTimeStr || contactTimeStr.trim() === "-") return null;
+  
+  const y = maxUtc.getUTCFullYear();
+  const m = maxUtc.getUTCMonth(); 
+  const d = maxUtc.getUTCDate();
+  
+  const timeParts = contactTimeStr.trim().split(":");
+  const hours = parseInt(timeParts[0] || "0");
+  const minutes = parseInt(timeParts[1] || "0");
+  const secondsFloat = parseFloat(timeParts[2] || "0");
+  const seconds = Math.floor(secondsFloat);
+  const ms = Math.round((secondsFloat % 1) * 1000);
+  
+  const cand = new Date(Date.UTC(y, m, d, hours, minutes, seconds, ms));
+  const diffHours = (cand.getTime() - maxUtc.getTime()) / (3600 * 1000);
+  
+  if (diffHours > 12) {
+    cand.setUTCDate(cand.getUTCDate() - 1);
+  } else if (diffHours < -12) {
+    cand.setUTCDate(cand.getUTCDate() + 1);
+  }
+  
+  return cand;
+}
+
+function parseSwetestEclipses(
+  output: string, 
+  tzOffsetHours: number, 
+  eventType: "solar" | "lunar",
+  lat?: number,
+  lon?: number
+) {
+  const eclipses: any[] = [];
+  const lines = output.split("\n");
+  
+  // Regex for Line 1 (Solar and Lunar)
+  const regexLine1 = /^\s*(partial|total|annular|total\/annular|annular\/total|non-central|penumb\.\s+lunar\s+eclipse|partial\s+lunar\s+eclipse|total\s+lunar\s+eclipse)\s+(\d{1,2}\.\d{1,2}\.\d{4})\s+(\d{1,2}:\d{2}:\d{2}(?:\.\d+)?)\s+([\d./-]+)\s+saros\s+(\d+\/\d+)\s+([\d.]+)/i;
+
+  let currentEclipse: any = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const match = line.match(regexLine1);
+    
+    if (match) {
+      if (currentEclipse) {
+        eclipses.push(currentEclipse);
+      }
+      
+      const rawType = match[1].trim();
+      const dateStr = match[2].trim();
+      const timeStr = match[3].trim();
+      const rawValues = match[4].trim(); 
+      const saros = match[5].trim();
+      const julianDay = parseFloat(match[6].trim());
+
+      const maxUtc = parseUtcDateTime(dateStr, timeStr);
+      const values = rawValues.split("/");
+      let magnitude = parseFloat(values[0] || "0");
+      const fraction = parseFloat(values[1] || "0");
+
+      if (eventType === "lunar" && rawType.toLowerCase().includes("penumb")) {
+        magnitude = fraction;
+      }
+
+      let typeFormatted = rawType.replace(/\s+/g, " ");
+      typeFormatted = typeFormatted.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+
+      currentEclipse = {
+        type: typeFormatted,
+        rawType: rawType,
+        eventType,
+        date: dateStr,
+        time: timeStr,
+        utcTimestamp: maxUtc ? maxUtc.getTime() : 0,
+        localDate: maxUtc ? toLocalDateStr(maxUtc, tzOffsetHours) : "-",
+        localTime: maxUtc ? toLocalTimeStr(maxUtc, tzOffsetHours) : "-",
+        magnitude,
+        fraction,
+        saros,
+        julianDay,
+        contactTimes: []
+      };
+    } else if (currentEclipse && line.trim() !== "") {
+      let lineClean = line.replace(/dt=[\d.]+/, "").trim();
+      
+      if (eventType === "solar") {
+        const durMatch = lineClean.match(/(\d+\s+min\s+[\d.]+\s+sec)/i);
+        if (durMatch) {
+          currentEclipse.duration = durMatch[1];
+          lineClean = lineClean.replace(durMatch[1], "").trim();
+        } else {
+          currentEclipse.duration = "0 min 0.00 sec";
+        }
+      }
+
+      const times = lineClean.split(/\s+/).filter(t => t.trim() !== "");
+      const maxUtc = currentEclipse.utcTimestamp ? new Date(currentEclipse.utcTimestamp) : null;
+      
+      if (eventType === "solar") {
+        const labels = ["C1 (Partial Begins)", "C2 (Totality Begins)", "C3 (Totality Ends)", "C4 (Partial Ends)"];
+        currentEclipse.contactTimes = times
+          .map((t, idx) => {
+            if (t === "-") return null;
+            const utcTime = getCorrectContactUtcTime(maxUtc, t);
+            return {
+              label: labels[idx] || `C${idx + 1}`,
+              rawTime: t,
+              localDate: utcTime ? toLocalDateStr(utcTime, tzOffsetHours) : "-",
+              localTime: utcTime ? toLocalTimeStr(utcTime, tzOffsetHours) : "-",
+              utcTime: utcTime
+            };
+          })
+          .filter((c: any) => c !== null);
+      } else {
+        const labels = [
+          "P1 (Penumbral Begins)",
+          "U1 (Partial Begins)",
+          "U2 (Totality Begins)",
+          "U3 (Totality Ends)",
+          "U4 (Partial Ends)",
+          "P4 (Penumbral Ends)"
+        ];
+        currentEclipse.contactTimes = times
+          .map((t, idx) => {
+            if (t === "-") return null;
+            const utcTime = getCorrectContactUtcTime(maxUtc, t);
+            const isVisible = utcTime && (lat !== undefined && lon !== undefined)
+              ? checkMoonAboveHorizon(utcTime, lat, lon)
+              : true;
+
+            return {
+              label: labels[idx] || `Contact ${idx + 1}`,
+              rawTime: t,
+              localDate: isVisible && utcTime ? toLocalDateStr(utcTime, tzOffsetHours) : "-",
+              localTime: isVisible && utcTime ? toLocalTimeStr(utcTime, tzOffsetHours) : "-",
+              utcTime: utcTime
+            };
+          })
+          .filter((c: any) => c !== null);
+      }
+
+      // Add Maximum Eclipse
+      if (maxUtc) {
+        const isVisible = (lat !== undefined && lon !== undefined)
+          ? (eventType === "solar" ? checkSunAboveHorizon(maxUtc, lat, lon) : checkMoonAboveHorizon(maxUtc, lat, lon))
+          : true;
+        currentEclipse.contactTimes.push({
+          label: "Maximum",
+          rawTime: currentEclipse.time,
+          localDate: isVisible ? toLocalDateStr(maxUtc, tzOffsetHours) : "-",
+          localTime: isVisible ? toLocalTimeStr(maxUtc, tzOffsetHours) : "-",
+          utcTime: maxUtc
+        });
+      }
+
+      // Add Sunrise/Sunset (solar) or Moonrise/Moonset (lunar)
+      if (lat !== undefined && lon !== undefined && maxUtc && currentEclipse.contactTimes.length > 0) {
+        currentEclipse.contactTimes.sort((a: any, b: any) => a.utcTime.getTime() - b.utcTime.getTime());
+        const startLimit = currentEclipse.contactTimes[0].utcTime.getTime() - 3600 * 1000;
+        const lastContactIdx = currentEclipse.contactTimes.length - 1;
+        const endLimit = currentEclipse.contactTimes[lastContactIdx].utcTime.getTime() + 3600 * 1000;
+
+        const riseSetTimes: { label: string, time: Date }[] = [];
+        const daysToCheck = [
+          new Date(maxUtc.getTime() - 86400 * 1000),
+          maxUtc,
+          new Date(maxUtc.getTime() + 86400 * 1000)
+        ];
+
+        const pad = (n: number) => String(n).padStart(2, '0');
+
+        if (eventType === "lunar") {
+          for (const d of daysToCheck) {
+            const dateStr = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+            if (VedicAstroEngine.isSwetestEnabled()) {
+              const res = VedicAstroEngine.getRiseSetTimes(1, dateStr, lon, lat, tzOffsetHours);
+              if (res.rise !== null) riseSetTimes.push({ label: "Moonrise", time: new Date(res.rise * 1000) });
+              if (res.set !== null) riseSetTimes.push({ label: "Moonset", time: new Date(res.set * 1000) });
+            } else {
+              try {
+                const mTimes = SunCalc.getMoonTimes(d, lat, lon);
+                if (mTimes.rise) riseSetTimes.push({ label: "Moonrise", time: mTimes.rise });
+                if (mTimes.set) riseSetTimes.push({ label: "Moonset", time: mTimes.set });
+              } catch (e) {}
+            }
+          }
+        } else {
+          for (const d of daysToCheck) {
+            const dateStr = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+            if (VedicAstroEngine.isSwetestEnabled()) {
+              const res = VedicAstroEngine.getRiseSetTimes(0, dateStr, lon, lat, tzOffsetHours);
+              if (res.rise !== null) riseSetTimes.push({ label: "Sunrise", time: new Date(res.rise * 1000) });
+              if (res.set !== null) riseSetTimes.push({ label: "Sunset", time: new Date(res.set * 1000) });
+            } else {
+              try {
+                const sTimes = SunCalc.getTimes(d, lat, lon);
+                if (sTimes.sunrise) riseSetTimes.push({ label: "Sunrise", time: sTimes.sunrise });
+                if (sTimes.sunset) riseSetTimes.push({ label: "Sunset", time: sTimes.sunset });
+              } catch (e) {}
+            }
+          }
+        }
+
+        const seen = new Set<number>();
+        for (const item of riseSetTimes) {
+          const ts = item.time.getTime();
+          if (ts >= startLimit && ts <= endLimit && !seen.has(ts)) {
+            seen.add(ts);
+            currentEclipse.contactTimes.push({
+              label: item.label,
+              rawTime: toLocalTimeStr(item.time, tzOffsetHours),
+              localDate: toLocalDateStr(item.time, tzOffsetHours),
+              localTime: toLocalTimeStr(item.time, tzOffsetHours),
+              utcTime: item.time
+            });
+          }
+        }
+      }
+
+      // Chronological sort
+      currentEclipse.contactTimes.sort((a: any, b: any) => a.utcTime.getTime() - b.utcTime.getTime());
+      
+      eclipses.push(currentEclipse);
+      currentEclipse = null;
+    }
+  }
+
+  if (currentEclipse) {
+    eclipses.push(currentEclipse);
+  }
+
+  return eclipses;
+}
+
+function parseUtcDateTime(dateStr: string, timeStr: string): Date | null {
+  if (!dateStr || !timeStr || timeStr.trim() === "-") return null;
+  const dateParts = dateStr.trim().split(".");
+  if (dateParts.length !== 3) return null;
+  const d = parseInt(dateParts[0]);
+  const m = parseInt(dateParts[1]);
+  const y = parseInt(dateParts[2]);
+
+  const timeParts = timeStr.trim().split(":");
+  const hours = parseInt(timeParts[0] || "0");
+  const minutes = parseInt(timeParts[1] || "0");
+  const secondsFloat = parseFloat(timeParts[2] || "0");
+  const seconds = Math.floor(secondsFloat);
+  const ms = Math.round((secondsFloat % 1) * 1000);
+  
+  if (isNaN(y) || isNaN(m) || isNaN(d)) return null;
+  return new Date(Date.UTC(y, m - 1, d, hours, minutes, seconds, ms));
+}
+
+function toLocalDateStr(utcDate: Date, tzOffsetHours: number): string {
+  const localTimeMs = utcDate.getTime() + tzOffsetHours * 3600 * 1000;
+  const localDate = new Date(localTimeMs);
+  const y = localDate.getUTCFullYear();
+  const m = String(localDate.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(localDate.getUTCDate()).padStart(2, '0');
+  return `${d}-${m}-${y}`;
+}
+
+function toLocalTimeStr(utcDate: Date, tzOffsetHours: number): string {
+  const localTimeMs = utcDate.getTime() + tzOffsetHours * 3600 * 1000;
+  const localDate = new Date(localTimeMs);
+  let h = localDate.getUTCHours();
+  const mins = String(localDate.getUTCMinutes()).padStart(2, '0');
+  const secs = String(localDate.getUTCSeconds()).padStart(2, '0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12;
+  if (h === 0) h = 12;
+  const hoursStr = String(h).padStart(2, '0');
+  return `${hoursStr}:${mins}:${secs} ${ampm}`;
+}
+
+// ----------------------------------------------------
+
+// మెయిన్ API ఎండ్‌పాయింట్
+app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
+  const input = { ...req.query, ...req.body };
+  const endpoint = (input.endpoint || "birthchart").toString().toLowerCase();
+
+  // 1. కాష్ కీని (Cache Key) సంబంధిత పారామితుల నుండి రూపొందించడం
+  const cacheableParams = [
+    "dob",
+    "tob",
+    "latitude",
+    "longitude",
+    "timezone",
+    "ayanamsha",
+    "from_date",
+    "date",
+    "days",
+    "lat",
+    "lon",
+    "tz",
+    "date",
+    "time",
+    "timestamp",
+    "boy_dob",
+    "boy_tob",
+    "boy_latitude",
+    "boy_longitude",
+    "boy_timezone",
+    "girl_dob",
+    "girl_tob",
+    "girl_latitude",
+    "girl_longitude",
+    "girl_timezone",
+    "rahu_mode",
+  ];
+  const keyObject: Record<string, any> = { endpoint };
+  for (const key of cacheableParams) {
+    if (input[key] !== undefined) {
+      keyObject[key] = input[key];
+    }
+  }
+  const sortedKeys = Object.keys(keyObject).sort();
+  const canonicalString = sortedKeys
+    .map((key) => `${key}:${keyObject[key]}`)
+    .join("|");
+  const cacheKey = crypto
+    .createHash("md5")
+    .update(canonicalString)
+    .digest("hex");
+
+  // 2. కాష్ ఉందో లేదో తనిఖీ చేయడం
+  const cached = cache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    res.setHeader("X-Cache", "HIT");
+    return res.json(cached.data);
+  }
+
+  // కాష్ లో సేవ్ చేసి JSON పంపడానికి ఒక హెల్పర్ ఫంక్షన్
+  const jsonAndCache = (data: any) => {
+    cache.set(cacheKey, {
+      data,
+      expiresAt: Date.now() + CACHE_TTL_SECONDS * 1000,
+    });
+    res.setHeader("X-Cache", "MISS");
+    return res.json(data);
+  };
+
+  try {
+    // ఇన్పుట్ పారామితులను సులభంగా ప్రాసెస్ చేయడానికి హెల్పర్ ఫంక్షన్
+    const parseInput = () => {
+      const { dob, tob, latitude, longitude, timezone, ayanamsha } = input;
+      if (!dob || !tob || !latitude || !longitude || !timezone) {
+        throw new Error("Missing required parameters (dob, tob, lat, lon, tz)");
+      }
+      const [year, month, day] = String(dob).split("-").map(Number);
+      const timeParts = String(tob).split(":");
+      const hour = parseInt(timeParts[0]);
+      const minute = parseInt(timeParts[1]);
+      const second = timeParts[2] ? parseInt(timeParts[2]) : 0;
+      return {
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        second,
+        lat: parseFloat(String(latitude)),
+        lon: parseFloat(String(longitude)),
+        tz: parseFloat(String(timezone)),
+        ayKey: String(ayanamsha || "lahiri"),
+        dob,
+        tob,
+      };
+    };
+
+    if (endpoint === "birthchart") {
+      const b = parseInput();
+      const rahuMode = (input.rahu_mode || "mean") === "true" ? "true" : "mean";
+
+      // ఇంజిన్ బిల్డ్ చేయడం
+      const engine = VedicAstroEngine.fromBirthData(
+        b.year,
+        b.month,
+        b.day,
+        b.hour,
+        b.minute,
+        b.tz,
+        b.ayKey,
+        b.second,
+        rahuMode,
+      );
+
+      const planets = engine.calculateAll(b.lat, b.lon);
+      const lagnaRashi = planets[Planet.Ascendant]?.rashi || 1;
+      const houses = engine.calcHouses(lagnaRashi);
+      const navamsa = engine.calcNavamsa(planets as any);
+      const d3 = (engine as any).calcDrekkanaD3(planets as any);
+      const d7 = (engine as any).calcSaptamshaD7(planets as any);
+      const d10 = (engine as any).calcDasamshaD10(planets as any);
+      const d12 = (engine as any).calcDwadashamshaD12(planets as any);
+      const d2 = (engine as any).calcHoraD2(planets as any);
+      const d4 = (engine as any).calcChaturthamshaD4(planets as any);
+      const d16 = (engine as any).calcShodashamshaD16(planets as any);
+      const d20 = (engine as any).calcVimshamshaD20(planets as any);
+      const d24 = (engine as any).calcChaturvimshamshaD24(planets as any);
+      const d27 = (engine as any).calcSaptavimshamshaD27(planets as any);
+      const d30 = (engine as any).calcTrimshamshaD30(planets as any);
+      const d60 = (engine as any).calcShashtiamshaD60(planets as any);
+
+      const moonData = planets[Planet.Moon]!;
+      const dashas = engine.calcVimshottariDasha(
+        moonData.nak_index,
+        moonData.deg_in_nak,
+        String(b.dob),
+      );
+
+      const sunLon = planets[Planet.Sun]?.longitude || 0;
+      const panchanga = engine.calcPanchanga(sunLon, moonData.longitude || 0);
+      const shadabala = engine.calcShadabala(planets, lagnaRashi);
+      const ashtakavarga = VedicAstroEngine.calcAshtakavarga(
+        planets,
+        lagnaRashi,
+      );
+
+      return jsonAndCache({
+        meta: {
+          dob: b.dob,
+          tob: b.tob,
+          latitude: b.lat,
+          longitude: b.lon,
+          timezone: b.tz,
+          ayanamsha: Number(engine.getAyanamsha().toFixed(6)),
+          ayanamsha_name: engine.getAyanamshaName(),
+          engine: engine.isUsingSwetest()
+            ? "swetest (Swiss Ephemeris)"
+            : "Math fallback",
+        },
+        planets,
+        houses,
+        navamsa_d9: navamsa,
+        d2,
+        d3,
+        d4,
+        d7,
+        d10,
+        d12,
+        d16,
+        d20,
+        d24,
+        d27,
+        d30,
+        d60,
+        dashas,
+        panchanga,
+        shadabala,
+        ashtakavarga,
+      });
+    } else if (endpoint === "shadabala") {
+      const b = parseInput();
+      const engine = VedicAstroEngine.fromBirthData(
+        b.year,
+        b.month,
+        b.day,
+        b.hour,
+        b.minute,
+        b.tz,
+        b.ayKey,
+        b.second,
+      );
+      const planets = engine.calculateAll(b.lat, b.lon);
+      const lagnaRashi = planets[Planet.Ascendant]?.rashi || 1;
+      const shadabala = engine.calcShadabala(planets, lagnaRashi);
+
+      return jsonAndCache({
+        endpoint: "Shadabala",
+        ayanamsha: engine.getAyanamshaName(),
+        shadabala,
+      });
+    } else if (endpoint === "ashtakavarga") {
+      const b = parseInput();
+      const engine = VedicAstroEngine.fromBirthData(
+        b.year,
+        b.month,
+        b.day,
+        b.hour,
+        b.minute,
+        b.tz,
+        b.ayKey,
+        b.second,
+      );
+      const planets = engine.calculateAll(b.lat, b.lon);
+      const lagnaRashi = planets[Planet.Ascendant]?.rashi || 1;
+      const ashtakavarga = VedicAstroEngine.calcAshtakavarga(
+        planets,
+        lagnaRashi,
+      );
+
+      return jsonAndCache({
+        endpoint: "Ashtakavarga",
+        ayanamsha: engine.getAyanamshaName(),
+        ashtakavarga,
+      });
+    } else if (endpoint === "precision_test") {
+      const { dob, tob, latitude, longitude, timezone, ayanamsha } = input;
+      if (!dob || !tob || !latitude || !longitude || !timezone) {
+        throw new Error("Missing required parameters (dob, tob, latitude, longitude, timezone)");
+      }
+      const [year, month, day] = String(dob).split("-").map(Number);
+      const timeParts = String(tob).split(":");
+      const hour = parseInt(timeParts[0]);
+      const minute = parseInt(timeParts[1]);
+      const second = timeParts[2] ? parseInt(timeParts[2]) : 0;
+      const lat = parseFloat(String(latitude));
+      const lon = parseFloat(String(longitude));
+      const tz = parseFloat(String(timezone));
+      const ayKey = String(ayanamsha || "lahiri");
+      const rahuMode = (input.rahu_mode || "mean") === "true" ? "true" : "mean";
+
+      // Target UT/local timestamp
+      const localMidnightUtc = Date.UTC(year, month - 1, day, 0, 0, 0);
+      const localMidnightDate = new Date(localMidnightUtc);
+      const targetLocalTs = Math.floor(localMidnightUtc / 1000) - tz * 3600 + (hour * 3600 + minute * 60 + second);
+
+      // --- 1. SUNRISE / SUNSET / MOONRISE / MOONSET ---
+      // Fallback (SunCalc)
+      const sunInfo = SunCalc.getTimes(localMidnightDate, lat, lon);
+      const fbSunrise = sunInfo.sunrise ? Math.floor(sunInfo.sunrise.getTime() / 1000) : null;
+      const fbSunset = sunInfo.sunset ? Math.floor(sunInfo.sunset.getTime() / 1000) : null;
+
+      const moonInfo = SunCalc.getMoonTimes(localMidnightDate, lat, lon);
+      const fbMoonrise = moonInfo.rise ? Math.floor(moonInfo.rise.getTime() / 1000) : null;
+      const fbMoonset = moonInfo.set ? Math.floor(moonInfo.set.getTime() / 1000) : null;
+
+      // High Precision (swetest)
+      const precSun = VedicAstroEngine.getRiseSetTimes(0, dob, lon, lat, tz);
+      const precMoon = VedicAstroEngine.getRiseSetTimes(1, dob, lon, lat, tz);
+
+      // --- 2. PANCHANGA VALUES & END TIMES ---
+      const nakLen = 360.0 / 27.0;
+
+      // A. Fallback Calculations
+      const fbEngine = VedicAstroEngine.fromBirthData(year, month, day, hour, minute, tz, ayKey, 0, rahuMode);
+      fbEngine.setSwetest(false);
+      const fbPlanets = fbEngine.calculateAll(lat, lon);
+      const fbSunLon = fbPlanets[Planet.Sun]?.longitude || 0;
+      const fbMoonLon = fbPlanets[Planet.Moon]?.longitude || 0;
+      const fbPanchanga = fbEngine.calcPanchanga(fbSunLon, fbMoonLon);
+      const fbSunSpeed = fbPlanets[Planet.Sun]?.speed || 0.9856;
+      const fbMoonSpeed = fbPlanets[Planet.Moon]?.speed || 13.176;
+      const fbTSpeed = Math.max(0.1, fbMoonSpeed - fbSunSpeed);
+      const fbYSpeed = Math.max(0.1, fbMoonSpeed + fbSunSpeed);
+
+      // Fallback Tithi End Time
+      const fbDiff = (fbMoonLon - fbSunLon + 360) % 360;
+      const fbTIndex = Math.floor(fbDiff / 12);
+      const fbTRem = 12.0 - (fbDiff % 12.0);
+      const fbTEndApprox = targetLocalTs + Math.floor((fbTRem / fbTSpeed) * 86400);
+      const fbTithiEnd = findExactTime(fbTEndApprox, "tithi", (fbTIndex + 1) * 12.0, lat, lon, tz, ayKey, true);
+
+      // Fallback Nakshatra End Time
+      const fbNakIndex = Math.floor(fbMoonLon / nakLen);
+      const fbNakRem = nakLen - (fbMoonLon % nakLen);
+      const fbNEndApprox = targetLocalTs + Math.floor((fbNakRem / fbMoonSpeed) * 86400);
+      const fbNakshatraEnd = findExactTime(fbNEndApprox, "nakshatra", (fbNakIndex + 1) * nakLen, lat, lon, tz, ayKey, true);
+
+      // Fallback Yoga End Time
+      const fbYogaDiff = (fbSunLon + fbMoonLon) % 360;
+      const fbYogaIndex = Math.floor(fbYogaDiff / nakLen);
+      const fbYogaRem = nakLen - (fbYogaDiff % nakLen);
+      const fbYEndApprox = targetLocalTs + Math.floor((fbYogaRem / fbYSpeed) * 86400);
+      const fbYogaEnd = findExactTime(fbYEndApprox, "yoga", (fbYogaIndex + 1) * nakLen, lat, lon, tz, ayKey, true);
+
+      // Fallback Karana End Time
+      const fbKaranaIndex = Math.floor(fbDiff / 6.0);
+      const fbKaranaRem = 6.0 - (fbDiff % 6.0);
+      const fbKEndApprox = targetLocalTs + Math.floor((fbKaranaRem / fbTSpeed) * 86400);
+      const fbKaranaEnd = findExactTime(fbKEndApprox, "karana", (fbKaranaIndex + 1) * 6.0, lat, lon, tz, ayKey, true);
+
+      // B. High-Precision Calculations
+      const precEngine = VedicAstroEngine.fromBirthData(year, month, day, hour, minute, tz, ayKey, second, rahuMode);
+      precEngine.setSwetest(true);
+      const precPlanets = precEngine.calculateAll(lat, lon);
+      const precSunLon = precPlanets[Planet.Sun]?.longitude || 0;
+      const precMoonLon = precPlanets[Planet.Moon]?.longitude || 0;
+      const precPanchanga = precEngine.calcPanchanga(precSunLon, precMoonLon);
+      const precSunSpeed = precPlanets[Planet.Sun]?.speed || 0.9856;
+      const precMoonSpeed = precPlanets[Planet.Moon]?.speed || 13.176;
+      const precTSpeed = Math.max(0.1, precMoonSpeed - precSunSpeed);
+      const precYSpeed = Math.max(0.1, precMoonSpeed + precSunSpeed);
+
+      // Precise Tithi End Time
+      const precDiff = (precMoonLon - precSunLon + 360) % 360;
+      const precTIndex = Math.floor(precDiff / 12);
+      const precTRem = 12.0 - (precDiff % 12.0);
+      const precTEndApprox = targetLocalTs + Math.floor((precTRem / precTSpeed) * 86400);
+      const precTithiEnd = findExactTime(precTEndApprox, "tithi", (precTIndex + 1) * 12.0, lat, lon, tz, ayKey, false);
+
+      // Precise Nakshatra End Time
+      const precNakIndex = Math.floor(precMoonLon / nakLen);
+      const precNakRem = nakLen - (precMoonLon % nakLen);
+      const precNEndApprox = targetLocalTs + Math.floor((precNakRem / precMoonSpeed) * 86400);
+      const precNakshatraEnd = findExactTime(precNEndApprox, "nakshatra", (precNakIndex + 1) * nakLen, lat, lon, tz, ayKey, false);
+
+      // Precise Yoga End Time
+      const precYogaDiff = (precSunLon + precMoonLon) % 360;
+      const precYogaIndex = Math.floor(precYogaDiff / nakLen);
+      const precYogaRem = nakLen - (precYogaDiff % nakLen);
+      const precYEndApprox = targetLocalTs + Math.floor((precYogaRem / precYSpeed) * 86400);
+      const precYogaEnd = findExactTime(precYEndApprox, "yoga", (precYogaIndex + 1) * nakLen, lat, lon, tz, ayKey, false);
+
+      // Precise Karana End Time
+      const precKaranaIndex = Math.floor(precDiff / 6.0);
+      const precKaranaRem = 6.0 - (precDiff % 6.0);
+      const precKEndApprox = targetLocalTs + Math.floor((precKaranaRem / precTSpeed) * 86400);
+      const precKaranaEnd = findExactTime(precKEndApprox, "karana", (precKaranaIndex + 1) * 6.0, lat, lon, tz, ayKey, false);
+
+      return jsonAndCache({
+        meta: {
+          dob,
+          tob,
+          timezone: tz,
+          latitude: lat,
+          longitude: lon,
+          ayanamsha: ayKey,
+          targetLocalTs,
+          engine: VedicAstroEngine.isSwetestEnabled()
+            ? `swetest${process.platform === "win32" ? ".exe (Windows)" : process.platform === "darwin" ? "_mac (macOS)" : " (Linux)"}`
+            : "Math fallback (No swetest binary found)",
+        },
+        riseSet: {
+          fallback: {
+            sunrise: fbSunrise,
+            sunset: fbSunset,
+            moonrise: fbMoonrise,
+            moonset: fbMoonset,
+          },
+          precise: {
+            sunrise: precSun.rise,
+            sunset: precSun.set,
+            moonrise: precMoon.rise,
+            moonset: precMoon.set,
+          },
+        },
+        panchanga: {
+          fallback: {
+            tithi: fbPanchanga.tithi,
+            tithi_number: fbPanchanga.tithi_number,
+            tithi_end: fbTithiEnd,
+            nakshatra: fbPanchanga.moon_nakshatra,
+            nakshatra_end: fbNakshatraEnd,
+            yoga: fbPanchanga.yoga,
+            yoga_end: fbYogaEnd,
+            karana: fbPanchanga.karana,
+            karana_end: fbKaranaEnd,
+            vara: fbPanchanga.vara,
+            paksha: fbPanchanga.paksha,
+            ayanamsha: fbEngine.getAyanamsha(),
+            ayanamsha_name: fbEngine.getAyanamshaName(),
+          },
+          precise: {
+            tithi: precPanchanga.tithi,
+            tithi_number: precPanchanga.tithi_number,
+            tithi_end: precTithiEnd,
+            nakshatra: precPanchanga.moon_nakshatra,
+            nakshatra_end: precNakshatraEnd,
+            yoga: precPanchanga.yoga,
+            yoga_end: precYogaEnd,
+            karana: precPanchanga.karana,
+            karana_end: precKaranaEnd,
+            vara: precPanchanga.vara,
+            paksha: precPanchanga.paksha,
+            ayanamsha: precEngine.getAyanamsha(),
+            ayanamsha_name: precEngine.getAyanamshaName(),
+          },
+        },
+      });
+    } else if (endpoint === "panchanga_table") {
+      const fromDate = String(
+        input.from_date || input.date || new Date().toISOString().split("T")[0],
+      );
+      const maxLimit = CONFIG.ENABLE_PANCHANGA_LIMIT
+        ? CONFIG.MAX_PANCHANGA_DAYS
+        : Infinity;
+      const days = Math.min(
+        maxLimit,
+        Math.max(1, parseInt(String(input.days || 10))),
+      );
+      const lat = parseFloat(String(input.latitude || input.lat || 12.9716));
+      const lon = parseFloat(String(input.longitude || input.lon || 77.5946));
+      const tz = parseFloat(String(input.timezone || input.tz || 5.5));
+      const ayKey = String(input.ayanamsha || "lahiri");
+      const boyNak = input.boy_nakshatra ? String(input.boy_nakshatra) : null;
+      const girlNak = input.girl_nakshatra
+        ? String(input.girl_nakshatra)
+        : null;
+
+      const fastMode = CONFIG.ENABLE_FAST_MODE && days > 30; // .env లో ఆన్ ఉండి, 30 రోజుల కంటే ఎక్కువ ఉంటేనే మ్యాథ్ ఫాల్‌బ్యాక్ వాడి స్పీడ్ పెంచుతుంది
+
+      const [startYear, startMonth, startDay] = fromDate.split("-").map(Number);
+      const dt = new Date(
+        Date.UTC(startYear, startMonth - 1, startDay, 6, 0, 0),
+      );
+
+      const tithiNames = [
+        "Prathama",
+        "Dvitiya",
+        "Tritiya",
+        "Chaturthi",
+        "Panchami",
+        "Shashthi",
+        "Saptami",
+        "Ashtami",
+        "Navami",
+        "Dashami",
+        "Ekadashi",
+        "Dvadashi",
+        "Trayodashi",
+        "Chaturdashi",
+      ];
+      const nakNames = [
+        "Ashwini",
+        "Bharani",
+        "Krittika",
+        "Rohini",
+        "Mrigashira",
+        "Arudra",
+        "Punarvasu",
+        "Pushya",
+        "Ashlesha",
+        "Magha",
+        "Purva Phalguni",
+        "Uttara Phalguni",
+        "Hasta",
+        "Chitra",
+        "Swati",
+        "Vishakha",
+        "Anuradha",
+        "Jyeshtha",
+        "Mula",
+        "Purva Ashadha",
+        "Uttara Ashadha",
+        "Shravana",
+        "Dhanishta",
+        "Shatabhisha",
+        "Purva Bhadrapada",
+        "Uttara Bhadrapada",
+        "Revati",
+      ];
+      const yogaNames = [
+        "Vishkambha",
+        "Priti",
+        "Ayushman",
+        "Saubhagya",
+        "Shobhana",
+        "Atiganda",
+        "Sukarma",
+        "Dhriti",
+        "Shula",
+        "Ganda",
+        "Vriddhi",
+        "Dhruva",
+        "Vyaghata",
+        "Harshana",
+        "Vajra",
+        "Siddhi",
+        "Vyatipata",
+        "Variyan",
+        "Parigha",
+        "Shiva",
+        "Siddha",
+        "Sadhya",
+        "Shubha",
+        "Shukla",
+        "Brahma",
+        "Indra",
+        "Vaidhriti",
+      ];
+      const karanaNames = [
+        "Bava",
+        "Balava",
+        "Kaulava",
+        "Taitila",
+        "Gara",
+        "Vanija",
+        "Vishti",
+        "Kimstughna",
+        "Shakuni",
+        "Chatushpada",
+        "Naga",
+      ];
+      const vaaraNames = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+      const rashiNames = [
+        "Mesha",
+        "Vrishabha",
+        "Mithuna",
+        "Karka",
+        "Simha",
+        "Kanya",
+        "Tula",
+        "Vrischika",
+        "Dhanu",
+        "Makara",
+        "Kumbha",
+        "Meena",
+      ];
+      const nakToRasi: Record<number, number[]> = {
+        0: [0],
+        1: [0],
+        2: [0, 1],
+        3: [1],
+        4: [1, 2],
+        5: [2],
+        6: [2, 3],
+        7: [3],
+        8: [3],
+        9: [4],
+        10: [4],
+        11: [4, 5],
+        12: [5],
+        13: [5, 6],
+        14: [6],
+        15: [6, 7],
+        16: [7],
+        17: [7],
+        18: [8],
+        19: [8],
+        20: [8, 9],
+        21: [9],
+        22: [9, 10],
+        23: [10],
+        24: [10, 11],
+        25: [11],
+        26: [11],
+      };
+      const taraNames: Record<number, string> = {
+        1: "Janma",
+        2: "Sampat",
+        3: "Vipat",
+        4: "Kshema",
+        5: "Pratyak",
+        6: "Sadhana",
+        7: "Naidhana",
+        8: "Mitra",
+        0: "Parama Mitra",
+      };
+      const lunarMonths = [
+        "Chaitra",
+        "Vaisakha",
+        "Jyeshtha",
+        "Ashadha",
+        "Shravana",
+        "Bhadrapada",
+        "Ashwayuja",
+        "Kartika",
+        "Margashirsha",
+        "Pausha",
+        "Magha",
+        "Phalguna",
+      ];
+
+      const startTs = Math.floor(dt.getTime() / 1000);
+      let lastAmTs = startTs,
+        lastAmSunLon = 0;
+      for (let d = 0; d <= 35; d++) {
+        const checkTs = startTs - d * 86400;
+        const td = new Date((checkTs + tz * 3600) * 1000);
+        const e = VedicAstroEngine.fromBirthData(
+          td.getUTCFullYear(),
+          td.getUTCMonth() + 1,
+          td.getUTCDate(),
+          6,
+          0,
+          tz,
+          ayKey,
+        );
+        const r = getDiffLon(e, lat, lon, fastMode);
+        if (Math.floor(r.diff / 12) === 29) {
+          lastAmTs = checkTs;
+          lastAmSunLon = getMidnightSunLon(
+            checkTs,
+            lat,
+            lon,
+            tz,
+            ayKey,
+            fastMode,
+          );
+          break;
+        }
+      }
+      let nextAmTs = startTs + 30 * 86400,
+        nextAmSunLon = 0;
+      for (let d = 1; d <= 35; d++) {
+        const checkTs = lastAmTs + d * 86400;
+        const td = new Date((checkTs + tz * 3600) * 1000);
+        const e = VedicAstroEngine.fromBirthData(
+          td.getUTCFullYear(),
+          td.getUTCMonth() + 1,
+          td.getUTCDate(),
+          6,
+          0,
+          tz,
+          ayKey,
+        );
+        const r = getDiffLon(e, lat, lon, fastMode);
+        if (Math.floor(r.diff / 12) === 29) {
+          nextAmTs = checkTs;
+          nextAmSunLon = getMidnightSunLon(
+            checkTs,
+            lat,
+            lon,
+            tz,
+            ayKey,
+            fastMode,
+          );
+          break;
+        }
+      }
+
+      let lastAmSunRashi = Math.floor((lastAmSunLon % 360) / 30);
+      let nextAmSunRashi = Math.floor((nextAmSunLon % 360) / 30);
+      let currentMasaName = lunarMonths[(lastAmSunRashi + 1) % 12];
+      let isAdhika = nextAmSunRashi === lastAmSunRashi;
+      let prevMonthWasAdhika = false;
+
+      const results: any[] = [];
+      let curTs = startTs;
+
+      for (let i = 0; i < days; i++) {
+        while (curTs > nextAmTs) {
+          prevMonthWasAdhika = isAdhika;
+          lastAmTs = nextAmTs;
+          lastAmSunLon = nextAmSunLon;
+          lastAmSunRashi = nextAmSunRashi;
+          currentMasaName = lunarMonths[(lastAmSunRashi + 1) % 12];
+          nextAmTs = lastAmTs + 30 * 86400;
+          for (let d = 1; d <= 35; d++) {
+            const checkTs = lastAmTs + d * 86400;
+            const td = new Date((checkTs + tz * 3600) * 1000);
+            const e = VedicAstroEngine.fromBirthData(
+              td.getUTCFullYear(),
+              td.getUTCMonth() + 1,
+              td.getUTCDate(),
+              6,
+              0,
+              tz,
+              ayKey,
+            );
+            const r = getDiffLon(e, lat, lon, fastMode);
+            if (Math.floor(r.diff / 12) === 29) {
+              nextAmTs = checkTs;
+              nextAmSunLon = getMidnightSunLon(
+                checkTs,
+                lat,
+                lon,
+                tz,
+                ayKey,
+                fastMode,
+              );
+              break;
+            }
+          }
+          nextAmSunRashi = Math.floor((nextAmSunLon % 360) / 30);
+          isAdhika = nextAmSunRashi === lastAmSunRashi;
+        }
+
+        let masaDisplay = isAdhika
+          ? "Adhika " + currentMasaName
+          : prevMonthWasAdhika
+            ? "Nija " + currentMasaName
+            : currentMasaName;
+        const curDtUTC = new Date((curTs + tz * 3600) * 1000);
+        const dateStr = `${curDtUTC.getUTCDate().toString().padStart(2, "0")}-${curDtUTC.toLocaleString("en-US", { month: "short" })}-${curDtUTC.getUTCFullYear()}`;
+
+        const { sunrise: sunriseTs, sunset: sunsetTs } = getPreciseSunriseSunset(curTs, lat, lon, tz);
+
+        const srDt = new Date((sunriseTs + tz * 3600) * 1000);
+        const engine = VedicAstroEngine.fromBirthData(
+          srDt.getUTCFullYear(),
+          srDt.getUTCMonth() + 1,
+          srDt.getUTCDate(),
+          srDt.getUTCHours(),
+          srDt.getUTCMinutes(),
+          tz,
+          ayKey,
+        );
+        if (fastMode && typeof (engine as any).setSwetest === "function") {
+          (engine as any).setSwetest(false);
+        }
+        const planets = engine.calculateAll(lat, lon);
+
+        const sunLon = planets[Planet.Sun]?.longitude || 0;
+        const sunSpeed = planets[Planet.Sun]?.speed || 0.9856;
+        const moonLon = planets[Planet.Moon]?.longitude || 0;
+        const moonSpeed = planets[Planet.Moon]?.speed || 13.176;
+        const tSpeed = Math.max(0.1, moonSpeed - sunSpeed);
+        const ySpeed = Math.max(0.1, moonSpeed + sunSpeed);
+        const diff = (moonLon - sunLon + 360) % 360;
+
+        const tIndex = Math.floor(diff / 12);
+        const tRem = 12.0 - (diff % 12.0);
+        let tEndTs = sunriseTs + Math.floor((tRem / tSpeed) * 86400);
+        tEndTs = findExactTime(
+          tEndTs,
+          "tithi",
+          (tIndex + 1) * 12.0,
+          lat,
+          lon,
+          tz,
+          ayKey,
+          fastMode,
+        );
+        const tithiName =
+          tIndex === 14
+            ? "Purnima"
+            : tIndex === 29
+              ? "Amavasya"
+              : (tIndex < 15 ? "S-" : "K-") + tithiNames[tIndex % 15];
+
+        const nakLen = 360.0 / 27.0;
+        const nakIndex = Math.floor(moonLon / nakLen);
+        let nEndTs =
+          sunriseTs +
+          Math.floor(((nakLen - (moonLon % nakLen)) / moonSpeed) * 86400);
+        nEndTs = findExactTime(
+          nEndTs,
+          "nakshatra",
+          (nakIndex + 1) * nakLen,
+          lat,
+          lon,
+          tz,
+          ayKey,
+          fastMode,
+        );
+        const nakName = nakNames[nakIndex];
+
+        const yVal = (moonLon + sunLon) % 360;
+        const yIndex = Math.floor(yVal / nakLen);
+        let yEndTs =
+          sunriseTs + Math.floor(((nakLen - (yVal % nakLen)) / ySpeed) * 86400);
+        yEndTs = findExactTime(
+          yEndTs,
+          "yoga",
+          (yIndex + 1) * nakLen,
+          lat,
+          lon,
+          tz,
+          ayKey,
+          fastMode,
+        );
+        const yogaName = yogaNames[yIndex];
+
+        const kIndex = Math.floor(diff / 6);
+        let kEndTs =
+          sunriseTs + Math.floor(((6.0 - (diff % 6.0)) / tSpeed) * 86400);
+        kEndTs = findExactTime(
+          kEndTs,
+          "karana",
+          (kIndex + 1) * 6.0,
+          lat,
+          lon,
+          tz,
+          ayKey,
+          fastMode,
+        );
+        let karanaName = "";
+        if (kIndex === 0) karanaName = "Kimstughna";
+        else if (kIndex === 57) karanaName = "Shakuni";
+        else if (kIndex === 58) karanaName = "Chatushpada";
+        else if (kIndex === 59) karanaName = "Naga";
+        else karanaName = karanaNames[(kIndex - 1) % 7];
+
+        const vaaraNum = curDtUTC.getUTCDay();
+        const moonRasiIdx = Math.floor(moonLon / 30);
+
+        const asthg = [];
+        for (const p of [Planet.Jupiter, Planet.Venus]) {
+          if (!planets[p]) continue;
+          const cLimit =
+            p === Planet.Jupiter ? 11 : planets[p].speed < 0 ? 8 : 10;
+          let pDiff = Math.abs(planets[p].longitude - sunLon);
+          pDiff = Math.min(pDiff % 360, 360 - (pDiff % 360));
+          if (pDiff <= cLimit) asthg.push(p === Planet.Jupiter ? "Gu" : "Sk");
+        }
+
+        const dayDur = sunsetTs - sunriseTs;
+        const rahuRatios = [0.875, 0.125, 0.75, 0.5, 0.625, 0.375, 0.25];
+        const yamaRatios = [0.5, 0.375, 0.25, 0.125, 0.875, 0.75, 0.625];
+        const rkStartTs = sunriseTs + Math.floor(dayDur * rahuRatios[vaaraNum]);
+        const ygStartTs = sunriseTs + Math.floor(dayDur * yamaRatios[vaaraNum]);
+
+        const durmuhurthams: Record<number, number[]> = {
+          0: [13],
+          1: [8, 11],
+          2: [3, 10],
+          3: [5],
+          4: [8],
+          5: [3, 8],
+          6: [1],
+        };
+        const durTimes: string[] = [];
+        for (const mIdx of durmuhurthams[vaaraNum] || []) {
+          const mStart = sunriseTs + Math.floor(dayDur * (mIdx / 15.0));
+          const mEnd = sunriseTs + Math.floor(dayDur * ((mIdx + 1) / 15.0));
+          durTimes.push(
+            `${formatTsLocal(mStart, tz)} - ${formatTsLocal(mEnd, tz)}`,
+          );
+        }
+
+        const mSpeedSafe = Math.max(0.1, moonSpeed);
+        const degPassed = moonLon % nakLen;
+        let nakStartTs1 =
+          sunriseTs - Math.floor((degPassed / mSpeedSafe) * 86400);
+        nakStartTs1 = findExactTime(
+          nakStartTs1,
+          "nakshatra",
+          nakIndex * nakLen,
+          lat,
+          lon,
+          tz,
+          ayKey,
+          fastMode,
+        );
+        const varjyamGhatis = [
+          50, 24, 30, 40, 14, 21, 30, 20, 32, 30, 20, 18, 21, 20, 14, 14, 10,
+          14, 56, 24, 20, 10, 10, 18, 16, 24, 30,
+        ];
+        const vStart1 =
+          nakStartTs1 + Math.floor(varjyamGhatis[nakIndex] * 1440);
+        const vEnd1 = vStart1 + 5760;
+        const nakIndex2 = (nakIndex + 1) % 27;
+        const vStart2 = nEndTs + Math.floor(varjyamGhatis[nakIndex2] * 1440);
+        const vEnd2 = vStart2 + 5760;
+
+        const varjyams: string[] = [];
+        const windowStart = sunriseTs - 3600;
+        const windowEnd = sunriseTs + 86400 + 3600;
+        if (vEnd1 > windowStart && vStart1 < windowEnd)
+          varjyams.push(
+            `${formatTsLocal(vStart1, tz)} - ${formatTsLocal(vEnd1, tz)}`,
+          );
+        if (vEnd2 > windowStart && vStart2 < windowEnd)
+          varjyams.push(
+            `${formatTsLocal(vStart2, tz)} - ${formatTsLocal(vEnd2, tz)}`,
+          );
+
+        const row: any = {
+          Date: dateStr,
+          Vaara: vaaraNames[vaaraNum],
+          Vaara_is_good: true,
+          Asthg: asthg.length ? asthg.join(",") : "-",
+          Maasa: masaDisplay,
+          Tithi: tithiName,
+          "Tithi End": formatTsLocal(tEndTs, tz),
+          Tithi_is_good: true,
+          Sunrise: formatTsLocal(sunriseTs, tz),
+          Nakshatra: nakName,
+          "Nakshatra End": formatTsLocal(nEndTs, tz),
+          Nakshatra_is_good: true,
+          "Moon Rasi": rashiNames[moonRasiIdx + 1],
+          Yoga: yogaName,
+          "Yoga End": formatTsLocal(yEndTs, tz),
+          Yoga_is_good: true,
+          Karana: karanaName,
+          "Karana End": formatTsLocal(kEndTs, tz),
+          Karana_is_good: true,
+          "Rahu Kalam": `${formatTsLocal(rkStartTs, tz)} - ${formatTsLocal(rkStartTs + Math.floor(dayDur * 0.125), tz)}`,
+          Yamagandam: `${formatTsLocal(ygStartTs, tz)} - ${formatTsLocal(ygStartTs + Math.floor(dayDur * 0.125), tz)}`,
+          Durmuhurtham: durTimes.length ? durTimes.join(", ") : "-",
+          Varjyam: varjyams.length ? varjyams.join(", ") : "-",
+        };
+
+        const populateTara = (prefix: string, nak: string | null) => {
+          if (nak) {
+            const idx = nakNames.indexOf(nak);
+            if (idx !== -1) {
+              row[`${prefix} Tarabalam`] =
+                taraNames[(((nakIndex - idx + 27) % 27) + 1) % 9];
+              row[`${prefix}_Tarabalam_is_good`] = true;
+              const isAshtama = nakToRasi[idx].includes((moonRasiIdx + 5) % 12);
+              row[`${prefix} Chandra Balam`] = isAshtama ? "Ashtama" : "Good";
+              row[`${prefix}_Chandra_Balam_is_good`] = !isAshtama;
+            }
+          }
+        };
+        populateTara("Boy", boyNak);
+        populateTara("Girl", girlNak);
+        results.push(row);
+        curTs += 86400;
+      }
+
+      // ఫ్రంట్‌ఎండ్ కోసం నేరుగా ఆరే (Array) పంపుతున్నాం
+      return jsonAndCache(results);
+    } else if (endpoint === "clock") {
+      const lat = parseFloat(String(input.latitude || input.lat || 12.9716));
+      const lon = parseFloat(String(input.longitude || input.lon || 77.5946));
+      const tz = parseFloat(String(input.timezone || input.tz || 5.5));
+      let timestamp =
+        input.timestamp && String(input.timestamp) !== ""
+          ? parseInt(String(input.timestamp))
+          : Date.now();
+      if (timestamp > 9999999999) timestamp = Math.floor(timestamp / 1000);
+
+      const dt = new Date(timestamp * 1000);
+      const offsetMs = tz * 3600 * 1000;
+      const localDt = new Date(timestamp * 1000 + offsetMs);
+      const year = localDt.getUTCFullYear();
+      const month = localDt.getUTCMonth() + 1;
+      const day = localDt.getUTCDate();
+      const hour = localDt.getUTCHours();
+      const minute = localDt.getUTCMinutes();
+      const ayKey = String(input.ayanamsha || "lahiri");
+
+      const engine = VedicAstroEngine.fromBirthData(
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        tz,
+        ayKey,
+      );
+      const planets = engine.calculateAll(lat, lon);
+      const lagnaRashi = planets[Planet.Ascendant]?.rashi || 1;
+      const sunLon = planets[Planet.Sun]?.longitude || 0;
+      const moonLon = planets[Planet.Moon]?.longitude || 0;
+      const panchanga = engine.calcPanchanga(sunLon, moonLon);
+
+      let sunSpeed = planets[Planet.Sun]?.speed || 0.9856;
+      let moonSpeed = planets[Planet.Moon]?.speed || 13.176;
+      if (moonSpeed <= 0) moonSpeed = 13.176;
+
+      let tithiSpeed = moonSpeed - sunSpeed;
+      if (tithiSpeed <= 0) tithiSpeed = 12.19;
+      let yogaSpeed = moonSpeed + sunSpeed;
+      if (yogaSpeed <= 0) yogaSpeed = 14.16;
+
+      let diff = moonLon - sunLon;
+      if (diff < 0) diff += 360;
+
+      const tithiRemDeg = 12.0 - (diff % 12.0);
+      let tithiEndTs =
+        timestamp + Math.floor((tithiRemDeg / tithiSpeed) * 86400);
+      tithiEndTs = findExactTime(
+        tithiEndTs,
+        "tithi",
+        (Math.floor(diff / 12) + 1) * 12.0,
+        lat,
+        lon,
+        tz,
+        ayKey,
+        !engine.isUsingSwetest(),
+      );
+      const nakLen = 360.0 / 27.0;
+      const nakRemDeg = nakLen - (moonLon % nakLen);
+      let nakEndTs = timestamp + Math.floor((nakRemDeg / moonSpeed) * 86400);
+      nakEndTs = findExactTime(
+        nakEndTs,
+        "nakshatra",
+        (Math.floor(moonLon / nakLen) + 1) * nakLen,
+        lat,
+        lon,
+        tz,
+        ayKey,
+        !engine.isUsingSwetest(),
+      );
+      const yogaVal = (moonLon + sunLon) % 360;
+      const yogaRemDeg = nakLen - (yogaVal % nakLen);
+      let yogaEndTs =
+        timestamp + Math.floor((yogaRemDeg / yogaSpeed) * 86400);
+      yogaEndTs = findExactTime(
+        yogaEndTs,
+        "yoga",
+        (Math.floor(yogaVal / nakLen) + 1) * nakLen,
+        lat,
+        lon,
+        tz,
+        ayKey,
+        !engine.isUsingSwetest(),
+      );
+      const karanaRemDeg = 6.0 - (diff % 6.0);
+      let karanaEndTs =
+        timestamp + Math.floor((karanaRemDeg / tithiSpeed) * 86400);
+      karanaEndTs = findExactTime(
+        karanaEndTs,
+        "karana",
+        (Math.floor(diff / 6.0) + 1) * 6.0,
+        lat,
+        lon,
+        tz,
+        ayKey,
+        !engine.isUsingSwetest(),
+      );
+
+      const ascLon = planets[Planet.Ascendant]?.longitude || 0;
+      const lagnaRemDeg = 30.0 - (ascLon % 30.0);
+      const lagnaEndTsPrecise = timestamp + Math.floor(lagnaRemDeg * 240);
+
+      const { sunrise: sunriseTs, sunset: sunsetTs } = getPreciseSunriseSunset(timestamp, lat, lon, tz);
+
+      let baseTs, endTs, isDay, vaaraStartTs, vaaraEndTs, wd;
+      if (timestamp < sunriseTs) {
+        const { sunset: prevSunsetTs, sunrise: prevSunriseTs } = getPreciseSunriseSunset(timestamp - 86400, lat, lon, tz);
+        baseTs = prevSunsetTs;
+        endTs = sunriseTs;
+        isDay = false;
+        vaaraStartTs = prevSunriseTs;
+        vaaraEndTs = sunriseTs;
+        wd = new Date((timestamp - 86400 + tz * 3600) * 1000).getUTCDay();
+      } else if (timestamp < sunsetTs) {
+        baseTs = sunriseTs;
+        endTs = sunsetTs;
+        isDay = true;
+        const { sunrise: nextSunriseTs } = getPreciseSunriseSunset(timestamp + 86400, lat, lon, tz);
+        vaaraStartTs = sunriseTs;
+        vaaraEndTs = nextSunriseTs;
+        wd = new Date((timestamp + tz * 3600) * 1000).getUTCDay();
+      } else {
+        const { sunrise: nextSunriseTs } = getPreciseSunriseSunset(timestamp + 86400, lat, lon, tz);
+        baseTs = sunsetTs;
+        endTs = nextSunriseTs;
+        isDay = false;
+        vaaraStartTs = sunriseTs;
+        vaaraEndTs = nextSunriseTs;
+        wd = new Date((timestamp + tz * 3600) * 1000).getUTCDay();
+      }
+
+      const duration = Math.max(0.1, endTs - baseTs);
+      const muhDuration = Math.max(0.1, duration / 15.0);
+      const mIdx = Math.max(
+        0,
+        Math.min(14, Math.floor((timestamp - baseTs) / muhDuration)),
+      );
+      const dayMuhurthas = [
+        "Rudra",
+        "Ahi",
+        "Mitra",
+        "Pitru",
+        "Vasu",
+        "Varaaha",
+        "Viswedeva",
+        "Vidhi",
+        "Satamukhi",
+        "Puruhuta",
+        "Vaahini",
+        "Nakshatra",
+        "Varuna",
+        "Aryamana",
+        "Bhaga",
+      ];
+      const nightMuhurthas = [
+        "Gireesha",
+        "Ajapaada",
+        "Ahir-budha",
+        "Pushya",
+        "Ashwini",
+        "Yama",
+        "Agni",
+        "Vidhaata",
+        "Kanda",
+        "Adithi",
+        "Jiva/Amrutha",
+        "Vishnu",
+        "Dyumadgadyuti",
+        "Brahma",
+        "Samudra",
+      ];
+      const currMuhurtha = isDay ? dayMuhurthas[mIdx] : nightMuhurthas[mIdx];
+      const muhurthaEndTs = Math.floor(baseTs + (mIdx + 1) * muhDuration);
+      const badMuhurthas = [
+        "Rudra",
+        "Ahi",
+        "Pitru",
+        "Vaahini",
+        "Nakshatra",
+        "Bhaga",
+        "Gireesha",
+        "Ahir-budha",
+        "Yama",
+        "Agni",
+      ];
+
+      const horaDur = Math.max(0.1, duration / 12.0);
+      let hIdx = Math.max(
+        0,
+        Math.min(11, Math.floor((timestamp - baseTs) / horaDur)),
+      );
+      if (!isDay) hIdx += 12;
+
+      const horaLords = [
+        "Sun",
+        "Venus",
+        "Mercury",
+        "Moon",
+        "Saturn",
+        "Jupiter",
+        "Mars",
+      ];
+      const horaLordsJs: Record<string, string> = {
+        Sun: "Surya",
+        Venus: "Shukra",
+        Mercury: "Budha",
+        Moon: "Chandra",
+        Saturn: "Shani",
+        Jupiter: "Guru",
+        Mars: "Kuja",
+      };
+      const horaLordsKey: Record<string, string> = {
+        Sun: "Su",
+        Venus: "Sk",
+        Mercury: "Bu",
+        Moon: "Mo",
+        Saturn: "Sa",
+        Jupiter: "Gu",
+        Mars: "Ku",
+      };
+      const wdStartIdx = [0, 3, 6, 2, 5, 1, 4];
+      const currentHoraEng = horaLords[(wdStartIdx[wd] + hIdx) % 7];
+      const horaLordCode = horaLordsKey[currentHoraEng];
+      const horaEndTs = Math.floor(baseTs + ((hIdx % 12) + 1) * horaDur);
+
+      const clockData: any = {
+        endpoint: "clock",
+        meta: {
+          timestamp,
+          datetime: dt.toISOString(),
+          lat,
+          lon,
+          tz,
+          engine: engine.isUsingSwetest() ? "swetest" : "fallback",
+        },
+      };
+
+      const planetMap: Record<string, string> = {
+        Sun: "Su",
+        Moon: "Mo",
+        Mars: "Ku",
+        Mercury: "Bu",
+        Jupiter: "Gu",
+        Venus: "Sk",
+        Saturn: "Sa",
+        Rahu: "Ra",
+        Ketu: "Ke",
+      };
+
+      for (const [phpKey, jsKey] of Object.entries(planetMap)) {
+        if (planets[phpKey as Planet]) {
+          const p = planets[phpKey as Planet]!;
+          let isR = false;
+          if (!["Sun", "Moon", "Rahu", "Ketu"].includes(phpKey)) {
+            isR = !!p.retrograde || (p.speed !== undefined && p.speed < -0.001);
+          }
+          clockData[jsKey] = {
+            angle: p.longitude || 0,
+            isR,
+            isC: !!p.combust,
+            isH: jsKey === horaLordCode,
+          };
+        }
+      }
+
+      clockData["lagna"] = ascLon;
+      if (clockData["Mo"]) {
+        const tIndex = Math.floor(diff / 12);
+        clockData["Mo"].tithi_num = (tIndex % 15) + 1;
+        clockData["Mo"].paksha = tIndex < 15 ? "Shukla" : "Krishna";
+      }
+
+      const pPaksha = panchanga.paksha?.split(" ")[0] || "";
+      clockData["sunrise"] = sunriseTs;
+      clockData["panchanga"] = {
+        vaara: (panchanga.vara || "").replace("vara", ""),
+        vaara_end: formatTsLocal(vaaraEndTs, tz),
+        vaara_end_ts: vaaraEndTs,
+        vaara_rem: Math.floor(
+          ((vaaraEndTs - timestamp) / Math.max(1, vaaraEndTs - vaaraStartTs)) *
+            100,
+        ),
+        tithi: pPaksha + " " + panchanga.tithi,
+        tithi_end: formatTsLocal(tithiEndTs, tz),
+        tithi_end_ts: tithiEndTs,
+        tithi_rem: Math.floor((tithiRemDeg / 12.0) * 100),
+        nakshatra: panchanga.moon_nakshatra + " (P" + panchanga.moon_pada + ")",
+        nakshatra_end: formatTsLocal(nakEndTs, tz),
+        nakshatra_end_ts: nakEndTs,
+        nakshatra_rem: Math.floor((nakRemDeg / nakLen) * 100),
+        yoga: panchanga.yoga,
+        yoga_end: formatTsLocal(yogaEndTs, tz),
+        yoga_end_ts: yogaEndTs,
+        yoga_rem: Math.floor((yogaRemDeg / nakLen) * 100),
+        karana: panchanga.karana,
+        karana_end: formatTsLocal(karanaEndTs, tz),
+        karana_end_ts: karanaEndTs,
+        karana_rem: Math.floor((karanaRemDeg / 6.0) * 100),
+        muhurtha: currMuhurtha,
+        muhurtha_end: formatTsLocal(muhurthaEndTs, tz),
+        muhurtha_end_ts: muhurthaEndTs,
+        muhurtha_rem: Math.floor(
+          ((muhurthaEndTs - timestamp) / Math.max(1, muhDuration)) * 100,
+        ),
+        muhurtha_is_good: !badMuhurthas.includes(currMuhurtha),
+        hora: horaLordsJs[currentHoraEng],
+        hora_end: formatTsLocal(horaEndTs, tz),
+        hora_end_ts: horaEndTs,
+        hora_rem: Math.floor(
+          ((horaEndTs - timestamp) / Math.max(1, horaDur)) * 100,
+        ),
+        lagna: [
+          "",
+          "Mesha",
+          "Vrishabha",
+          "Mithuna",
+          "Karka",
+          "Simha",
+          "Kanya",
+          "Tula",
+          "Vrischika",
+          "Dhanu",
+          "Makara",
+          "Kumbha",
+          "Meena",
+        ][lagnaRashi],
+        lagna_end: formatTsLocal(lagnaEndTsPrecise, tz),
+        lagna_end_ts: lagnaEndTsPrecise,
+        lagna_rem: Math.floor((lagnaRemDeg / 30.0) * 100),
+      };
+
+      return jsonAndCache(clockData);
+    } else if (endpoint === "muhurtha_chart") {
+      const dateStr = String(
+        input.date || new Date().toISOString().split("T")[0],
+      );
+      const timeStr = String(input.time || "12:00:00");
+      const lat = parseFloat(String(input.lat || 12.9716));
+      const lon = parseFloat(String(input.lon || 77.5946));
+      const tz = parseFloat(String(input.tz || 5.5));
+      const ayKey = String(input.ayanamsha || "lahiri");
+
+      const [year, month, day] = dateStr.split("-").map(Number);
+      const [hour, minute, second] = timeStr.split(":").map(Number);
+      const sec = second || 0;
+
+      const localDt = new Date(
+        Date.UTC(year, month - 1, day, hour, minute, sec),
+      );
+      const timestamp = Math.floor(
+        (localDt.getTime() - tz * 3600 * 1000) / 1000,
+      );
+
+      const rahuMode = (input.rahu_mode || "mean") === "true" ? "true" : "mean";
+      const engine = VedicAstroEngine.fromBirthData(
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        tz,
+        ayKey,
+        0,
+        rahuMode,
+      );
+      const planets = engine.calculateAll(lat, lon);
+      const navamsa = engine.calcNavamsa(planets as any);
+      const panchanga = engine.calcPanchanga(
+        planets[Planet.Sun]?.longitude || 0,
+        planets[Planet.Moon]?.longitude || 0,
+      );
+
+      const ascDeg = planets[Planet.Ascendant]?.degree || 0.0;
+      const degWhole = Math.floor(ascDeg);
+      const degMin = Math.floor((ascDeg - degWhole) * 60);
+      const lagnaLabel = `${degWhole}°${degMin}'`;
+      const lagnaRemPct = Math.round(((30.0 - ascDeg) / 30.0) * 100);
+
+      const rashiStartTs = timestamp - Math.floor(ascDeg * 240);
+      const rashiEndTs = rashiStartTs + 30 * 240;
+      const midTs = Math.floor((rashiStartTs + rashiEndTs) / 2);
+      const midWindow = `${formatTsLocal(midTs - 1440, tz)} - ${formatTsLocal(midTs + 1440, tz)}`;
+
+      const pushkaraInfo = getPushkaraInfo(
+        planets[Planet.Ascendant]!.rashi,
+        navamsa[Planet.Ascendant]?.rashi || planets[Planet.Ascendant]!.rashi,
+        ascDeg,
+        timestamp,
+        tz,
+      );
+
+      // getMuhurthaInfo Logic
+      const { sunrise: mSunriseTs, sunset: mSunsetTs } = getPreciseSunriseSunset(timestamp, lat, lon, tz);
+      let mBaseTs, mEndTs, mIsDay, mVaaraNum;
+      if (timestamp < mSunriseTs) {
+        const { sunset: prevSunsetTs } = getPreciseSunriseSunset(timestamp - 86400, lat, lon, tz);
+        mBaseTs = prevSunsetTs;
+        mEndTs = mSunriseTs;
+        mIsDay = false;
+        mVaaraNum = new Date(
+          (timestamp - 86400 + tz * 3600) * 1000,
+        ).getUTCDay();
+      } else if (timestamp < mSunsetTs) {
+        mBaseTs = mSunriseTs;
+        mEndTs = mSunsetTs;
+        mIsDay = true;
+        mVaaraNum = new Date((timestamp + tz * 3600) * 1000).getUTCDay();
+      } else {
+        const { sunrise: nextSunriseTs } = getPreciseSunriseSunset(timestamp + 86400, lat, lon, tz);
+        mBaseTs = mSunsetTs;
+        mEndTs = nextSunriseTs;
+        mIsDay = false;
+        mVaaraNum = new Date((timestamp + tz * 3600) * 1000).getUTCDay();
+      }
+      const mDuration = Math.max(1, mEndTs - mBaseTs);
+      const mMuhurthaDuration = mDuration / 15.0;
+      const mIndex = Math.max(
+        0,
+        Math.min(14, Math.floor((timestamp - mBaseTs) / mMuhurthaDuration)),
+      );
+      const mDayMuhurthas = [
+        "Rudra",
+        "Ahi",
+        "Mitra",
+        "Pitru",
+        "Vasu",
+        "Varaaha",
+        "Viswedeva",
+        "Vidhi",
+        "Satamukhi",
+        "Puruhuta",
+        "Vaahini",
+        "Nakshatra",
+        "Varuna",
+        "Aryamana",
+        "Bhaga",
+      ];
+      const mNightMuhurthas = [
+        "Gireesha",
+        "Ajapaada",
+        "Ahir-budha",
+        "Pushya",
+        "Ashwini",
+        "Yama",
+        "Agni",
+        "Vidhaata",
+        "Kanda",
+        "Adithi",
+        "Jiva/Amrutha",
+        "Vishnu",
+        "Dyumadgadyuti",
+        "Brahma",
+        "Samudra",
+      ];
+      const mBadMuhurthas = [
+        "Rudra",
+        "Ahi",
+        "Pitru",
+        "Vaahini",
+        "Nakshatra",
+        "Bhaga",
+        "Gireesha",
+        "Ahir-budha",
+        "Yama",
+        "Agni",
+      ];
+      const mCurrent = mIsDay ? mDayMuhurthas[mIndex] : mNightMuhurthas[mIndex];
+      const mEndTime = Math.floor(mBaseTs + (mIndex + 1) * mMuhurthaDuration);
+      const mDayDuration = Math.max(1, mSunsetTs - mSunriseTs);
+      const rahuRatios = [0.875, 0.125, 0.75, 0.5, 0.625, 0.375, 0.25];
+      const yamaRatios = [0.5, 0.375, 0.25, 0.125, 0.875, 0.75, 0.625];
+      const rahuStart =
+        mSunriseTs + Math.floor(mDayDuration * rahuRatios[mVaaraNum]);
+      const yamaStart =
+        mSunriseTs + Math.floor(mDayDuration * yamaRatios[mVaaraNum]);
+      const durmuhurthams: Record<number, number[]> = {
+        0: [13],
+        1: [8, 11],
+        2: [3, 10],
+        3: [5],
+        4: [8],
+        5: [3, 8],
+        6: [1],
+      };
+      const durTimes: string[] = [];
+      for (const mdIdx of durmuhurthams[mVaaraNum] || []) {
+        const mStart = mSunriseTs + Math.floor(mDayDuration * (mdIdx / 15.0));
+        const mEnd =
+          mSunriseTs + Math.floor(mDayDuration * ((mdIdx + 1) / 15.0));
+        durTimes.push(
+          `${formatTsLocal(mStart, tz)} - ${formatTsLocal(mEnd, tz)}`,
+        );
+      }
+      const mMoonLon = planets[Planet.Moon]?.longitude || 0;
+      const mMoonSpeed = planets[Planet.Moon]?.speed || 13.176;
+      const mSpeedSafe = Math.max(0.1, mMoonSpeed);
+      const mNakLen = 360.0 / 27.0;
+      const mNakIndex = Math.floor(mMoonLon / mNakLen);
+      const mDegPassed = mMoonLon % mNakLen;
+      let mNakStartTs1 =
+        timestamp - Math.floor((mDegPassed / mSpeedSafe) * 86400);
+      mNakStartTs1 = findExactTime(
+        mNakStartTs1,
+        "nakshatra",
+        mNakIndex * mNakLen,
+        lat,
+        lon,
+        tz,
+        ayKey,
+        true,
+      );
+      const varjyamGhatis = [
+        50, 24, 30, 40, 14, 21, 30, 20, 32, 30, 20, 18, 21, 20, 14, 14, 10, 14,
+        56, 24, 20, 10, 10, 18, 16, 24, 30,
+      ];
+      const vStart1 =
+        mNakStartTs1 + Math.floor(varjyamGhatis[mNakIndex] * 1440);
+      const vEnd1 = vStart1 + 5760;
+      const mNakIndex2 = (mNakIndex + 1) % 27;
+      let mnEndTs =
+        timestamp + Math.floor(((mNakLen - mDegPassed) / mSpeedSafe) * 86400);
+      mnEndTs = findExactTime(
+        mnEndTs,
+        "nakshatra",
+        (mNakIndex + 1) * mNakLen,
+        lat,
+        lon,
+        tz,
+        ayKey,
+        true,
+      );
+      const vStart2 = mnEndTs + Math.floor(varjyamGhatis[mNakIndex2] * 1440);
+      const vEnd2 = vStart2 + 5760;
+      const varjyams: string[] = [];
+      const windowStart = mSunriseTs - 3600;
+      const windowEnd = mSunriseTs + 86400 + 3600;
+      if (vEnd1 > windowStart && vStart1 < windowEnd)
+        varjyams.push(
+          `${formatTsLocal(vStart1, tz)} - ${formatTsLocal(vEnd1, tz)}`,
+        );
+      if (vEnd2 > windowStart && vStart2 < windowEnd)
+        varjyams.push(
+          `${formatTsLocal(vStart2, tz)} - ${formatTsLocal(vEnd2, tz)}`,
+        );
+
+      const muhurthaInfo = {
+        current: mCurrent,
+        end: formatTsLocal(mEndTime, tz),
+        is_good: !mBadMuhurthas.includes(mCurrent),
+        rahu_kalam: `${formatTsLocal(rahuStart, tz)} - ${formatTsLocal(rahuStart + Math.floor(mDayDuration * 0.125), tz)}`,
+        yamagandam: `${formatTsLocal(yamaStart, tz)} - ${formatTsLocal(yamaStart + Math.floor(mDayDuration * 0.125), tz)}`,
+        durmuhurtham: durTimes.length ? durTimes.join(", ") : "-",
+        varjyam: varjyams.length ? varjyams.join(", ") : "-",
+      };
+
+      const localWd = new Date((timestamp + tz * 3600) * 1000).getUTCDay();
+      const panchaka = panchakaResult(
+        localWd,
+        panchanga.tithi_number || 0,
+        (planets[Planet.Moon]?.nak_index || 0) + 1,
+        planets[Planet.Ascendant]!.rashi,
+      );
+      const doshas = evaluateMuhurthaDoshas(planets, panchanga, muhurthaInfo);
+
+      return jsonAndCache({
+        endpoint: "muhurtha_chart",
+        ayanamsha_name: engine.getAyanamshaName(),
+        chart: buildChartGrid(planets),
+        chart_d9: buildChartGrid(navamsa),
+        lagna_deg: lagnaLabel,
+        lagna_rem_pct: lagnaRemPct,
+        pushkaramsha: pushkaraInfo.label,
+        is_pushkara: pushkaraInfo.is_pushkara,
+        pushkaramsha_time: pushkaraInfo.window,
+        mid_lagna_window: midWindow,
+        current_muhurtha: muhurthaInfo.current,
+        current_muhurtha_end: muhurthaInfo.end,
+        muhurtha_is_good: muhurthaInfo.is_good,
+        panchaka: panchaka.label,
+        panchaka_is_good: panchaka.is_good,
+        rahu_kalam: muhurthaInfo.rahu_kalam,
+        yamagandam: muhurthaInfo.yamagandam,
+        durmuhurtham: muhurthaInfo.durmuhurtham,
+        varjyam: muhurthaInfo.varjyam,
+        doshas,
+      });
+    } else if (endpoint === "match") {
+      // అబ్బాయి, అమ్మాయి ఇద్దరి జాతకాలను ఒకేసారి గణించి పంపడం (React Ashtakuta Logic కోసం)
+      const boy = {
+        dob: String(input.boy_dob),
+        tob: String(input.boy_tob),
+        lat: parseFloat(String(input.boy_latitude || input.boy_lat)),
+        lon: parseFloat(String(input.boy_longitude || input.boy_lon)),
+        tz: parseFloat(String(input.boy_timezone || input.boy_tz)),
+      };
+      const girl = {
+        dob: String(input.girl_dob),
+        tob: String(input.girl_tob),
+        lat: parseFloat(String(input.girl_latitude || input.girl_lat)),
+        lon: parseFloat(String(input.girl_longitude || input.girl_lon)),
+        tz: parseFloat(String(input.girl_timezone || input.girl_tz)),
+      };
+      const ayKey = String(input.ayanamsha || "lahiri");
+
+      const rahuMode = (input.rahu_mode || "mean") === "true" ? "true" : "mean";
+
+      // 1. అబ్బాయి జాతకం
+      const [bYear, bMonth, bDay] = boy.dob.split("-").map(Number);
+      const [bHour, bMinute] = boy.tob.split(":").map(Number);
+      const bEngine = VedicAstroEngine.fromBirthData(
+        bYear,
+        bMonth,
+        bDay,
+        bHour,
+        bMinute,
+        boy.tz,
+        ayKey,
+        0,
+        rahuMode,
+      );
+      const bPlanets = bEngine.calculateAll(boy.lat, boy.lon);
+      const bNavamsa = bEngine.calcNavamsa(bPlanets as any);
+
+      // 2. అమ్మాయి జాతకం
+      const [gYear, gMonth, gDay] = girl.dob.split("-").map(Number);
+      const [gHour, gMinute] = girl.tob.split(":").map(Number);
+      const gEngine = VedicAstroEngine.fromBirthData(
+        gYear,
+        gMonth,
+        gDay,
+        gHour,
+        gMinute,
+        girl.tz,
+        ayKey,
+        0,
+        rahuMode,
+      );
+      const gPlanets = gEngine.calculateAll(girl.lat, girl.lon);
+      const gNavamsa = gEngine.calcNavamsa(gPlanets as any);
+
+      return jsonAndCache({
+        endpoint: "match",
+        ayanamsha: bEngine.getAyanamshaName(),
+        boy: {
+          moon: bPlanets[Planet.Moon],
+          chart: { planets: bPlanets, navamsa_d9: bNavamsa },
+        },
+        girl: {
+          moon: gPlanets[Planet.Moon],
+          chart: { planets: gPlanets, navamsa_d9: gNavamsa },
+        },
+      });
+    } else if (endpoint === "save_user") {
+      if (!isSyncEnabled()) {
+        return res.json({
+          status: "success",
+          message: "User data sync is disabled",
+        });
+      }
+      const usersFile = path.join(process.cwd(), "users_data.json");
+
+      // ఫైల్ సైజు 10MB దాటితే ఆపడం (భద్రత కోసం)
+      if (fs.existsSync(usersFile)) {
+        const stats = fs.statSync(usersFile);
+        if (stats.size > 10 * 1024 * 1024) {
+          return res
+            .status(507)
+            .json({ status: "error", message: "Storage limit reached" });
+        }
+      }
+
+      // XSS ఎటాక్స్ నివారించడానికి డేటాని క్లీన్ చేయడం
+      const cleanData = {
+        name: String(input.name || "Unknown").substring(0, 100),
+        dob: String(input.dob || "").substring(0, 20),
+        tob: String(input.tob || "").substring(0, 20),
+        city: String(input.city || "").substring(0, 100),
+        deviceId: String(input.deviceId || "").substring(0, 100),
+        timestamp: String(input.timestamp || new Date().toISOString()),
+      };
+
+      let existingData = [];
+      if (fs.existsSync(usersFile)) {
+        try {
+          existingData = JSON.parse(fs.readFileSync(usersFile, "utf-8"));
+          if (!Array.isArray(existingData)) existingData = [];
+        } catch (e) {
+          existingData = [];
+        }
+      }
+
+      let isUpdated = false;
+      if (cleanData.deviceId) {
+        for (let i = 0; i < existingData.length; i++) {
+          if (existingData[i].deviceId === cleanData.deviceId) {
+            existingData[i] = cleanData;
+            isUpdated = true;
+            break;
+          }
+        }
+      }
+
+      if (!isUpdated) {
+        existingData.push(cleanData);
+      }
+
+      try {
+        // ఒకేసారి ఇద్దరు సేవ్ చేసినా ప్రాబ్లమ్ లేకుండా Sync వాడాం
+        fs.writeFileSync(usersFile, JSON.stringify(existingData, null, 2));
+        res.setHeader("X-Cache", "BYPASS"); // ఈ రిక్వెస్ట్ ని కాష్ చేయకూడదు
+        return res.json({
+          status: "success",
+          message: "User data saved successfully",
+        });
+      } catch (e) {
+        return res
+          .status(500)
+          .json({ status: "error", message: "Failed to write to file" });
+      }
+    } else if (endpoint === "push_subscribe") {
+      const subFile = path.join(process.cwd(), "subscribers.json");
+      const { sub_endpoint, keys, action } = input;
+
+      let subscribers: any = {};
+      if (fs.existsSync(subFile)) {
+        try {
+          subscribers = JSON.parse(fs.readFileSync(subFile, "utf-8"));
+        } catch (e) {}
+      }
+
+      if (action === "subscribe" && sub_endpoint && keys) {
+        subscribers[sub_endpoint] = {
+          endpoint: sub_endpoint,
+          keys,
+          timestamp: Date.now(),
+        };
+      } else if (action === "unsubscribe" && sub_endpoint) {
+        delete subscribers[sub_endpoint];
+      }
+
+      fs.writeFileSync(subFile, JSON.stringify(subscribers, null, 2));
+      res.setHeader("X-Cache", "BYPASS");
+      return res.json({ status: "success" });
+    } else if (endpoint === "send_alert") {
+      // అడ్మిన్ పాస్‌వర్డ్ ఉంటేనే మెసేజ్ పంపాలి (లేకపోతే హ్యాకర్లు స్పామ్ చేస్తారు)
+      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
+      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
+      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+        return res
+          .status(403)
+          .json({ error: "Forbidden: Invalid Admin Password" });
+      }
+
+      const { title, body, url, is_important } = input;
+      const subFile = path.join(process.cwd(), "subscribers.json");
+
+      if (!fs.existsSync(subFile))
+        return res.json({ error: "No subscribers found." });
+      const subscribers = JSON.parse(fs.readFileSync(subFile, "utf-8"));
+
+      const pushId = Date.now().toString();
+      const appBasePath = (process.env.APP_BASE_PATH || "/test/").replace(/\/$/, "");
+      const targetUrl = url || `${appBasePath}/`;
+      const finalUrl = `${appBasePath}/?push_id=${pushId}&push_title=${encodeURIComponent(String(title))}&push_body=${encodeURIComponent(String(body))}${is_important ? "&push_important=1" : ""}&target_url=${encodeURIComponent(targetUrl)}`;
+
+      const payload = JSON.stringify({ title, body, url: finalUrl });
+      const subsArray = Object.values(subscribers);
+
+      res.setHeader("X-Cache", "BYPASS");
+      res.json({
+        status: "queued",
+        message: `Notifications are being sent in the background to ${subsArray.length} users.`,
+      });
+
+      // బ్యాక్‌గ్రౌండ్ ప్రాసెస్ (Background Chunking): ఏపీఐ హ్యాంగ్ అవ్వకుండా ఉండటానికి
+      (async () => {
+        const chunkSize = 50; // ఒకేసారి 50 మందికి పంపుతాము
+        let isModified = false;
+
+        for (let i = 0; i < subsArray.length; i += chunkSize) {
+          const chunk = subsArray.slice(i, i + chunkSize);
+          const promises = chunk.map((sub: any) => {
+            return webpush.sendNotification(sub, payload).catch((err) => {
+              if (err.statusCode === 410 || err.statusCode === 404) {
+                delete subscribers[sub.endpoint];
+                isModified = true; // సబ్‌స్క్రిప్షన్ ఎక్స్‌పైర్ అయితే ఫ్లాగ్ సెట్ చేయడం
+              }
+            });
+          });
+
+          await Promise.all(promises);
+
+          // Google/Apple ఫైర్‌వాల్ బ్లాక్ చేయకుండా ప్రతి 50 మెసేజ్‌లకి 1 సెకను గ్యాప్
+          if (i + chunkSize < subsArray.length) {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+        }
+
+        if (isModified) {
+          fs.writeFileSync(subFile, JSON.stringify(subscribers, null, 2));
+        }
+      })();
+    } else if (endpoint === "get_lessons") {
+      const lessonsFile = path.join(process.cwd(), "lessons.json");
+      if (!fs.existsSync(lessonsFile)) {
+        // Fallback or initialize from public static directory if available
+        const publicLessons = path.join(process.cwd(), "..", "public", "static", "lessons.json");
+        if (fs.existsSync(publicLessons)) {
+          try {
+            const data = fs.readFileSync(publicLessons, "utf-8");
+            fs.writeFileSync(lessonsFile, data);
+            return res.json(JSON.parse(data));
+          } catch (e) {}
+        }
+        return res.json({ lessons: [] });
+      }
+      try {
+        const data = fs.readFileSync(lessonsFile, "utf-8");
+        return res.json(JSON.parse(data));
+      } catch (e) {
+        return res.status(500).json({ error: "Failed to read lessons file" });
+      }
+    } else if (endpoint === "save_lessons") {
+      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
+      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
+      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+        return res
+          .status(403)
+          .json({ error: "Forbidden: Invalid Admin Password" });
+      }
+
+      const { lessons } = input;
+      if (!Array.isArray(lessons)) {
+        return res.status(400).json({ error: "Invalid lessons data format" });
+      }
+
+      const lessonsFile = path.join(process.cwd(), "lessons.json");
+      try {
+        fs.writeFileSync(lessonsFile, JSON.stringify({ lessons }, null, 2));
+
+        // Sync to public static folder if in dev environment
+        const publicLessons = path.join(process.cwd(), "..", "public", "static", "lessons.json");
+        if (fs.existsSync(path.dirname(publicLessons))) {
+          try {
+            fs.writeFileSync(publicLessons, JSON.stringify({ lessons }, null, 2));
+          } catch (e) {}
+        }
+
+        res.setHeader("X-Cache", "BYPASS");
+        return res.json({ status: "success", message: "Lessons saved successfully" });
+      } catch (e: any) {
+        return res.status(500).json({ error: "Failed to write lessons: " + e.message });
+      }
+    } else if (endpoint === "get_library") {
+      const libraryFile = path.join(process.cwd(), "library.json");
+      if (!fs.existsSync(libraryFile)) {
+        // Fallback 1: Initialize from public static directory if available
+        const publicLibrary = path.join(process.cwd(), "..", "public", "static", "library.json");
+        if (fs.existsSync(publicLibrary)) {
+          try {
+            const data = fs.readFileSync(publicLibrary, "utf-8");
+            fs.writeFileSync(libraryFile, data);
+            return res.json(JSON.parse(data));
+          } catch (e) {}
+        }
+        // Fallback 2: Initialize from src/data directory if available
+        const srcLibrary = path.join(process.cwd(), "..", "src", "data", "library.json");
+        if (fs.existsSync(srcLibrary)) {
+          try {
+            const data = fs.readFileSync(srcLibrary, "utf-8");
+            fs.writeFileSync(libraryFile, data);
+            return res.json(JSON.parse(data));
+          } catch (e) {}
+        }
+        return res.json([]);
+      }
+      try {
+        const data = fs.readFileSync(libraryFile, "utf-8");
+        return res.json(JSON.parse(data));
+      } catch (e) {
+        return res.status(500).json({ error: "Failed to read library file" });
+      }
+    } else if (endpoint === "save_library") {
+      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
+      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
+      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+        return res
+          .status(403)
+          .json({ error: "Forbidden: Invalid Admin Password" });
+      }
+
+      const { library } = input;
+      if (!Array.isArray(library)) {
+        return res.status(400).json({ error: "Invalid library data format" });
+      }
+
+      const libraryFile = path.join(process.cwd(), "library.json");
+      try {
+        fs.writeFileSync(libraryFile, JSON.stringify(library, null, 2));
+
+        // Sync to public static folder if in dev environment
+        const publicLibrary = path.join(process.cwd(), "..", "public", "static", "library.json");
+        if (fs.existsSync(path.dirname(publicLibrary))) {
+          try {
+            fs.writeFileSync(publicLibrary, JSON.stringify(library, null, 2));
+          } catch (e) {}
+        }
+
+        // Sync to src/data folder if in dev environment
+        const srcLibrary = path.join(process.cwd(), "..", "src", "data", "library.json");
+        if (fs.existsSync(path.dirname(srcLibrary))) {
+          try {
+            fs.writeFileSync(srcLibrary, JSON.stringify(library, null, 2));
+          } catch (e) {}
+        }
+
+        res.setHeader("X-Cache", "BYPASS");
+        return res.json({ status: "success", message: "Library saved successfully" });
+      } catch (e: any) {
+        return res.status(500).json({ error: "Failed to write library: " + e.message });
+      }
+    } else if (endpoint === "get_ticker") {
+      const tickerFile = path.join(process.cwd(), "ticker.json");
+      if (!fs.existsSync(tickerFile)) {
+        const publicTicker = path.join(process.cwd(), "..", "public", "static", "ticker.json");
+        if (fs.existsSync(publicTicker)) {
+          try {
+            const data = fs.readFileSync(publicTicker, "utf-8");
+            fs.writeFileSync(tickerFile, data);
+            return res.json(JSON.parse(data));
+          } catch (e) {}
+        }
+        const srcTicker = path.join(process.cwd(), "..", "src", "data", "ticker.json");
+        if (fs.existsSync(srcTicker)) {
+          try {
+            const data = fs.readFileSync(srcTicker, "utf-8");
+            fs.writeFileSync(tickerFile, data);
+            return res.json(JSON.parse(data));
+          } catch (e) {}
+        }
+        return res.json({ speed: "normal", tickers: [] });
+      }
+      try {
+        const data = fs.readFileSync(tickerFile, "utf-8");
+        return res.json(JSON.parse(data));
+      } catch (e) {
+        return res.status(500).json({ error: "Failed to read ticker file" });
+      }
+    } else if (endpoint === "save_ticker") {
+      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
+      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
+      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+        return res.status(403).json({ error: "Forbidden: Invalid Admin Password" });
+      }
+      const { ticker } = input;
+      if (!ticker || typeof ticker !== "object") {
+        return res.status(400).json({ error: "Invalid ticker data format" });
+      }
+      const tickerFile = path.join(process.cwd(), "ticker.json");
+      try {
+        fs.writeFileSync(tickerFile, JSON.stringify(ticker, null, 2));
+        const publicTicker = path.join(process.cwd(), "..", "public", "static", "ticker.json");
+        if (fs.existsSync(path.dirname(publicTicker))) {
+          try { fs.writeFileSync(publicTicker, JSON.stringify(ticker, null, 2)); } catch (e) {}
+        }
+        const srcTicker = path.join(process.cwd(), "..", "src", "data", "ticker.json");
+        if (fs.existsSync(path.dirname(srcTicker))) {
+          try { fs.writeFileSync(srcTicker, JSON.stringify(ticker, null, 2)); } catch (e) {}
+        }
+        res.setHeader("X-Cache", "BYPASS");
+        return res.json({ status: "success", message: "Ticker saved successfully" });
+      } catch (e: any) {
+        return res.status(500).json({ error: "Failed to write ticker: " + e.message });
+      }
+    } else if (endpoint === "save_subscribers") {
+
+      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
+      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
+      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+        return res
+          .status(403)
+          .json({ error: "Forbidden: Invalid Admin Password" });
+      }
+
+      const { subscribers } = input;
+      if (Array.isArray(subscribers)) {
+        const subFile = path.join(process.cwd(), "subscribers.json");
+        const subMap: Record<string, any> = {};
+        for (const sub of subscribers) {
+          if (sub && sub.endpoint) {
+            subMap[sub.endpoint] = sub;
+          }
+        }
+        try {
+          fs.writeFileSync(subFile, JSON.stringify(subMap, null, 2));
+          res.setHeader("X-Cache", "BYPASS");
+          return res.json({ status: "success", message: "Subscribers saved successfully" });
+        } catch (e: any) {
+          return res.status(500).json({ error: "Failed to write subscribers: " + e.message });
+        }
+      }
+      return res.status(400).json({ error: "Invalid subscribers data format" });
+    } else if (endpoint === "save_users") {
+      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
+      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
+      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+        return res
+          .status(403)
+          .json({ error: "Forbidden: Invalid Admin Password" });
+      }
+
+      const { users } = input;
+      if (Array.isArray(users)) {
+        if (!isSyncEnabled() && users.length > 0) {
+          return res.status(400).json({
+            error: "Cannot import users while user data sync is disabled. (యూజర్ డేటా సింక్ ఆఫ్‌లో ఉన్నప్పుడు ఇంపోర్ట్ చేయలేరు.)",
+          });
+        }
+        const usersFile = path.join(process.cwd(), "users_data.json");
+        try {
+          fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
+          res.setHeader("X-Cache", "BYPASS");
+          return res.json({ status: "success", message: "Users saved successfully" });
+        } catch (e: any) {
+          return res.status(500).json({ error: "Failed to write users: " + e.message });
+        }
+      }
+    } else if (endpoint === "eclipses") {
+      const lat = parseFloat(String(input.latitude || input.lat || 12.9716));
+      const lon = parseFloat(String(input.longitude || input.lon || 77.5946));
+      const tz = parseFloat(String(input.timezone || input.tz || 5.5));
+      const count = Math.min(20, Math.max(1, parseInt(String(input.count || 5))));
+      const fromDate = String(input.date || new Date().toISOString().split("T")[0]); 
+      const [year, month, day] = fromDate.split("-").map(Number);
+      const swetestDateStr = `${day}.${month}.${year}`;
+
+      const solArgs = `-solecl -local -geopos${lon},${lat},0 -b${swetestDateStr} -n${count}`;
+      const lunArgs = `-lunecl -b${swetestDateStr} -n${count * 3}`;
+
+      const solOut = VedicAstroEngine.runSwetestStatic(solArgs);
+      const lunOut = VedicAstroEngine.runSwetestStatic(lunArgs);
+
+      const solarEclipses = parseSwetestEclipses(solOut, tz, "solar", lat, lon)
+        .filter(e => e.magnitude >= 0.01);
+      const allLunarEclipses = parseSwetestEclipses(lunOut, tz, "lunar", lat, lon);
+
+      const lunarEclipses = allLunarEclipses
+        .filter(e => e.magnitude >= 0.01 && e.contactTimes.some((c: any) => c.localTime !== "-"))
+        .slice(0, count);
+
+      const allEclipses = [...solarEclipses, ...lunarEclipses].sort((a, b) => a.utcTimestamp - b.utcTimestamp);
+
+      return jsonAndCache({
+        endpoint: "eclipses",
+        meta: {
+          latitude: lat,
+          longitude: lon,
+          timezone: tz,
+          fromDate,
+        },
+        solar: solarEclipses,
+        lunar: lunarEclipses,
+        all: allEclipses.slice(0, count),
+      });
+    } else if (endpoint === "admin_get_all") {
+      // అడ్మిన్ ప్యానెల్ లో డేటా చూపించడానికి కొత్త ఎండ్‌పాయింట్
+      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
+      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
+      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+        return res
+          .status(403)
+          .json({ error: "Forbidden: Invalid Admin Password" });
+      }
+
+      const readJson = (file: string) => {
+        const p = path.join(process.cwd(), file);
+        if (fs.existsSync(p)) {
+          try {
+            return JSON.parse(fs.readFileSync(p, "utf-8"));
+          } catch (e) {}
+        }
+        return null;
+      };
+
+      const subscribers = readJson("subscribers.json") || {};
+      const users = readJson("users_data.json") || [];
+      const enableUserSync = isSyncEnabled();
+
+      res.setHeader("X-Cache", "BYPASS");
+      return res.json({
+        status: "success",
+        subscribers: Object.values(subscribers),
+        users,
+        enableUserSync,
+      });
+    } else if (endpoint === "save_sync_settings") {
+      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
+      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
+      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+        return res
+          .status(403)
+          .json({ error: "Forbidden: Invalid Admin Password" });
+      }
+
+      const settingsFile = path.join(process.cwd(), "sync_settings.json");
+      const data = {
+        enableUserSync: input.enableUserSync === true,
+      };
+      try {
+        fs.writeFileSync(settingsFile, JSON.stringify(data, null, 2));
+        res.setHeader("X-Cache", "BYPASS");
+        return res.json({
+          status: "success",
+          enableUserSync: data.enableUserSync,
+        });
+      } catch (e: any) {
+        return res.status(500).json({ error: "Failed to write sync settings: " + e.message });
+      }
+    }
+
+    return res.status(400).json({ error: "Unknown endpoint" });
+  } catch (err: any) {
+    return res
+      .status(400)
+      .json({ error: "Bad Request / Server Error", detail: err.message });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(
+    `\n✅ Jyotisha API Express Server is running on http://localhost:${PORT}`,
+  );
+});
