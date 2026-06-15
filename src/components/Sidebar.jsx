@@ -27,7 +27,7 @@ export function Sidebar({ isOpen, logoUrl, onClose, activePage, onNavigate, prof
     { id: "e-PATA", icon: "📖", label: t("e-PATA", "e-PATA") },
     { id: "e-Library", icon: "📚", label: t("e-Library", "e-Library") },
     { id: "PrecisionTest", icon: "🔬", label: t("PrecisionTest", "Precision Test") },
-    { id: "Help", icon: "📖", label: t("Help", "User Guide") },
+    { id: "Help", icon: "📖", label: t("Help", "FAQ") },
     { id: "e-Support", icon: "🤝", label: t("Support", "Donate") },
     { id: "Privacy", icon: "🛡️", label: t("Privacy", "Privacy Policy") },
     { id: "Settings", icon: "⚙️", label: t("Settings", "Settings") },

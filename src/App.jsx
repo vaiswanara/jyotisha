@@ -1021,7 +1021,7 @@ export default function App() {
                                       : activePage === "changelog"
                                         ? t("whatsNew", "WHAT'S NEW")
                                         : activePage === "Help"
-                                          ? t("Help", "USER GUIDE")
+                                          ? t("Help", "FAQ")
                                           : activePage === "Privacy"
                                             ? t("Privacy", "PRIVACY POLICY")
                                             : activePage === "Feedback"

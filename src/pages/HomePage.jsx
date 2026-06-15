@@ -41,7 +41,7 @@ const CONTENT = {
     settings: "Settings",
     desc_settings:
       "Customize global preferences, default locations, Ayanamsa, and Pan Shudhi rules.",
-    help_guide: "User Guide",
+    help_guide: "FAQ",
     desc_help: "Learn how to use the app with our step-by-step FAQ guide.",
     disclaimer_prefix: "Disclaimer:",
     disclaimer_text:
@@ -97,8 +97,8 @@ const CONTENT = {
     settings: "సెట్టింగ్స్",
     desc_settings:
       "గ్లోబల్ ప్రిఫరెన్సెస్, డిఫాల్ట్ లొకేషన్లు, అయనాంశ మరియు పంచాంగ శుద్ధి నియమాలను అనుకూలీకరించండి.",
-    help_guide: "యూజర్ గైడ్",
-    desc_help: "యాప్‌లోని ఫీచర్లను సులభంగా ఎలా వాడాలో తెలుసుకోండి.",
+    help_guide: "FAQ",
+    desc_help: "తరచుగా అడిగే ప్రశ్నలు (FAQs) మరియు సహాయ సమాచారం.",
     disclaimer_prefix: "గమనిక:",
     disclaimer_text:
       "ఈ అప్లికేషన్ విద్యాపరమైన ఉపయోగం కోసం మాత్రమే — వ్యాపార నిమిత్తం కాదు.",
@@ -153,8 +153,8 @@ const CONTENT = {
     settings: "ಸೆಟ್ಟಿಂಗ್ಸ್",
     desc_settings:
       "ಗ್ಲೋಬಲ್ ಪ್ರಿಫರೆನ್ಸಸ್, ಡಿಫಾಲ್ಟ್ ಸ್ಥಳಗಳು, ಅಯನಾಂಶ ಮತ್ತು ಪಂಚಾಂಗ ಶುದ್ಧಿ ನಿಯಮಗಳನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಿ.",
-    help_guide: "ಬಳಕೆದಾರರ ಕೈಪಿಡಿ",
-    desc_help: "ಆ್ಯಪ್ ಅನ್ನು ಸುಲಭವಾಗಿ ಹೇಗೆ ಬಳಸಬೇಕೆಂದು ತಿಳಿಯಿರಿ.",
+    help_guide: "FAQ",
+    desc_help: "ಪದೇ ಪದೇ ಕೇಳಲಾಗುವ ಪ್ರಶ್ನೆಗಳು (FAQs) ಮತ್ತು ಕಲಿಕಾ ಮಾಹಿತಿ.",
     disclaimer_prefix: "ಸೂಚನೆ:",
     disclaimer_text:
       "ಈ ಅಪ್ಲಿಕೇಶನ್ ಶಿಕ್ಷಣ ಉದ್ದೇಶಕ್ಕಾಗಿ ಮಾತ್ರ — ವ್ಯಾಪಾರ ಉದ್ದೇಶಕ್ಕಾಗಿ ಅಲ್ಲ.",

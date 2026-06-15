@@ -9,6 +9,8 @@
 - Supported North Indian layout globally (Horoscope, Gochara, Ashtakavarga, Match Page, Muhurtha Tab, Astro Clock, and PDF exports) with bold planet names for better readability.
 - Enabled instant reactive update across all charts when the chart style is changed and saved.
 - Removed Chart Style toggling selection from the D1 chart settings gear menu, keeping it centered in settings.
+- PDF chart styles for Ashtakavarga and Matchmaking D1/D9 fixed
+- deleted Vendor directory (excluding composer.json and composer.lock)
 
 
 14-06-2026
