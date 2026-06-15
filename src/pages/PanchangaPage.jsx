@@ -4,6 +4,8 @@ import { LocationAutocomplete } from "../components/LocationAutocomplete.jsx";
 import { AdhikaMasaExplorer } from "../components/AdhikaMasaExplorer.jsx";
 import { API_URL, API_TOKEN } from "../services/astrologyApi.js";
 import { EclipsePage } from "./EclipsePage.jsx";
+import { getLocalDateStr } from "../utils/formatters.js";
+
 
 const NORTH_INDIAN_LAYOUT_280 = {
   1: { rashi: { x: 140, y: 31 }, planets: { x: 140, y: 79 } },
@@ -180,14 +182,15 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
     const defLoc = JSON.parse(
       localStorage.getItem("vaiswanara_default_location") || "null",
     );
+    const tz = defLoc?.timezone || 5.5;
     return {
       profileName: "Panchanga",
-      startDate: new Date().toISOString().split("T")[0],
+      startDate: getLocalDateStr(tz),
       days: 10,
       city: defLoc?.city || "Bengaluru, Karnataka",
       lat: defLoc?.latitude || 12.9716,
       lon: defLoc?.longitude || 77.5946,
-      tz: defLoc?.timezone || 5.5,
+      tz: tz,
       boyCheck: false,
       boyNakshatra: "",
       girlCheck: false,

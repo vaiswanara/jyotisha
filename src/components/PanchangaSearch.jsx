@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { LocationAutocomplete } from "./LocationAutocomplete.jsx";
 import { useTranslation } from "react-i18next";
+import { getLocalDateStr } from "../utils/formatters.js";
+
 
 const NAKSHATRAS = [
   "Ashwini",
@@ -53,7 +55,7 @@ export default function PanchangaSearch() {
   const defaultLoc = getDefaultLocation();
   const [formData, setFormData] = useState({
     exportName: "Panchanga",
-    date: new Date().toISOString().split("T")[0],
+    date: getLocalDateStr(defaultLoc.timezone),
     days: 10,
     city: defaultLoc.city,
     latitude: defaultLoc.latitude,

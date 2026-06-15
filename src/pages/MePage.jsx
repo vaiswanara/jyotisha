@@ -8,6 +8,8 @@ import {
 } from "../services/astrologyApi.js";
 import Sankalpa from "../components/Sankalpa.jsx";
 import { LocationAutocomplete } from "../components/LocationAutocomplete.jsx";
+import { getLocalDateStr } from "../utils/formatters.js";
+
 
 const NAKSHATRAS = [
   "Ashwini",
@@ -127,7 +129,7 @@ export function MePage({ onNavigate }) {
         const prefs = JSON.parse(localStorage.getItem("eclock_prefs") || "{}");
         const ayanamsha = prefs.ayanamsha_val || "lahiri";
 
-        const todayStr = new Date().toISOString().split("T")[0];
+        const todayStr = getLocalDateStr(transitTz);
 
         // Cache Keys (SWR pattern for background syncing)
         const pCacheKey = `me_panchanga_latest_${transitLat}_${transitLon}_${ayanamsha}`;

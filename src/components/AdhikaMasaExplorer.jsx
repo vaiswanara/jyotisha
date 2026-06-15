@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { getLocalDateStr } from "../utils/formatters.js";
+
 
 const parseCustomDate = (dateStr) => {
   if (!dateStr) return 0;
@@ -81,7 +83,7 @@ function calculateExactInterval(startDateStr, endDateStr) {
 export function AdhikaMasaExplorer() {
   const { t } = useTranslation();
   const [mode, setMode] = useState("adhika");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(getLocalDateStr());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
