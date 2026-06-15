@@ -272,8 +272,66 @@ function buildPrintSVG(planets, navamsa, title, subtitle, t) {
   return s;
 }
 
-function buildAkvPrintSVG(data, title, subtitle, t, isSav = false) {
+function buildAkvPrintNorthSvg(data, title, subtitle, t, isSav = false, lagnaRashi = 1) {
+  const W = 280;
+  let s = `<svg width="${W}px" height="${W}px" viewBox="0 0 ${W} ${W}" xmlns="http://www.w3.org/2000/svg" style="display:block;font-family:sans-serif;background:#fff; width: 100%; height: auto;">
+    <rect width="${W}" height="${W}" fill="white" stroke="#8e44ad" stroke-width="1.5"/>
+    <line x1="0" y1="0" x2="${W}" y2="${W}" stroke="#ccc" stroke-width="1"/>
+    <line x1="0" y1="${W}" x2="${W}" y2="0" stroke="#ccc" stroke-width="1"/>
+    <line x1="${W/2}" y1="0" x2="0" y2="${W/2}" stroke="#ccc" stroke-width="1"/>
+    <line x1="0" y1="${W/2}" x2="${W/2}" y2="${W}" stroke="#ccc" stroke-width="1"/>
+    <line x1="${W/2}" y1="${W}" x2="${W}" y2="${W/2}" stroke="#ccc" stroke-width="1"/>
+    <line x1="${W}" y1="${W/2}" x2="${W/2}" y2="0" stroke="#ccc" stroke-width="1"/>`;
+
+  const layout = {
+    1: { rashi: { x: 140, y: 35 }, pts: { x: 140, y: 70 } },
+    2: { rashi: { x: 70, y: 22 }, pts: { x: 70, y: 55 } },
+    3: { rashi: { x: 22, y: 70 }, pts: { x: 55, y: 70 } },
+    4: { rashi: { x: 35, y: 140 }, pts: { x: 70, y: 140 } },
+    5: { rashi: { x: 22, y: 210 }, pts: { x: 55, y: 210 } },
+    6: { rashi: { x: 70, y: 258 }, pts: { x: 70, y: 225 } },
+    7: { rashi: { x: 140, y: 245 }, pts: { x: 140, y: 210 } },
+    8: { rashi: { x: 210, y: 258 }, pts: { x: 210, y: 225 } },
+    9: { rashi: { x: 258, y: 210 }, pts: { x: 225, y: 210 } },
+    10: { rashi: { x: 245, y: 140 }, pts: { x: 210, y: 140 } },
+    11: { rashi: { x: 258, y: 70 }, pts: { x: 225, y: 70 } },
+    12: { rashi: { x: 210, y: 22 }, pts: { x: 210, y: 55 } },
+  };
+
+  for (let h = 1; h <= 12; h++) {
+    const houseRashi = ((lagnaRashi + h - 2) % 12) + 1;
+    const pos = layout[h];
+
+    s += `<text x="${pos.rashi.x}" y="${pos.rashi.y}" font-size="9" font-weight="bold" fill="#7f8c8d" text-anchor="middle" dominant-baseline="middle">${houseRashi}</text>`;
+
+    const pts = isSav ? (data[houseRashi]?.points ?? 0) : (data[houseRashi] ?? 0);
+    let color = "#2d3436";
+    if (isSav) {
+      if (pts >= 28) color = "#27ae60";
+      else if (pts < 20) color = "#c0392b";
+    } else {
+      if (pts >= 5) color = "#27ae60";
+      else if (pts <= 2) color = "#c0392b";
+    }
+
+    s += `<text x="${pos.pts.x}" y="${pos.pts.y}" font-size="16" font-weight="bold" fill="${color}" text-anchor="middle" dominant-baseline="middle">${pts}</text>`;
+  }
+
+  s += `<rect x="95" y="102" width="90" height="36" rx="4" fill="#f9f0ff" stroke="#8e44ad" stroke-width="1"/>
+  <text x="140" y="116" font-size="10" font-weight="bold" fill="#8e44ad" text-anchor="middle">${title}</text>
+  <text x="140" y="128" font-size="9" fill="#666" text-anchor="middle">${subtitle}</text>`;
+
+  s += `</svg>`;
+  return s;
+}
+
+function buildAkvPrintSVG(data, title, subtitle, t, isSav = false, lagnaRashi = 1) {
   if (!data) return "";
+  const chartStyle = localStorage.getItem("vaiswanara_chart_style") || "south";
+  if (chartStyle === "north") {
+    return buildAkvPrintNorthSvg(data, title, subtitle, t, isSav, lagnaRashi);
+  }
+
   const W = 280, cell = 70;
   const siGrid = [
     [12, 1, 2, 3],
@@ -491,14 +549,15 @@ export function HoroscopePageNew({ logoUrl, onNavigate }) {
         const savData = chartData.ashtakavarga.sarvashtakavarga || {};
         const bavData = chartData.ashtakavarga.prastarashtakavarga || {};
         
-        const savSvg = buildAkvPrintSVG(savData, "SAV", t("sarvashtakavarga", "(Sarvashtakavarga)"), t, true);
-        const suBavSvg = buildAkvPrintSVG(bavData.Sun || {}, "Su BAV", t("Sun"), t, false);
-        const moBavSvg = buildAkvPrintSVG(bavData.Moon || {}, "Ch BAV", t("Moon"), t, false);
-        const maBavSvg = buildAkvPrintSVG(bavData.Mars || {}, "Ku BAV", t("Mars"), t, false);
-        const meBavSvg = buildAkvPrintSVG(bavData.Mercury || {}, "Bu BAV", t("Mercury"), t, false);
-        const juBavSvg = buildAkvPrintSVG(bavData.Jupiter || {}, "Gu BAV", t("Jupiter"), t, false);
-        const veBavSvg = buildAkvPrintSVG(bavData.Venus || {}, "Sk BAV", t("Venus"), t, false);
-        const saBavSvg = buildAkvPrintSVG(bavData.Saturn || {}, "Sa BAV", t("Saturn"), t, false);
+        const lagnaRashi = chartData.planets?.Ascendant?.rashi ?? 1;
+        const savSvg = buildAkvPrintSVG(savData, "SAV", t("sarvashtakavarga", "(Sarvashtakavarga)"), t, true, lagnaRashi);
+        const suBavSvg = buildAkvPrintSVG(bavData.Sun || {}, "Su BAV", t("Sun"), t, false, lagnaRashi);
+        const moBavSvg = buildAkvPrintSVG(bavData.Moon || {}, "Ch BAV", t("Moon"), t, false, lagnaRashi);
+        const maBavSvg = buildAkvPrintSVG(bavData.Mars || {}, "Ku BAV", t("Mars"), t, false, lagnaRashi);
+        const meBavSvg = buildAkvPrintSVG(bavData.Mercury || {}, "Bu BAV", t("Mercury"), t, false, lagnaRashi);
+        const juBavSvg = buildAkvPrintSVG(bavData.Jupiter || {}, "Gu BAV", t("Jupiter"), t, false, lagnaRashi);
+        const veBavSvg = buildAkvPrintSVG(bavData.Venus || {}, "Sk BAV", t("Venus"), t, false, lagnaRashi);
+        const saBavSvg = buildAkvPrintSVG(bavData.Saturn || {}, "Sa BAV", t("Saturn"), t, false, lagnaRashi);
 
         akvGridHtml = `
           <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; width: 100%;">

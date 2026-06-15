@@ -2389,8 +2389,122 @@ export function MatchPage({ logoUrl, onNavigate }) {
   );
 }
 
+function buildPrintNorthSvg(planets, navamsa, title, subtitle, t) {
+  const W = 280;
+  const shortNames = {
+    Sun: "Su",
+    Moon: "Ch",
+    Mars: "Ku",
+    Mercury: "Bu",
+    Jupiter: "Gu",
+    Venus: "Sk",
+    Saturn: "Sa",
+    Rahu: "Ra",
+    Ketu: "Ke",
+    Ascendant: "Lg",
+  };
+
+  const activePlanets = {};
+  for (const [name, pd] of Object.entries(planets)) {
+    const rashi = navamsa ? (navamsa[name]?.rashi ?? pd.rashi) : pd.rashi;
+    activePlanets[name] = {
+      rashi,
+      retrograde: pd.retrograde,
+      combust: pd.combust,
+    };
+  }
+
+  const lagnaRashi = activePlanets["Ascendant"]?.rashi ?? 1;
+
+  let s = `<svg width="${W}px" height="${W}px" viewBox="0 0 ${W} ${W}" xmlns="http://www.w3.org/2000/svg" style="display:block;font-family:sans-serif;background:#fff;">
+    <rect width="${W}" height="${W}" fill="white" stroke="#8e44ad" stroke-width="1.5"/>
+    <line x1="0" y1="0" x2="${W}" y2="${W}" stroke="#ccc" stroke-width="1"/>
+    <line x1="0" y1="${W}" x2="${W}" y2="0" stroke="#ccc" stroke-width="1"/>
+    <line x1="${W/2}" y1="0" x2="0" y2="${W/2}" stroke="#ccc" stroke-width="1"/>
+    <line x1="0" y1="${W/2}" x2="${W/2}" y2="${W}" stroke="#ccc" stroke-width="1"/>
+    <line x1="${W/2}" y1="${W}" x2="${W}" y2="${W/2}" stroke="#ccc" stroke-width="1"/>
+    <line x1="${W}" y1="${W/2}" x2="${W/2}" y2="0" stroke="#ccc" stroke-width="1"/>`;
+
+  const layout = {
+    1: { rashi: { x: 140, y: 30 }, planets: { x: 140, y: 80 } },
+    2: { rashi: { x: 70, y: 22 }, planets: { x: 70, y: 48 } },
+    3: { rashi: { x: 22, y: 70 }, planets: { x: 48, y: 70 } },
+    4: { rashi: { x: 30, y: 140 }, planets: { x: 80, y: 140 } },
+    5: { rashi: { x: 22, y: 210 }, planets: { x: 48, y: 210 } },
+    6: { rashi: { x: 70, y: 258 }, planets: { x: 70, y: 232 } },
+    7: { rashi: { x: 140, y: 250 }, planets: { x: 140, y: 200 } },
+    8: { rashi: { x: 210, y: 258 }, planets: { x: 210, y: 232 } },
+    9: { rashi: { x: 258, y: 210 }, planets: { x: 232, y: 210 } },
+    10: { rashi: { x: 250, y: 140 }, planets: { x: 200, y: 140 } },
+    11: { rashi: { x: 258, y: 70 }, planets: { x: 232, y: 70 } },
+    12: { rashi: { x: 210, y: 22 }, planets: { x: 210, y: 48 } },
+  };
+
+  for (let h = 1; h <= 12; h++) {
+    const houseRashi = ((lagnaRashi + h - 2) % 12) + 1;
+    const pos = layout[h];
+
+    s += `<text x="${pos.rashi.x}" y="${pos.rashi.y}" font-size="10.5" font-weight="bold" fill="#7f8c8d" text-anchor="middle" dominant-baseline="middle">${houseRashi}</text>`;
+
+    const housePlanets = Object.entries(activePlanets)
+      .filter(([name, p]) => p.rashi === houseRashi)
+      .map(([name, p]) => ({
+        name,
+        label: shortNames[name] || name,
+        retrograde: p.retrograde,
+        combust: p.combust,
+      }));
+
+    if (housePlanets.length > 0) {
+      const rows = [];
+      const itemsPerRow = 3;
+      for (let i = 0; i < housePlanets.length; i += itemsPerRow) {
+        rows.push(housePlanets.slice(i, i + itemsPerRow));
+      }
+
+      rows.forEach((row, rowIdx) => {
+        let y = pos.planets.y;
+        if (rows.length === 2) {
+          y = pos.planets.y - 5 + rowIdx * 10;
+        } else if (rows.length === 3) {
+          y = pos.planets.y - 10 + rowIdx * 10;
+        } else if (rows.length > 3) {
+          y = pos.planets.y - 15 + rowIdx * 10;
+        }
+
+        row.forEach((planet, idx) => {
+          const color = planet.retrograde ? "#2980b9" : planet.combust ? "#c0392b" : "#2c3e50";
+          const text = t(planet.label);
+          let x = pos.planets.x;
+          if (row.length === 2) {
+            x = idx === 0 ? pos.planets.x - 12 : pos.planets.x + 12;
+          } else if (row.length === 3) {
+            x = idx === 0 ? pos.planets.x - 18 : idx === 1 ? pos.planets.x : pos.planets.x + 18;
+          }
+          s += `<text x="${x}" y="${y}" font-size="10.5" font-weight="900" fill="${color}" text-anchor="middle" dominant-baseline="middle">${text}`;
+          if (planet.retrograde) s += "R";
+          if (planet.combust) s += "c";
+          s += `</text>`;
+        });
+      });
+    }
+  }
+
+  s += `<rect x="95" y="102" width="90" height="36" rx="4" fill="#f9f0ff" stroke="#8e44ad" stroke-width="1"/>
+  <text x="140" y="116" font-size="10" font-weight="bold" fill="#8e44ad" text-anchor="middle">${t(title)}</text>
+  <text x="140" y="128" font-size="9" fill="#666" text-anchor="middle">${subtitle}</text>`;
+
+  s += `</svg>`;
+  return s;
+}
+
 // Local SVG builder function reusing the Horoscope 14pt responsive adjustments
 function buildPrintSVG(planets, navamsa, title, subtitle, t) {
+  const chartStyle = localStorage.getItem("vaiswanara_chart_style") || "south";
+  if (chartStyle === "north") {
+    return buildPrintNorthSvg(planets, navamsa, title, subtitle, t);
+  }
+
   const W = 280,
     cell = 70;
   const siGrid = [
