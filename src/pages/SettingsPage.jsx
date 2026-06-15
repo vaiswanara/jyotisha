@@ -1467,14 +1467,6 @@ export function SettingsPage({ logoUrl, onNavigate }) {
                   />
                 </label>
               </details>
-              <button
-                type="button"
-                className="btn-action btn-purple"
-                onClick={handleSaveSettings}
-                style={{ width: "fit-content", marginBottom: "20px" }}
-              >
-                Save General Settings
-              </button>
             </div>
 
             <div className="form-panel" style={{ position: "static", marginBottom: "20px" }}>
@@ -1518,16 +1510,18 @@ export function SettingsPage({ logoUrl, onNavigate }) {
                   />
                 </div>
               )}
-              <div style={{ marginTop: "15px" }}>
-                <button
-                  type="button"
-                  className="btn-action btn-purple"
-                  onClick={handleSaveSettings}
-                  style={{ width: "fit-content" }}
-                >
-                  Save Ayanamsha
-                </button>
-              </div>
+            </div>
+
+            {/* General Settings Save button at the end of General Tab */}
+            <div style={{ display: "flex", justifyContent: "flex-start", marginTop: "10px", marginBottom: "20px" }}>
+              <button
+                type="button"
+                className="btn-action btn-purple"
+                onClick={handleSaveSettings}
+                style={{ width: "fit-content" }}
+              >
+                Save General Settings
+              </button>
             </div>
           </>
         )}
