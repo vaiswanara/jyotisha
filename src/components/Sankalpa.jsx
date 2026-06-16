@@ -833,7 +833,7 @@ const VARA_SANKALPA = {
   Saturday: "Sthira",
 };
 
-export default function Sankalpa({ onNavigate }) {
+export default function Sankalpa({ onNavigate, transitChart }) {
   const [sankalpaData, setSankalpaData] = useState("");
   const [apiData, setApiData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -845,8 +845,15 @@ export default function Sankalpa({ onNavigate }) {
 
   useEffect(() => {
     fetchAdhikaMaasa();
-    fetchPanchangaData();
   }, []);
+
+  useEffect(() => {
+    if (transitChart) {
+      setApiData({ data: transitChart, dateVal: transitChart.meta?.dob || "" });
+    } else {
+      fetchPanchangaData();
+    }
+  }, [transitChart]);
 
   const fetchAdhikaMaasa = async () => {
     try {

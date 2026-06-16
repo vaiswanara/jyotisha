@@ -73,9 +73,19 @@ const BAD_TARAS = ["Janma", "Vipat", "Pratyak", "Naidhana"];
 export function MePage({ onNavigate }) {
   const { t } = useTranslation();
   const [meProfile, setMeProfile] = useState(null);
-  const [todayPanchanga, setTodayPanchanga] = useState(null);
   const [transitChart, setTransitChart] = useState(null);
   const [natalChart, setNatalChart] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const defLoc = JSON.parse(
+      localStorage.getItem("vaiswanara_default_location") || "null"
+    );
+    const tz = defLoc?.timezone || 5.5;
+    return getLocalDateStr(tz);
+  });
+  const [selectedTime, setSelectedTime] = useState(() => {
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -101,12 +111,14 @@ export function MePage({ onNavigate }) {
     }
   }, []);
 
-  // Fetch Today's Data and Natal Chart whenever Profile changes
+  // Fetch Today's Data and Natal Chart whenever Profile, Selected Date or Time changes
   useEffect(() => {
     if (!meProfile) return;
 
     const loadDailyData = async () => {
-      setIsLoading(true);
+      if (!natalChart || !transitChart) {
+        setIsLoading(true);
+      }
       try {
         const profile = meProfile;
 
@@ -115,7 +127,7 @@ export function MePage({ onNavigate }) {
         const natalLon = profile.longitude || 77.5946;
         const natalTz = profile.timezone || 5.5;
 
-        // Default location coordinates for today's Panchanga and Transit Chart
+        // Default location coordinates for today's Transit Chart
         const defLoc = JSON.parse(
           localStorage.getItem("vaiswanara_default_location") || "null"
         );
@@ -129,21 +141,14 @@ export function MePage({ onNavigate }) {
         const prefs = JSON.parse(localStorage.getItem("eclock_prefs") || "{}");
         const ayanamsha = prefs.ayanamsha_val || "lahiri";
 
-        const todayStr = getLocalDateStr(transitTz);
-
         // Cache Keys (SWR pattern for background syncing)
-        const pCacheKey = `me_panchanga_latest_${transitLat}_${transitLon}_${ayanamsha}`;
         const natalCacheKey = `me_natal_${profile.dob}_${profile.tob || "12:00"}_${natalLat}_${natalLon}_${ayanamsha}`;
-        const transitCacheKey = `me_transit_latest_${transitLat}_${transitLon}_${ayanamsha}`;
+        const transitCacheKey = `me_transit_v2_${selectedDate}_${selectedTime}_${transitLat}_${transitLon}_${ayanamsha}`;
 
-        let pData = null;
         let natal = null;
         let transit = null;
 
-        // 1. Try Loading Stale/Cached Data First
-        try {
-          pData = JSON.parse(localStorage.getItem(pCacheKey));
-        } catch (e) {}
+        // 1. Try Loading Cached Data First
         try {
           natal = JSON.parse(localStorage.getItem(natalCacheKey));
         } catch (e) {}
@@ -152,21 +157,14 @@ export function MePage({ onNavigate }) {
         } catch (e) {}
 
         // Instantly display cached data if available
-        if (pData?.data) setTodayPanchanga(pData.data);
         if (natal) setNatalChart(natal);
-        if (transit?.data) setTransitChart(transit.data);
-
-        // Show full loading screen only if we have NO data to show
-        if (!pData || !natal || !transit) {
-          setIsLoading(true);
-        }
+        if (transit) setTransitChart(transit);
 
         // 2. Background Revalidation (Parallel for speed)
         const needsNatal = !natal;
-        const needsPanchanga = !pData || pData.date !== todayStr;
-        const needsTransit = !transit || transit.date !== todayStr;
+        const needsTransit = !transit;
 
-        if (needsNatal || needsPanchanga || needsTransit) {
+        if (needsNatal || needsTransit) {
           setIsSyncing(true);
           try {
             const tasks = [];
@@ -187,47 +185,17 @@ export function MePage({ onNavigate }) {
               );
             }
 
-            if (needsPanchanga) {
-              const pParams = new URLSearchParams({
-                endpoint: "panchanga_table",
-                date: todayStr,
-                days: 1,
-                lat: transitLat,
-                lon: transitLon,
-                tz: transitTz,
-                ayanamsha: ayanamsha,
-              });
-              tasks.push(
-                fetch(`${API_URL}?${pParams.toString()}`, {
-                  headers: { "x-api-token": API_TOKEN },
-                })
-                  .then((r) => r.json())
-                  .then((resObj) => {
-                    if (resObj && resObj.length > 0) {
-                      localStorage.setItem(
-                        pCacheKey,
-                        JSON.stringify({ date: todayStr, data: resObj[0] }),
-                      );
-                      setTodayPanchanga(resObj[0]);
-                    }
-                  })
-              );
-            }
-
             if (needsTransit) {
               tasks.push(
                 fetchBirthChart({
-                  dob: todayStr,
-                  tob: "06:00:00", // Fixed time for daily transit
+                  dob: selectedDate,
+                  tob: selectedTime + ":00",
                   latitude: transitLat,
                   longitude: transitLon,
                   timezone: transitTz,
                   ayanamsha: ayanamsha,
                 }).then((res) => {
-                  localStorage.setItem(
-                    transitCacheKey,
-                    JSON.stringify({ date: todayStr, data: res }),
-                  );
+                  localStorage.setItem(transitCacheKey, JSON.stringify(res));
                   setTransitChart(res);
                 })
               );
@@ -250,7 +218,7 @@ export function MePage({ onNavigate }) {
     };
 
     loadDailyData();
-  }, [meProfile]);
+  }, [meProfile, selectedDate, selectedTime]);
 
   const handleSaveProfile = () => {
     if (!editFormData.dob || !editFormData.tob) {
@@ -318,23 +286,26 @@ export function MePage({ onNavigate }) {
 
   // --- Calculators ---
 
-  const parseAndLocalizeTithi = (tithiStr) => {
+  const parseAndLocalizeTithiRealtime = (tithiStr, pakshaStr) => {
     if (!tithiStr) return "";
-    const mainPart = tithiStr.split(" ")[0]; // e.g. "K-Navami"
-    if (mainPart.includes("-")) {
-      const parts = mainPart.split("-");
-      const paksha = parts[0] === "K" || parts[0] === "Krishna" ? "Krishna" : "Shukla";
-      const tithiName = parts[1];
-      return `${t(paksha)}-${t(tithiName, tithiName)}`;
-    }
-    return t(mainPart, mainPart);
+    let cleanTithi = tithiStr
+      .replace("K.", "")
+      .replace("S.", "")
+      .replace("Shukla ", "")
+      .replace("Krishna ", "")
+      .trim();
+    if (cleanTithi === "Pratipada" || cleanTithi === "Prathama") cleanTithi = "Pratipath";
+    
+    const isKrishna = pakshaStr?.includes("Krishna") || tithiStr.includes("K.");
+    const paksha = isKrishna ? "Krishna" : "Shukla";
+    return `${t(paksha)}-${t(cleanTithi, cleanTithi)}`;
   };
 
   const getTarabalam = () => {
-    if (!natalChart || !todayPanchanga) return null;
+    if (!natalChart || !transitChart) return null;
     const natalNakshatra = natalChart.planets?.Moon?.nakshatra;
     const todayNakshatra =
-      todayPanchanga["Nakshatra"] || todayPanchanga["Nakshatra_End"];
+      transitChart.panchanga?.moon_nakshatra || transitChart.planets?.Moon?.nakshatra;
     if (!natalNakshatra || !todayNakshatra) return null;
 
     const nNakIdx = NAKSHATRAS.indexOf(natalNakshatra);
@@ -715,8 +686,51 @@ export function MePage({ onNavigate }) {
           </div>
         ) : (
           <>
+            {/* Interactive Date & Time Selection Panel */}
+            <div
+              style={{
+                display: "flex",
+                gap: "15px",
+                background: "#fdfefe",
+                padding: "15px",
+                borderRadius: "12px",
+                border: "1px solid #eee",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "center",
+                maxWidth: "800px",
+                margin: "0 auto 10px auto",
+                width: "100%",
+                boxSizing: "border-box",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+              }}
+            >
+              <div style={{ flex: 1, minWidth: "140px" }}>
+                <label style={{ display: "block", fontWeight: "bold", fontSize: "0.85rem", marginBottom: "5px", color: "#2c3e50", textAlign: "left" }}>
+                  📅 {t("Date", "Date")}:
+                </label>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none", fontSize: "0.9rem" }}
+                />
+              </div>
+              <div style={{ flex: 1, minWidth: "140px" }}>
+                <label style={{ display: "block", fontWeight: "bold", fontSize: "0.85rem", marginBottom: "5px", color: "#2c3e50", textAlign: "left" }}>
+                  ⏰ {t("Time", "Time")}:
+                </label>
+                <input
+                  type="time"
+                  value={selectedTime}
+                  onChange={(e) => setSelectedTime(e.target.value)}
+                  style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none", fontSize: "0.9rem" }}
+                />
+              </div>
+            </div>
+
             {/* Single Line Panchanga Banner */}
-            {todayPanchanga && (
+            {transitChart && transitChart.panchanga && (
               <>
                 <div
                   style={{
@@ -734,7 +748,7 @@ export function MePage({ onNavigate }) {
                   }}
                 >
                   <div style={{ fontSize: "1.1rem", marginBottom: "6px" }}>
-                    📅 {todayPanchanga.Date} ({todayPanchanga.Vaara ? t(`${todayPanchanga.Vaara}_short`) : ""})
+                    📅 {selectedDate} ({transitChart.panchanga.vara ? t(`${transitChart.panchanga.vara}_short`) : ""})
                   </div>
                   <div
                     style={{
@@ -743,10 +757,9 @@ export function MePage({ onNavigate }) {
                       lineHeight: "1.5",
                     }}
                   >
-                    {parseAndLocalizeTithi(todayPanchanga.Tithi) || t("tithi", "Tithi")} •{" "}
-                    {t(todayPanchanga["Nakshatra"] ||
-                      todayPanchanga["Nakshatra_End"])}{" "}
-                    • {t(todayPanchanga.Yoga)} • {t(todayPanchanga.Karana)}
+                    {parseAndLocalizeTithiRealtime(transitChart.panchanga.tithi, transitChart.panchanga.paksha) || t("tithi", "Tithi")} •{" "}
+                    {t(transitChart.panchanga.moon_nakshatra || transitChart.planets?.Moon?.nakshatra)}{" "}
+                    • {t(transitChart.panchanga.yoga)} • {t(transitChart.panchanga.karana)}
                   </div>
                   <div
                     style={{
@@ -756,7 +769,7 @@ export function MePage({ onNavigate }) {
                       fontStyle: "italic",
                     }}
                   >
-                    {t("atSunriseTime", "(at Sunrise time)")}
+                    {t("calculatedAtRealtime", "(Calculated at Realtime)")}
                   </div>
                 </div>
                 <div
@@ -885,7 +898,7 @@ export function MePage({ onNavigate }) {
               }}
             >
               <div style={{ width: "100%", maxWidth: "1000px" }}>
-                <Sankalpa onNavigate={onNavigate} />
+                {transitChart && <Sankalpa onNavigate={onNavigate} transitChart={transitChart} />}
               </div>
             </div>
           </>
