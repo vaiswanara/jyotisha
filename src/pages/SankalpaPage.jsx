@@ -196,7 +196,20 @@ export function SankalpaPage({ onNavigate }) {
               </div>
             ) : (
               transitChart && (
-                <Sankalpa onNavigate={onNavigate} transitChart={transitChart} hideTitle={true} />
+                <>
+                  <div
+                    style={{
+                      textAlign: "center",
+                      fontSize: "0.95rem",
+                      color: "#7f8c8d",
+                      marginBottom: "10px",
+                      fontWeight: "600",
+                    }}
+                  >
+                    🌅 {t("SunriseLabel", "Sunrise")}: {transitChart.meta?.sunrise || "--:--"}
+                  </div>
+                  <Sankalpa onNavigate={onNavigate} transitChart={transitChart} hideTitle={true} />
+                </>
               )
             )}
           </div>
