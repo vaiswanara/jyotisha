@@ -157,7 +157,7 @@ export function MePage({ onNavigate }) {
 
         // Cache Keys (SWR pattern for background syncing)
         const natalCacheKey = `me_natal_${profile.dob}_${profile.tob || "12:00"}_${natalLat}_${natalLon}_${ayanamsha}`;
-        const transitCacheKey = `me_transit_v2_${selectedDate}_${selectedTime}_${transitLat}_${transitLon}_${ayanamsha}`;
+        const transitCacheKey = `me_transit_v3_${selectedDate}_${selectedTime}_${transitLat}_${transitLon}_${ayanamsha}`;
 
         let natal = null;
         let transit = null;
@@ -171,7 +171,7 @@ export function MePage({ onNavigate }) {
         } catch (e) {}
         try {
           const cachedTransit = JSON.parse(localStorage.getItem(transitCacheKey));
-          if (cachedTransit && cachedTransit.planets) {
+          if (cachedTransit && cachedTransit.planets && cachedTransit.meta && cachedTransit.meta.sunrise) {
             transit = cachedTransit;
           }
         } catch (e) {}
