@@ -6,7 +6,6 @@ import {
   API_TOKEN,
   saveUserData
 } from "../services/astrologyApi.js";
-import Sankalpa from "../components/Sankalpa.jsx";
 import { LocationAutocomplete } from "../components/LocationAutocomplete.jsx";
 import { getLocalDateStr } from "../utils/formatters.js";
 
@@ -904,18 +903,45 @@ export function MePage({ onNavigate }) {
               )}
             </div>
 
-            {/* Nitya Sankalpam Section */}
+            {/* Note about Sankalpam moved */}
             <div
               style={{
                 marginTop: "20px",
-                width: "100%",
+                padding: "15px",
+                background: "#fcf3cf",
+                borderLeft: "5px solid #f39c12",
+                borderRadius: "8px",
+                textAlign: "center",
+                fontSize: "14px",
+                color: "#7e5109",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
                 display: "flex",
-                justifyContent: "center",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "10px",
+                width: "100%",
+                boxSizing: "border-box",
               }}
             >
-              <div style={{ width: "100%", maxWidth: "1000px" }}>
-                {transitChart && <Sankalpa onNavigate={onNavigate} transitChart={transitChart} />}
-              </div>
+              <span>
+                ℹ️ {t("sankalpaMovedNote", "Nitya Sankalpam has been moved to a separate page for a cleaner dashboard.")}
+              </span>
+              <button
+                onClick={() => onNavigate("Sankalpa")}
+                style={{
+                  background: "#e67e22",
+                  color: "#fff",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+                }}
+              >
+                {t("clickToViewSankalpa", "Click here to view")}
+              </button>
             </div>
           </>
         )}

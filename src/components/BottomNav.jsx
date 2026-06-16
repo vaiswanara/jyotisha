@@ -7,8 +7,8 @@ export function BottomNav({ activePage, onNavigate, profileName }) {
   const navItems = [
     { id: "Home", icon: "🏠", label: t("Home", "Home") },
     { id: "Me", icon: "👤", label: profileName || t("Me", "Me").replace(/\s*\(.*?\)/, "") },
+    { id: "Sankalpa", icon: "☀️", label: t("Sankalpa", "Sankalpa") },
     { id: "e-Jataka", icon: "📜", label: t("Jataka", "Jataka") },
-    { id: "e-Match", icon: "💞", label: t("Match", "Match") },
     { id: "e-PATA", icon: "📖", label: t("e-PATA", "e-PATA") },
     { id: "Settings", icon: "⚙️", label: t("Settings", "Settings") },
   ];

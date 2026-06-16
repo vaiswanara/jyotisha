@@ -18,6 +18,7 @@ export function Sidebar({ isOpen, logoUrl, onClose, activePage, onNavigate, prof
   const allMenuItems = [
     { id: "Home", icon: "🏠", label: t("Home", "Home") },
     { id: "Me", icon: "👤", label: profileName || t("Me", "Me").replace(/\s*\(.*?\)/, "") },
+    { id: "Sankalpa", icon: "☀️", label: t("e-Sankalpa", "e-Sankalpa") },
     { id: "e-Jataka", icon: "📜", label: t("e-Jataka", "e-Jataka") },
     { id: "e-Match", icon: "💞", label: t("e-Match", "e-Match") },
     { id: "e-Panchanga", icon: "🗓️", label: t("e-Panchanga", "e-Panchanga") },
@@ -35,7 +36,7 @@ export function Sidebar({ isOpen, logoUrl, onClose, activePage, onNavigate, prof
     { id: "Feedback", icon: "📝", label: t("Feedback", "Feedback") },
   ];
 
-  const mandatoryPages = ["Home", "Help", "e-Support", "Settings", "Feedback", "PrecisionTest", "e-Library"];
+  const mandatoryPages = ["Home", "Sankalpa", "Help", "e-Support", "Settings", "Feedback", "PrecisionTest", "e-Library"];
 
   const menuItems = visiblePages
     ? allMenuItems.filter(

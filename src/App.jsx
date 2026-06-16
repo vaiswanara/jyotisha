@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
-import logoUrl from "../logo.png";
+const logoUrl = `${import.meta.env.BASE_URL}logo.png`;
 import { Sidebar } from "./components/Sidebar.jsx";
 import { BottomNav } from "./components/BottomNav.jsx";
 import { useTranslation } from "react-i18next";
@@ -54,6 +54,9 @@ const ChangelogPage = lazy(() =>
 );
 const MePage = lazy(() =>
   import("./pages/MePage.jsx").then((m) => ({ default: m.MePage })),
+);
+const SankalpaPage = lazy(() =>
+  import("./pages/SankalpaPage.jsx").then((m) => ({ default: m.SankalpaPage })),
 );
 const PrivacyPage = lazy(() =>
   import("./pages/PrivacyPage.jsx").then((m) => ({ default: m.PrivacyPage })),
@@ -996,8 +999,10 @@ export default function App() {
                 ? t("Jataka", "e-JATAKA")
                 : activePage === "e-Match"
                   ? t("Match", "e-MATCH")
-                  : activePage === "Me"
-                    ? (profileFirstName ? profileFirstName.toUpperCase() : t("Me", "ME"))
+                  : activePage === "Sankalpa"
+                    ? t("Sankalpa", "SANKALPA")
+                    : activePage === "Me"
+                      ? (profileFirstName ? profileFirstName.toUpperCase() : t("Me", "ME"))
                     : activePage === "e-Panchanga"
                       ? t("Panchanga", "e-PANCHANGA")
                       : activePage === "Profiles"
@@ -1161,6 +1166,9 @@ export default function App() {
         )}
         {activePage === "Me" && (
           <MePage logoUrl={logoUrl} onNavigate={setActivePage} />
+        )}
+        {activePage === "Sankalpa" && (
+          <SankalpaPage onNavigate={setActivePage} />
         )}
         {activePage === "e-Jataka" && (
           <HoroscopePageNew logoUrl={logoUrl} onNavigate={setActivePage} />

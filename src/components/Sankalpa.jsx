@@ -833,7 +833,7 @@ const VARA_SANKALPA = {
   Saturday: "Sthira",
 };
 
-export default function Sankalpa({ onNavigate, transitChart }) {
+export default function Sankalpa({ onNavigate, transitChart, hideTitle = false }) {
   const [sankalpaData, setSankalpaData] = useState("");
   const [apiData, setApiData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -1248,41 +1248,59 @@ export default function Sankalpa({ onNavigate, transitChart }) {
         boxSizing: "border-box",
       }}
     >
-      <h2
-        style={{
-          color: "#d35400",
-          fontFamily: "'Crimson Pro', serif",
-          fontSize: "28px",
-          marginTop: "0",
-        }}
-      >
-        ॥ {t("Nitya Sankalpam", "Nitya Sankalpam")} ॥
-      </h2>
+      {!hideTitle && (
+        <>
+          <h2
+            style={{
+              color: "#d35400",
+              fontFamily: "'Crimson Pro', serif",
+              fontSize: "28px",
+              marginTop: "0",
+            }}
+          >
+            ॥ {t("Nitya Sankalpam", "Nitya Sankalpam")} ॥
+          </h2>
 
-      <div
-        style={{
-          fontSize: "0.85rem",
-          color: "#7f8c8d",
-          fontStyle: "italic",
-          marginBottom: "15px",
-        }}
-      >
-        {t("calculatedAtRealtime", "(Calculated at Realtime)")}
-      </div>
+          <div
+            style={{
+              fontSize: "0.85rem",
+              color: "#7f8c8d",
+              fontStyle: "italic",
+              marginBottom: "15px",
+            }}
+          >
+            {t("calculatedAtRealtime", "(Calculated at Realtime)")}
+          </div>
+        </>
+      )}
 
       {loading && <p>Calculating Nitya Sankalpam...</p>}
       {error && <p style={{ color: "red" }}>Error: {error}</p>}
       {sankalpaData && !loading && (
-        <p
-          style={{
-            fontSize: "1.4rem",
-            lineHeight: "2.2",
-            color: "#2c3e50",
-            fontFamily: fontMap[lang] || "Arial",
-            margin: 0,
-          }}
-          dangerouslySetInnerHTML={{ __html: sankalpaData }}
-        ></p>
+        <>
+          <p
+            style={{
+              fontSize: "1.4rem",
+              lineHeight: "2.2",
+              color: "#2c3e50",
+              fontFamily: fontMap[lang] || "Arial",
+              margin: 0,
+            }}
+            dangerouslySetInnerHTML={{ __html: sankalpaData }}
+          ></p>
+          {hideTitle && (
+            <div
+              style={{
+                fontSize: "0.85rem",
+                color: "#7f8c8d",
+                fontStyle: "italic",
+                marginTop: "20px",
+              }}
+            >
+              {t("calculatedAtRealtime", "(Calculated at Realtime)")}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

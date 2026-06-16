@@ -707,6 +707,15 @@ export function HomePage({
                 )}
               </div>
             </div>
+            <div
+              className="card-home"
+              style={{ borderTopColor: "#f39c12" }}
+              onClick={() => onNavigate("Sankalpa")}
+            >
+              <div className="icon">☀️</div>
+              <h2>{copy.e_sankalpa}</h2>
+              <div className="desc">{copy.desc_quick_panchanga}</div>
+            </div>
             {visibleMenus.includes("jataka") && (
               <div
                 className="card-home"
