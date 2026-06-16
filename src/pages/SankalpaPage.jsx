@@ -20,7 +20,7 @@ export function SankalpaPage({ onNavigate }) {
     return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
   });
 
-  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(true);
 
   useEffect(() => {
     const loadTransitChart = async () => {
