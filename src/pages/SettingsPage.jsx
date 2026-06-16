@@ -1302,6 +1302,7 @@ export function SettingsPage({ logoUrl, onNavigate }) {
               >
                 <option value="Home">{t("Home", "Home")}</option>
                 <option value="Me">{t("Me", "Me (My Profile)")}</option>
+                <option value="Sankalpa">{t("Sankalpa", "Sankalpa")}</option>
                 <option value="e-Jataka">{t("e-Jataka", "e-Jataka")}</option>
                 <option value="e-Match">{t("e-Match", "e-Match")}</option>
                 <option value="e-Panchanga">
