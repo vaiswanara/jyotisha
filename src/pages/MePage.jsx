@@ -792,6 +792,16 @@ export function MePage({ onNavigate }) {
                   >
                     🌅 {t("SunriseLabel", "Sunrise")}: {transitChart.meta?.sunrise || "--:--"}
                   </div>
+                  <div
+                    style={{
+                      fontSize: "0.8rem",
+                      opacity: 0.8,
+                      marginTop: "2px",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    {t("calculatedAtRealtime", "(Calculated at Realtime)")}
+                  </div>
                 </div>
                 <div
                   style={{
