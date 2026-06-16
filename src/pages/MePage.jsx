@@ -715,43 +715,28 @@ export function MePage({ onNavigate }) {
             <div
               style={{
                 display: "flex",
-                gap: "15px",
-                background: "#fdfefe",
-                padding: "15px",
-                borderRadius: "12px",
-                border: "1px solid #eee",
-                flexWrap: "wrap",
+                gap: "10px",
+                flexWrap: "nowrap",
                 alignItems: "center",
                 justifyContent: "center",
-                maxWidth: "800px",
+                maxWidth: "400px",
                 margin: "0 auto 10px auto",
                 width: "100%",
                 boxSizing: "border-box",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
               }}
             >
-              <div style={{ flex: 1, minWidth: "140px" }}>
-                <label style={{ display: "block", fontWeight: "bold", fontSize: "0.85rem", marginBottom: "5px", color: "#2c3e50", textAlign: "left" }}>
-                  📅 {t("Date", "Date")}:
-                </label>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none", fontSize: "0.9rem" }}
-                />
-              </div>
-              <div style={{ flex: 1, minWidth: "140px" }}>
-                <label style={{ display: "block", fontWeight: "bold", fontSize: "0.85rem", marginBottom: "5px", color: "#2c3e50", textAlign: "left" }}>
-                  ⏰ {t("Time", "Time")}:
-                </label>
-                <input
-                  type="time"
-                  value={selectedTime}
-                  onChange={(e) => setSelectedTime(e.target.value)}
-                  style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none", fontSize: "0.9rem" }}
-                />
-              </div>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none", fontSize: "0.9rem", minWidth: "120px" }}
+              />
+              <input
+                type="time"
+                value={selectedTime}
+                onChange={(e) => setSelectedTime(e.target.value)}
+                style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none", fontSize: "0.9rem", minWidth: "90px" }}
+              />
             </div>
 
             {/* Single Line Panchanga Banner */}
