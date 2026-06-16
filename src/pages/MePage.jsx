@@ -70,6 +70,20 @@ const TARA_NAMES = {
 };
 const BAD_TARAS = ["Janma", "Vipat", "Pratyak", "Naidhana"];
 
+const normalizeNakshatraForIndex = (name) => {
+  if (!name) return "";
+  if (name === "Ardra") return "Arudra";
+  if (name === "Dhanishtha") return "Dhanishta";
+  return name;
+};
+
+const normalizeNakshatraForTranslation = (name) => {
+  if (!name) return "";
+  if (name === "Arudra") return "Ardra";
+  if (name === "Dhanishtha") return "Dhanishta";
+  return name;
+};
+
 export function MePage({ onNavigate }) {
   const { t } = useTranslation();
   const [meProfile, setMeProfile] = useState(null);
@@ -150,10 +164,16 @@ export function MePage({ onNavigate }) {
 
         // 1. Try Loading Cached Data First
         try {
-          natal = JSON.parse(localStorage.getItem(natalCacheKey));
+          const cachedNatal = JSON.parse(localStorage.getItem(natalCacheKey));
+          if (cachedNatal && cachedNatal.planets) {
+            natal = cachedNatal;
+          }
         } catch (e) {}
         try {
-          transit = JSON.parse(localStorage.getItem(transitCacheKey));
+          const cachedTransit = JSON.parse(localStorage.getItem(transitCacheKey));
+          if (cachedTransit && cachedTransit.planets) {
+            transit = cachedTransit;
+          }
         } catch (e) {}
 
         // Instantly display cached data if available
@@ -179,8 +199,10 @@ export function MePage({ onNavigate }) {
                   timezone: natalTz,
                   ayanamsha: ayanamsha,
                 }).then((res) => {
-                  localStorage.setItem(natalCacheKey, JSON.stringify(res));
-                  setNatalChart(res);
+                  if (res && res.planets) {
+                    localStorage.setItem(natalCacheKey, JSON.stringify(res));
+                    setNatalChart(res);
+                  }
                 })
               );
             }
@@ -195,8 +217,10 @@ export function MePage({ onNavigate }) {
                   timezone: transitTz,
                   ayanamsha: ayanamsha,
                 }).then((res) => {
-                  localStorage.setItem(transitCacheKey, JSON.stringify(res));
-                  setTransitChart(res);
+                  if (res && res.planets) {
+                    localStorage.setItem(transitCacheKey, JSON.stringify(res));
+                    setTransitChart(res);
+                  }
                 })
               );
             }
@@ -303,9 +327,10 @@ export function MePage({ onNavigate }) {
 
   const getTarabalam = () => {
     if (!natalChart || !transitChart) return null;
-    const natalNakshatra = natalChart.planets?.Moon?.nakshatra;
-    const todayNakshatra =
-      transitChart.panchanga?.moon_nakshatra || transitChart.planets?.Moon?.nakshatra;
+    const natalNakshatra = normalizeNakshatraForIndex(natalChart.planets?.Moon?.nakshatra);
+    const todayNakshatra = normalizeNakshatraForIndex(
+      transitChart.panchanga?.moon_nakshatra || transitChart.planets?.Moon?.nakshatra
+    );
     if (!natalNakshatra || !todayNakshatra) return null;
 
     const nNakIdx = NAKSHATRAS.indexOf(natalNakshatra);
@@ -319,7 +344,7 @@ export function MePage({ onNavigate }) {
     return {
       name: t(taraName, taraName),
       isGood,
-      desc: `${t(natalNakshatra, natalNakshatra)} → ${t(todayNakshatra, todayNakshatra)}`,
+      desc: `${t(normalizeNakshatraForTranslation(natalChart.planets?.Moon?.nakshatra))} → ${t(normalizeNakshatraForTranslation(transitChart.panchanga?.moon_nakshatra || transitChart.planets?.Moon?.nakshatra))}`,
     };
   };
 
@@ -476,7 +501,7 @@ export function MePage({ onNavigate }) {
               }}
             >
               {natalChart?.planets?.Moon?.nakshatra
-                ? `${t(natalChart.planets.Moon.nakshatra)}-${natalChart.planets.Moon.pada}(${t(RASHI_NAMES[natalChart.planets.Moon.rashi])})`
+                ? `${t(normalizeNakshatraForTranslation(natalChart.planets.Moon.nakshatra))}-${natalChart.planets.Moon.pada}(${t(RASHI_NAMES[natalChart.planets.Moon.rashi])})`
                 : t("processingWait", "Loading...")}
             </span>
           </div>
@@ -747,9 +772,6 @@ export function MePage({ onNavigate }) {
                     boxSizing: "border-box",
                   }}
                 >
-                  <div style={{ fontSize: "1.1rem", marginBottom: "6px" }}>
-                    📅 {selectedDate} ({transitChart.panchanga.vara ? t(`${transitChart.panchanga.vara}_short`) : ""})
-                  </div>
                   <div
                     style={{
                       fontSize: "clamp(14px, 3vw, 17px)",
@@ -758,18 +780,17 @@ export function MePage({ onNavigate }) {
                     }}
                   >
                     {parseAndLocalizeTithiRealtime(transitChart.panchanga.tithi, transitChart.panchanga.paksha) || t("tithi", "Tithi")} •{" "}
-                    {t(transitChart.panchanga.moon_nakshatra || transitChart.planets?.Moon?.nakshatra)}{" "}
+                    {t(normalizeNakshatraForTranslation(transitChart.panchanga.moon_nakshatra || transitChart.planets?.Moon?.nakshatra))}{" "}
                     • {t(transitChart.panchanga.yoga)} • {t(transitChart.panchanga.karana)}
                   </div>
                   <div
                     style={{
                       fontSize: "0.85rem",
-                      opacity: 0.8,
+                      opacity: 0.9,
                       marginTop: "4px",
-                      fontStyle: "italic",
                     }}
                   >
-                    {t("calculatedAtRealtime", "(Calculated at Realtime)")}
+                    🌅 {t("SunriseLabel", "Sunrise")}: {transitChart.meta?.sunrise || "--:--"}
                   </div>
                 </div>
                 <div
