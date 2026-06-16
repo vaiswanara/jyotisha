@@ -78,7 +78,7 @@ export function SankalpaPage({ onNavigate }) {
           flexDirection: "column",
           alignItems: "stretch",
           gap: "0px",
-          paddingTop: "calc(env(safe-area-inset-top, 0px) + 10px)",
+          paddingTop: "0px",
           width: "100%",
         }}
       >
