@@ -454,7 +454,7 @@ export function MePage({ onNavigate }) {
           display: "flex",
           flexDirection: "column",
           gap: "20px",
-      paddingTop: "calc(env(safe-area-inset-top, 0px) + 10px)",
+          paddingTop: "0px",
         }}
       >
         {/* Header - Profile Selection */}
