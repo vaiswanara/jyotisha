@@ -1043,7 +1043,7 @@ export default function PanchangaSearch() {
                 onChange={handleImportCSV}
               />
             </div>
-            <div style={{ maxHeight: "280px", overflow: "auto" }}>
+            <div style={{ maxHeight: "450px", overflow: "auto" }}>
               <table
                 style={{
                   width: "100%",
