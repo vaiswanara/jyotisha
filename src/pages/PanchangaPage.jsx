@@ -720,6 +720,52 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
     setSavedProfilesList(Object.keys(savedProfiles));
   };
 
+  const handleRenameTable = () => {
+    const profileName = formData.profileName.trim();
+    if (!profileName) {
+      return alert("Please enter a profile name to rename.");
+    }
+    const savedProfiles = JSON.parse(
+      localStorage.getItem("panchanga_profiles") || "{}",
+    );
+    if (!savedProfiles[profileName]) {
+      return alert(`Profile "${profileName}" does not exist.`);
+    }
+    const newName = window.prompt("Enter new name for the profile:", profileName);
+    if (newName === null) return;
+    const trimmedNewName = newName.trim();
+    if (!trimmedNewName) {
+      return alert("Profile name cannot be empty.");
+    }
+    if (trimmedNewName === profileName) return;
+
+    if (savedProfiles[trimmedNewName]) {
+      const overwrite = window.confirm(
+        `A profile named "${trimmedNewName}" already exists. Do you want to overwrite it?`,
+      );
+      if (!overwrite) return;
+    }
+
+    savedProfiles[trimmedNewName] = savedProfiles[profileName];
+    delete savedProfiles[profileName];
+
+    localStorage.setItem("panchanga_profiles", JSON.stringify(savedProfiles));
+    setSavedProfilesList(Object.keys(savedProfiles));
+
+    setFormData((prev) => ({
+      ...prev,
+      profileName: trimmedNewName,
+    }));
+    if (selectedProfileName === profileName) {
+      setSelectedProfileName(trimmedNewName);
+    }
+    if (loadProfileName === profileName) {
+      setLoadProfileName(trimmedNewName);
+    }
+
+    alert(`Profile "${profileName}" successfully renamed to "${trimmedNewName}"!`);
+  };
+
   const exportPanchangaCSV = () => {
     if (resultData.length === 0) return;
     const csvRows = [
@@ -2044,6 +2090,12 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                         {isPanShudhiActive ? "👁️ Show All" : "✨ Pan Shudhi"}
                       </button>
                       <button
+                        style={{ ...actionBtnStyle, background: "#f39c12" }}
+                        onClick={handleRenameTable}
+                      >
+                        ✏️ Rename Table
+                      </button>
+                      <button
                         style={{ ...actionBtnStyle, background: "#c0392b" }}
                         onClick={() => {
                           const profileName = formData.profileName.trim();
@@ -2517,6 +2569,12 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                         onClick={exportMuhurthaPDF}
                       >
                         📄 Export PDF
+                      </button>
+                      <button
+                        style={{ ...actionBtnStyle, background: "#f39c12" }}
+                        onClick={handleRenameTable}
+                      >
+                        ✏️ Rename Table
                       </button>
                       <button
                         style={{ ...actionBtnStyle, background: "#c0392b" }}
