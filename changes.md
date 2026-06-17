@@ -1,4 +1,5 @@
 17-06-2026
+- Fixed "Restore Tables" JSON import logic in `SettingsPage.jsx` (`handleRestoreData`) to detect single-table JSON files containing location metadata/rows (and wrap them reactively under their original filename) instead of treating the `"rows"` and `"location"` keys as separate profiles.
 - Added a "Rename Table" button in the results action panel of both the Panchanga and Muhurtha tabs in `PanchangaPage.jsx`, allowing users to rename already saved tables with overwrite warnings and automatic dropdown lists/form states updates.
 - Integrated custom user-extracted `public/static/masa.json` data, converting the custom keys (`Masa_Name`, `Start_Date`, `End_Date`) and IST-formatted timestamps to standard UTC ISO strings (`masa`, `start`, `end`) for seamless timezone-independent client formatting. Corrected Pausha to Pushya naming.
 - Made the 'Place' and 'Tarabalam & Chandra Balam (optional)' sections in the Panchanga search tab and page collapsible by default using `<details>` wrappers.

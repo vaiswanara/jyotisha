@@ -751,6 +751,14 @@ export function SettingsPage({ logoUrl, onNavigate }) {
             }
           }
           incoming = clean;
+        } else if (storageKey === "panchanga_profiles") {
+          // Check if it's a single profile export containing rows and location, or just raw array of rows
+          if (parsed && (Array.isArray(parsed) || (parsed.rows && Array.isArray(parsed.rows)))) {
+            const profileName = file.name.replace(/\.[^/.]+$/, "") || "Restored Table";
+            incoming = {
+              [profileName]: Array.isArray(parsed) ? { rows: parsed, location: {} } : parsed
+            };
+          }
         }
         const existingData = JSON.parse(
           localStorage.getItem(storageKey) || "{}",
