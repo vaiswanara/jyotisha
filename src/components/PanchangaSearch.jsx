@@ -122,6 +122,8 @@ export default function PanchangaSearch() {
   const [isPanShudhiActive, setIsPanShudhiActive] = useState(false);
   const [selectedRows, setSelectedRows] = useState(new Set());
   const [isAllSelected, setIsAllSelected] = useState(false);
+  const [showLunarMonthsModal, setShowLunarMonthsModal] = useState(false);
+  const [lunarMonthsData, setLunarMonthsData] = useState([]);
 
   const csvRef = useRef(null);
 
@@ -338,6 +340,51 @@ export default function PanchangaSearch() {
     } catch (error) {
       console.error("Calculation Error: ", error);
       alert("Failed to calculate. " + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatUtcInTimezone = (utcStr, tzOffsetHours) => {
+    const d = new Date(utcStr);
+    if (isNaN(d.getTime())) return "";
+    const utcMs = d.getTime();
+    const targetMs = utcMs + parseFloat(tzOffsetHours || 0) * 3600000;
+    const targetDate = new Date(targetMs);
+    const pad = (n) => n.toString().padStart(2, "0");
+    const day = pad(targetDate.getUTCDate());
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const month = months[targetDate.getUTCMonth()];
+    const year = targetDate.getUTCFullYear();
+    let hr = targetDate.getUTCHours();
+    const ampm = hr >= 12 ? "PM" : "AM";
+    hr = hr % 12 || 12;
+    const min = pad(targetDate.getUTCMinutes());
+    return `${day}-${month}-${year} ${pad(hr)}:${min} ${ampm}`;
+  };
+
+  const fetchLunarMonths = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${import.meta.env.BASE_URL}static/masa.json`);
+      if (!res.ok) throw new Error("Failed to load masa.json");
+      const allMonths = await res.json();
+      
+      const selectedDate = formData.date || new Date().toISOString().split("T")[0];
+      const chosen = new Date(selectedDate);
+      
+      const futureMonths = allMonths.filter((m) => new Date(m.end) > chosen);
+      const next12 = futureMonths.slice(0, 12).map((m) => ({
+        masa: m.masa,
+        startDate: formatUtcInTimezone(m.start, formData.timezone),
+        endDate: formatUtcInTimezone(m.end, formData.timezone),
+      }));
+
+      setLunarMonthsData(next12);
+      setShowLunarMonthsModal(true);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load lunar months: " + err.message);
     } finally {
       setIsLoading(false);
     }
@@ -957,6 +1004,8 @@ export default function PanchangaSearch() {
             marginTop: "25px",
             display: "flex",
             justifyContent: "center",
+            gap: "15px",
+            flexWrap: "wrap",
           }}
         >
           <button
@@ -977,6 +1026,23 @@ export default function PanchangaSearch() {
             {isLoading
               ? t("calculating", "Calculating...")
               : t("calcPanchanga", "Calculate Panchanga")}
+          </button>
+
+          <button
+            onClick={fetchLunarMonths}
+            disabled={isLoading}
+            style={{
+              padding: "12px 30px",
+              background: "#27ae60",
+              color: "#fff",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontSize: "1.1rem",
+              fontWeight: "bold",
+            }}
+          >
+            📅 {t("maasa", "Maasa")}
           </button>
         </div>
       </div>
@@ -1237,6 +1303,92 @@ export default function PanchangaSearch() {
             {/* Display location details below the generated table */}
             <div style={{ padding: "10px 15px", fontSize: "11px", color: "#7f8c8d", fontStyle: "italic", borderTop: "1px solid #eee", textAlign: "left" }}>
               Location: <strong>{formData.city || "N/A"}</strong> (Lat: {formData.latitude || "N/A"}, Lon: {formData.longitude || "N/A"}, TZ: {formData.timezone || "N/A"})
+            </div>
+          </div>
+        )}
+
+        {showLunarMonthsModal && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              background: "rgba(0,0,0,0.6)",
+              zIndex: 10002,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backdropFilter: "blur(3px)",
+            }}
+            onClick={() => setShowLunarMonthsModal(false)}
+          >
+            <div
+              style={{
+                background: "#fff",
+                padding: "25px 30px",
+                borderRadius: "12px",
+                maxWidth: "700px",
+                width: "95%",
+                maxHeight: "85vh",
+                overflowY: "auto",
+                boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  borderBottom: "2px solid #8e44ad",
+                  paddingBottom: "10px",
+                  marginBottom: "15px",
+                }}
+              >
+                <h3 style={{ margin: 0, color: "#8e44ad" }}>
+                  🌙 12 Lunar Months (Maasa) Names & Dates
+                </h3>
+                <button
+                  onClick={() => setShowLunarMonthsModal(false)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    fontSize: "24px",
+                    cursor: "pointer",
+                    color: "#c0392b",
+                    fontWeight: "bold",
+                  }}
+                >
+                  &times;
+                </button>
+              </div>
+              
+              <p style={{ fontSize: "14px", color: "#666", marginBottom: "15px" }}>
+                The next 12 lunar months starting from the selected date:
+              </p>
+
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13.5px" }}>
+                <thead>
+                  <tr style={{ background: "#f8f9fa" }}>
+                    <th style={{ border: "1px solid #ddd", padding: "10px", textAlign: "left", color: "#8e44ad" }}>#</th>
+                    <th style={{ border: "1px solid #ddd", padding: "10px", textAlign: "left", color: "#8e44ad" }}>Maasa Name</th>
+                    <th style={{ border: "1px solid #ddd", padding: "10px", textAlign: "left", color: "#8e44ad" }}>Start Date & Time</th>
+                    <th style={{ border: "1px solid #ddd", padding: "10px", textAlign: "left", color: "#8e44ad" }}>End Date & Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lunarMonthsData.map((item, idx) => (
+                    <tr key={idx} style={{ background: idx % 2 === 0 ? "#fff" : "#fafafa" }}>
+                      <td style={{ border: "1px solid #ddd", padding: "10px" }}>{idx + 1}</td>
+                      <td style={{ border: "1px solid #ddd", padding: "10px", fontWeight: "bold", color: "#2c3e50" }}>{item.masa}</td>
+                      <td style={{ border: "1px solid #ddd", padding: "10px" }}>{item.startDate}</td>
+                      <td style={{ border: "1px solid #ddd", padding: "10px" }}>{item.endDate}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
