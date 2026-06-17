@@ -1,4 +1,5 @@
 17-06-2026
+- Increased the maximum number of days for Panchanga calculations from 30 to 50 days in both `PanchangaSearch.jsx` and `PanchangaPage.jsx`.
 - Added location details (place, longitude, latitude, and timezone) under the search results table in both Panchanga tab and `PanchangaSearch.jsx`.
 - Swapped chart footers in the Muhurtha tab: D1 chart displays saved location details (at a smaller font size of 11px) and D9 chart displays the Ayanamsha name.
 - Synchronized Muhurtha D1/D9 chart calculation coordinates with the loaded profile's saved location rather than the currently entered form coordinates.

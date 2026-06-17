@@ -228,8 +228,8 @@ export default function PanchangaSearch() {
       return;
     }
 
-    if (formData.days > 30) {
-      alert("Please select 30 days or less!");
+    if (formData.days > 50) {
+      alert("Please select 50 days or less!");
       return;
     }
 
