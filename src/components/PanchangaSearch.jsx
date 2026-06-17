@@ -686,21 +686,6 @@ export default function PanchangaSearch() {
           }}
         >
           <div>
-            <div className="input-group">
-              <LocationAutocomplete
-                city={formData.city}
-                onLocationSelect={(locData) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    city: locData.city,
-                    latitude: locData.latitude,
-                    longitude: locData.longitude,
-                    timezone: locData.timezone,
-                  }));
-                }}
-              />
-            </div>
-
             <details
               style={{
                 fontSize: "14px",
@@ -708,104 +693,148 @@ export default function PanchangaSearch() {
                 padding: "15px",
                 borderRadius: "8px",
                 border: "1px solid #eee",
-                marginTop: "15px",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
               }}
             >
               <summary
                 style={{
                   cursor: "pointer",
-                  color: "#3498db",
+                  color: "#2c3e50",
                   fontWeight: "bold",
+                  fontSize: "14.5px",
                   outline: "none",
                   listStyle: "none",
-                }}
-              >
-                {t("manualCoordsExt", "Manual Coordinates (Lat / Lon / Tz)")}
-              </summary>
-              <div
-                style={{
                   display: "flex",
-                  gap: "15px",
-                  marginTop: "15px",
-                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: "6px"
                 }}
               >
-                <div
-                  className="input-group"
-                  style={{ flex: 1, minWidth: "80px", marginBottom: "0" }}
-                >
-                  <label>{t("lat", "Lat")}:</label>
-                  <input
-                    type="text"
-                    name="latitude"
-                    value={formData.latitude}
-                    onChange={handleInputChange}
-                    style={{ width: "100%", padding: "8px" }}
+                📍 {t("place", "Place")} ({formData.city || "Not Selected"})
+              </summary>
+              <div style={{ marginTop: "15px" }}>
+                <div className="input-group">
+                  <LocationAutocomplete
+                    city={formData.city}
+                    onLocationSelect={(locData) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        city: locData.city,
+                        latitude: locData.latitude,
+                        longitude: locData.longitude,
+                        timezone: locData.timezone,
+                      }));
+                    }}
                   />
                 </div>
-                <div
-                  className="input-group"
-                  style={{ flex: 1, minWidth: "80px", marginBottom: "0" }}
+
+                <details
+                  style={{
+                    fontSize: "14px",
+                    background: "#fdfefe",
+                    padding: "15px",
+                    borderRadius: "8px",
+                    border: "1px solid #eee",
+                    marginTop: "15px",
+                  }}
                 >
-                  <label>{t("lon", "Lon")}:</label>
-                  <input
-                    type="text"
-                    name="longitude"
-                    value={formData.longitude}
-                    onChange={handleInputChange}
-                    style={{ width: "100%", padding: "8px" }}
-                  />
-                </div>
-                <div
-                  className="input-group"
-                  style={{ flex: 1, minWidth: "80px", marginBottom: "0" }}
-                >
-                  <label>{t("tz", "Tz")}:</label>
-                  <input
-                    type="text"
-                    name="timezone"
-                    value={formData.timezone}
-                    onChange={handleInputChange}
-                    style={{ width: "100%", padding: "8px" }}
-                  />
-                </div>
+                  <summary
+                    style={{
+                      cursor: "pointer",
+                      color: "#3498db",
+                      fontWeight: "bold",
+                      outline: "none",
+                      listStyle: "none",
+                    }}
+                  >
+                    {t("manualCoordsExt", "Manual Coordinates (Lat / Lon / Tz)")}
+                  </summary>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "15px",
+                      marginTop: "15px",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <div
+                      className="input-group"
+                      style={{ flex: 1, minWidth: "80px", marginBottom: "0" }}
+                    >
+                      <label>{t("lat", "Lat")}:</label>
+                      <input
+                        type="text"
+                        name="latitude"
+                        value={formData.latitude}
+                        onChange={handleInputChange}
+                        style={{ width: "100%", padding: "8px" }}
+                      />
+                    </div>
+                    <div
+                      className="input-group"
+                      style={{ flex: 1, minWidth: "80px", marginBottom: "0" }}
+                    >
+                      <label>{t("lon", "Lon")}:</label>
+                      <input
+                        type="text"
+                        name="longitude"
+                        value={formData.longitude}
+                        onChange={handleInputChange}
+                        style={{ width: "100%", padding: "8px" }}
+                      />
+                    </div>
+                    <div
+                      className="input-group"
+                      style={{ flex: 1, minWidth: "80px", marginBottom: "0" }}
+                    >
+                      <label>{t("tz", "Tz")}:</label>
+                      <input
+                        type="text"
+                        name="timezone"
+                        value={formData.timezone}
+                        onChange={handleInputChange}
+                        style={{ width: "100%", padding: "8px" }}
+                      />
+                    </div>
+                  </div>
+                </details>
               </div>
             </details>
           </div>
 
           <div>
-            <div
+            <details
               style={{
                 padding: "20px",
                 borderRadius: "8px",
                 height: "100%",
                 boxSizing: "border-box",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
                 background: "#fffcf9",
                 borderLeft: "4px solid #f39c12",
                 borderTop: "1px solid #eee",
                 borderRight: "1px solid #eee",
                 borderBottom: "1px solid #eee",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
               }}
             >
-              <label
+              <summary
                 style={{
                   fontWeight: "bold",
                   color: "#2c3e50",
                   fontSize: "14.5px",
-                  marginBottom: "15px",
-                  display: "block",
-                  marginTop: "0",
+                  cursor: "pointer",
+                  outline: "none",
+                  listStyle: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px"
                 }}
               >
-                {t("tarabalamOptional", "Tarabalam & Chandra Balam (Optional)")}
-                :
-              </label>
+                ✨ {t("tarabalamOptional", "Tarabalam & Chandra Balam (Optional)")}
+              </summary>
 
               <div
                 style={{
+                  marginTop: "15px",
                   display: "grid",
                   gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
                   gap: "15px",
@@ -919,7 +948,7 @@ export default function PanchangaSearch() {
                   )}
                 </div>
               </div>
-            </div>
+            </details>
           </div>
         </div>
 

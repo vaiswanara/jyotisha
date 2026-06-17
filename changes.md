@@ -1,4 +1,5 @@
 17-06-2026
+- Made the 'Place' and 'Tarabalam & Chandra Balam (optional)' sections in the Panchanga search tab collapsible by default using `<details>` wrappers.
 - Standardized and normalized all 22 calculated columns in both `PanchangaSearch.jsx` and `PanchangaPage.jsx` using `normalizeRow` and `normalizeMuhurthaRow` functions to map both space-separated and underscore-separated keys.
 - Resolved column alignment shifting in the Panchanga search results table in `PanchangaPage.jsx` by using a unified static `visibleKeys` list.
 - Configured CSV export functions (`exportCSV`, `exportPanchangaCSV`, `exportMuhurthaCSV`) to export all 22 calculated columns.
