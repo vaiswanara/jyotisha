@@ -108,6 +108,83 @@ const RASI_NAMES = [
   "Kumbha",
   "Meena",
 ];
+
+const PANCHANGA_ALL_COLUMNS = [
+  "Date",
+  "Asthg",
+  "Maasa",
+  "Tithi",
+  "Tithi End",
+  "Vaara",
+  "Nakshatra",
+  "Nakshatra End",
+  "Yoga",
+  "Yoga End",
+  "Karana",
+  "Karana End",
+  "Rahu Kalam",
+  "Sunrise",
+  "Moon Rasi",
+  "Durmuhurtham",
+  "Yamagandam",
+  "Varjyam",
+  "Girl Tarabalam",
+  "Girl Chandra Balam",
+  "Boy Tarabalam",
+  "Boy Chandra Balam"
+];
+
+function normalizeRow(row) {
+  if (!row) return row;
+  const norm = {};
+  PANCHANGA_ALL_COLUMNS.forEach((col) => {
+    const spaceKey = col;
+    const underscoreKey = col.replace(/ /g, "_");
+    let val = "";
+    if (row[spaceKey] !== undefined && row[spaceKey] !== null) {
+      val = String(row[spaceKey]);
+    } else if (row[underscoreKey] !== undefined && row[underscoreKey] !== null) {
+      val = String(row[underscoreKey]);
+    }
+    norm[spaceKey] = val;
+    norm[underscoreKey] = val;
+  });
+  Object.keys(row).forEach((k) => {
+    if (k.endsWith("_is_good")) {
+      norm[k] = row[k];
+    }
+  });
+  return norm;
+}
+
+function normalizeMuhurthaRow(row) {
+  if (!row) return row;
+  const norm = {};
+  norm["Priority"] = row["Priority"] !== undefined && row["Priority"] !== null ? String(row["Priority"]) : "";
+  norm["Muhurtha_Notes"] = row["Muhurtha_Notes"] !== undefined && row["Muhurtha_Notes"] !== null 
+    ? String(row["Muhurtha_Notes"]) 
+    : (row["Muhurtha Notes"] !== undefined && row["Muhurtha Notes"] !== null ? String(row["Muhurtha Notes"]) : "");
+  norm["Muhurtha Notes"] = norm["Muhurtha_Notes"];
+
+  PANCHANGA_ALL_COLUMNS.forEach((col) => {
+    const spaceKey = col;
+    const underscoreKey = col.replace(/ /g, "_");
+    let val = "";
+    if (row[spaceKey] !== undefined && row[spaceKey] !== null) {
+      val = String(row[spaceKey]);
+    } else if (row[underscoreKey] !== undefined && row[underscoreKey] !== null) {
+      val = String(row[underscoreKey]);
+    }
+    norm[spaceKey] = val;
+    norm[underscoreKey] = val;
+  });
+  Object.keys(row).forEach((k) => {
+    if (k.endsWith("_is_good")) {
+      norm[k] = row[k];
+    }
+  });
+  return norm;
+}
 const NAK_TO_RASI = {
   0: [0],
   1: [0],
@@ -183,6 +260,10 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
   const [isPanShudhiActive, setIsPanShudhiActive] = useState(false);
   const [selectedRows, setSelectedRows] = useState(new Set());
   const [displayColumns, setDisplayColumns] = useState([]);
+
+  const visibleKeys = displayColumns
+    .map((k) => k.replace(/_/g, " "))
+    .filter((k) => PANCHANGA_ALL_COLUMNS.includes(k));
 
   // Muhurtha States
   const [savedProfilesList, setSavedProfilesList] = useState([]);
@@ -343,10 +424,10 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
       const data = savedProfiles[loadProfileName];
       const rows = Array.isArray(data) ? data : data.rows || [];
       const prefs = syncPreferences();
-
       evaluatePanShudhiFlags(rows, prefs);
-      setResultData(rows);
-      setOriginalData(JSON.parse(JSON.stringify(rows)));
+      const normalizedRows = rows.map(normalizeRow);
+      setResultData(normalizedRows);
+      setOriginalData(JSON.parse(JSON.stringify(normalizedRows)));
       setIsPanShudhiActive(false);
       setSelectedRows(new Set());
 
@@ -389,14 +470,14 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
         row.Yoga_is_good = isGood(row.Yoga, prefs.yoga);
       if (row.Karana !== undefined)
         row.Karana_is_good = isGood(row.Karana, prefs.karana);
-      if (row["Boy Tarabalam"])
-        row.Boy_Tarabalam_is_good = isGood(
-          row["Boy Tarabalam"],
-          prefs.tarabalam,
-        );
       if (row["Girl Tarabalam"])
         row.Girl_Tarabalam_is_good = isGood(
           row["Girl Tarabalam"],
+          prefs.tarabalam,
+        );
+      if (row["Boy Tarabalam"])
+        row.Boy_Tarabalam_is_good = isGood(
+          row["Boy Tarabalam"],
           prefs.tarabalam,
         );
     });
@@ -469,13 +550,14 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
         return;
       }
 
-      const prefs = syncPreferences();
-      evaluatePanShudhiFlags(data, prefs);
+      const syncPrefs = syncPreferences();
+      evaluatePanShudhiFlags(data, syncPrefs);
+      const normalizedData = data.map(normalizeRow);
 
       // భవిష్యత్తు కోసం రిజల్ట్ ని క్యాచ్ లో సేవ్ చేయడం
-      cacheRef.current[cacheKey] = data;
-      setResultData(data);
-      setOriginalData(JSON.parse(JSON.stringify(data)));
+      cacheRef.current[cacheKey] = normalizedData;
+      setResultData(normalizedData);
+      setOriginalData(JSON.parse(JSON.stringify(normalizedData)));
       setIsPanShudhiActive(false);
       setSelectedRows(new Set());
     } catch (err) {
@@ -593,11 +675,11 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
   const exportPanchangaCSV = () => {
     if (resultData.length === 0) return;
     const csvRows = [
-      displayColumns.map((c) => `"${c.replace(/_/g, " ")}"`).join(","),
+      PANCHANGA_ALL_COLUMNS.map((h) => `"${h}"`).join(","),
     ];
     resultData.forEach((row) => {
-      const values = displayColumns.map((col) => {
-        let dataKey = row.hasOwnProperty(col) ? col : col.replace(/ /g, "_");
+      const values = PANCHANGA_ALL_COLUMNS.map((header) => {
+        let dataKey = row.hasOwnProperty(header) ? header : header.replace(/ /g, "_");
         return `"${(row[dataKey] !== undefined ? String(row[dataKey]) : "").replace(/"/g, '""')}"`;
       });
       csvRows.push(values.join(","));
@@ -645,7 +727,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
             let added = 0;
             parsedData.forEach((row) => {
               if (!merged.some((r) => r.Date === row.Date)) {
-                merged.push(row);
+                merged.push(normalizeRow(row));
                 added++;
               }
             });
@@ -656,8 +738,9 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
             setSelectedRows(new Set());
             alert(`Merged ${added} records from CSV successfully!`);
           } else {
-            setResultData(parsedData);
-            setOriginalData(parsedData);
+            const normalizedParsed = parsedData.map(normalizeRow);
+            setResultData(normalizedParsed);
+            setOriginalData(normalizedParsed);
             setIsPanShudhiActive(false);
             setSelectedRows(new Set());
             alert("CSV Imported Successfully!");
@@ -668,7 +751,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
             let added = 0;
             parsedData.forEach((row) => {
               if (!merged.some((r) => r.Date === row.Date)) {
-                merged.push(row);
+                merged.push(normalizeMuhurthaRow(row));
                 added++;
               }
             });
@@ -685,7 +768,8 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
             }
             alert(`Merged ${added} records from CSV into Muhurtha Table!`);
           } else {
-            setMuhurthaData(parsedData);
+            const normalizedParsed = parsedData.map(normalizeMuhurthaRow);
+            setMuhurthaData(normalizedParsed);
             setMuhurthaSelectedRows(new Set());
             alert("CSV Imported Successfully into Muhurtha Table!");
           }
@@ -733,8 +817,9 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
 
     const prefs = syncPreferences();
     evaluatePanShudhiFlags(rows, prefs);
+    const normalizedRows = rows.map(normalizeMuhurthaRow);
 
-    setMuhurthaData(rows);
+    setMuhurthaData(normalizedRows);
     setMuhurthaSelectedRows(new Set());
     setChartDateSelect("");
     setChartSelectedInfo(null);
@@ -759,12 +844,13 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
     });
 
     existingData.sort((a, b) => new Date(a.Date) - new Date(b.Date));
-    setMuhurthaData(existingData);
+    const normalizedMerged = existingData.map(normalizeMuhurthaRow);
+    setMuhurthaData(normalizedMerged);
 
     if (Array.isArray(saved[selectedProfileName])) {
-      saved[selectedProfileName] = existingData;
+      saved[selectedProfileName] = normalizedMerged;
     } else {
-      saved[selectedProfileName].rows = existingData;
+      saved[selectedProfileName].rows = normalizedMerged;
     }
     localStorage.setItem("panchanga_profiles", JSON.stringify(saved));
     setMuhurthaSelectedRows(new Set());
@@ -1041,16 +1127,16 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
   const exportMuhurthaCSV = () => {
     if (!selectedProfileName || muhurthaSelectedRows.size === 0)
       return alert("Select a profile and at least one row!");
-    const prefs = JSON.parse(localStorage.getItem("eclock_prefs") || "{}");
-    const exportCols = prefs.export_columns || muhurthaColumns;
     const indices = Array.from(muhurthaSelectedRows).sort(
       (a, b) =>
         (parseInt(muhurthaData[a]["Priority"]) || 99) -
         (parseInt(muhurthaData[b]["Priority"]) || 99),
     );
 
+    const exportCols = ["Priority", ...PANCHANGA_ALL_COLUMNS, "Muhurtha Notes"];
+
     const csvRows = [
-      exportCols.map((c) => `"${c.replace(/_/g, " ")}"`).join(","),
+      exportCols.map((c) => `"${c}"`).join(","),
     ];
     indices.forEach((idx) => {
       const row = muhurthaData[idx];
@@ -1948,31 +2034,15 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                               }}
                             />
                           </th>
-                          {displayColumns
-                            .map((k) => k.replace(/_/g, " "))
-                            .filter(
-                              (k) =>
-                                Object.keys(resultData[0]).includes(k) ||
-                                Object.keys(resultData[0]).includes(
-                                  k.replace(/ /g, "_"),
-                                ),
-                            )
-                            .map((header, i) => (
-                              <th key={i} style={{ whiteSpace: "nowrap" }}>
-                                {header}
-                              </th>
-                            ))}
+                          {visibleKeys.map((header, i) => (
+                            <th key={i} style={{ whiteSpace: "nowrap" }}>
+                              {header}
+                            </th>
+                          ))}
                         </tr>
                       </thead>
                       <tbody>
                         {resultData.map((row, rIndex) => {
-                          const keys = displayColumns
-                            .map((k) => k.replace(/_/g, " "))
-                            .filter(
-                              (k) =>
-                                Object.keys(row).includes(k) ||
-                                Object.keys(row).includes(k.replace(/ /g, "_")),
-                            );
                           return (
                             <tr
                               key={rIndex}
@@ -1993,7 +2063,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                   }}
                                 />
                               </td>
-                              {keys.map((k, cIndex) => {
+                              {visibleKeys.map((k, cIndex) => {
                                 let dataKey = row.hasOwnProperty(k)
                                   ? k
                                   : k.replace(/ /g, "_");

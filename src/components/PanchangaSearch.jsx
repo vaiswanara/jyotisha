@@ -34,6 +34,54 @@ const NAKSHATRAS = [
   "Revati",
 ];
 
+const PANCHANGA_ALL_COLUMNS = [
+  "Date",
+  "Asthg",
+  "Maasa",
+  "Tithi",
+  "Tithi End",
+  "Vaara",
+  "Nakshatra",
+  "Nakshatra End",
+  "Yoga",
+  "Yoga End",
+  "Karana",
+  "Karana End",
+  "Rahu Kalam",
+  "Sunrise",
+  "Moon Rasi",
+  "Durmuhurtham",
+  "Yamagandam",
+  "Varjyam",
+  "Girl Tarabalam",
+  "Girl Chandra Balam",
+  "Boy Tarabalam",
+  "Boy Chandra Balam"
+];
+
+function normalizeRow(row) {
+  if (!row) return row;
+  const norm = {};
+  PANCHANGA_ALL_COLUMNS.forEach((col) => {
+    const spaceKey = col;
+    const underscoreKey = col.replace(/ /g, "_");
+    let val = "";
+    if (row[spaceKey] !== undefined && row[spaceKey] !== null) {
+      val = String(row[spaceKey]);
+    } else if (row[underscoreKey] !== undefined && row[underscoreKey] !== null) {
+      val = String(row[underscoreKey]);
+    }
+    norm[spaceKey] = val;
+    norm[underscoreKey] = val;
+  });
+  Object.keys(row).forEach((k) => {
+    if (k.endsWith("_is_good")) {
+      norm[k] = row[k];
+    }
+  });
+  return norm;
+}
+
 function getDefaultLocation() {
   try {
     const savedLoc = JSON.parse(
@@ -281,8 +329,9 @@ export default function PanchangaSearch() {
         console.warn("Could not parse eclock_prefs", e);
       }
       data = evaluatePanShudhiFlags(data, loadedPrefs);
-      setOriginalResults(data);
-      setResults(data);
+      const normalizedData = data.map(normalizeRow);
+      setOriginalResults(normalizedData);
+      setResults(normalizedData);
       setIsPanShudhiActive(false);
       setSelectedRows(new Set());
       setIsAllSelected(false);
@@ -433,9 +482,9 @@ export default function PanchangaSearch() {
 
   const exportCSV = () => {
     if (!results.length) return;
-    const csvRows = [keys.map((h) => `"${h}"`).join(",")];
+    const csvRows = [PANCHANGA_ALL_COLUMNS.map((h) => `"${h}"`).join(",")];
     results.forEach((row) => {
-      const values = keys.map((header) => {
+      const values = PANCHANGA_ALL_COLUMNS.map((header) => {
         let dataKey = Object.prototype.hasOwnProperty.call(row, header)
           ? header
           : header.replace(/ /g, "_");
@@ -490,7 +539,7 @@ export default function PanchangaSearch() {
           let added = 0;
           parsedData.forEach((row) => {
             if (!merged.some((r) => r.Date === row.Date)) {
-              merged.push(row);
+              merged.push(normalizeRow(row));
               added++;
             }
           });
@@ -502,8 +551,9 @@ export default function PanchangaSearch() {
           setIsAllSelected(false);
           alert(`Merged ${added} records from CSV successfully!`);
         } else {
-          setResults(parsedData);
-          setOriginalResults(parsedData);
+          const normalizedParsed = parsedData.map(normalizeRow);
+          setResults(normalizedParsed);
+          setOriginalResults(normalizedParsed);
           setIsPanShudhiActive(false);
           setSelectedRows(new Set());
           setIsAllSelected(false);
