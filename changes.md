@@ -1,5 +1,5 @@
 17-06-2026
-- Reordered default Panchanga active and master columns in `preferences.json`, `SettingsPage.jsx`, and `PanchangaSearch.jsx` as requested by the user.
+- Reordered default active and master columns in `preferences.json` and `SettingsPage.jsx`, and enforced strict column sorting in `PanchangaSearch.jsx` and `PanchangaPage.jsx` based on this order to bypass browser local storage caches.
 - Added a `maxHeight: "450px"` scroll wrapper to the Panchanga search results table in both `PanchangaSearch.jsx` and `PanchangaPage.jsx` to display approximately 10 rows by default and allow scrolling.
 - Configured max Panchanga days limit validation as a dynamic Vite environment variable `VITE_MAX_PANCHANGA_DAYS` inside `.env`.
 - Added location details (place, longitude, latitude, and timezone) under the search results table in both Panchanga tab and `PanchangaSearch.jsx`.

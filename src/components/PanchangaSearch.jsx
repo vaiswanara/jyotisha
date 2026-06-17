@@ -518,42 +518,41 @@ export default function PanchangaSearch() {
     reader.readAsText(file);
   };
 
-  const desiredOrder =
-    prefs?.panchanga_columns?.length > 0
-      ? prefs.panchanga_columns
-      : [
-          "Date",
-          "Asthg",
-          "Maasa",
-          "Tithi",
-          "Tithi End",
-          "Vaara",
-          "Nakshatra",
-          "Nakshatra End",
-          "Yoga",
-          "Yoga End",
-          "Karana",
-          "Karana End",
-          "Rahu Kalam",
-          "Sunrise",
-          "Moon Rasi",
-          "Durmuhurtham",
-          "Yamagandam",
-          "Varjyam",
-          "Girl Tarabalam",
-          "Girl Chandra Balam",
-          "Boy Tarabalam",
-          "Boy Chandra Balam",
-        ];
+  const desiredOrder = [
+    "Date",
+    "Asthg",
+    "Maasa",
+    "Tithi",
+    "Tithi End",
+    "Vaara",
+    "Nakshatra",
+    "Nakshatra End",
+    "Yoga",
+    "Yoga End",
+    "Karana",
+    "Karana End",
+    "Rahu Kalam",
+    "Sunrise",
+    "Moon Rasi",
+    "Durmuhurtham",
+    "Yamagandam",
+    "Varjyam",
+    "Girl Tarabalam",
+    "Girl Chandra Balam",
+    "Boy Tarabalam",
+    "Boy Chandra Balam",
+  ];
 
   const availableKeys = results.length > 0 ? Object.keys(results[0]) : [];
-  const keys = desiredOrder
-    .map((k) => k.replace(/_/g, " "))
-    .filter(
-      (k) =>
-        availableKeys.includes(k) ||
-        availableKeys.includes(k.replace(/ /g, "_")),
-    );
+  const activeColumns = prefs?.panchanga_columns?.length > 0
+    ? prefs.panchanga_columns.map((c) => c.replace(/_/g, " "))
+    : desiredOrder;
+
+  const keys = desiredOrder.filter((k) => {
+    const hasKey = availableKeys.includes(k) || availableKeys.includes(k.replace(/ /g, "_"));
+    const isActive = activeColumns.includes(k);
+    return hasKey && isActive;
+  });
 
   return (
     <div

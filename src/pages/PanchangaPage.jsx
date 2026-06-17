@@ -250,35 +250,36 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
   const syncPreferences = () => {
     const prefs = JSON.parse(localStorage.getItem("eclock_prefs") || "{}");
 
-    const defaultPanchangaCols = [
+    const desiredOrder = [
       "Date",
-      "Vaara",
       "Asthg",
       "Maasa",
       "Tithi",
       "Tithi_End",
-      "Sunrise",
+      "Vaara",
       "Nakshatra",
       "Nakshatra_End",
-      "Moon_Rasi",
       "Yoga",
       "Yoga_End",
       "Karana",
       "Karana_End",
       "Rahu_Kalam",
-      "Yamagandam",
+      "Sunrise",
+      "Moon_Rasi",
       "Durmuhurtham",
+      "Yamagandam",
       "Varjyam",
-      "Boy_Tarabalam",
-      "Boy_Chandra_Balam",
       "Girl_Tarabalam",
       "Girl_Chandra_Balam",
+      "Boy_Tarabalam",
+      "Boy_Chandra_Balam",
     ];
     const pCols =
       prefs.panchanga_columns && prefs.panchanga_columns.length > 0
         ? prefs.panchanga_columns
-        : defaultPanchangaCols;
-    setDisplayColumns(pCols);
+        : desiredOrder;
+    const sortedCols = desiredOrder.filter((c) => pCols.includes(c));
+    setDisplayColumns(sortedCols);
 
     const defaultMuhurthaCols = [
       "Priority",
