@@ -1,5 +1,5 @@
 17-06-2026
-- Created a static `public/static/masa.json` database of lunar months up to 2030, and integrated a 'Maasa' button and modal inside `PanchangaSearch.jsx` and `PanchangaPage.jsx` to load and display the next 12 lunar months names, start dates, and end dates relative to the selected start date.
+- Created a static, high-precision `public/static/masa.json` database of lunar months from 2026 to 2030 (calculated via Swiss Ephemeris on the python engine to match Amavasya moments and correct Adhika/Nija mappings), and integrated a 'Maasa' button and modal inside `PanchangaSearch.jsx` and `PanchangaPage.jsx` to load and display the next 12 lunar months names, start dates, and end dates relative to the selected start date.
 - Made the 'Place' and 'Tarabalam & Chandra Balam (optional)' sections in the Panchanga search tab and page collapsible by default using `<details>` wrappers.
 - Standardized and normalized all 22 calculated columns in both `PanchangaSearch.jsx` and `PanchangaPage.jsx` using `normalizeRow` and `normalizeMuhurthaRow` functions to map both space-separated and underscore-separated keys.
 - Resolved column alignment shifting in the Panchanga search results table in `PanchangaPage.jsx` by using a unified static `visibleKeys` list.
