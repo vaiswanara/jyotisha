@@ -83,11 +83,116 @@ const normalizeNakshatraForTranslation = (name) => {
   return name;
 };
 
+const SANSKRIT_VAARAS = {
+  te: {
+    Sunday: "భాను",
+    Monday: "సోమ",
+    Tuesday: "మంగళ",
+    Wednesday: "బుధ",
+    Thursday: "గురు",
+    Friday: "శుక్ర",
+    Saturday: "శని",
+    Ravivara: "భాను",
+    Somavara: "సోమ",
+    Mangalavara: "మంగళ",
+    Budhavara: "బుధ",
+    Guruvara: "గురు",
+    Shukravara: "శుక్ర",
+    Shanivara: "శని",
+  },
+  kn: {
+    Sunday: "ಭಾನು",
+    Monday: "ಸೋಮ",
+    Tuesday: "ಮಂಗಳ",
+    Wednesday: "ಬುಧ",
+    Thursday: "ಗುರು",
+    Friday: "ಶುಕ್ರ",
+    Saturday: "ಶನಿ",
+    Ravivara: "ಭಾನು",
+    Somavara: "ಸೋಮ",
+    Mangalavara: "ಮಂಗಳ",
+    Budhavara: "ಬುಧ",
+    Guruvara: "ಗುರು",
+    Shukravara: "ಶುಕ್ರ",
+    Shanivara: "ಶನಿ",
+  },
+  en: {
+    Sunday: "Bhaanu",
+    Monday: "Soma",
+    Tuesday: "Mangala",
+    Wednesday: "Budha",
+    Thursday: "Guru",
+    Friday: "Shukra",
+    Saturday: "Shani",
+    Ravivara: "Bhaanu",
+    Somavara: "Soma",
+    Mangalavara: "Mangala",
+    Budhavara: "Budha",
+    Guruvara: "Guru",
+    Shukravara: "Shukra",
+    Shanivara: "Shani",
+  },
+};
+
+const formatDateStr = (dateStr) => {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-");
+  if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  return dateStr;
+};
+
+const safeSetLocalStorage = (key, value) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {
+    if (e.name === "QuotaExceededError" || e.name === "NS_ERROR_DOM_QUOTA_REACHED") {
+      console.warn("Storage quota exceeded. Pruning old cached charts...");
+      try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith("me_transit_") || k.startsWith("me_natal_"))) {
+            keysToRemove.push(k);
+          }
+        }
+        keysToRemove.forEach((k) => localStorage.removeItem(k));
+        localStorage.setItem(key, value);
+      } catch (retryErr) {
+        console.error("Failed to save to localStorage even after pruning:", retryErr);
+      }
+    } else {
+      console.error("Failed to save to localStorage:", e);
+    }
+  }
+};
+
 export function MePage({ onNavigate }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.split("-")[0] || "en";
   const [meProfile, setMeProfile] = useState(null);
   const [transitChart, setTransitChart] = useState(null);
   const [natalChart, setNatalChart] = useState(null);
+  const [jupiterTransits, setJupiterTransits] = useState([]);
+  const [saturnTransits, setSaturnTransits] = useState([]);
+
+  // Fetch transits on mount
+  useEffect(() => {
+    fetch(`${import.meta.env.BASE_URL}static/jupiter_transits.json`)
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to load jupiter transits");
+      })
+      .then((data) => setJupiterTransits(data))
+      .catch((err) => console.error(err));
+
+    fetch(`${import.meta.env.BASE_URL}static/saturn_transits.json`)
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to load saturn transits");
+      })
+      .then((data) => setSaturnTransits(data))
+      .catch((err) => console.error(err));
+  }, []);
   const [selectedDate, setSelectedDate] = useState(() => {
     const defLoc = JSON.parse(
       localStorage.getItem("vaiswanara_default_location") || "null"
@@ -99,6 +204,19 @@ export function MePage({ onNavigate }) {
     const now = new Date();
     return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
   });
+
+  const handleResetToNow = () => {
+    const defLoc = JSON.parse(
+      localStorage.getItem("vaiswanara_default_location") || "null"
+    );
+    const tz = defLoc?.timezone || 5.5;
+    setSelectedDate(getLocalDateStr(tz));
+    const now = new Date();
+    setSelectedTime(
+      `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+    );
+  };
+
   const [isLoading, setIsLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -199,7 +317,7 @@ export function MePage({ onNavigate }) {
                   ayanamsha: ayanamsha,
                 }).then((res) => {
                   if (res && res.planets) {
-                    localStorage.setItem(natalCacheKey, JSON.stringify(res));
+                    safeSetLocalStorage(natalCacheKey, JSON.stringify(res));
                     setNatalChart(res);
                   }
                 })
@@ -217,7 +335,7 @@ export function MePage({ onNavigate }) {
                   ayanamsha: ayanamsha,
                 }).then((res) => {
                   if (res && res.planets) {
-                    localStorage.setItem(transitCacheKey, JSON.stringify(res));
+                    safeSetLocalStorage(transitCacheKey, JSON.stringify(res));
                     setTransitChart(res);
                   }
                 })
@@ -372,10 +490,72 @@ export function MePage({ onNavigate }) {
     const guruDist = ((transitJupiterRasi - natalMoonRasi + 12) % 12) + 1;
     const isGood = [2, 5, 7, 9, 11].includes(guruDist);
 
+    let transitInfo = "";
+    let nextStableInfo = "";
+
+    const getDurationInDays = (startStr, endStr) => {
+      const s = new Date(startStr);
+      const e = new Date(endStr);
+      const diffTime = Math.abs(e - s);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    };
+
+    if (jupiterTransits && jupiterTransits.length > 0) {
+      const activeRashis = [2, 5, 7, 9, 11].map(
+        (h) => ((natalMoonRasi + h - 2) % 12) + 1
+      );
+
+      const currentSegment = jupiterTransits.find(
+        (t) => selectedDate >= t.start && selectedDate <= t.end
+      );
+
+      if (isGood) {
+        if (currentSegment) {
+          const duration = getDurationInDays(currentSegment.start, currentSegment.end);
+          const isTemp = duration < 90;
+          const formattedEnd = formatDateStr(currentSegment.end);
+
+          if (isTemp) {
+            transitInfo = t("currentTempEnds", { date: formattedEnd });
+            const futureTransits = jupiterTransits.filter((t) => t.start > selectedDate);
+            const nextStableSegment = futureTransits.find(
+              (t) => activeRashis.includes(t.rashi) && getDurationInDays(t.start, t.end) >= 90
+            );
+            if (nextStableSegment) {
+              nextStableInfo = t("nextStableStarts", { date: formatDateStr(nextStableSegment.start) });
+            }
+          } else {
+            transitInfo = t("currentStableEnds", { date: formattedEnd });
+          }
+        }
+      } else {
+        const futureTransits = jupiterTransits.filter((t) => t.start > selectedDate);
+        const nextStableSegment = futureTransits.find(
+          (t) => activeRashis.includes(t.rashi) && getDurationInDays(t.start, t.end) >= 90
+        );
+        const nextTempSegment = futureTransits.find(
+          (t) => activeRashis.includes(t.rashi) && getDurationInDays(t.start, t.end) < 90
+        );
+
+        if (nextTempSegment && (!nextStableSegment || nextTempSegment.start < nextStableSegment.start)) {
+          const tempDuration = getDurationInDays(nextTempSegment.start, nextTempSegment.end);
+          transitInfo = t("nextTempStarts", { date: formatDateStr(nextTempSegment.start), duration: tempDuration });
+          if (nextStableSegment) {
+            nextStableInfo = t("nextStableStarts", { date: formatDateStr(nextStableSegment.start) });
+          }
+        } else if (nextStableSegment) {
+          transitInfo = t("nextStableStarts", { date: formatDateStr(nextStableSegment.start) });
+        }
+      }
+    }
+
     return {
       name: isGood ? t("Guru Balam Present", "Guru Balam Present") : t("No Guru Balam", "No Guru Balam"),
       isGood: isGood,
       desc: t("jupiterInHouse", "Jupiter in House {{house}}", { house: guruDist }),
+      transitInfo: transitInfo,
+      nextStableInfo: nextStableInfo,
     };
   };
 
@@ -408,10 +588,74 @@ export function MePage({ onNavigate }) {
       isGood = "medium";
     }
 
+    let transitInfo = "";
+    let nextStableInfo = "";
+
+    const getDurationInDays = (startStr, endStr) => {
+      const s = new Date(startStr);
+      const e = new Date(endStr);
+      const diffTime = Math.abs(e - s);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    };
+
+    if (saturnTransits && saturnTransits.length > 0) {
+      const activeRashis = [3, 6, 11].map(
+        (h) => ((natalMoonRasi + h - 2) % 12) + 1
+      );
+
+      const currentSegment = saturnTransits.find(
+        (t) => selectedDate >= t.start && selectedDate <= t.end
+      );
+
+      const hasShaniBalam = isGood === true;
+
+      if (hasShaniBalam) {
+        if (currentSegment) {
+          const duration = getDurationInDays(currentSegment.start, currentSegment.end);
+          const isTemp = duration < 90;
+          const formattedEnd = formatDateStr(currentSegment.end);
+
+          if (isTemp) {
+            transitInfo = t("currentTempShaniEnds", { date: formattedEnd });
+            const futureTransits = saturnTransits.filter((t) => t.start > selectedDate);
+            const nextStableSegment = futureTransits.find(
+              (t) => activeRashis.includes(t.rashi) && getDurationInDays(t.start, t.end) >= 90
+            );
+            if (nextStableSegment) {
+              nextStableInfo = t("nextStableShaniStarts", { date: formatDateStr(nextStableSegment.start) });
+            }
+          } else {
+            transitInfo = t("currentStableShaniEnds", { date: formattedEnd });
+          }
+        }
+      } else {
+        const futureTransits = saturnTransits.filter((t) => t.start > selectedDate);
+        const nextStableSegment = futureTransits.find(
+          (t) => activeRashis.includes(t.rashi) && getDurationInDays(t.start, t.end) >= 90
+        );
+        const nextTempSegment = futureTransits.find(
+          (t) => activeRashis.includes(t.rashi) && getDurationInDays(t.start, t.end) < 90
+        );
+
+        if (nextTempSegment && (!nextStableSegment || nextTempSegment.start < nextStableSegment.start)) {
+          const tempDuration = getDurationInDays(nextTempSegment.start, nextTempSegment.end);
+          transitInfo = t("nextTempShaniStarts", { date: formatDateStr(nextTempSegment.start), duration: tempDuration });
+          if (nextStableSegment) {
+            nextStableInfo = t("nextStableShaniStarts", { date: formatDateStr(nextStableSegment.start) });
+          }
+        } else if (nextStableSegment) {
+          transitInfo = t("nextStableShaniStarts", { date: formatDateStr(nextStableSegment.start) });
+        }
+      }
+    }
+
     return {
       name: t(statusKey, statusDefault),
       isGood: isGood,
       desc: t("saturnInHouse", "Saturn in House {{house}}", { house: shaniDist }),
+      transitInfo: transitInfo,
+      nextStableInfo: nextStableInfo,
     };
   };
 
@@ -736,6 +980,26 @@ export function MePage({ onNavigate }) {
                 onChange={(e) => setSelectedTime(e.target.value)}
                 style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #ccc", outline: "none", fontSize: "0.9rem", minWidth: "90px" }}
               />
+              <button
+                onClick={handleResetToNow}
+                title={t("resetToNow", "Reset to Current Time")}
+                style={{
+                  width: "37px",
+                  height: "37px",
+                  border: "none",
+                  background: "transparent",
+                  color: "#2d3436",
+                  fontSize: "1.65rem",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxSizing: "border-box",
+                  padding: 0,
+                }}
+              >
+                🔄
+              </button>
             </div>
 
             {/* Single Line Panchanga Banner */}
@@ -764,6 +1028,7 @@ export function MePage({ onNavigate }) {
                     }}
                   >
                     {parseAndLocalizeTithiRealtime(transitChart.panchanga.tithi, transitChart.panchanga.paksha) || t("tithi", "Tithi")} •{" "}
+                    {transitChart.panchanga.vaara || transitChart.panchanga.vara ? `${(SANSKRIT_VAARAS[lang] || SANSKRIT_VAARAS.en)[transitChart.panchanga.vaara || transitChart.panchanga.vara] || (transitChart.panchanga.vaara || transitChart.panchanga.vara)} • ` : ""}
                     {t(normalizeNakshatraForTranslation(transitChart.panchanga.moon_nakshatra || transitChart.planets?.Moon?.nakshatra))}{" "}
                     • {t(transitChart.panchanga.yoga)} • {t(transitChart.panchanga.karana)}
                   </div>
@@ -805,14 +1070,7 @@ export function MePage({ onNavigate }) {
             )}
 
             {/* Balams Grid */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-                gap: "15px",
-                width: "100%",
-              }}
-            >
+            <div className="balams-grid">
               {/* Tarabalam Card */}
               {tarabalam && (
                 <div style={cardStyle(tarabalam.isGood)}>
@@ -873,6 +1131,16 @@ export function MePage({ onNavigate }) {
                   <div style={{ fontSize: "11px", color: "#7f8c8d" }}>
                     {guruBalam.desc}
                   </div>
+                  {guruBalam.transitInfo && (
+                    <div style={{ fontSize: "11px", color: "#8e44ad", fontWeight: "bold", marginTop: "4px" }}>
+                      {guruBalam.transitInfo}
+                    </div>
+                  )}
+                  {guruBalam.nextStableInfo && (
+                    <div style={{ fontSize: "11px", color: "#8e44ad", fontWeight: "bold", marginTop: "4px" }}>
+                      {guruBalam.nextStableInfo}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -899,6 +1167,16 @@ export function MePage({ onNavigate }) {
                   <div style={{ fontSize: "11px", color: "#7f8c8d" }}>
                     {shaniBalam.desc}
                   </div>
+                  {shaniBalam.transitInfo && (
+                    <div style={{ fontSize: "11px", color: "#8e44ad", fontWeight: "bold", marginTop: "4px" }}>
+                      {shaniBalam.transitInfo}
+                    </div>
+                  )}
+                  {shaniBalam.nextStableInfo && (
+                    <div style={{ fontSize: "11px", color: "#8e44ad", fontWeight: "bold", marginTop: "4px" }}>
+                      {shaniBalam.nextStableInfo}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

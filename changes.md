@@ -1,3 +1,25 @@
+17-06-2026
+- Added a borderless, transparent reset button (🔄) next to the date and time fields in Sankalpa and Me Profile pages to quickly reset input values to the current local date and time.
+- Standardized the reset button height and icon sizes to match input fields uniformly (41px for Sankalpa Page, 37px for Me Page).
+
+
+16-06-2026
+- Pancahnga at surise logic removed and displayed panchange as per realtime. 
+- Nitya Sankalpa moved to a separate page
+- Added date and time selection to Sankalpa page
+- Added "Today" button to Sankalpa page to quickly set current date and time
+- Made date and time picker collapsible (click to expand/collapse)
+- Enabled PWA auto-update mode to automatically download and apply new web app builds/updates immediately without manual hard refreshes or clicks.
+- Added short weekday (Vaaram) display to the daily Panchanga banner in the Me Profile page in Sanskrit transliteration (Bhaanu, Soma, Mangala, Budha, Guru, Shukra, Shani format).
+- Increased the font-size of card icons on the Home Page by 20% for both desktop and mobile screens while preserving text sizes.
+- Added global chunk load error and unhandled promise rejection handlers to automatically reload the page when a dynamic page import fails, preventing blank screen issues after updates/deployments.
+- Implemented next Guru Balam prediction calculation and display on the Me Profile page, utilizing a static JSON database of Jupiter (Guru) transits from 2024 to 2040 for instant offline client-side calculation.
+- Made Balams Grid on the Me Profile page responsive (stacks cards vertically "one by one" on mobile screens of width <= 600px).
+- Extended prediction feature to Shani Balam (calculates and displays next/ending transit dates for Shani Balam under Option 3 style utilizing a static database of Saturn transits from 2023 to 2041).
+- Added Shani Balam specific translation keys to Telugu, Kannada, and English locale files.
+- Fixed `QuotaExceededError` in LocalStorage during background sync of daily dashboard data by creating a `safeSetLocalStorage` helper that automatically prunes old cached charts to free up space.
+
+
 15-06-2026
 - Nija Jesta masa display bug fixed
 - defult location bug fixed in eclock page
@@ -11,6 +33,7 @@
 - Removed Chart Style toggling selection from the D1 chart settings gear menu, keeping it centered in settings.
 - PDF chart styles for Ashtakavarga and Matchmaking D1/D9 fixed
 - deleted Vendor directory (excluding composer.json and composer.lock)
+
 
 
 14-06-2026

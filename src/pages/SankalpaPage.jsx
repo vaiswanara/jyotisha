@@ -22,6 +22,18 @@ export function SankalpaPage({ onNavigate }) {
 
   const [isPickerOpen, setIsPickerOpen] = useState(true);
 
+  const handleResetToNow = () => {
+    const defLoc = JSON.parse(
+      localStorage.getItem("vaiswanara_default_location") || "null"
+    );
+    const tz = defLoc?.timezone || 5.5;
+    setSelectedDate(getLocalDateStr(tz));
+    const now = new Date();
+    setSelectedTime(
+      `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+    );
+  };
+
   useEffect(() => {
     const loadTransitChart = async () => {
       setIsLoading(true);
@@ -55,7 +67,11 @@ export function SankalpaPage({ onNavigate }) {
             ayanamsha: ayanamsha,
           });
           if (res && res.planets) {
-            localStorage.setItem(transitCacheKey, JSON.stringify(res));
+            try {
+              localStorage.setItem(transitCacheKey, JSON.stringify(res));
+            } catch (e) {
+              console.warn("Storage quota exceeded in Sankalpa Page, skipping cache write.");
+            }
             setTransitChart(res);
           }
         }
@@ -177,6 +193,26 @@ export function SankalpaPage({ onNavigate }) {
                 minWidth: "90px",
               }}
             />
+            <button
+              onClick={handleResetToNow}
+              title={t("resetToNow", "Reset to Current Time")}
+              style={{
+                width: "41px",
+                height: "41px",
+                border: "none",
+                background: "transparent",
+                color: "#2d3436",
+                fontSize: "1.8rem",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxSizing: "border-box",
+                padding: 0,
+              }}
+            >
+              🔄
+            </button>
           </div>
         )}
 
