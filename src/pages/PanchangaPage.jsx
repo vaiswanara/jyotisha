@@ -1616,224 +1616,261 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
               >
                 {/* Location Column */}
                 <div>
-                  <LocationAutocomplete
-                    city={formData.city}
-                    onLocationSelect={(locData) => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        city: locData.city,
-                        lat: locData.latitude,
-                        lon: locData.longitude,
-                        tz: locData.timezone,
-                      }));
-                    }}
-                  />
                   <details
                     style={{
-                      marginTop: "10px",
                       fontSize: "14px",
                       background: "#fdfefe",
-                      padding: "12px",
+                      padding: "15px",
                       borderRadius: "8px",
                       border: "1px solid #eee",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
                     }}
                   >
                     <summary
                       style={{
                         cursor: "pointer",
-                        color: "#3498db",
+                        color: "#2c3e50",
                         fontWeight: "bold",
+                        fontSize: "14.5px",
                         outline: "none",
                         listStyle: "none",
-                      }}
-                    >
-                      Manual Coordinates (Lat / Lon / Tz)
-                    </summary>
-                    <div
-                      style={{
                         display: "flex",
-                        gap: "10px",
-                        marginTop: "10px",
+                        alignItems: "center",
+                        gap: "6px"
                       }}
                     >
-                      <label
+                      📍 Place ({formData.city || "Not Selected"})
+                    </summary>
+                    <div style={{ marginTop: "15px" }}>
+                      <LocationAutocomplete
+                        city={formData.city}
+                        onLocationSelect={(locData) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            city: locData.city,
+                            lat: locData.latitude,
+                            lon: locData.longitude,
+                            tz: locData.timezone,
+                          }));
+                        }}
+                      />
+                      <details
                         style={{
-                          flex: 1,
-                          fontSize: "0.85rem",
-                          color: "#636e72",
+                          marginTop: "10px",
+                          fontSize: "14px",
+                          background: "#fdfefe",
+                          padding: "12px",
+                          borderRadius: "8px",
+                          border: "1px solid #eee",
                         }}
                       >
-                        Lat:
-                        <input
-                          type="text"
-                          name="lat"
+                        <summary
                           style={{
-                            ...inputStyle,
-                            padding: "8px",
-                            marginTop: "4px",
+                            cursor: "pointer",
+                            color: "#3498db",
+                            fontWeight: "bold",
+                            outline: "none",
+                            listStyle: "none",
                           }}
-                          value={formData.lat}
-                          onChange={handleChange}
-                        />
-                      </label>
-                      <label
-                        style={{
-                          flex: 1,
-                          fontSize: "0.85rem",
-                          color: "#636e72",
-                        }}
-                      >
-                        Lon:
-                        <input
-                          type="text"
-                          name="lon"
+                        >
+                          Manual Coordinates (Lat / Lon / Tz)
+                        </summary>
+                        <div
                           style={{
-                            ...inputStyle,
-                            padding: "8px",
-                            marginTop: "4px",
+                            display: "flex",
+                            gap: "10px",
+                            marginTop: "10px",
                           }}
-                          value={formData.lon}
-                          onChange={handleChange}
-                        />
-                      </label>
-                      <label
-                        style={{
-                          flex: 1,
-                          fontSize: "0.85rem",
-                          color: "#636e72",
-                        }}
-                      >
-                        Tz:
-                        <input
-                          type="text"
-                          name="tz"
-                          style={{
-                            ...inputStyle,
-                            padding: "8px",
-                            marginTop: "4px",
-                          }}
-                          value={formData.tz}
-                          onChange={handleChange}
-                        />
-                      </label>
+                        >
+                          <label
+                            style={{
+                              flex: 1,
+                              fontSize: "0.85rem",
+                              color: "#636e72",
+                            }}
+                          >
+                            Lat:
+                            <input
+                              type="text"
+                              name="lat"
+                              style={{
+                                ...inputStyle,
+                                padding: "8px",
+                                marginTop: "4px",
+                              }}
+                              value={formData.lat}
+                              onChange={handleChange}
+                            />
+                          </label>
+                          <label
+                            style={{
+                              flex: 1,
+                              fontSize: "0.85rem",
+                              color: "#636e72",
+                            }}
+                          >
+                            Lon:
+                            <input
+                              type="text"
+                              name="lon"
+                              style={{
+                                ...inputStyle,
+                                padding: "8px",
+                                marginTop: "4px",
+                              }}
+                              value={formData.lon}
+                              onChange={handleChange}
+                            />
+                          </label>
+                          <label
+                            style={{
+                              flex: 1,
+                              fontSize: "0.85rem",
+                              color: "#636e72",
+                            }}
+                          >
+                            Tz:
+                            <input
+                              type="text"
+                              name="tz"
+                              style={{
+                                ...inputStyle,
+                                padding: "8px",
+                                marginTop: "4px",
+                              }}
+                              value={formData.tz}
+                              onChange={handleChange}
+                            />
+                          </label>
+                        </div>
+                      </details>
                     </div>
                   </details>
                 </div>
 
                 {/* Tarabalam Column */}
-                <div
-                  style={{
-                    background: "#fffdf9",
-                    borderLeft: "4px solid #f39c12",
-                    padding: "18px",
-                    borderRadius: "8px",
-                    borderTop: "1px solid #fdf5e6",
-                    borderRight: "1px solid #fdf5e6",
-                    borderBottom: "1px solid #fdf5e6",
-                  }}
-                >
-                  <span
+                <div>
+                  <details
                     style={{
-                      display: "block",
-                      fontWeight: "bold",
-                      color: "#2c3e50",
-                      marginBottom: "15px",
-                      fontSize: "0.95rem",
+                      background: "#fffdf9",
+                      borderLeft: "4px solid #f39c12",
+                      padding: "18px",
+                      borderRadius: "8px",
+                      borderTop: "1px solid #fdf5e6",
+                      borderRight: "1px solid #fdf5e6",
+                      borderBottom: "1px solid #fdf5e6",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
                     }}
                   >
-                    Tarabalam & Chandra Balam (Optional):
-                  </span>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      marginBottom: "15px",
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      name="boyCheck"
-                      checked={formData.boyCheck}
-                      onChange={handleChange}
-                      style={{
-                        width: "18px",
-                        height: "18px",
-                        cursor: "pointer",
-                        accentColor: "#8e44ad",
-                      }}
-                    />
-                    <span
+                    <summary
                       style={{
                         fontWeight: "bold",
-                        color: "#3498db",
-                        minWidth: "40px",
-                      }}
-                    >
-                      Boy
-                    </span>
-                    {formData.boyCheck && (
-                      <select
-                        name="boyNakshatra"
-                        style={{ ...inputStyle, flex: 1, padding: "8px" }}
-                        value={formData.boyNakshatra}
-                        onChange={handleChange}
-                      >
-                        <option value="">-- Select Nakshatra --</option>
-                        {NAKSHATRAS.map((n) => (
-                          <option key={n} value={n}>
-                            {n}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      name="girlCheck"
-                      checked={formData.girlCheck}
-                      onChange={handleChange}
-                      style={{
-                        width: "18px",
-                        height: "18px",
+                        color: "#2c3e50",
+                        fontSize: "0.95rem",
                         cursor: "pointer",
-                        accentColor: "#8e44ad",
-                      }}
-                    />
-                    <span
-                      style={{
-                        fontWeight: "bold",
-                        color: "#e74c3c",
-                        minWidth: "40px",
+                        outline: "none",
+                        listStyle: "none",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px"
                       }}
                     >
-                      Girl
-                    </span>
-                    {formData.girlCheck && (
-                      <select
-                        name="girlNakshatra"
-                        style={{ ...inputStyle, flex: 1, padding: "8px" }}
-                        value={formData.girlNakshatra}
-                        onChange={handleChange}
+                      ✨ Tarabalam & Chandra Balam (Optional)
+                    </summary>
+
+                    <div style={{ marginTop: "15px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                          marginBottom: "15px",
+                        }}
                       >
-                        <option value="">-- Select Nakshatra --</option>
-                        {NAKSHATRAS.map((n) => (
-                          <option key={n} value={n}>
-                            {n}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                  </div>
+                        <input
+                          type="checkbox"
+                          name="boyCheck"
+                          checked={formData.boyCheck}
+                          onChange={handleChange}
+                          style={{
+                            width: "18px",
+                            height: "18px",
+                            cursor: "pointer",
+                            accentColor: "#8e44ad",
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontWeight: "bold",
+                            color: "#3498db",
+                            minWidth: "40px",
+                          }}
+                        >
+                          Boy
+                        </span>
+                        {formData.boyCheck && (
+                          <select
+                            name="boyNakshatra"
+                            style={{ ...inputStyle, flex: 1, padding: "8px" }}
+                            value={formData.boyNakshatra}
+                            onChange={handleChange}
+                          >
+                            <option value="">-- Select Nakshatra --</option>
+                            {NAKSHATRAS.map((n) => (
+                              <option key={n} value={n}>
+                                {n}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          name="girlCheck"
+                          checked={formData.girlCheck}
+                          onChange={handleChange}
+                          style={{
+                            width: "18px",
+                            height: "18px",
+                            cursor: "pointer",
+                            accentColor: "#8e44ad",
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontWeight: "bold",
+                            color: "#e74c3c",
+                            minWidth: "40px",
+                          }}
+                        >
+                          Girl
+                        </span>
+                        {formData.girlCheck && (
+                          <select
+                            name="girlNakshatra"
+                            style={{ ...inputStyle, flex: 1, padding: "8px" }}
+                            value={formData.girlNakshatra}
+                            onChange={handleChange}
+                          >
+                            <option value="">-- Select Nakshatra --</option>
+                            {NAKSHATRAS.map((n) => (
+                              <option key={n} value={n}>
+                                {n}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    </div>
+                  </details>
                 </div>
               </div>
 
