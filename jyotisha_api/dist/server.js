@@ -207,6 +207,78 @@ function findExactTime(approxTs, type, targetVal, lat, lon, tz, ayKey, fastMode 
     }
     return Math.round(ts);
 }
+function getLagnaRashi(ts, lat, lon, tz, ayKey, fastMode) {
+    const offsetMs = tz * 3600 * 1000;
+    const localDt = new Date(ts * 1000 + offsetMs);
+    const engine = VedicAstroEngine_1.VedicAstroEngine.fromBirthData(localDt.getUTCFullYear(), localDt.getUTCMonth() + 1, localDt.getUTCDate(), localDt.getUTCHours(), localDt.getUTCMinutes(), tz, ayKey, localDt.getUTCSeconds());
+    let isSwetestUsed = engine.isUsingSwetest();
+    if (fastMode && typeof engine.setSwetest === "function") {
+        engine.setSwetest(false);
+        isSwetestUsed = false;
+    }
+    let ascLon = engine.calcAscendant(lat, lon);
+    if (!isSwetestUsed) {
+        ascLon = (ascLon + 180) % 360;
+    }
+    return Math.floor(ascLon / 30);
+}
+function getLagnaDeg(ts, lat, lon, tz, ayKey, fastMode) {
+    const offsetMs = tz * 3600 * 1000;
+    const localDt = new Date(ts * 1000 + offsetMs);
+    const engine = VedicAstroEngine_1.VedicAstroEngine.fromBirthData(localDt.getUTCFullYear(), localDt.getUTCMonth() + 1, localDt.getUTCDate(), localDt.getUTCHours(), localDt.getUTCMinutes(), tz, ayKey, localDt.getUTCSeconds());
+    let isSwetestUsed = engine.isUsingSwetest();
+    if (fastMode && typeof engine.setSwetest === "function") {
+        engine.setSwetest(false);
+        isSwetestUsed = false;
+    }
+    let ascLon = engine.calcAscendant(lat, lon);
+    if (!isSwetestUsed) {
+        ascLon = (ascLon + 180) % 360;
+    }
+    return ascLon;
+}
+function getLagnaBoundary(targetTs, targetRasi, isStart, lat, lon, tz, ayKey) {
+    let low = isStart ? targetTs - 21600 : targetTs;
+    let high = isStart ? targetTs : targetTs + 21600;
+    for (let i = 0; i < 25; i++) {
+        const mid = (low + high) / 2;
+        const rasi = getLagnaRashi(mid, lat, lon, tz, ayKey, true);
+        if (rasi === targetRasi) {
+            if (isStart) {
+                high = mid;
+            }
+            else {
+                low = mid;
+            }
+        }
+        else {
+            if (isStart) {
+                low = mid;
+            }
+            else {
+                high = mid;
+            }
+        }
+    }
+    return Math.round((low + high) / 2);
+}
+function getExactTsForDeg(lowTs, highTs, targetRasi, targetDegInRashi, lat, lon, tz, ayKey) {
+    const targetTotalDeg = (targetRasi * 30 + targetDegInRashi + 360) % 360;
+    let low = lowTs;
+    let high = highTs;
+    for (let i = 0; i < 25; i++) {
+        const mid = (low + high) / 2;
+        const midAsc = getLagnaDeg(mid, lat, lon, tz, ayKey, true);
+        const diff = (midAsc - targetTotalDeg + 360) % 360;
+        if (diff < 180) {
+            high = mid;
+        }
+        else {
+            low = mid;
+        }
+    }
+    return Math.round((low + high) / 2);
+}
 function getPreciseSunriseSunset(timestamp, lat, lon, tz) {
     const dt = new Date(timestamp * 1000);
     const offsetMs = tz * 3600 * 1000;
@@ -268,56 +340,54 @@ function buildChartGrid(planets) {
     return grid;
 }
 function panchakaResult(vaaraNum, tithiNum, nakNum, lagnaRashi) {
-    const names = {
-        1: "Mrityu Panchaka",
-        2: "Agni Panchaka",
-        4: "Raja Panchaka",
-        6: "Chora Panchaka",
-        8: "Roga Panchaka",
+    const totalSum = vaaraNum + tithiNum + nakNum + lagnaRashi;
+    const rem = totalSum % 9;
+    const panchakaMap = {
+        1: { label: "Mrityu (Bad)", isGood: false },
+        2: { label: "Agni (Bad)", isGood: false },
+        4: { label: "Raja (Bad)", isGood: false },
+        6: { label: "Chora (Bad)", isGood: false },
+        8: { label: "Roga (Bad)", isGood: false },
+        3: { label: "Shubham (Good)", isGood: true },
+        5: { label: "Shubham (Good)", isGood: true },
+        7: { label: "Shubham (Good)", isGood: true },
+        0: { label: "Shubham (Good)", isGood: true },
     };
-    const value = (vaaraNum + tithiNum + nakNum + lagnaRashi) % 9;
-    if (names[value])
-        return { label: names[value], is_good: false };
-    return { label: "Shubha", is_good: true };
+    const res = panchakaMap[rem] || { label: "Shubham (Good)", isGood: true };
+    return {
+        label: `${res.label} [Total:${totalSum}]`,
+        is_good: res.isGood,
+    };
 }
-function getPushkaraInfo(lagnaRashi, navamsaRashi, ascDeg, timestamp, tz) {
-    const pushkaraNavamsas = {
-        1: [7, 9],
-        2: [3, 5],
-        3: [6, 8],
-        4: [1, 3],
-        5: [7, 9],
-        6: [3, 5],
-        7: [6, 8],
-        8: [1, 3],
-        9: [7, 9],
-        10: [3, 5],
-        11: [6, 8],
-        12: [1, 3],
+function getPushkaraInfo(lagnaRashi, ascDeg, startLagnaTs, endLagnaTs, lat, lon, tz, ayKey) {
+    const pushkaraMap = {
+        1: [21, 24], 5: [21, 24], 9: [21, 24], // Mesha, Simha, Dhanu
+        2: [14, 17], 6: [14, 17], 10: [14, 17], // Vrishabha, Kanya, Makara
+        3: [24, 27], 7: [24, 27], 11: [24, 27], // Mithuna, Tula, Kumbha
+        4: [7, 10], 8: [7, 10], 12: [7, 10] // Karka, Vrischika, Meena
     };
-    const navIndex = Math.max(1, Math.min(9, Math.floor(ascDeg / (30.0 / 9.0)) + 1));
-    const isPushkara = (pushkaraNavamsas[lagnaRashi] || []).includes(navIndex);
-    if (!isPushkara)
-        return { label: "N/A", is_pushkara: false, window: "-" };
-    const rashiNames = [
-        "",
-        "Mesha",
-        "Vrishabha",
-        "Mithuna",
-        "Karka",
-        "Simha",
-        "Kanya",
-        "Tula",
-        "Vrischika",
-        "Dhanu",
-        "Makara",
-        "Kumbha",
-        "Meena",
-    ];
-    const navSizeDeg = 30.0 / 9.0;
-    const startOffset = Math.floor((navIndex - 1) * navSizeDeg * 240);
-    const endOffset = Math.ceil(navIndex * navSizeDeg * 240);
-    const rashiStartTs = timestamp - Math.floor(ascDeg * 240);
+    const pDegs = pushkaraMap[lagnaRashi] || [];
+    if (pDegs.length === 0) {
+        return { label: "No (Nearest: N/A)", is_pushkara: false, window: "-" };
+    }
+    // Find nearest Pushkara degree
+    let nearestP = pDegs[0];
+    let minDiff = Math.abs(ascDeg - pDegs[0]);
+    for (let i = 1; i < pDegs.length; i++) {
+        const d = Math.abs(ascDeg - pDegs[i]);
+        if (d < minDiff) {
+            minDiff = d;
+            nearestP = pDegs[i];
+        }
+    }
+    const pDiff = Math.abs(ascDeg - nearestP);
+    const isPushkara = pDiff <= 1.5;
+    const label = `${isPushkara ? "Yes" : "No"} (Nearest: ${nearestP}°, Diff: ${pDiff.toFixed(2)}°)`;
+    // Calculate exact time range for Pushkara (within 1.5 deg of nearestP)
+    const pStartDeg = nearestP - 1.5;
+    const pEndDeg = nearestP + 1.5;
+    const pStartTs = getExactTsForDeg(startLagnaTs, endLagnaTs, lagnaRashi - 1, pStartDeg, lat, lon, tz, ayKey);
+    const pEndTs = getExactTsForDeg(startLagnaTs, endLagnaTs, lagnaRashi - 1, pEndDeg, lat, lon, tz, ayKey);
     const fmt = (ts) => {
         const d = new Date((ts + tz * 3600) * 1000);
         let h = d.getUTCHours();
@@ -329,9 +399,9 @@ function getPushkaraInfo(lagnaRashi, navamsaRashi, ascDeg, timestamp, tz) {
         return `${h.toString().padStart(2, "0")}:${m} ${ampm}`;
     };
     return {
-        label: rashiNames[navamsaRashi] + " Navamsha",
-        is_pushkara: true,
-        window: `${fmt(rashiStartTs + startOffset)} - ${fmt(rashiStartTs + endOffset)}`,
+        label,
+        is_pushkara: isPushkara,
+        window: `${fmt(pStartTs)} - ${fmt(pEndTs)}`,
     };
 }
 function evaluateMuhurthaDoshas(planets, panchanga, muhurthaInfo) {
@@ -839,6 +909,10 @@ app.all(apiPaths, async (req, res) => {
             const panchanga = engine.calcPanchanga(sunLon, moonData.longitude || 0);
             const shadabala = engine.calcShadabala(planets, lagnaRashi);
             const ashtakavarga = VedicAstroEngine_1.VedicAstroEngine.calcAshtakavarga(planets, lagnaRashi);
+            const dateUtc = Date.UTC(b.year, b.month - 1, b.day, b.hour, b.minute, b.second);
+            const timestamp = Math.floor(dateUtc / 1000) - b.tz * 3600;
+            const { sunrise: sunriseTs } = getPreciseSunriseSunset(timestamp, b.lat, b.lon, b.tz);
+            const sunriseStr = formatTsLocal(sunriseTs, b.tz);
             return jsonAndCache({
                 meta: {
                     dob: b.dob,
@@ -848,6 +922,7 @@ app.all(apiPaths, async (req, res) => {
                     timezone: b.tz,
                     ayanamsha: Number(engine.getAyanamsha().toFixed(6)),
                     ayanamsha_name: engine.getAyanamshaName(),
+                    sunrise: sunriseStr,
                     engine: engine.isUsingSwetest()
                         ? "swetest (Swiss Ephemeris)"
                         : "Math fallback",
@@ -1732,11 +1807,29 @@ app.all(apiPaths, async (req, res) => {
             const degMin = Math.floor((ascDeg - degWhole) * 60);
             const lagnaLabel = `${degWhole}°${degMin}'`;
             const lagnaRemPct = Math.round(((30.0 - ascDeg) / 30.0) * 100);
-            const rashiStartTs = timestamp - Math.floor(ascDeg * 240);
-            const rashiEndTs = rashiStartTs + 30 * 240;
-            const midTs = Math.floor((rashiStartTs + rashiEndTs) / 2);
+            const rashiNames = [
+                "Mesha",
+                "Vrishabha",
+                "Mithuna",
+                "Karka",
+                "Simha",
+                "Kanya",
+                "Tula",
+                "Vrischika",
+                "Dhanu",
+                "Makara",
+                "Kumbha",
+                "Meena",
+            ];
+            const lagnaName = rashiNames[planets[constants_1.Planet.Ascendant].rashi - 1];
+            const lagnaRashiIndex = planets[constants_1.Planet.Ascendant].rashi - 1; // 0..11
+            const actualAyanamsha = engine.getAyanamsha();
+            const ayKeyForBoundary = actualAyanamsha.toString();
+            const startLagnaTs = getLagnaBoundary(timestamp, lagnaRashiIndex, true, lat, lon, tz, ayKeyForBoundary);
+            const endLagnaTs = getLagnaBoundary(timestamp, lagnaRashiIndex, false, lat, lon, tz, ayKeyForBoundary);
+            const midTs = Math.floor((startLagnaTs + endLagnaTs) / 2);
             const midWindow = `${formatTsLocal(midTs - 1440, tz)} - ${formatTsLocal(midTs + 1440, tz)}`;
-            const pushkaraInfo = getPushkaraInfo(planets[constants_1.Planet.Ascendant].rashi, navamsa[constants_1.Planet.Ascendant]?.rashi || planets[constants_1.Planet.Ascendant].rashi, ascDeg, timestamp, tz);
+            const pushkaraInfo = getPushkaraInfo(planets[constants_1.Planet.Ascendant].rashi, ascDeg, startLagnaTs, endLagnaTs, lat, lon, tz, ayKeyForBoundary);
             // getMuhurthaInfo Logic
             const { sunrise: mSunriseTs, sunset: mSunsetTs } = getPreciseSunriseSunset(timestamp, lat, lon, tz);
             let mBaseTs, mEndTs, mIsDay, mVaaraNum;
@@ -1866,8 +1959,12 @@ app.all(apiPaths, async (req, res) => {
                 durmuhurtham: durTimes.length ? durTimes.join(", ") : "-",
                 varjyam: varjyams.length ? varjyams.join(", ") : "-",
             };
-            const localWd = new Date((timestamp + tz * 3600) * 1000).getUTCDay();
-            const panchaka = panchakaResult(localWd, panchanga.tithi_number || 0, (planets[constants_1.Planet.Moon]?.nak_index || 0) + 1, planets[constants_1.Planet.Ascendant].rashi);
+            let wd = new Date((timestamp + tz * 3600) * 1000).getUTCDay(); // Sunday=0, Monday=1, ..., Saturday=6
+            if (timestamp < mSunriseTs) {
+                wd = (wd - 1 + 7) % 7;
+            }
+            const hinduWd = wd + 1; // Sunday=1, Monday=2, ..., Saturday=7
+            const panchaka = panchakaResult(hinduWd, panchanga.tithi_number || 0, (planets[constants_1.Planet.Moon]?.nak_index || 0) + 1, planets[constants_1.Planet.Ascendant].rashi);
             const doshas = evaluateMuhurthaDoshas(planets, panchanga, muhurthaInfo);
             return jsonAndCache({
                 endpoint: "muhurtha_chart",
@@ -1876,6 +1973,9 @@ app.all(apiPaths, async (req, res) => {
                 chart_d9: buildChartGrid(navamsa),
                 lagna_deg: lagnaLabel,
                 lagna_rem_pct: lagnaRemPct,
+                lagna_name: lagnaName,
+                lagna_start: formatTsLocal(startLagnaTs, tz),
+                lagna_end: formatTsLocal(endLagnaTs, tz),
                 pushkaramsha: pushkaraInfo.label,
                 is_pushkara: pushkaraInfo.is_pushkara,
                 pushkaramsha_time: pushkaraInfo.window,

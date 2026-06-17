@@ -1,4 +1,13 @@
 17-06-2026
+- Added location details (place, longitude, latitude, and timezone) under the search results table in both Panchanga tab and `PanchangaSearch.jsx`.
+- Swapped chart footers in the Muhurtha tab: D1 chart displays saved location details (at a smaller font size of 11px) and D9 chart displays the Ayanamsha name.
+- Synchronized Muhurtha D1/D9 chart calculation coordinates with the loaded profile's saved location rather than the currently entered form coordinates.
+- Modified the JSON export feature to include location metadata (city, lat, lon, tz) inside the exported JSON object.
+- Wrapped the Saved Muhurtha Table in horizontal and vertical scrollable containers (maxHeight: 400px).
+- Restructured Varjyam and Durmuhurtham interval display to render line-by-line.
+- Implemented precise Lagna and Pushkaraamsha calculation window calculations using Julian days and binary search in the Node API.
+- Implemented backend caching of ayanamsha value to optimize performance of binary search calculation.
+- Fixed a sign inversion error in ascendant calculation logic.
 - Added a borderless, transparent reset button (🔄) next to the date and time fields in Sankalpa and Me Profile pages to quickly reset input values to the current local date and time.
 - Standardized the reset button height and icon sizes to match input fields uniformly (41px for Sankalpa Page, 37px for Me Page).
 

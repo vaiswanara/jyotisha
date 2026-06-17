@@ -413,7 +413,16 @@ export default function PanchangaSearch() {
 
   const exportJSON = () => {
     if (!results.length) return;
-    const dataStr = JSON.stringify(results, null, 2);
+    const exportObj = {
+      rows: results,
+      location: {
+        city: formData.city || "",
+        latitude: formData.latitude || "",
+        longitude: formData.longitude || "",
+        timezone: formData.timezone || "",
+      },
+    };
+    const dataStr = JSON.stringify(exportObj, null, 2);
     downloadFile(
       dataStr,
       `${formData.exportName || "Panchanga"}.json`,
@@ -1145,6 +1154,10 @@ export default function PanchangaSearch() {
                   ))}
                 </tbody>
               </table>
+            </div>
+            {/* Display location details below the generated table */}
+            <div style={{ padding: "10px 15px", fontSize: "11px", color: "#7f8c8d", fontStyle: "italic", borderTop: "1px solid #eee", textAlign: "left" }}>
+              Location: <strong>{formData.city || "N/A"}</strong> (Lat: {formData.latitude || "N/A"}, Lon: {formData.longitude || "N/A"}, TZ: {formData.timezone || "N/A"})
             </div>
           </div>
         )}

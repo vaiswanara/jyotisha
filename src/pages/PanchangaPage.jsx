@@ -5,6 +5,20 @@ import { AdhikaMasaExplorer } from "../components/AdhikaMasaExplorer.jsx";
 import { API_URL, API_TOKEN } from "../services/astrologyApi.js";
 import { EclipsePage } from "./EclipsePage.jsx";
 import { getLocalDateStr } from "../utils/formatters.js";
+import { RashiChart } from "../components/RashiChart.jsx";
+
+const renderIntervalList = (valString) => {
+  if (!valString || valString === "-") return "-";
+  const parts = valString.split(",").map((p) => p.trim());
+  if (parts.length === 1) return parts[0];
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+      {parts.map((p, idx) => (
+        <span key={idx}>{p}</span>
+      ))}
+    </div>
+  );
+};
 
 
 const NORTH_INDIAN_LAYOUT_280 = {
@@ -124,6 +138,40 @@ const NAK_TO_RASI = {
   26: [11],
 };
 
+function convertMuhurthaChartArrayToPlanets(chartArray) {
+  const planetsObj = {};
+  const planetCodeMap = {
+    Lg: "Ascendant",
+    Su: "Sun",
+    Ch: "Moon",
+    Ku: "Mars",
+    Bu: "Mercury",
+    Gu: "Jupiter",
+    Sk: "Venus",
+    Sa: "Saturn",
+    Ra: "Rahu",
+    Ke: "Ketu",
+  };
+  
+  if (!chartArray || !Array.isArray(chartArray)) return planetsObj;
+
+  chartArray.forEach((rashiPlanets, rashiIndex) => {
+    const rashiNum = rashiIndex + 1;
+    if (Array.isArray(rashiPlanets)) {
+      rashiPlanets.forEach((p) => {
+        const id = p.id || p;
+        const name = planetCodeMap[id] || id;
+        planetsObj[name] = {
+          rashi: rashiNum,
+          retrograde: Boolean(p.isR || p.retrograde),
+          combust: Boolean(p.isC || p.combust),
+        };
+      });
+    }
+  });
+  return planetsObj;
+}
+
 export function PanchangaPage({ logoUrl, onNavigate }) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("search");
@@ -139,6 +187,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
   // Muhurtha States
   const [savedProfilesList, setSavedProfilesList] = useState([]);
   const [selectedProfileName, setSelectedProfileName] = useState("");
+  const [selectedProfileLocation, setSelectedProfileLocation] = useState(null);
   const [muhurthaData, setMuhurthaData] = useState([]);
   const [muhurthaColumns, setMuhurthaColumns] = useState([]);
   const [muhurthaSelectedRows, setMuhurthaSelectedRows] = useState(new Set());
@@ -661,6 +710,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
     setSelectedProfileName(profileName);
     if (!profileName) {
       setMuhurthaData([]);
+      setSelectedProfileLocation(null);
       return;
     }
 
@@ -669,8 +719,15 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
     );
     const data = saved[profileName];
     let rows = [];
-    if (Array.isArray(data)) rows = data;
-    else if (data && Array.isArray(data.rows)) rows = data.rows;
+    if (Array.isArray(data)) {
+      rows = data;
+      setSelectedProfileLocation(null);
+    } else if (data && Array.isArray(data.rows)) {
+      rows = data.rows;
+      setSelectedProfileLocation(data.location || null);
+    } else {
+      setSelectedProfileLocation(null);
+    }
 
     const prefs = syncPreferences();
     evaluatePanShudhiFlags(rows, prefs);
@@ -839,7 +896,18 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
   const updateChart = async (reqDate, reqTime) => {
     const cDate = reqDate || chartDate;
     const cTime = reqTime || chartTime;
-    if (!cDate || !cTime || !formData.lat) return;
+
+    let targetLat = formData.lat;
+    let targetLon = formData.lon;
+    let targetTz = formData.tz;
+
+    if (activeTab === "muhurtha" && selectedProfileLocation) {
+      targetLat = selectedProfileLocation.lat || targetLat;
+      targetLon = selectedProfileLocation.lon || targetLon;
+      targetTz = selectedProfileLocation.tz || targetTz;
+    }
+
+    if (!cDate || !cTime || !targetLat) return;
 
     setIsChartLoading(true);
     try {
@@ -850,9 +918,9 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
         endpoint: "muhurtha_chart",
         date: cDate,
         time: cTime,
-        lat: formData.lat,
-        lon: formData.lon,
-        tz: formData.tz,
+        lat: targetLat,
+        lon: targetLon,
+        tz: targetTz,
         ayanamsha: ayanamsha,
         rahu_mode: localStorage.getItem("rahu_mode") || "mean",
         _t: Date.now(),
@@ -1819,13 +1887,22 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                       </button>
                       <button
                         style={{ ...actionBtnStyle, background: "#3498db" }}
-                        onClick={() =>
+                        onClick={() => {
+                          const exportObj = {
+                            rows: resultData,
+                            location: {
+                              city: formData.city || "",
+                              lat: formData.lat || "",
+                              lon: formData.lon || "",
+                              tz: formData.tz || "",
+                            },
+                          };
                           downloadFile(
-                            JSON.stringify(resultData, null, 2),
+                            JSON.stringify(exportObj, null, 2),
                             `${formData.profileName || "Panchanga"}.json`,
                             "application/json",
-                          )
-                        }
+                          );
+                        }}
                       >
                         📥 Export JSON
                       </button>
@@ -1954,6 +2031,10 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                         })}
                       </tbody>
                     </table>
+                  </div>
+                  {/* Display location details below the generated table */}
+                  <div style={{ padding: "10px 20px", fontSize: "11px", color: "#7f8c8d", fontStyle: "italic", borderTop: "1px solid #eee", textAlign: "left" }}>
+                    Location: <strong>{formData.city || "N/A"}</strong> (Lat: {formData.lat || "N/A"}, Lon: {formData.lon || "N/A"}, TZ: {formData.tz || "N/A"})
                   </div>
                 </section>
               )}
@@ -2309,7 +2390,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                         onChange={(e) => handleImportCSV(e, "muhurtha")}
                       />
                     </div>
-                    <div className="table-scroll">
+                     <div className="table-scroll" style={{ maxHeight: "400px", overflow: "auto" }}>
                       <table>
                         <thead>
                           <tr>
@@ -2414,6 +2495,28 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                         </tbody>
                       </table>
                     </div>
+                    {selectedProfileName && (
+                      <div
+                        style={{
+                          padding: "10px 20px",
+                          fontSize: "0.85rem",
+                          color: "#7f8c8d",
+                          fontStyle: "italic",
+                          borderTop: "1px solid #eee",
+                          textAlign: "left",
+                          background: "#fafafa",
+                        }}
+                      >
+                        Saved Location:{" "}
+                        {selectedProfileLocation ? (
+                          <>
+                            <strong>{selectedProfileLocation.city || "N/A"}</strong> (Lat: {selectedProfileLocation.lat || "N/A"}, Lon: {selectedProfileLocation.lon || "N/A"}, TZ: {selectedProfileLocation.tz || "N/A"})
+                          </>
+                        ) : (
+                          "N/A"
+                        )}
+                      </div>
+                    )}
                   </details>
 
                   <section
@@ -2520,22 +2623,31 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                             flexDirection: "column",
                             gap: "20px",
                             alignItems: "center",
-                            flex: "0 0 auto",
+                            flex: "0 0 320px",
                           }}
                         >
-                          {renderMuhurthaGrid(
-                            muhurthaChartData.chart,
-                            "Rasi (D1)",
-                            false,
-                          )}
-                          <div style={{ fontSize: "11px", color: "#7f8c8d", marginTop: "-15px", marginBottom: "5px" }}>
-                            Ayanamsha: {muhurthaChartData.ayanamsha_name}
-                          </div>
-                          {renderMuhurthaGrid(
-                            muhurthaChartData.chart_d9,
-                            "Navamsha (D9)",
-                            true,
-                          )}
+                          <RashiChart
+                            planets={convertMuhurthaChartArrayToPlanets(muhurthaChartData.chart)}
+                            navamsa={convertMuhurthaChartArrayToPlanets(muhurthaChartData.chart_d9)}
+                            hideD1Settings={true}
+                            hideDivisionalSelector={true}
+                            d1Footer={
+                              selectedProfileLocation ? (
+                                <div style={{ textAlign: "center", fontSize: "11px", color: "#7f8c8d", marginTop: "10px" }}>
+                                  Location: <strong>{selectedProfileLocation.city || "N/A"}</strong> (Lat: {selectedProfileLocation.lat || "N/A"}, Lon: {selectedProfileLocation.lon || "N/A"}, TZ: {selectedProfileLocation.tz || "N/A"})
+                                </div>
+                              ) : (
+                                <div style={{ textAlign: "center", fontSize: "11px", color: "#7f8c8d", marginTop: "10px" }}>
+                                  Location: <strong>{formData.city || "N/A"}</strong> (Lat: {formData.lat || "N/A"}, Lon: {formData.lon || "N/A"}, TZ: {formData.tz || "N/A"})
+                                </div>
+                              )
+                            }
+                            d9Footer={
+                              <div style={{ textAlign: "center", fontSize: "12px", color: "#7f8c8d", marginTop: "10px" }}>
+                                <strong>Ayanamsha:</strong> {muhurthaChartData.ayanamsha_name}
+                              </div>
+                            }
+                          />
                         </div>
 
                         <div
@@ -2558,7 +2670,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                               boxSizing: "border-box",
                             }}
                           >
-                            <h4
+                             <h4
                               style={{ margin: "0 0 10px 0", color: "#2c3e50" }}
                             >
                               Muhurtha Details
@@ -2573,7 +2685,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                               </span>
                             </p>
                             <p style={{ margin: "5px 0", fontSize: "14px" }}>
-                              <strong>Pushkaramsha:</strong>{" "}
+                              <strong>Pushkara:</strong>{" "}
                               <span
                                 style={{
                                   color: muhurthaChartData.is_pushkara
@@ -2583,6 +2695,20 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                 }}
                               >
                                 {muhurthaChartData.pushkaramsha}
+                              </span>
+                            </p>
+                            {muhurthaChartData.lagna_name && (
+                              <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                                <strong>{muhurthaChartData.lagna_name} Lagna:</strong>{" "}
+                                <span style={{ color: "#e67e22", fontWeight: "bold" }}>
+                                  {muhurthaChartData.lagna_start} - {muhurthaChartData.lagna_end}
+                                </span>
+                              </p>
+                            )}
+                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                              <strong>Pushkaraamsha:</strong>{" "}
+                              <span style={{ color: "#8e44ad", fontWeight: "bold" }}>
+                                {muhurthaChartData.pushkaramsha_time}
                               </span>
                             </p>
                             <p style={{ margin: "5px 0", fontSize: "14px" }}>
@@ -2635,22 +2761,18 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                   "-"}
                               </span>
                             </p>
-                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
-                              <strong>Varjyam:</strong>{" "}
-                              <span style={{ color: "#c0392b" }}>
-                                {chartSelectedInfo?.varjyam ||
-                                  muhurthaChartData.varjyam ||
-                                  "-"}
-                              </span>
-                            </p>
-                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
-                              <strong>Durmuhurtham:</strong>{" "}
-                              <span style={{ color: "#d35400" }}>
-                                {chartSelectedInfo?.durm ||
-                                  muhurthaChartData.durmuhurtham ||
-                                  "-"}
-                              </span>
-                            </p>
+                            <div style={{ margin: "8px 0", fontSize: "14px" }}>
+                              <strong>Varjyam:</strong>
+                              <div style={{ color: "#c0392b", marginTop: "2px", fontWeight: "bold" }}>
+                                {renderIntervalList(chartSelectedInfo?.varjyam || muhurthaChartData.varjyam)}
+                              </div>
+                            </div>
+                            <div style={{ margin: "8px 0", fontSize: "14px" }}>
+                              <strong>Durmuhurtham:</strong>
+                              <div style={{ color: "#d35400", marginTop: "2px", fontWeight: "bold" }}>
+                                {renderIntervalList(chartSelectedInfo?.durm || muhurthaChartData.durmuhurtham)}
+                              </div>
+                            </div>
                           </div>
                         </div>
 
