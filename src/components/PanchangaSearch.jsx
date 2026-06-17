@@ -523,27 +523,27 @@ export default function PanchangaSearch() {
       ? prefs.panchanga_columns
       : [
           "Date",
-          "Vaara",
           "Asthg",
           "Maasa",
           "Tithi",
           "Tithi End",
-          "Sunrise",
+          "Vaara",
           "Nakshatra",
           "Nakshatra End",
-          "Moon Rasi",
           "Yoga",
           "Yoga End",
           "Karana",
           "Karana End",
           "Rahu Kalam",
-          "Yamagandam",
+          "Sunrise",
+          "Moon Rasi",
           "Durmuhurtham",
+          "Yamagandam",
           "Varjyam",
-          "Boy Tarabalam",
-          "Boy Chandra Balam",
           "Girl Tarabalam",
           "Girl Chandra Balam",
+          "Boy Tarabalam",
+          "Boy Chandra Balam",
         ];
 
   const availableKeys = results.length > 0 ? Object.keys(results[0]) : [];
