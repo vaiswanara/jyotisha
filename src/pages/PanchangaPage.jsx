@@ -407,8 +407,9 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
       return;
     }
 
-    if (formData.days > 50) {
-      alert("Please select 50 days or less!");
+    const maxDays = Number(import.meta.env.VITE_MAX_PANCHANGA_DAYS) || 50;
+    if (formData.days > maxDays) {
+      alert(`Please select ${maxDays} days or less!`);
       return;
     }
 

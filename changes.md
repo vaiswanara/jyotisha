@@ -1,7 +1,7 @@
 17-06-2026
-- Increased the maximum number of days for Panchanga calculations from 30 to 50 days in both `PanchangaSearch.jsx` and `PanchangaPage.jsx`.
+- Configured max Panchanga days limit validation as a dynamic Vite environment variable `VITE_MAX_PANCHANGA_DAYS` inside `.env`.
 - Added location details (place, longitude, latitude, and timezone) under the search results table in both Panchanga tab and `PanchangaSearch.jsx`.
-- Swapped chart footers in the Muhurtha tab: D1 chart displays saved location details (at a smaller font size of 11px) and D9 chart displays the Ayanamsha name.
+
 - Synchronized Muhurtha D1/D9 chart calculation coordinates with the loaded profile's saved location rather than the currently entered form coordinates.
 - Modified the JSON export feature to include location metadata (city, lat, lon, tz) inside the exported JSON object.
 - Wrapped the Saved Muhurtha Table in horizontal and vertical scrollable containers (maxHeight: 400px).
