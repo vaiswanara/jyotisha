@@ -1928,7 +1928,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                       />
                     </div>
                   </div>
-                  <div className="table-scroll">
+                  <div className="table-scroll" style={{ maxHeight: "280px", overflow: "auto" }}>
                     <table>
                       <thead>
                         <tr>
