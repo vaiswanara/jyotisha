@@ -169,10 +169,124 @@ function buildPrintNorthSvg(planets, navamsa, title, subtitle, t) {
   return s;
 }
 
+function buildPrintEastSvg(planets, navamsa, title, subtitle, t) {
+  const W = 280;
+  const shortNames = {
+    Sun: "Su",
+    Moon: "Ch",
+    Mars: "Ku",
+    Mercury: "Bu",
+    Jupiter: "Gu",
+    Venus: "Sk",
+    Saturn: "Sa",
+    Rahu: "Ra",
+    Ketu: "Ke",
+    Ascendant: "Lg",
+  };
+
+  const activePlanets = {};
+  for (const [name, pd] of Object.entries(planets)) {
+    const rashi = navamsa ? (navamsa[name]?.rashi ?? pd.rashi) : pd.rashi;
+    activePlanets[name] = {
+      rashi,
+      retrograde: pd.retrograde,
+      combust: pd.combust,
+    };
+  }
+
+  const lagnaRashi = activePlanets["Ascendant"]?.rashi ?? 1;
+
+  const EAST_INDIAN_LAYOUT = {
+    1: { rashi: { x: 150, y: 25 }, planets: { x: 150, y: 60 }, polygon: "100,0 200,0 200,100 100,100" },
+    2: { rashi: { x: 75, y: 25 }, planets: { x: 65, y: 50 }, polygon: "0,0 100,0 100,100" },
+    3: { rashi: { x: 25, y: 75 }, planets: { x: 45, y: 65 }, polygon: "0,0 0,100 100,100" },
+    4: { rashi: { x: 50, y: 125 }, planets: { x: 50, y: 160 }, polygon: "0,100 100,100 100,200 0,200" },
+    5: { rashi: { x: 25, y: 225 }, planets: { x: 45, y: 245 }, polygon: "0,200 100,200 0,300" },
+    6: { rashi: { x: 75, y: 275 }, planets: { x: 65, y: 250 }, polygon: "100,200 0,300 100,300" },
+    7: { rashi: { x: 150, y: 275 }, planets: { x: 150, y: 240 }, polygon: "100,200 200,200 200,300 100,300" },
+    8: { rashi: { x: 225, y: 275 }, planets: { x: 235, y: 250 }, polygon: "200,200 200,300 300,300" },
+    9: { rashi: { x: 275, y: 225 }, planets: { x: 255, y: 245 }, polygon: "200,200 300,200 300,300" },
+    10: { rashi: { x: 250, y: 125 }, planets: { x: 250, y: 160 }, polygon: "200,100 300,100 300,200 200,200" },
+    11: { rashi: { x: 275, y: 75 }, planets: { x: 255, y: 65 }, polygon: "200,100 300,100 300,0" },
+    12: { rashi: { x: 225, y: 25 }, planets: { x: 235, y: 50 }, polygon: "200,0 200,100 300,0" }
+  };
+
+  let s = `<svg width="${W}px" height="${W}px" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" style="display:block;font-family:sans-serif;background:#fff;">
+    <rect width="300" height="300" fill="white" stroke="#8e44ad" stroke-width="1.5"/>`;
+
+  for (let r = 1; r <= 12; r++) {
+    const pos = EAST_INDIAN_LAYOUT[r];
+    const isLagna = r === lagnaRashi;
+    const fill = isLagna ? "rgba(142, 68, 173, 0.08)" : "none";
+
+    s += `<polygon points="${pos.polygon}" fill="${fill}" stroke="#ccc" stroke-width="1"/>`;
+
+    if (isLagna) {
+      s += `<line x1="${pos.rashi.x + 8}" y1="${pos.rashi.y - 12}" x2="${pos.rashi.x + 18}" y2="${pos.rashi.y - 2}" stroke="#8e44ad" stroke-width="1.5" opacity="0.6"/>`;
+      s += `<line x1="${pos.rashi.x + 12}" y1="${pos.rashi.y - 12}" x2="${pos.rashi.x + 22}" y2="${pos.rashi.y - 2}" stroke="#8e44ad" stroke-width="1.5" opacity="0.6"/>`;
+    }
+
+    s += `<text x="${pos.rashi.x}" y="${pos.rashi.y}" font-size="10" font-weight="bold" fill="${isLagna ? "#8e44ad" : "#7f8c8d"}" text-anchor="middle" dominant-baseline="middle">${r}</text>`;
+
+    const housePlanets = Object.entries(activePlanets)
+      .filter(([name, p]) => p.rashi === r)
+      .map(([name, p]) => ({
+        name,
+        label: shortNames[name] || name,
+        retrograde: p.retrograde,
+        combust: p.combust,
+      }));
+
+    if (housePlanets.length > 0) {
+      const rows = [];
+      const itemsPerRow = 3;
+      for (let i = 0; i < housePlanets.length; i += itemsPerRow) {
+        rows.push(housePlanets.slice(i, i + itemsPerRow));
+      }
+
+      rows.forEach((row, rowIdx) => {
+        let y = pos.planets.y;
+        if (rows.length === 2) {
+          y = pos.planets.y - 5 + rowIdx * 10;
+        } else if (rows.length === 3) {
+          y = pos.planets.y - 10 + rowIdx * 10;
+        } else if (rows.length > 3) {
+          y = pos.planets.y - 15 + rowIdx * 10;
+        }
+
+        row.forEach((planet, idx) => {
+          const color = planet.retrograde ? "#2980b9" : planet.combust ? "#c0392b" : "#2c3e50";
+          const text = t(planet.label);
+          let x = pos.planets.x;
+          if (row.length === 2) {
+            x = idx === 0 ? pos.planets.x - 12 : pos.planets.x + 12;
+          } else if (row.length === 3) {
+            x = idx === 0 ? pos.planets.x - 18 : idx === 1 ? pos.planets.x : pos.planets.x + 18;
+          }
+          s += `<text x="${x}" y="${y}" font-size="10" font-weight="900" fill="${color}" text-anchor="middle" dominant-baseline="middle">${text}`;
+          if (planet.retrograde) s += "R";
+          if (planet.combust) s += "c";
+          s += `</text>`;
+        });
+      });
+    }
+  }
+
+  s += `<rect x="100" y="100" width="100" height="100" fill="#f9f0ff" stroke="#8e44ad" stroke-width="1"/>
+  <text x="150" y="145" font-size="10.5" font-weight="bold" fill="#8e44ad" text-anchor="middle">${t(title)}</text>
+  <text x="150" y="160" font-size="9.5" fill="#666" text-anchor="middle">${subtitle}</text>`;
+
+  s += `</svg>`;
+  return s;
+}
+
 function buildPrintSVG(planets, navamsa, title, subtitle, t) {
   const chartStyle = localStorage.getItem("vaiswanara_chart_style") || "south";
   if (chartStyle === "north") {
     return buildPrintNorthSvg(planets, navamsa, title, subtitle, t);
+  }
+  if (chartStyle === "east") {
+    return buildPrintEastSvg(planets, navamsa, title, subtitle, t);
   }
 
   const W = 280,
@@ -325,11 +439,69 @@ function buildAkvPrintNorthSvg(data, title, subtitle, t, isSav = false, lagnaRas
   return s;
 }
 
+function buildAkvPrintEastSvg(data, title, subtitle, t, isSav = false, lagnaRashi = 1) {
+  const W = 280;
+  const EAST_INDIAN_LAYOUT = {
+    1: { rashi: { x: 150, y: 25 }, planets: { x: 150, y: 65 }, polygon: "100,0 200,0 200,100 100,100" },
+    2: { rashi: { x: 75, y: 25 }, planets: { x: 65, y: 55 }, polygon: "0,0 100,0 100,100" },
+    3: { rashi: { x: 25, y: 75 }, planets: { x: 45, y: 65 }, polygon: "0,0 0,100 100,100" },
+    4: { rashi: { x: 50, y: 125 }, planets: { x: 50, y: 165 }, polygon: "0,100 100,100 100,200 0,200" },
+    5: { rashi: { x: 25, y: 225 }, planets: { x: 45, y: 245 }, polygon: "0,200 100,200 0,300" },
+    6: { rashi: { x: 75, y: 275 }, planets: { x: 65, y: 255 }, polygon: "100,200 0,300 100,300" },
+    7: { rashi: { x: 150, y: 275 }, planets: { x: 150, y: 240 }, polygon: "100,200 200,200 200,300 100,300" },
+    8: { rashi: { x: 225, y: 275 }, planets: { x: 235, y: 255 }, polygon: "200,200 200,300 300,300" },
+    9: { rashi: { x: 275, y: 225 }, planets: { x: 255, y: 245 }, polygon: "200,200 300,200 300,300" },
+    10: { rashi: { x: 250, y: 125 }, planets: { x: 250, y: 165 }, polygon: "200,100 300,100 300,200 200,200" },
+    11: { rashi: { x: 275, y: 75 }, planets: { x: 255, y: 65 }, polygon: "200,100 300,100 300,0" },
+    12: { rashi: { x: 225, y: 25 }, planets: { x: 235, y: 55 }, polygon: "200,0 200,100 300,0" }
+  };
+
+  let s = `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" style="display:block;font-family:sans-serif; width: 100%; height: auto;">
+    <rect width="300" height="300" fill="white" stroke="#8e44ad" stroke-width="1.5"/>`;
+
+  for (let r = 1; r <= 12; r++) {
+    const pos = EAST_INDIAN_LAYOUT[r];
+    const isLagna = r === lagnaRashi;
+    const fill = isLagna ? "rgba(142, 68, 173, 0.08)" : "none";
+
+    s += `<polygon points="${pos.polygon}" fill="${fill}" stroke="#ccc" stroke-width="1"/>`;
+
+    if (isLagna) {
+      s += `<line x1="${pos.rashi.x + 8}" y1="${pos.rashi.y - 12}" x2="${pos.rashi.x + 18}" y2="${pos.rashi.y - 2}" stroke="#8e44ad" stroke-width="1.5" opacity="0.6"/>`;
+      s += `<line x1="${pos.rashi.x + 12}" y1="${pos.rashi.y - 12}" x2="${pos.rashi.x + 22}" y2="${pos.rashi.y - 2}" stroke="#8e44ad" stroke-width="1.5" opacity="0.6"/>`;
+    }
+
+    s += `<text x="${pos.rashi.x}" y="${pos.rashi.y}" font-size="9" font-weight="bold" fill="${isLagna ? "#8e44ad" : "#7f8c8d"}" text-anchor="middle" dominant-baseline="middle">${r}</text>`;
+
+    const pts = isSav ? (data[r]?.points ?? 0) : (data[r] ?? 0);
+    let color = "#2d3436";
+    if (isSav) {
+      if (pts >= 28) color = "#27ae60";
+      else if (pts < 20) color = "#c0392b";
+    } else {
+      if (pts >= 5) color = "#27ae60";
+      else if (pts <= 2) color = "#c0392b";
+    }
+
+    s += `<text x="${pos.planets.x}" y="${pos.planets.y}" font-size="16" font-weight="bold" fill="${color}" text-anchor="middle" dominant-baseline="middle">${pts}</text>`;
+  }
+
+  s += `<rect x="100" y="100" width="100" height="100" fill="#f9f0ff" stroke="#8e44ad" stroke-width="1"/>
+  <text x="150" y="145" font-size="10" font-weight="bold" fill="#8e44ad" text-anchor="middle">${title}</text>
+  <text x="150" y="160" font-size="9" fill="#666" text-anchor="middle">${subtitle}</text>`;
+
+  s += `</svg>`;
+  return s;
+}
+
 function buildAkvPrintSVG(data, title, subtitle, t, isSav = false, lagnaRashi = 1) {
   if (!data) return "";
   const chartStyle = localStorage.getItem("vaiswanara_chart_style") || "south";
   if (chartStyle === "north") {
     return buildAkvPrintNorthSvg(data, title, subtitle, t, isSav, lagnaRashi);
+  }
+  if (chartStyle === "east") {
+    return buildAkvPrintEastSvg(data, title, subtitle, t, isSav, lagnaRashi);
   }
 
   const W = 280, cell = 70;
@@ -372,6 +544,543 @@ function buildAkvPrintSVG(data, title, subtitle, t, isSav = false, lagnaRashi = 
   }
   s += `</svg>`;
   return s;
+}
+
+// --- MISC Panel Constants & Helper Functions ---
+const planetsOrder = ['Lg', 'Su', 'Ch', 'Ku', 'Bu', 'Gu', 'Sk', 'Sa', 'Ra', 'Ke'];
+const rashisOrder = ['Mesha', 'Vrishabha', 'Mithuna', 'Karka', 'Simha', 'Kanya', 'Tula', 'Vrischika', 'Dhanu', 'Makara', 'Kumbha', 'Meena'];
+
+const lordshipData = {
+  "1": { "Su": "5", "Ch": "4", "Ku": "1,8", "Bu": "3,6", "Gu": "9,12", "Sk": "2,7", "Sa": "10,11" },
+  "2": { "Su": "4", "Ch": "3", "Ku": "7,12", "Bu": "2,5", "Gu": "8,11", "Sk": "1,6", "Sa": "9,10" },
+  "3": { "Su": "3", "Ch": "2", "Ku": "6,11", "Bu": "1,4", "Gu": "7,10", "Sk": "5,12", "Sa": "8,9" },
+  "4": { "Su": "2", "Ch": "1", "Ku": "5,10", "Bu": "3,12", "Gu": "6,9", "Sk": "4,11", "Sa": "7,8" },
+  "5": { "Su": "1", "Ch": "12", "Ku": "4,9", "Bu": "2,11", "Gu": "5,8", "Sk": "3,10", "Sa": "6,7" },
+  "6": { "Su": "12", "Ch": "11", "Ku": "3,8", "Bu": "1,10", "Gu": "4,7", "Sk": "2,9", "Sa": "5,6" },
+  "7": { "Su": "11", "Ch": "10", "Ku": "2,7", "Bu": "9,12", "Gu": "3,6", "Sk": "1,8", "Sa": "4,5" },
+  "8": { "Su": "10", "Ch": "9", "Ku": "1,6", "Bu": "8,11", "Gu": "2,5", "Sk": "7,12", "Sa": "3,4" },
+  "9": { "Su": "9", "Ch": "8", "Ku": "5,12", "Bu": "7,10", "Gu": "1,4", "Sk": "6,11", "Sa": "2,3" },
+  "10": { "Su": "8", "Ch": "7", "Ku": "4,11", "Bu": "6,9", "Gu": "3,12", "Sk": "5,10", "Sa": "1,2" },
+  "11": { "Su": "7", "Ch": "6", "Ku": "3,10", "Bu": "5,8", "Gu": "2,11", "Sk": "4,9", "Sa": "12,1" },
+  "12": { "Su": "6", "Ch": "5", "Ku": "2,9", "Bu": "4,7", "Gu": "1,10", "Sk": "3,8", "Sa": "11,12" }
+};
+const rashiLords = { 1: 'Ku', 2: 'Sk', 3: 'Bu', 4: 'Ch', 5: 'Su', 6: 'Bu', 7: 'Sk', 8: 'Ku', 9: 'Gu', 10: 'Sa', 11: 'Sa', 12: 'Gu' };
+const naturalRelationships = { 'Su': { friends: ['Ch', 'Ku', 'Gu'], enemies: ['Sk', 'Sa'], neutral: ['Bu'] }, 'Ch': { friends: ['Su', 'Bu'], enemies: [], neutral: ['Gu', 'Sk', 'Sa', 'Ku'] }, 'Ku': { friends: ['Su', 'Ch', 'Gu'], enemies: ['Bu'], neutral: ['Sk', 'Sa'] }, 'Bu': { friends: ['Su', 'Sk'], enemies: ['Ch'], neutral: ['Gu', 'Sa', 'Ku'] }, 'Gu': { friends: ['Su', 'Ch', 'Ku'], enemies: ['Bu', 'Sk'], neutral: ['Sa'] }, 'Sk': { friends: ['Bu', 'Sa'], enemies: ['Su', 'Ch'], neutral: ['Gu', 'Ku'] }, 'Sa': { friends: ['Bu', 'Sk'], enemies: ['Su', 'Ch', 'Ku'], neutral: ['Gu'] }, 'Ra': { friends: ['Sa', 'Sk'], enemies: ['Su', 'Ch', 'Ku'], neutral: ['Bu', 'Gu'] }, 'Ke': { friends: ['Ku', 'Gu'], enemies: ['Su', 'Ch'], neutral: ['Bu', 'Sk', 'Sa'] } };
+const planetStrengthFallback = {
+  "Su": { "Exaltation": 1, "Deblitation": 7, "Own_house1": 5, "Own_house2": 0 },
+  "Ch": { "Exaltation": 2, "Deblitation": 8, "Own_house1": 4, "Own_house2": 0 },
+  "Ku": { "Exaltation": 10, "Deblitation": 4, "Own_house1": 1, "Own_house2": 8 },
+  "Bu": { "Exaltation": 6, "Deblitation": 12, "Own_house1": 3, "Own_house2": 6 },
+  "Gu": { "Exaltation": 4, "Deblitation": 10, "Own_house1": 9, "Own_house2": 12 },
+  "Sk": { "Exaltation": 12, "Deblitation": 6, "Own_house1": 2, "Own_house2": 7 },
+  "Sa": { "Exaltation": 7, "Deblitation": 1, "Own_house1": 10, "Own_house2": 11 },
+  "Ra": { "Exaltation": 3, "Deblitation": 9, "Own_house1": 0, "Own_house2": 0 },
+  "Ke": { "Exaltation": 9, "Deblitation": 3, "Own_house1": 0, "Own_house2": 0 }
+};
+
+function getLordship(planetName, lagnaRashi) {
+  if (!lagnaRashi || planetName === 'Lg' || planetName === 'Ra' || planetName === 'Ke') return '';
+  return lordshipData[lagnaRashi]?.[planetName] || '';
+}
+
+function calculateHouseNumber(planetRashiNumber, lagnaRashiNumber) {
+  if (!planetRashiNumber || !lagnaRashiNumber) return '';
+  if (planetRashiNumber === lagnaRashiNumber) return '1';
+  let houseNumber = parseInt(planetRashiNumber) - parseInt(lagnaRashiNumber) + 1;
+  if (houseNumber <= 0) houseNumber += 12;
+  return houseNumber.toString();
+}
+
+function calculateAspects(targetRashi, aspectingPlanetName, aspectingRashi) {
+  if (!targetRashi || !aspectingRashi) return false;
+  const source = parseInt(aspectingRashi);
+  const target = parseInt(targetRashi);
+  let aspects = [];
+  if (aspectingPlanetName !== 'Lg') {
+      let seventhHouse = source + 6;
+      if (seventhHouse > 12) seventhHouse -= 12;
+      if (target === seventhHouse) aspects.push("7th");
+  }
+  if (aspectingPlanetName === 'Gu') {
+      let fifthHouse = source + 4; let ninthHouse = source + 8;
+      if (fifthHouse > 12) fifthHouse -= 12; if (ninthHouse > 12) ninthHouse -= 12;
+      if (target === fifthHouse) aspects.push("5th");
+      if (target === ninthHouse) aspects.push("9th");
+  } else if (aspectingPlanetName === 'Sa') {
+      let thirdHouse = source + 2; let tenthHouse = source + 9;
+      if (thirdHouse > 12) thirdHouse -= 12; if (tenthHouse > 12) tenthHouse -= 12;
+      if (target === thirdHouse) aspects.push("3rd");
+      if (target === tenthHouse) aspects.push("10th");
+  } else if (aspectingPlanetName === 'Ku') {
+      let fourthHouse = source + 3; let eighthHouse = source + 7;
+      if (fourthHouse > 12) fourthHouse -= 12; if (eighthHouse > 12) eighthHouse -= 12;
+      if (target === fourthHouse) aspects.push("4th");
+      if (target === eighthHouse) aspects.push("8th");
+  }
+  return aspects.length > 0 ? aspects.join(",") : false;
+}
+
+function determineStrength(planetCode, rashiNumber, t) {
+  if (!planetStrengthFallback[planetCode] || !rashiNumber) return '';
+  const info = planetStrengthFallback[planetCode];
+  const parts = [];
+  if (info.Exaltation === parseInt(rashiNumber)) parts.push(t('exaltation', 'Exaltation'));
+  if (info.Deblitation === parseInt(rashiNumber)) parts.push(t('debilitation', 'Debilitation'));
+  if (info.Own_house1 === parseInt(rashiNumber) || info.Own_house2 === parseInt(rashiNumber)) parts.push(t('own_house', 'Own House'));
+  return parts.join(', ') || t('neutral', 'Neutral');
+}
+
+function getFinalRelationship(naturalRel, tempRel) {
+  const matrix = {
+      'friend': {'friend': 'best_friend', 'neutral': 'friend', 'enemy': 'neutral_rel'},
+      'neutral': {'friend': 'friend', 'neutral': 'neutral_rel', 'enemy': 'enemy'},
+      'enemy': {'friend': 'neutral_rel', 'neutral': 'enemy', 'enemy': 'bitter_enemy'}
+  };
+  return matrix[naturalRel][tempRel];
+}
+
+function MiscPanel({ chartData, t }) {
+  const [showReadContext, setShowReadContext] = useState(false);
+  const [sthaana, setSthaana] = useState("");
+  const [kaaraka, setKaaraka] = useState("");
+  const [adhipatya, setAdhipatya] = useState("");
+
+  if (!chartData || !chartData.planets) return null;
+
+  const pMap = { 'Ascendant': 'Lg', 'Sun': 'Su', 'Moon': 'Ch', 'Mars': 'Ku', 'Mercury': 'Bu', 'Jupiter': 'Gu', 'Venus': 'Sk', 'Saturn': 'Sa', 'Rahu': 'Ra', 'Ketu': 'Ke' };
+  const planetPositions = {};
+  Object.entries(chartData.planets).forEach(([full, p]) => {
+      if (pMap[full]) planetPositions[pMap[full]] = String(p.rashi);
+  });
+  const lagnaRashi = planetPositions['Lg'] || "1";
+
+  const getFormattedPlanetName = (pName, targetRashiNum, isAspect = false) => {
+      if (!pName || pName === 'Lg') return pName;
+      let formattedName = t(pName, pName);
+      if (pName === 'Gu' || pName === 'Sk') return formattedName + '(+)';
+      if (['Sa', 'Ku', 'Ra', 'Ke', 'Su'].includes(pName)) return formattedName + '(-)';
+      if (pName === 'Bu') {
+          let hasGuOrSk = false;
+          if (!isAspect) {
+              planetsOrder.forEach(innerP => {
+                  if (innerP !== 'Bu' && planetPositions[innerP] === String(targetRashiNum)) {
+                      if (innerP === 'Gu' || innerP === 'Sk') hasGuOrSk = true;
+                  }
+              });
+          } else {
+              planetsOrder.forEach((innerP) => {
+                  if (innerP !== 'Bu' && planetPositions[innerP]) {
+                      const innerAspect = calculateAspects(targetRashiNum, innerP, planetPositions[innerP]);
+                      if (innerAspect && (innerP === 'Gu' || innerP === 'Sk')) hasGuOrSk = true;
+                  }
+              });
+          }
+          return formattedName + (hasGuOrSk ? '(+)' : '(-)');
+      }
+      return formattedName;
+  };
+
+  const findConjunctions = (planetCode, rashiNumber, useFormat = false) => {
+      let conjunctions = [];
+      planetsOrder.forEach((pName) => {
+          if (pName !== planetCode && planetPositions[pName] === String(rashiNumber) && rashiNumber && pName !== 'Lg') {
+              conjunctions.push(useFormat ? getFormattedPlanetName(pName, parseInt(rashiNumber), false) : t(pName, pName));
+          }
+      });
+      return conjunctions.join(', ');
+  };
+
+  const findAspects = (planetCode, rashiNumber, useFormat = false) => {
+      let aspects = [];
+      planetsOrder.forEach((pName) => {
+          if (pName !== planetCode && planetPositions[pName]) {
+              const aspectType = calculateAspects(rashiNumber, pName, planetPositions[pName]);
+              if (aspectType && pName !== 'Lg') {
+                  aspects.push(useFormat ? getFormattedPlanetName(pName, parseInt(rashiNumber), true) : t(pName, pName));
+              }
+          }
+      });
+      return aspects.join(', ');
+  };
+
+  const rowsData = planetsOrder.map(planet => {
+      const rashiNum = planetPositions[planet];
+      const rashiName = rashiNum ? rashisOrder[rashiNum - 1] : '-';
+      const localizedPlanet = t(planet, planet);
+      const localizedRashi = rashiNum ? t(rashiName, rashiName) : '-';
+
+      const adhipathya = getLordship(planet, lagnaRashi);
+      const sthaanaNum = calculateHouseNumber(rashiNum, lagnaRashi);
+      const samyoga = rashiNum ? findConjunctions(planet, rashiNum) : '';
+      const drusti = rashiNum ? findAspects(planet, rashiNum) : '';
+
+      const strength = rashiNum ? determineStrength(planet, rashiNum, t) : '';
+      let hSymbol = '';
+      if (['1', '4', '5', '7', '9', '10'].includes(sthaanaNum)) hSymbol = '(+)';
+      else if (['6', '8', '12'].includes(sthaanaNum)) hSymbol = '(-)';
+      else if (['2', '3', '11'].includes(sthaanaNum)) hSymbol = '(N)';
+      const sthaanaAnalyze = sthaanaNum ? sthaanaNum + hSymbol : '';
+
+      const samyogaAnalyze = rashiNum ? findConjunctions(planet, rashiNum, true) : '';
+      const drustiAnalyze = rashiNum ? findAspects(planet, rashiNum, true) : '';
+
+      let pMaitri = '';
+      if (rashiNum && planet !== 'Lg') {
+          const rashiLord = rashiLords[parseInt(rashiNum)];
+          const rashiLordPos = planetPositions[rashiLord];
+          const localizedRashiLord = t(rashiLord, rashiLord);
+          if (planet === rashiLord) {
+              pMaitri = `${localizedRashiLord}: ${t('own_house', 'Own House')}`;
+          } else if (rashiLord && rashiLordPos) {
+              const naturalRel = naturalRelationships[planet].friends.includes(rashiLord) ? 'friend' : (naturalRelationships[planet].enemies.includes(rashiLord) ? 'enemy' : 'neutral');
+              let distance = Math.abs(parseInt(rashiNum) - parseInt(rashiLordPos));
+              if (distance > 6) distance = 12 - distance;
+              const housePosition = distance + 1;
+              const tempRel = [2, 3, 4, 10, 11, 12].includes(housePosition) ? 'friend' : ([1, 5, 6, 7, 8, 9].includes(housePosition) ? 'enemy' : 'neutral');
+              const finalRel = getFinalRelationship(naturalRel, tempRel);
+              pMaitri = `${localizedRashiLord}: ${t(finalRel, finalRel)}`;
+          }
+      }
+
+      return { planet, localizedPlanet, localizedRashi, adhipathya, sthaanaNum, samyoga, drusti, strength, sthaanaAnalyze, samyogaAnalyze, drustiAnalyze, pMaitri };
+  });
+
+  const renderContext = () => {
+      return rowsData.map(row => {
+          if ((row.adhipathya || row.sthaanaNum || row.samyoga || row.drusti) && row.planet !== 'Lg') {
+              let infoText = "";
+              if (row.adhipathya) infoText += `${row.adhipathya} ${t('lord', 'Lord')} ${row.localizedPlanet}`;
+              else infoText += row.localizedPlanet;
+              if (row.sthaanaNum) infoText += ` ${t('posited_in', 'posited in')} ${row.sthaanaNum} ${t('house', 'House')}`;
+              if (row.samyoga) infoText += `. ${t('samyoga_with', 'Samyoga with')} ${row.samyoga}`;
+              if (row.drusti) infoText += `. ${t('aspected_by', 'Aspected by')} ${row.drusti}`;
+              infoText += '.';
+
+              return (
+                  <div key={"ctx_"+row.planet} style={{ margin: 0, padding: '12px', background: '#fff', borderRadius: '8px', borderLeft: '3px solid #8e44ad', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                      <h4 style={{ margin: '0 0 6px 0', color: '#8e44ad', fontSize: '15px' }}>{row.localizedPlanet}</h4>
+                      <p style={{ margin: 0, color: '#555', lineHeight: 1.5, fontSize: '14px' }}>{infoText}</p>
+                  </div>
+              );
+          }
+          return null;
+      });
+  };
+
+  let sthaanaResult = "";
+  if (sthaana) {
+      const targetRashi = ((parseInt(lagnaRashi) + parseInt(sthaana) - 2) % 12) + 1;
+      const occupants = [];
+      planetsOrder.forEach(p => {
+          if (p !== 'Lg' && planetPositions[p] === String(targetRashi)) occupants.push(getFormattedPlanetName(p, targetRashi, false));
+      });
+      const aspectors = [];
+      planetsOrder.forEach(p => {
+          if (p !== 'Lg' && planetPositions[p]) {
+              const a = calculateAspects(targetRashi, p, planetPositions[p]);
+              if (a) aspectors.push(getFormattedPlanetName(p, targetRashi, true));
+          }
+      });
+      sthaanaResult = <div><b>{t('occupants', 'Occupants')}:</b> {occupants.length ? occupants.join(', ') : t('none', 'None')}<br/><b>{t('aspects', 'Aspects')}:</b> {aspectors.length ? aspectors.join(', ') : t('none', 'None')}</div>;
+  }
+
+  let kaarakaResult = "";
+  if (kaaraka) {
+      const targetRashi = planetPositions[kaaraka];
+      if (!targetRashi) {
+          kaarakaResult = t('planet_not_in_chart', 'Planet not in chart.');
+      } else {
+          const occupants = [];
+          planetsOrder.forEach(p => {
+              if (p !== kaaraka && p !== 'Lg' && planetPositions[p] === targetRashi) occupants.push(getFormattedPlanetName(p, parseInt(targetRashi), false));
+          });
+          const aspectors = [];
+          planetsOrder.forEach(p => {
+              if (p !== kaaraka && p !== 'Lg' && planetPositions[p]) {
+                  const a = calculateAspects(targetRashi, p, planetPositions[p]);
+                  if (a) aspectors.push(getFormattedPlanetName(p, parseInt(targetRashi), true));
+              }
+          });
+          kaarakaResult = <div><b>{t('conjunctions', 'Conjunctions')}:</b> {occupants.length ? occupants.join(', ') : t('none', 'None')}<br/><b>{t('aspects', 'Aspects')}:</b> {aspectors.length ? aspectors.join(', ') : t('none', 'None')}</div>;
+      }
+  }
+
+  let adhipatyaResult = "";
+  if (adhipatya) {
+      const targetHouseRashi = ((parseInt(lagnaRashi) + parseInt(adhipatya) - 2) % 12) + 1;
+      const lord = rashiLords[targetHouseRashi];
+      if (!lord) {
+          adhipatyaResult = t('no_lord_for_this_house', 'No lord for this house.');
+      } else {
+          const lordRashi = planetPositions[lord];
+          if (!lordRashi) {
+              adhipatyaResult = `Lord ${t(lord, lord)} not found in chart.`;
+          } else {
+              const occupants = [];
+              planetsOrder.forEach(p => {
+                  if (p !== lord && p !== 'Lg' && planetPositions[p] === lordRashi) occupants.push(getFormattedPlanetName(p, parseInt(lordRashi), false));
+              });
+              const aspectors = [];
+              planetsOrder.forEach(p => {
+                  if (p !== lord && p !== 'Lg' && planetPositions[p]) {
+                      const a = calculateAspects(lordRashi, p, planetPositions[p]);
+                      if (a) aspectors.push(getFormattedPlanetName(p, parseInt(lordRashi), true));
+                  }
+              });
+              adhipatyaResult = <div><b>{t('lord', 'Lord')}: {t(lord, lord)}</b><br/><b>{t('occupants', 'Occupants')}:</b> {occupants.length ? occupants.join(', ') : t('none', 'None')}<br/><b>{t('aspects', 'Aspects')}:</b> {aspectors.length ? aspectors.join(', ') : t('none', 'None')}</div>;
+          }
+      }
+  }
+
+  return (
+    <div className="misc-panel-modern" style={{ width: "100%", boxSizing: "border-box", marginTop: "20px" }}>
+      {showReadContext && (
+        <div style={{ marginBottom: "25px", padding: "20px", borderLeft: "4px solid #8e44ad", background: "#f9f0ff", borderRadius: "12px", boxShadow: "0 4px 15px rgba(0,0,0,0.05)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #e8daff", paddingBottom: "12px", marginBottom: "15px" }}>
+            <h3 style={{ margin: 0, color: "#2c3e50", fontSize: "18px", fontWeight: "bold" }}>{t("planet_details_context", "Planet Details Context")}</h3>
+            <button onClick={() => setShowReadContext(false)} style={{ background: "none", border: "none", fontSize: "28px", cursor: "pointer", color: "#c0392b", padding: "0" }}>&times;</button>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
+            {renderContext()}
+          </div>
+        </div>
+      )}
+
+      <div style={{ width: "100%" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "3px solid #f1f2f6", paddingBottom: "10px", marginBottom: "20px", marginTop: "10px", flexWrap: "nowrap" }}>
+          <h3 style={{ fontWeight: "800", color: "#2c3e50", fontSize: "20px", margin: 0, flex: "1 1 auto", paddingRight: "10px" }}>
+            {t("analyze_horoscope", "Analyze Horoscope")}
+          </h3>
+          <button 
+            onClick={(e) => { e.preventDefault(); setShowReadContext(!showReadContext); }} 
+            style={{ background: "linear-gradient(135deg, #8e44ad, #732d91)", color: "white", border: "none", padding: "8px 14px", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", fontSize: "13px", whiteSpace: "nowrap", boxShadow: "0 2px 8px rgba(142,68,173,0.2)", flex: "0 0 auto", width: "fit-content" }}
+          >
+            {showReadContext ? t("close_context", "Close Context") : t("read_context", "Read Context")}
+          </button>
+        </div>
+        
+        <style>{`
+          .analyze-horo-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            width: 100%;
+          }
+          @media (min-width: 600px) {
+            .analyze-horo-grid {
+              grid-template-columns: repeat(2, 1fr);
+            }
+          }
+          @media (min-width: 1024px) {
+            .analyze-horo-grid {
+              grid-template-columns: repeat(3, 1fr);
+            }
+          }
+          .graha-stat-card {
+            background: #ffffff;
+            border: 1px solid #eaecee;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+          }
+          .graha-stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+          }
+          .graha-stat-header {
+            font-size: 22px;
+            font-weight: 800;
+            color: #2980b9;
+            border-bottom: 2px solid #f8f9fa;
+            padding-bottom: 15px;
+            margin-bottom: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          .graha-stat-header span.adhipathya-badge {
+            font-size: 14px;
+            background: #fdf2e9;
+            color: #e67e22;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid #fae5d3;
+          }
+          .graha-stat-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          }
+          .g-stat-item {
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+            gap: 8px;
+          }
+          .g-stat-label {
+            color: #7f8c8d;
+            font-size: 14px;
+            text-transform: capitalize;
+            font-weight: 600;
+            white-space: nowrap;
+          }
+          .g-stat-val {
+            font-weight: 800;
+            font-size: 17px;
+            line-height: 1.4;
+          }
+          .val-strength { color: #16a085; }
+          .val-sthaana { color: #2980b9; }
+          .val-pmaitri { color: #8e44ad; }
+          .val-samyoga { color: #c0392b; }
+          .val-drusti { color: #27ae60; }
+          
+          /* Bhala Grid Styles */
+          .bhala-cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin-top: 35px;
+            width: 100%;
+          }
+          @media (min-width: 768px) {
+            .bhala-cards-container {
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+            }
+          }
+          .bhala-card-modern {
+            padding: 24px;
+            border-radius: 16px;
+            background: #fff;
+            border: 1px solid #f1f2f6;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            box-sizing: border-box;
+          }
+          .bhala-card-modern.sthaana { border-top: 5px solid #e67e22; }
+          .bhala-card-modern.kaaraka { border-top: 5px solid #3498db; }
+          .bhala-card-modern.adhipatya { border-top: 5px solid #2ecc71; }
+          
+          .bhala-card-modern h4 {
+            margin: 0 0 18px 0;
+            font-size: 18px;
+            font-weight: 800;
+          }
+          .bhala-card-modern.sthaana h4 { color: #d35400; }
+          .bhala-card-modern.kaaraka h4 { color: #2980b9; }
+          .bhala-card-modern.adhipatya h4 { color: #27ae60; }
+          
+          .bhala-select {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 2px solid #eaecee;
+            background: #fdfefe;
+            font-size: 16px;
+            color: #2c3e50;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%237f8c8d" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            box-sizing: border-box;
+            font-weight: 600;
+          }
+          .bhala-select:focus {
+            border-color: #8e44ad;
+            box-shadow: 0 0 0 4px rgba(142,68,173,0.1);
+          }
+          .bhala-result-box {
+            margin-top: 20px;
+            font-size: 15px;
+            color: #34495e;
+            line-height: 1.6;
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 10px;
+            border-left: 4px solid #bdc3c7;
+            flex-grow: 1;
+            font-weight: 500;
+          }
+        `}</style>
+        
+        <div className="analyze-horo-grid" style={{ width: "100%", boxSizing: "border-box" }}>
+          {rowsData.filter(r => r.planet !== 'Lg').map((row) => (
+            <div key={"analyze_"+row.planet} className="graha-stat-card" style={{ width: "100%", boxSizing: "border-box" }}>
+              <div className="graha-stat-header">
+                {row.localizedPlanet}
+                {row.adhipathya && <span className="adhipathya-badge">Lordship: {row.adhipathya}</span>}
+              </div>
+              <div className="graha-stat-list">
+                <div className="g-stat-item">
+                  <span className="g-stat-label">{t("strength", "Strength")} :</span>
+                  <span className="g-stat-val val-strength">{row.strength || '-'}</span>
+                </div>
+                <div className="g-stat-item">
+                  <span className="g-stat-label">{t("sthaana", "Sthaana")} :</span>
+                  <span className="g-stat-val val-sthaana">{row.sthaanaAnalyze || '-'}</span>
+                </div>
+                <div className="g-stat-item">
+                  <span className="g-stat-label">{t("p_maitri", "P.Maitri")} :</span>
+                  <span className="g-stat-val val-pmaitri">{row.pMaitri || '-'}</span>
+                </div>
+                <div className="g-stat-item">
+                  <span className="g-stat-label">{t("samyoga", "Samyoga")} :</span>
+                  <span className="g-stat-val val-samyoga">{row.samyogaAnalyze || '-'}</span>
+                </div>
+                <div className="g-stat-item">
+                  <span className="g-stat-label">{t("drusti", "Drusti")} :</span>
+                  <span className="g-stat-val val-drusti">{row.drustiAnalyze || '-'}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="bhala-cards-container">
+          <div className="bhala-card-modern sthaana">
+            <h4>{t("sthaana_bhala", "Sthaana Bhala")}</h4>
+            <select className="bhala-select" value={sthaana} onChange={(e) => setSthaana(e.target.value)}>
+              <option value="">{t("select_house", "-- Select House --")}</option>
+              {[...Array(12)].map((_, i) => <option key={"s_"+i} value={i+1}>{t("house", "House")} {i+1}</option>)}
+            </select>
+            {sthaanaResult && <div className="bhala-result-box" style={{ borderLeftColor: '#e67e22' }}>{sthaanaResult}</div>}
+          </div>
+
+          <div className="bhala-card-modern kaaraka">
+            <h4>{t("kaaraka_bhala", "Kaaraka Bhala")}</h4>
+            <select className="bhala-select" value={kaaraka} onChange={(e) => setKaaraka(e.target.value)}>
+              <option value="">{t("select_planet", "-- Select Planet --")}</option>
+              {planetsOrder.filter(p => p !== 'Lg').map(p => <option key={"k_"+p} value={p}>{t(p, p)}</option>)}
+            </select>
+            {kaarakaResult && <div className="bhala-result-box" style={{ borderLeftColor: '#3498db' }}>{kaarakaResult}</div>}
+          </div>
+
+          <div className="bhala-card-modern adhipatya">
+            <h4>{t("adhipatya_bhala", "Adhipatya Bhala")}</h4>
+            <select className="bhala-select" value={adhipatya} onChange={(e) => setAdhipatya(e.target.value)}>
+              <option value="">{t("select_house", "-- Select House --")}</option>
+              {[...Array(12)].map((_, i) => <option key={"a_"+i} value={i+1}>{t("house", "House")} {i+1}</option>)}
+            </select>
+            {adhipatyaResult && <div className="bhala-result-box" style={{ borderLeftColor: '#2ecc71' }}>{adhipatyaResult}</div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function HoroscopePageNew({ logoUrl, onNavigate }) {
@@ -912,7 +1621,7 @@ export function HoroscopePageNew({ logoUrl, onNavigate }) {
         /* Responsive Layout for Charts & Tables */
         .new-horo-page .charts-table-row {
           display: grid !important;
-          grid-template-columns: 1fr 1fr 1fr !important;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
           gap: 15px !important;
           width: 100% !important;
           align-items: start !important;
@@ -920,7 +1629,7 @@ export function HoroscopePageNew({ logoUrl, onNavigate }) {
         
         .new-horo-page .shadbala-akv-row {
           display: grid !important;
-          grid-template-columns: 1fr 1fr !important;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
           gap: 15px !important;
           width: 100% !important;
         }
@@ -1302,17 +2011,20 @@ export function HoroscopePageNew({ logoUrl, onNavigate }) {
         .new-horo-page .popup-container {
           position: fixed; top: 0; left: 0; right: 0; bottom: 0;
           background: rgba(0,0,0,0.6); z-index: 1000;
-          display: flex; justify-content: center; align-items: center;
+          display: flex; justify-content: center; align-items: flex-start;
           padding: 20px; backdrop-filter: blur(4px);
+          overflow-y: auto;
         }
         .new-horo-page .popup-content {
           background: #fff; padding: 30px; border-radius: 16px;
-          width: 100%; max-width: 650px; max-height: 90vh;
-          overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+          width: 100%; max-width: 650px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+          margin: 40px auto;
+          box-sizing: border-box;
         }
         @media (max-width: 768px) {
           .new-horo-page .popup-container { padding: 15px; }
-          .new-horo-page .popup-content { padding: 20px; max-width: 100%; }
+          .new-horo-page .popup-content { padding: 20px; max-width: 100%; margin: 20px auto; }
         }
         .new-horo-page .popup-tab {
           flex: 1;
@@ -1655,6 +2367,11 @@ export function HoroscopePageNew({ logoUrl, onNavigate }) {
                     ashtakavarga={chartData.ashtakavarga}
                     lagnaRashi={chartData.planets?.Ascendant?.rashi ?? 1}
                   />
+                </div>
+
+                {/* 5. MISC Analysis Tab */}
+                <div style={{ marginTop: "15px", width: "100%", display: "flex", flexDirection: "column", gap: "15px" }}>
+                  <MiscPanel chartData={chartData} t={t} />
                 </div>
               </>
             )}

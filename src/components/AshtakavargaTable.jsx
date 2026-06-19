@@ -43,6 +43,21 @@ const NORTH_INDIAN_LAYOUT = {
   12: { rashi: { x: 240, y: 25 }, planets: { x: 240, y: 55 } },
 };
 
+const EAST_INDIAN_LAYOUT = {
+  1: { rashi: { x: 150, y: 25 }, planets: { x: 150, y: 65 }, polygon: "100,0 200,0 200,100 100,100" },
+  2: { rashi: { x: 75, y: 25 }, planets: { x: 65, y: 55 }, polygon: "0,0 100,0 100,100" },
+  3: { rashi: { x: 25, y: 75 }, planets: { x: 45, y: 65 }, polygon: "0,0 0,100 100,100" },
+  4: { rashi: { x: 50, y: 125 }, planets: { x: 50, y: 165 }, polygon: "0,100 100,100 100,200 0,200" },
+  5: { rashi: { x: 25, y: 225 }, planets: { x: 45, y: 245 }, polygon: "0,200 100,200 0,300" },
+  6: { rashi: { x: 75, y: 275 }, planets: { x: 65, y: 255 }, polygon: "100,200 0,300 100,300" },
+  7: { rashi: { x: 150, y: 275 }, planets: { x: 150, y: 240 }, polygon: "100,200 200,200 200,300 100,300" },
+  8: { rashi: { x: 225, y: 275 }, planets: { x: 235, y: 255 }, polygon: "200,200 200,300 300,300" },
+  9: { rashi: { x: 275, y: 225 }, planets: { x: 255, y: 245 }, polygon: "200,200 300,200 300,300" },
+  10: { rashi: { x: 250, y: 125 }, planets: { x: 250, y: 165 }, polygon: "200,100 300,100 300,200 200,200" },
+  11: { rashi: { x: 275, y: 75 }, planets: { x: 255, y: 65 }, polygon: "200,100 300,100 300,0" },
+  12: { rashi: { x: 225, y: 25 }, planets: { x: 235, y: 55 }, polygon: "200,0 200,100 300,0" }
+};
+
 import { useEffect } from "react";
 
 export function AshtakavargaTable({ ashtakavarga, lagnaRashi = 1 }) {
@@ -322,6 +337,160 @@ export function AshtakavargaTable({ ashtakavarga, lagnaRashi = 1 }) {
     );
   };
 
+  const renderEastIndianGrid = (data, isSarva) => {
+    const title = isSarva ? "SAV" : `${t(activeTab)} BAV`;
+    const lagna = lagnaRashi || 1;
+
+    const cells = [];
+    for (let r = 1; r <= 12; r++) {
+      const pts = isSarva ? (data[r]?.points ?? 0) : (data[r] ?? 0);
+      let cls = "";
+      if (isSarva) cls = pts >= 28 ? "high" : pts < 20 ? "low" : "";
+      else cls = pts >= 5 ? "high" : pts <= 2 ? "low" : "";
+
+      const pos = EAST_INDIAN_LAYOUT[r];
+      const isLagna = r === lagna;
+      cells.push({
+        rashiNum: r,
+        pts,
+        cls,
+        pos,
+        isLagna,
+      });
+    }
+
+    return (
+      <div
+        className="east-chart"
+        aria-label={`East Indian ${title}`}
+        style={{
+          width: "100%",
+          maxWidth: "320px",
+          aspectRatio: "1 / 1",
+          margin: "1rem auto 0 auto",
+          boxSizing: "border-box",
+        }}
+      >
+        <svg
+          viewBox="0 0 300 300"
+          width="100%"
+          height="100%"
+          style={{
+            display: "block",
+            background: "#ffffff",
+            border: "2px solid #8e44ad",
+            borderRadius: "8px",
+            boxSizing: "border-box",
+          }}
+        >
+          {/* Main Grid Polygons */}
+          {cells.map(({ rashiNum, pts, cls, pos, isLagna }) => {
+            let color = "#2c3e50";
+            if (cls === "high") color = "#27ae60";
+            else if (cls === "low") color = "#c0392b";
+
+            const fill = isLagna ? "rgba(142, 68, 173, 0.08)" : "#ffffff";
+
+            return (
+              <g key={rashiNum}>
+                {/* Cell Area */}
+                <polygon
+                  points={pos.polygon}
+                  fill={fill}
+                  stroke="#ccc"
+                  strokeWidth="1.2"
+                />
+
+                {/* Lagna marker line (double slanting lines in top right of cell) */}
+                {isLagna && (
+                  <g stroke="#8e44ad" strokeWidth="1.5" opacity="0.6">
+                    <line x1={pos.rashi.x + 8} y1={pos.rashi.y - 12} x2={pos.rashi.x + 18} y2={pos.rashi.y - 2} />
+                    <line x1={pos.rashi.x + 12} y1={pos.rashi.y - 12} x2={pos.rashi.x + 22} y2={pos.rashi.y - 2} />
+                  </g>
+                )}
+
+                {/* Rashi Number */}
+                <text
+                  x={pos.rashi.x}
+                  y={pos.rashi.y}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: "bold",
+                    fill: isLagna ? "#8e44ad" : "#7f8c8d",
+                    fontFamily: "sans-serif",
+                    userSelect: "none",
+                  }}
+                >
+                  {rashiNum}
+                </text>
+
+                {/* Points inside the cell */}
+                <text
+                  x={pos.planets.x}
+                  y={pos.planets.y}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                    fill: color,
+                    fontFamily: "sans-serif",
+                  }}
+                >
+                  {pts}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Center cell - Grid Square & Overlay Title */}
+          <rect
+            x="100"
+            y="100"
+            width="100"
+            height="100"
+            fill="#f9f0ff"
+            stroke="#ccc"
+            strokeWidth="1.2"
+          />
+          <g transform="translate(150, 150)">
+            <text
+              x="0"
+              y="-6"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              style={{
+                fontSize: "11px",
+                fontWeight: "bold",
+                fill: "#8e44ad",
+                fontFamily: "sans-serif",
+              }}
+            >
+              {title}
+            </text>
+            <text
+              x="0"
+              y="10"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              style={{
+                fontSize: "9px",
+                fill: "#666",
+                fontFamily: "sans-serif",
+              }}
+            >
+              {isSarva
+                ? t("sarvashtakavarga", "(Sarvashtakavarga)")
+                : t("bhinnashtakavarga", "(Bhinnashtakavarga)")}
+            </text>
+          </g>
+        </svg>
+      </div>
+    );
+  };
+
   return (
     <section className="table-panel">
       <h2>{t("ashtakavarga", "Ashtakavarga")}</h2>
@@ -398,8 +567,16 @@ export function AshtakavargaTable({ ashtakavarga, lagnaRashi = 1 }) {
 
       <div id="akv-tables">
         {activeTab === "Sarva"
-          ? (chartStyle === "north" ? renderNorthIndianGrid(sarva, true) : renderGrid(sarva, true))
-          : (chartStyle === "north" ? renderNorthIndianGrid(pras[activeTab] || {}, false) : renderGrid(pras[activeTab] || {}, false))}
+          ? (chartStyle === "north"
+              ? renderNorthIndianGrid(sarva, true)
+              : chartStyle === "east"
+                ? renderEastIndianGrid(sarva, true)
+                : renderGrid(sarva, true))
+          : (chartStyle === "north"
+              ? renderNorthIndianGrid(pras[activeTab] || {}, false)
+              : chartStyle === "east"
+                ? renderEastIndianGrid(pras[activeTab] || {}, false)
+                : renderGrid(pras[activeTab] || {}, false))}
       </div>
     </section>
   );

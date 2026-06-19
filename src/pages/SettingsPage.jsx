@@ -1375,6 +1375,7 @@ export function SettingsPage({ logoUrl, onNavigate }) {
               >
                 <option value="south">South Indian Chart</option>
                 <option value="north">North Indian Chart</option>
+                <option value="east">East Indian Chart</option>
               </select>
             </div>
 

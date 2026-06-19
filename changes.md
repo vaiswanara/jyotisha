@@ -1,3 +1,10 @@
+19-06-2026
+- Added Eastern Chart Style in the app .
+
+18-06-2026
+- Added Reference book in eprahsna page.
+- Added "Analyze horoscope" in jataka page.
+
 17-06-2026
 - Fixed "Restore Tables" JSON import logic in `SettingsPage.jsx` (`handleRestoreData`) to detect single-table JSON files containing location metadata/rows (and wrap them reactively under their original filename) instead of treating the `"rows"` and `"location"` keys as separate profiles.
 - Added a "Rename Table" button in the results action panel of both the Panchanga and Muhurtha tabs in `PanchangaPage.jsx`, allowing users to rename already saved tables with overwrite warnings and automatic dropdown lists/form states updates.
