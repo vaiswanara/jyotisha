@@ -284,6 +284,19 @@ export function EClockPage() {
   const [isCompactMobile, setIsCompactMobile] = useState(false);
   const [isGhatiUI, setIsGhatiUI] = useState(false);
 
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
+  const [customModalForm, setCustomModalForm] = useState({
+    profileName: "",
+    dob: "",
+    tob: "",
+    city: "",
+    latitude: "",
+    longitude: "",
+    timezone: "5.5",
+  });
+  const [modalCitySearch, setModalCitySearch] = useState("");
+  const [chartProfilesList, setChartProfilesList] = useState([]);
+
   // --- Data Fetching ---
   const fetchAngles = useCallback(async () => {
     const simTime = fixedTimeMsRef.current !== null ? fixedTimeMsRef.current : Date.now();
@@ -336,6 +349,16 @@ export function EClockPage() {
       if (prefsRef.current.default_display_mode)
         setDisplayMode(prefsRef.current.default_display_mode);
     } catch (e) { }
+
+    // Load birth chart profiles list
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem("vaiswanara_profiles") || "{}",
+      );
+      setChartProfilesList(Object.keys(saved));
+    } catch (e) {
+      console.error(e);
+    }
 
     // Load cities
     const loadCities = async () => {
@@ -2745,39 +2768,118 @@ export function EClockPage() {
                         </button>
                       </div>
                     </summary>
+                    {isOfflineFallback && (
+                      <div style={{ textAlign: "center", marginBottom: "8px" }}>
+                        <span style={{ color: "#c0392b", fontSize: "11px", fontWeight: "bold", padding: "2px 8px", background: "#fdedec", border: "1px solid #e74c3c", borderRadius: "10px" }}>
+                          {t("ephemeris_offline", "EPHEMERIS OFFLINE")}
+                        </span>
+                      </div>
+                    )}
                     <div
                       className="eclock-time-status"
                       style={{
-                        marginTop: "15px",
+                        marginTop: "10px",
                         marginBottom: "15px",
                         display: "flex",
+                        gap: "10px",
                         justifyContent: "center",
+                        alignItems: "center",
                       }}
                     >
-                      <span
+                      <button
+                        onClick={() => {
+                          fixedTimeMsRef.current = null;
+                          setIsTimeTravel(false);
+                          currentAnglesRef.current = null;
+                          // Reset coordinates and timezone to default location
+                          try {
+                            const settingsLoc = JSON.parse(
+                              localStorage.getItem("vaiswanara_default_location") || "null"
+                            );
+                            if (settingsLoc && settingsLoc.latitude && settingsLoc.longitude) {
+                              locRef.current = {
+                                lat: parseFloat(settingsLoc.latitude),
+                                lon: parseFloat(settingsLoc.longitude),
+                                tz: parseFloat(settingsLoc.timezone || 5.5),
+                                city: settingsLoc.city || "Bengaluru, Karnataka",
+                              };
+                            } else {
+                              locRef.current = {
+                                lat: 12.9716,
+                                lon: 77.5946,
+                                tz: 5.5,
+                                city: "Bengaluru, Karnataka",
+                              };
+                            }
+                            setCitySearch(locRef.current.city);
+                          } catch (e) {
+                            locRef.current = { lat: 12.9716, lon: 77.5946, tz: 5.5, city: "Bengaluru, Karnataka" };
+                            setCitySearch("Bengaluru, Karnataka");
+                          }
+                          fetchAngles();
+                        }}
                         style={{
-                          color: isOfflineFallback
-                            ? "#c0392b"
-                            : isTimeTravel
-                              ? "#c0392b"
-                              : "#27ae60",
-                          padding: "4px 12px",
+                          background: !isTimeTravel ? "#27ae60" : "transparent",
+                          color: !isTimeTravel ? "white" : "#27ae60",
+                          border: "1px solid #27ae60",
+                          padding: "6px 14px",
                           borderRadius: "12px",
                           fontSize: "12px",
                           fontWeight: "bold",
-                          border: `1px solid ${isOfflineFallback || isTimeTravel ? "#e74c3c" : "#2ecc71"}`,
-                          background:
-                            isOfflineFallback || isTimeTravel
-                              ? "#fdedec"
-                              : "#eafaf1",
+                          cursor: "pointer",
+                          transition: "all 0.15s ease",
+                          outline: "none",
                         }}
                       >
-                        {isOfflineFallback
-                          ? t("ephemeris_offline", "EPHEMERIS OFFLINE")
-                          : isTimeTravel
-                            ? t("time_travel", "TIME TRAVEL")
-                            : t("live_time", "LIVE TIME")}
-                      </span>
+                        {t("live_time", "Live Time")}
+                      </button>
+                      <button
+                        onClick={() => {
+                          // Prefill current modal form states
+                          const settingsLoc = locRef.current;
+                          const simTime = fixedTimeMsRef.current !== null ? fixedTimeMsRef.current : Date.now();
+                          const tzOffsetHours = parseFloat(settingsLoc.tz || 5.5);
+                          const locDate = new Date(simTime + tzOffsetHours * 3600000);
+                          const pad = (n) => n.toString().padStart(2, "0");
+                          const dobStr = `${locDate.getUTCFullYear()}-${pad(locDate.getUTCMonth() + 1)}-${pad(locDate.getUTCDate())}`;
+                          const tobStr = `${pad(locDate.getUTCHours())}:${pad(locDate.getUTCMinutes())}`;
+
+                          setCustomModalForm({
+                            profileName: "",
+                            dob: dobStr,
+                            tob: tobStr,
+                            city: settingsLoc.city,
+                            latitude: settingsLoc.lat,
+                            longitude: settingsLoc.lon,
+                            timezone: settingsLoc.tz,
+                          });
+                          setModalCitySearch(settingsLoc.city);
+                          
+                          // Load latest profiles
+                          try {
+                            const saved = JSON.parse(
+                              localStorage.getItem("vaiswanara_profiles") || "{}",
+                            );
+                            setChartProfilesList(Object.keys(saved));
+                          } catch (e) {}
+
+                          setIsCustomModalOpen(true);
+                        }}
+                        style={{
+                          background: isTimeTravel ? "#2980b9" : "transparent",
+                          color: isTimeTravel ? "white" : "#2980b9",
+                          border: "1px solid #2980b9",
+                          padding: "6px 14px",
+                          borderRadius: "12px",
+                          fontSize: "12px",
+                          fontWeight: "bold",
+                          cursor: "pointer",
+                          transition: "all 0.15s ease",
+                          outline: "none",
+                        }}
+                      >
+                        {t("custom_time", "Custom Time")}
+                      </button>
                     </div>
                     <div
                       className="eclock-time-nav-row"
@@ -3029,89 +3131,7 @@ export function EClockPage() {
                   </details>
                 )}
 
-              {/* Custom Date */}
-              {prefsRef.current.clock_visible_panels?.includes(
-                "custom_date",
-              ) && (
-                  <details
-                    className="box-white"
-                    style={{
-                      padding: "15px",
-                      borderRadius: "12px",
-                      boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
-                      borderTop: "4px solid #16a085",
-                    }}
-                  >
-                    <summary
-                      style={{
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        color: "#2c3e50",
-                        fontSize: "16px",
-                        outline: "none",
-                        listStyle: "none",
-                      }}
-                    >
-                      {t(
-                        "custom_date_time_expand",
-                        "Custom Date & Time (Expand)",
-                      )}
-                    </summary>
-                    <div
-                      style={{
-                        marginTop: "15px",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "10px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "1fr 1fr",
-                          gap: "10px",
-                        }}
-                      >
-                        <input
-                          type="date"
-                          ref={customDateRef}
-                          style={{
-                            padding: "8px",
-                            border: "1px solid #ccc",
-                            borderRadius: "5px",
-                            width: "100%",
-                          }}
-                        />
-                        <input
-                          type="time"
-                          step="1"
-                          ref={customTimeRef}
-                          style={{
-                            padding: "8px",
-                            border: "1px solid #ccc",
-                            borderRadius: "5px",
-                            width: "100%",
-                          }}
-                        />
-                      </div>
-                      <button
-                        onClick={jumpToCustomTime}
-                        style={{
-                          background: "#16a085",
-                          color: "white",
-                          padding: "10px",
-                          width: "100%",
-                          border: "none",
-                          borderRadius: "4px",
-                          fontWeight: "bold",
-                          cursor: "pointer",
-                        }}
-                      >
-                        {t("jump_to_date", "Jump to Date")}
-                      </button>
-                    </div>
-                  </details>
-                )}
+
 
               {/* Location */}
               {prefsRef.current.clock_visible_panels?.includes("location") && (
@@ -3286,6 +3306,304 @@ export function EClockPage() {
           </div>
         </div>
       </section>
+
+      {isCustomModalOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(8px)",
+            zIndex: 10000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+            boxSizing: "border-box",
+          }}
+          onClick={() => setIsCustomModalOpen(false)}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "16px",
+              width: "100%",
+              maxWidth: "500px",
+              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
+              padding: "24px",
+              boxSizing: "border-box",
+              position: "relative",
+              border: "1px solid rgba(255, 255, 255, 0.8)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Title */}
+            <h3
+              style={{
+                margin: "0 0 20px 0",
+                fontSize: "18px",
+                color: "#2c3e50",
+                borderBottom: "2px solid #f4f6f7",
+                paddingBottom: "10px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span>🕒 {t("custom_profile_time", "Custom Profile / Time")}</span>
+              <button
+                onClick={() => setIsCustomModalOpen(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  fontSize: "20px",
+                  cursor: "pointer",
+                  color: "#95a5a6",
+                  padding: "0 5px",
+                }}
+              >
+                &times;
+              </button>
+            </h3>
+
+            {/* Profile Selection */}
+            {chartProfilesList.length > 0 && (
+              <div style={{ marginBottom: "20px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "13px",
+                    fontWeight: "bold",
+                    color: "#7f8c8d",
+                    marginBottom: "6px",
+                  }}
+                >
+                  👤 {t("select_saved_profile", "Select Saved Profile")}
+                </label>
+                <select
+                  value={customModalForm.profileName}
+                  onChange={(e) => {
+                    const selectedName = e.target.value;
+                    if (!selectedName) return;
+                    try {
+                      const saved = JSON.parse(
+                        localStorage.getItem("vaiswanara_profiles") || "{}",
+                      );
+                      const profile = saved[selectedName];
+                      if (profile) {
+                        setCustomModalForm({
+                          profileName: selectedName,
+                          dob: profile.dob || "",
+                          tob: profile.tob ? profile.tob.substring(0, 5) : "12:00",
+                          city: profile.city || "",
+                          latitude: profile.latitude || "",
+                          longitude: profile.longitude || "",
+                          timezone: profile.timezone || "5.5",
+                        });
+                        setModalCitySearch(profile.city || "");
+                      }
+                    } catch (err) {
+                      console.error("Error loading profile", err);
+                    }
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    border: "1px solid #ccc",
+                    background: "#fdfefe",
+                    fontSize: "14px",
+                    color: "#2c3e50",
+                    outline: "none",
+                  }}
+                >
+                  <option value="">-- {t("select_profile", "Select Profile")} --</option>
+                  {chartProfilesList.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Manual Date & Time Input */}
+            <div style={{ display: "flex", gap: "15px", marginBottom: "20px" }}>
+              <div style={{ flex: 1 }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "13px",
+                    fontWeight: "bold",
+                    color: "#7f8c8d",
+                    marginBottom: "6px",
+                  }}
+                >
+                  📅 {t("birth_date", "Birth Date")}
+                </label>
+                <input
+                  type="date"
+                  value={customModalForm.dob}
+                  onChange={(e) =>
+                    setCustomModalForm((f) => ({ ...f, dob: e.target.value, profileName: "" }))
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    border: "1px solid #ccc",
+                    fontSize: "14px",
+                    boxSizing: "border-box",
+                    outline: "none",
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "13px",
+                    fontWeight: "bold",
+                    color: "#7f8c8d",
+                    marginBottom: "6px",
+                  }}
+                >
+                  ⏰ {t("birth_time", "Birth Time")}
+                </label>
+                <input
+                  type="time"
+                  value={customModalForm.tob}
+                  onChange={(e) =>
+                    setCustomModalForm((f) => ({ ...f, tob: e.target.value, profileName: "" }))
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    border: "1px solid #ccc",
+                    fontSize: "14px",
+                    boxSizing: "border-box",
+                    outline: "none",
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Custom Location Autocomplete */}
+            <div style={{ marginBottom: "24px" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "13px",
+                  fontWeight: "bold",
+                  color: "#7f8c8d",
+                  marginBottom: "6px",
+                }}
+              >
+                📍 {t("birth_place", "Birth Place")}
+              </label>
+              <div style={{ position: "relative" }}>
+                <LocationAutocomplete
+                  city={modalCitySearch}
+                  onLocationSelect={(locData) => {
+                    setModalCitySearch(locData.city);
+                    setCustomModalForm((f) => ({
+                      ...f,
+                      profileName: "",
+                      city: locData.city,
+                      latitude: parseFloat(locData.latitude),
+                      longitude: parseFloat(locData.longitude),
+                      timezone: parseFloat(locData.timezone || 5.5),
+                    }));
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                justifyContent: "flex-end",
+                borderTop: "2px solid #f4f6f7",
+                paddingTop: "16px",
+              }}
+            >
+              <button
+                onClick={() => setIsCustomModalOpen(false)}
+                style={{
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  border: "1px solid #ccc",
+                  background: "#fff",
+                  color: "#7f8c8d",
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  outline: "none",
+                }}
+              >
+                {t("cancel", "Cancel")}
+              </button>
+              <button
+                onClick={() => {
+                  const { dob, tob, latitude, longitude, timezone, city } = customModalForm;
+                  if (!dob || !tob || !latitude || !longitude) {
+                    alert("Please fill in Date, Time, and Location!");
+                    return;
+                  }
+                  
+                  // Parse target epoch time
+                  const [year, month, day] = dob.split("-").map(Number);
+                  let tStr = tob;
+                  if (tStr.length === 5) tStr += ":00";
+                  const [hours, minutes, seconds] = tStr.split(":").map(Number);
+                  const tzOffsetHours = parseFloat(timezone || 5.5);
+                  
+                  // Treat coordinates local time as UTC, subtract tz offset to get epoch Ms
+                  const localAsUTCMs = Date.UTC(year, month - 1, day, hours, minutes, seconds);
+                  const targetEpoch = localAsUTCMs - tzOffsetHours * 3600000;
+
+                  // Set states
+                  fixedTimeMsRef.current = targetEpoch;
+                  setIsTimeTravel(true);
+                  locRef.current = {
+                    lat: parseFloat(latitude),
+                    lon: parseFloat(longitude),
+                    tz: parseFloat(timezone),
+                    city: city,
+                  };
+                  setCitySearch(city);
+                  
+                  // Reset animation lerping
+                  currentAnglesRef.current = null;
+                  
+                  // Fetch and close
+                  fetchAngles();
+                  setIsCustomModalOpen(false);
+                }}
+                style={{
+                  padding: "10px 24px",
+                  borderRadius: "8px",
+                  border: "none",
+                  background: "#2980b9",
+                  color: "white",
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  outline: "none",
+                }}
+              >
+                {t("apply", "Apply")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
