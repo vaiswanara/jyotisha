@@ -2006,6 +2006,122 @@ export function EClockPage() {
     }
   };
 
+  const renderTimeModeButtons = (isMobileStyle = false) => {
+    return (
+      <>
+        <button
+          onClick={() => {
+            fixedTimeMsRef.current = null;
+            setIsTimeTravel(false);
+            currentAnglesRef.current = null;
+            try {
+              const settingsLoc = JSON.parse(
+                localStorage.getItem("vaiswanara_default_location") || "null"
+              );
+              if (settingsLoc && settingsLoc.latitude && settingsLoc.longitude) {
+                locRef.current = {
+                  lat: parseFloat(settingsLoc.latitude),
+                  lon: parseFloat(settingsLoc.longitude),
+                  tz: parseFloat(settingsLoc.timezone || 5.5),
+                  city: settingsLoc.city || "Bengaluru, Karnataka",
+                };
+              } else {
+                locRef.current = {
+                  lat: 12.9716,
+                  lon: 77.5946,
+                  tz: 5.5,
+                  city: "Bengaluru, Karnataka",
+                };
+              }
+              setCitySearch(locRef.current.city);
+            } catch (e) {
+              locRef.current = { lat: 12.9716, lon: 77.5946, tz: 5.5, city: "Bengaluru, Karnataka" };
+              setCitySearch("Bengaluru, Karnataka");
+            }
+            fetchAngles();
+          }}
+          style={isMobileStyle ? {
+            background: !isTimeTravel ? "#27ae60" : "transparent",
+            color: !isTimeTravel ? "white" : "#27ae60",
+            border: "1px solid #27ae60",
+            padding: "4px 8px",
+            borderRadius: "8px",
+            fontSize: "10px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            outline: "none",
+          } : {
+            background: !isTimeTravel ? "#27ae60" : "transparent",
+            color: !isTimeTravel ? "white" : "#27ae60",
+            border: "1px solid #27ae60",
+            padding: "6px 14px",
+            borderRadius: "12px",
+            fontSize: "12px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            transition: "all 0.15s ease",
+            outline: "none",
+          }}
+        >
+          {t("live_time", "Live Time")}
+        </button>
+        <button
+          onClick={() => {
+            const settingsLoc = locRef.current;
+            const simTime = fixedTimeMsRef.current !== null ? fixedTimeMsRef.current : Date.now();
+            const tzOffsetHours = parseFloat(settingsLoc.tz || 5.5);
+            const locDate = new Date(simTime + tzOffsetHours * 3600000);
+            const pad = (n) => n.toString().padStart(2, "0");
+            const dobStr = `${locDate.getUTCFullYear()}-${pad(locDate.getUTCMonth() + 1)}-${pad(locDate.getUTCDate())}`;
+            const tobStr = `${pad(locDate.getUTCHours())}:${pad(locDate.getUTCMinutes())}`;
+
+            setCustomModalForm({
+              profileName: "",
+              dob: dobStr,
+              tob: tobStr,
+              city: settingsLoc.city,
+              latitude: settingsLoc.lat,
+              longitude: settingsLoc.lon,
+              timezone: settingsLoc.tz,
+            });
+            setModalCitySearch(settingsLoc.city);
+            try {
+              const saved = JSON.parse(
+                localStorage.getItem("vaiswanara_profiles") || "{}",
+              );
+              setChartProfilesList(Object.keys(saved));
+            } catch (e) {}
+            setIsCustomModalOpen(true);
+          }}
+          style={isMobileStyle ? {
+            background: isTimeTravel ? "#2980b9" : "transparent",
+            color: isTimeTravel ? "white" : "#2980b9",
+            border: "1px solid #2980b9",
+            padding: "4px 8px",
+            borderRadius: "8px",
+            fontSize: "10px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            outline: "none",
+          } : {
+            background: isTimeTravel ? "#2980b9" : "transparent",
+            color: isTimeTravel ? "white" : "#2980b9",
+            border: "1px solid #2980b9",
+            padding: "6px 14px",
+            borderRadius: "12px",
+            fontSize: "12px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            transition: "all 0.15s ease",
+            outline: "none",
+          }}
+        >
+          {t("custom_time", "Custom Time")}
+        </button>
+      </>
+    );
+  };
+
   return (
     <main
       className="page eclock-page"
@@ -2162,7 +2278,15 @@ export function EClockPage() {
           .eclock-page button:hover {
             transform: translateY(-1px);
           }
+          .eclock-mobile-mode-switch-header {
+            display: none !important;
+          }
           @media (max-width: 900px) {
+            .eclock-mobile-mode-switch-header {
+              display: flex !important;
+              align-items: center;
+              gap: 6px;
+            }
             .eclock-header {
               padding: 16px 14px 0;
             }
@@ -2304,6 +2428,12 @@ export function EClockPage() {
                     >
                       <span>{t("time_machine_expand", "Time Machine")}</span>
                       <div
+                        className="eclock-mobile-mode-switch-header"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {renderTimeModeButtons(true)}
+                      </div>
+                      <div
                         className="eclock-time-mode-switch"
                         style={{
                           display: "flex",
@@ -2380,100 +2510,7 @@ export function EClockPage() {
                         alignItems: "center",
                       }}
                     >
-                      <button
-                        onClick={() => {
-                          fixedTimeMsRef.current = null;
-                          setIsTimeTravel(false);
-                          currentAnglesRef.current = null;
-                          // Reset coordinates and timezone to default location
-                          try {
-                            const settingsLoc = JSON.parse(
-                              localStorage.getItem("vaiswanara_default_location") || "null"
-                            );
-                            if (settingsLoc && settingsLoc.latitude && settingsLoc.longitude) {
-                              locRef.current = {
-                                lat: parseFloat(settingsLoc.latitude),
-                                lon: parseFloat(settingsLoc.longitude),
-                                tz: parseFloat(settingsLoc.timezone || 5.5),
-                                city: settingsLoc.city || "Bengaluru, Karnataka",
-                              };
-                            } else {
-                              locRef.current = {
-                                lat: 12.9716,
-                                lon: 77.5946,
-                                tz: 5.5,
-                                city: "Bengaluru, Karnataka",
-                              };
-                            }
-                            setCitySearch(locRef.current.city);
-                          } catch (e) {
-                            locRef.current = { lat: 12.9716, lon: 77.5946, tz: 5.5, city: "Bengaluru, Karnataka" };
-                            setCitySearch("Bengaluru, Karnataka");
-                          }
-                          fetchAngles();
-                        }}
-                        style={{
-                          background: !isTimeTravel ? "#27ae60" : "transparent",
-                          color: !isTimeTravel ? "white" : "#27ae60",
-                          border: "1px solid #27ae60",
-                          padding: "6px 14px",
-                          borderRadius: "12px",
-                          fontSize: "12px",
-                          fontWeight: "bold",
-                          cursor: "pointer",
-                          transition: "all 0.15s ease",
-                          outline: "none",
-                        }}
-                      >
-                        {t("live_time", "Live Time")}
-                      </button>
-                      <button
-                        onClick={() => {
-                          // Prefill current modal form states
-                          const settingsLoc = locRef.current;
-                          const simTime = fixedTimeMsRef.current !== null ? fixedTimeMsRef.current : Date.now();
-                          const tzOffsetHours = parseFloat(settingsLoc.tz || 5.5);
-                          const locDate = new Date(simTime + tzOffsetHours * 3600000);
-                          const pad = (n) => n.toString().padStart(2, "0");
-                          const dobStr = `${locDate.getUTCFullYear()}-${pad(locDate.getUTCMonth() + 1)}-${pad(locDate.getUTCDate())}`;
-                          const tobStr = `${pad(locDate.getUTCHours())}:${pad(locDate.getUTCMinutes())}`;
-
-                          setCustomModalForm({
-                            profileName: "",
-                            dob: dobStr,
-                            tob: tobStr,
-                            city: settingsLoc.city,
-                            latitude: settingsLoc.lat,
-                            longitude: settingsLoc.lon,
-                            timezone: settingsLoc.tz,
-                          });
-                          setModalCitySearch(settingsLoc.city);
-                          
-                          // Load latest profiles
-                          try {
-                            const saved = JSON.parse(
-                              localStorage.getItem("vaiswanara_profiles") || "{}",
-                            );
-                            setChartProfilesList(Object.keys(saved));
-                          } catch (e) {}
-
-                          setIsCustomModalOpen(true);
-                        }}
-                        style={{
-                          background: isTimeTravel ? "#2980b9" : "transparent",
-                          color: isTimeTravel ? "white" : "#2980b9",
-                          border: "1px solid #2980b9",
-                          padding: "6px 14px",
-                          borderRadius: "12px",
-                          fontSize: "12px",
-                          fontWeight: "bold",
-                          cursor: "pointer",
-                          transition: "all 0.15s ease",
-                          outline: "none",
-                        }}
-                      >
-                        {t("custom_time", "Custom Time")}
-                      </button>
+                      {renderTimeModeButtons(false)}
                     </div>
                     <div
                       className="eclock-time-nav-row"
