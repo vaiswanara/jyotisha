@@ -2042,14 +2042,14 @@ export function EClockPage() {
           }}
           style={isMobileStyle ? {
             background: !isTimeTravel ? "#27ae60" : "transparent",
-            color: !isTimeTravel ? "white" : "#27ae60",
-            border: "1px solid #27ae60",
-            padding: "4px 8px",
-            borderRadius: "8px",
-            fontSize: "10px",
-            fontWeight: "bold",
+            color: !isTimeTravel ? "white" : "#555",
+            padding: "4px 10px",
+            borderRadius: "12px",
+            fontSize: "11px",
+            border: "none",
             cursor: "pointer",
             outline: "none",
+            fontWeight: "600",
           } : {
             background: !isTimeTravel ? "#27ae60" : "transparent",
             color: !isTimeTravel ? "white" : "#27ae60",
@@ -2063,7 +2063,7 @@ export function EClockPage() {
             outline: "none",
           }}
         >
-          {t("live_time", "Live Time")}
+          {isMobileStyle ? t("live", "Live") : t("live_time", "Live Time")}
         </button>
         <button
           onClick={() => {
@@ -2095,14 +2095,14 @@ export function EClockPage() {
           }}
           style={isMobileStyle ? {
             background: isTimeTravel ? "#2980b9" : "transparent",
-            color: isTimeTravel ? "white" : "#2980b9",
-            border: "1px solid #2980b9",
-            padding: "4px 8px",
-            borderRadius: "8px",
-            fontSize: "10px",
-            fontWeight: "bold",
+            color: isTimeTravel ? "white" : "#555",
+            padding: "4px 10px",
+            borderRadius: "12px",
+            fontSize: "11px",
+            border: "none",
             cursor: "pointer",
             outline: "none",
+            fontWeight: "600",
           } : {
             background: isTimeTravel ? "#2980b9" : "transparent",
             color: isTimeTravel ? "white" : "#2980b9",
@@ -2116,7 +2116,7 @@ export function EClockPage() {
             outline: "none",
           }}
         >
-          {t("custom_time", "Custom Time")}
+          {isMobileStyle ? t("custom", "Custom") : t("custom_time", "Custom Time")}
         </button>
       </>
     );
@@ -2430,6 +2430,12 @@ export function EClockPage() {
                       <div
                         className="eclock-mobile-mode-switch-header"
                         onClick={(e) => e.stopPropagation()}
+                        style={{
+                          gap: "4px",
+                          background: "#e8e8e8",
+                          borderRadius: "14px",
+                          padding: "2px",
+                        }}
                       >
                         {renderTimeModeButtons(true)}
                       </div>
