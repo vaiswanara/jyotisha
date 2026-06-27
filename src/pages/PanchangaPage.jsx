@@ -273,6 +273,12 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
   const [selectedProfileName, setSelectedProfileName] = useState("");
   const [selectedProfileLocation, setSelectedProfileLocation] = useState(null);
   const [muhurthaData, setMuhurthaData] = useState([]);
+  const CleanMuhurthaData = Array.isArray(muhurthaData) ? muhurthaData : [];
+  const muhurthaDataRef = useRef([]);
+  const setMuhurthaDataAndRef = (data) => {
+    muhurthaDataRef.current = data;
+    setMuhurthaData(data);
+  };
   const [muhurthaColumns, setMuhurthaColumns] = useState([]);
   const [muhurthaSelectedRows, setMuhurthaSelectedRows] = useState(new Set());
   const [isMuhurthaTableOpen, setIsMuhurthaTableOpen] = useState(true);
@@ -840,8 +846,9 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
             alert("CSV Imported Successfully!");
           }
         } else if (type === "muhurtha") {
-          if (muhurthaData.length > 0 && window.confirm("Do you want to MERGE this CSV with the existing Muhurtha table?\n\nClick OK to MERGE.\nClick Cancel to REPLACE.")) {
-            const merged = [...muhurthaData];
+          const currentMuhData = muhurthaDataRef.current;
+          if (currentMuhData.length > 0 && window.confirm("Do you want to MERGE this CSV with the existing Muhurtha table?\n\nClick OK to MERGE.\nClick Cancel to REPLACE.")) {
+            const merged = [...currentMuhData];
             let added = 0;
             parsedData.forEach((row) => {
               if (!merged.some((r) => r.Date === row.Date)) {
@@ -850,7 +857,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
               }
             });
             merged.sort((a, b) => new Date(a.Date) - new Date(b.Date));
-            setMuhurthaData(merged);
+            setMuhurthaDataAndRef(merged);
             setMuhurthaSelectedRows(new Set());
             if (selectedProfileName) {
               const saved = JSON.parse(localStorage.getItem("panchanga_profiles") || "{}");
@@ -863,7 +870,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
             alert(`Merged ${added} records from CSV into Muhurtha Table!`);
           } else {
             const normalizedParsed = parsedData.map(normalizeMuhurthaRow);
-            setMuhurthaData(normalizedParsed);
+            setMuhurthaDataAndRef(normalizedParsed);
             setMuhurthaSelectedRows(new Set());
             alert("CSV Imported Successfully into Muhurtha Table!");
           }
@@ -889,7 +896,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
   const loadSelectedProfile = (profileName) => {
     setSelectedProfileName(profileName);
     if (!profileName) {
-      setMuhurthaData([]);
+      setMuhurthaDataAndRef([]);
       setSelectedProfileLocation(null);
       return;
     }
@@ -913,7 +920,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
     evaluatePanShudhiFlags(rows, prefs);
     const normalizedRows = rows.map(normalizeMuhurthaRow);
 
-    setMuhurthaData(normalizedRows);
+    setMuhurthaDataAndRef(normalizedRows);
     setMuhurthaSelectedRows(new Set());
     setChartDateSelect("");
     setChartSelectedInfo(null);
@@ -927,7 +934,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
     if (!mergeData) return;
 
     let mergeRows = Array.isArray(mergeData) ? mergeData : mergeData.rows || [];
-    const existingData = [...muhurthaData];
+    const existingData = [...muhurthaDataRef.current];
     let addedCount = 0;
 
     mergeRows.forEach((newRow) => {
@@ -939,7 +946,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
 
     existingData.sort((a, b) => new Date(a.Date) - new Date(b.Date));
     const normalizedMerged = existingData.map(normalizeMuhurthaRow);
-    setMuhurthaData(normalizedMerged);
+    setMuhurthaDataAndRef(normalizedMerged);
 
     if (Array.isArray(saved[selectedProfileName])) {
       saved[selectedProfileName] = normalizedMerged;
@@ -953,13 +960,14 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
   };
 
   const applyMuhurthaTarabalam = () => {
-    if (!selectedProfileName || muhurthaData.length === 0)
+    const currentMuhData = muhurthaDataRef.current;
+    if (!selectedProfileName || currentMuhData.length === 0)
       return alert("Please select a profile first!");
     const { boyCheck, boyNakshatra, girlCheck, girlNakshatra } = muhurthaForm;
     const prefs = JSON.parse(localStorage.getItem("eclock_prefs") || "{}");
     const goodTaras = prefs.tarabalam || [];
 
-    const newData = [...muhurthaData];
+    const newData = [...currentMuhData];
     newData.forEach((row, index) => {
       if (muhurthaSelectedRows.size > 0 && !muhurthaSelectedRows.has(index))
         return;
@@ -1003,7 +1011,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
       }
     });
 
-    setMuhurthaData(newData);
+    setMuhurthaDataAndRef(newData);
     const savedProfiles = JSON.parse(
       localStorage.getItem("panchanga_profiles") || "{}",
     );
@@ -1015,10 +1023,29 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
     }
   };
 
+  const saveMuhurthaTable = () => {
+    if (!selectedProfileName) {
+      alert("Please select a profile first!");
+      return;
+    }
+    const savedProfiles = JSON.parse(
+      localStorage.getItem("panchanga_profiles") || "{}",
+    );
+    if (savedProfiles[selectedProfileName]) {
+      if (Array.isArray(savedProfiles[selectedProfileName]))
+        savedProfiles[selectedProfileName] = muhurthaDataRef.current;
+      else savedProfiles[selectedProfileName].rows = muhurthaDataRef.current;
+      localStorage.setItem("panchanga_profiles", JSON.stringify(savedProfiles));
+      alert("Table data saved successfully!");
+    } else {
+      alert("Selected profile not found in saved profiles.");
+    }
+  };
+
   const handleCellEdit = (index, key, newValue) => {
-    const newData = [...muhurthaData];
+    const newData = [...muhurthaDataRef.current];
     newData[index][key] = newValue;
-    setMuhurthaData(newData);
+    setMuhurthaDataAndRef(newData);
     const savedProfiles = JSON.parse(
       localStorage.getItem("panchanga_profiles") || "{}",
     );
@@ -1156,20 +1183,21 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
 
       const prefs = JSON.parse(localStorage.getItem("eclock_prefs") || "{}");
       const exportCols = prefs.export_columns || muhurthaColumns;
+      const currentMuhData = muhurthaDataRef.current;
       const indices = Array.from(muhurthaSelectedRows).sort(
         (a, b) =>
-          (parseInt(muhurthaData[a]["Priority"]) || 99) -
-          (parseInt(muhurthaData[b]["Priority"]) || 99),
+          (parseInt(currentMuhData[a]["Priority"]) || 99) -
+          (parseInt(currentMuhData[b]["Priority"]) || 99),
       );
 
       const headers = [exportCols.map((c) => c.replace(/_/g, " "))];
       const body = indices.map((idx) =>
         exportCols.map((col) => {
-          let dataKey = muhurthaData[idx].hasOwnProperty(col)
+          let dataKey = currentMuhData[idx].hasOwnProperty(col)
             ? col
             : col.replace(/ /g, "_");
-          return muhurthaData[idx][dataKey] !== undefined
-            ? String(muhurthaData[idx][dataKey])
+          return currentMuhData[idx][dataKey] !== undefined
+            ? String(currentMuhData[idx][dataKey])
             : "";
         }),
       );
@@ -1219,12 +1247,13 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
   };
 
   const exportMuhurthaCSV = () => {
+    const currentMuhData = muhurthaDataRef.current;
     if (!selectedProfileName || muhurthaSelectedRows.size === 0)
       return alert("Select a profile and at least one row!");
     const indices = Array.from(muhurthaSelectedRows).sort(
       (a, b) =>
-        (parseInt(muhurthaData[a]["Priority"]) || 99) -
-        (parseInt(muhurthaData[b]["Priority"]) || 99),
+        (parseInt(currentMuhData[a]["Priority"]) || 99) -
+        (parseInt(currentMuhData[b]["Priority"]) || 99),
     );
 
     const exportCols = muhurthaColumns;
@@ -1233,7 +1262,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
       exportCols.map((c) => `"${c.replace(/_/g, " ")}"`).join(","),
     ];
     indices.forEach((idx) => {
-      const row = muhurthaData[idx];
+      const row = currentMuhData[idx];
       const values = exportCols.map((col) => {
         let dataKey = row.hasOwnProperty(col) ? col : col.replace(/ /g, "_");
         return `"${(row[dataKey] !== undefined ? String(row[dataKey]) : "").replace(/"/g, '""')}"`;
@@ -1264,12 +1293,12 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
     const gNotes = JSON.parse(
       localStorage.getItem("muhurtha_global_notes") || "{}",
     );
-    const newData = [...muhurthaData];
+    const newData = [...muhurthaDataRef.current];
     newData.forEach((row, i) => {
       if (muhurthaSelectedRows.size > 0 && !muhurthaSelectedRows.has(i)) return;
       if (gNotes[row.Date]) row["Muhurtha_Notes"] = gNotes[row.Date];
     });
-    setMuhurthaData(newData);
+    setMuhurthaDataAndRef(newData);
 
     const savedProfiles = JSON.parse(
       localStorage.getItem("panchanga_profiles") || "{}",
@@ -2538,10 +2567,10 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                             if (!window.confirm("Are you sure you want to delete the selected rows?")) {
                               return;
                             }
-                            const newData = muhurthaData.filter(
+                            const newData = muhurthaDataRef.current.filter(
                               (_, i) => !muhurthaSelectedRows.has(i),
                             );
-                            setMuhurthaData(newData);
+                            setMuhurthaDataAndRef(newData);
                             setMuhurthaSelectedRows(new Set());
                             
                             const savedProfiles = JSON.parse(localStorage.getItem("panchanga_profiles") || "{}");
@@ -2613,6 +2642,12 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                           onClick={() => muhurthaCsvRef.current.click()}
                         >
                           Import CSV
+                        </button>
+                        <button
+                          style={{ ...actionBtnStyle, background: "#3498db" }}
+                          onClick={saveMuhurthaTable}
+                        >
+                          Save
                         </button>
                         <input
                           type="file"
