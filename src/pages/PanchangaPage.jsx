@@ -2974,7 +2974,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                             </p>
                             {muhurthaChartData.lagna_name && (
                               <p style={{ margin: "5px 0", fontSize: "14px" }}>
-                                <strong>{muhurthaChartData.lagna_name} Lagna:</strong>{" "}
+                                <strong>{t("lagna_span", "Lagna Span")}:</strong>{" "}
                                 <span style={{ color: "#e67e22", fontWeight: "bold" }}>
                                   {muhurthaChartData.lagna_start} - {muhurthaChartData.lagna_end}
                                 </span>
@@ -2982,7 +2982,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                             )}
                             {muhurthaChartData.mid_lagna_window && (
                               <p style={{ margin: "5px 0", fontSize: "14px" }}>
-                                <strong>Lagna Mid:</strong>{" "}
+                                <strong>{muhurthaChartData.lagna_name || "Lagna"} Lagna:</strong>{" "}
                                 <span style={{ color: "#27ae60", fontWeight: "bold" }}>
                                   {muhurthaChartData.mid_lagna_window}
                                 </span>
@@ -3031,8 +3031,11 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                   fontWeight: "bold",
                                 }}
                               >
-                                {muhurthaChartData.current_muhurtha} (Ends:{" "}
-                                {muhurthaChartData.current_muhurtha_end})
+                                {muhurthaChartData.current_muhurtha} (
+                                {muhurthaChartData.current_muhurtha_start
+                                  ? `${muhurthaChartData.current_muhurtha_start} ${t("to", "to")} ${muhurthaChartData.current_muhurtha_end}`
+                                  : `Ends: ${muhurthaChartData.current_muhurtha_end}`}
+                                )
                               </span>
                             </p>
 
