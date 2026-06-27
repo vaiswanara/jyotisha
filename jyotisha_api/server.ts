@@ -1986,7 +1986,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         input.timestamp && String(input.timestamp) !== ""
           ? parseInt(String(input.timestamp))
           : Date.now();
-      if (timestamp > 9999999999) timestamp = Math.floor(timestamp / 1000);
+      if (Math.abs(timestamp) > 9999999999) timestamp = Math.floor(timestamp / 1000);
 
       const dt = new Date(timestamp * 1000);
       const offsetMs = tz * 3600 * 1000;

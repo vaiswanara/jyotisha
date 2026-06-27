@@ -589,12 +589,9 @@ export function EClockPage() {
       timeStr = `${pad(g)}g : ${pad(v)}v : ${pad(l)}l`;
     }
 
-    let dateStr = locDate.toLocaleDateString("en-IN", {
-      weekday: "long",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    let dateStr = `${weekdays[locDate.getUTCDay()]}, ${locDate.getUTCDate()} ${months[locDate.getUTCMonth()]} ${locDate.getUTCFullYear()}`;
 
     const drawSegment = (
       startDeg,
