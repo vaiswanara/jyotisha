@@ -2263,431 +2263,13 @@ export function EClockPage() {
           {/* Left Panel Controls */}
           {!isFullscreen && (
             <div className="clock-left-panel">
-              {/* Panchanga Panel */}
-              {prefsRef.current.clock_visible_panels?.includes("panchanga") && (
-                <details
-                  className="box-white eclock-panchanga-panel"
-                  open
-                  style={{
-                    padding: "15px",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
-                    borderTop: "4px solid #2ecc71",
-                  }}
-                >
-                  <summary
-                    style={{
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                      color: "#2c3e50",
-                      fontSize: "16px",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      borderBottom: "1px dashed #eee",
-                      paddingBottom: "10px",
-                      marginBottom: "10px",
-                      listStyle: "none",
-                    }}
-                  >
-                    <span>{t("panchanga_details", "Panchanga Details")}</span>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                      }}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "4px",
-                          background: "#e8e8e8",
-                          borderRadius: "14px",
-                          padding: "2px",
-                        }}
-                      >
-                        <button
-                          onClick={() => {
-                            isGhatiFormatRef.current = false;
-                            setIsGhatiUI(false);
-                            drawClock();
-                          }}
-                          style={{
-                            background: !isGhatiUI ? "#3498db" : "transparent",
-                            color: !isGhatiUI ? "white" : "#555",
-                            padding: "4px 10px",
-                            fontSize: "11px",
-                            borderRadius: "12px",
-                            border: "none",
-                            cursor: "pointer",
-                          }}
-                        >
-                          {t("standard_time", "Standard")}
-                        </button>
-                        <button
-                          onClick={() => {
-                            isGhatiFormatRef.current = true;
-                            setIsGhatiUI(true);
-                            drawClock();
-                          }}
-                          style={{
-                            background: isGhatiUI ? "#8e44ad" : "transparent",
-                            color: isGhatiUI ? "white" : "#555",
-                            padding: "4px 10px",
-                            fontSize: "11px",
-                            borderRadius: "12px",
-                            border: "none",
-                            cursor: "pointer",
-                          }}
-                        >
-                          {t("vedic_time", "Vedic")}
-                        </button>
-                      </div>
-                    </div>
-                  </summary>
-                  {currentPanchanga && (
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: "10px",
-                        fontSize: "14px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          padding: "10px",
-                          borderRadius: "8px",
-                          border: "1px solid #ddd",
-                        }}
-                      >
-                        <strong
-                          style={{
-                            color: "#7f8c8d",
-                            fontSize: "12px",
-                            display: "block",
-                          }}
-                        >
-                          {t("tithi", "Tithi")}
-                        </strong>
-                        <span style={{ color: "#2c3e50", fontWeight: "bold" }}>
-                          {currentPanchanga.tithi?.split(" ")[1]
-                            ? `${t(currentPanchanga.tithi.split(" ")[0], currentPanchanga.tithi.split(" ")[0])} ${t(currentPanchanga.tithi.split(" ")[1], currentPanchanga.tithi.split(" ")[1])}`
-                            : t(currentPanchanga.tithi, currentPanchanga.tithi)}
-                        </span>
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: "#7f8c8d",
-                            marginTop: "3px",
-                          }}
-                        >
-                          {t("ends", "Ends")}:{" "}
-                          <span
-                            style={{ color: "#e67e22", fontWeight: "bold" }}
-                          >
-                            {formatPanchangaTime(
-                              currentPanchanga.tithi_end,
-                              currentPanchanga.tithi_end_ts,
-                              currentPanchanga.tithi_rem
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        style={{
-                          padding: "10px",
-                          borderRadius: "8px",
-                          border: "1px solid #ddd",
-                        }}
-                      >
-                        <strong
-                          style={{
-                            color: "#7f8c8d",
-                            fontSize: "12px",
-                            display: "block",
-                          }}
-                        >
-                          {t("vaara_at_sunrise", "Vaara")}
-                        </strong>
-                        <span style={{ color: "#2c3e50", fontWeight: "bold" }}>
-                          {t(currentPanchanga.vaara, currentPanchanga.vaara)}
-                        </span>
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: "#7f8c8d",
-                            marginTop: "3px",
-                          }}
-                        >
-                          {t("ends", "Ends")}:{" "}
-                          <span
-                            style={{ color: "#e67e22", fontWeight: "bold" }}
-                          >
-                            {formatPanchangaTime(
-                              currentPanchanga.vaara_end,
-                              currentPanchanga.vaara_end_ts,
-                              currentPanchanga.vaara_rem
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        style={{
-                          padding: "10px",
-                          borderRadius: "8px",
-                          border: "1px solid #ddd",
-                        }}
-                      >
-                        <strong
-                          style={{
-                            color: "#7f8c8d",
-                            fontSize: "12px",
-                            display: "block",
-                          }}
-                        >
-                          {t("nakshatra", "Nakshatra")}
-                        </strong>
-                        <span style={{ color: "#2c3e50", fontWeight: "bold" }}>
-                          {t(
-                            currentPanchanga.nakshatra,
-                            currentPanchanga.nakshatra,
-                          )}
-                        </span>
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: "#7f8c8d",
-                            marginTop: "3px",
-                          }}
-                        >
-                          {t("ends", "Ends")}:{" "}
-                          <span
-                            style={{ color: "#e67e22", fontWeight: "bold" }}
-                          >
-                            {formatPanchangaTime(
-                              currentPanchanga.nakshatra_end,
-                              currentPanchanga.nakshatra_end_ts,
-                              currentPanchanga.nakshatra_rem
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        style={{
-                          padding: "10px",
-                          borderRadius: "8px",
-                          border: "1px solid #ddd",
-                        }}
-                      >
-                        <strong
-                          style={{
-                            color: "#7f8c8d",
-                            fontSize: "12px",
-                            display: "block",
-                          }}
-                        >
-                          {t("yoga", "Yoga")}
-                        </strong>
-                        <span style={{ color: "#2c3e50", fontWeight: "bold" }}>
-                          {t(currentPanchanga.yoga, currentPanchanga.yoga)}
-                        </span>
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: "#7f8c8d",
-                            marginTop: "3px",
-                          }}
-                        >
-                          {t("ends", "Ends")}:{" "}
-                          <span
-                            style={{ color: "#e67e22", fontWeight: "bold" }}
-                          >
-                            {formatPanchangaTime(
-                              currentPanchanga.yoga_end,
-                              currentPanchanga.yoga_end_ts,
-                              currentPanchanga.yoga_rem
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        style={{
-                          padding: "10px",
-                          borderRadius: "8px",
-                          border: "1px solid #ddd",
-                        }}
-                      >
-                        <strong
-                          style={{
-                            color: "#7f8c8d",
-                            fontSize: "12px",
-                            display: "block",
-                          }}
-                        >
-                          {t("karana", "Karana")}
-                        </strong>
-                        <span style={{ color: "#2c3e50", fontWeight: "bold" }}>
-                          {t(currentPanchanga.karana, currentPanchanga.karana)}
-                        </span>
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: "#7f8c8d",
-                            marginTop: "3px",
-                          }}
-                        >
-                          {t("ends", "Ends")}:{" "}
-                          <span
-                            style={{ color: "#e67e22", fontWeight: "bold" }}
-                          >
-                            {formatPanchangaTime(
-                              currentPanchanga.karana_end,
-                              currentPanchanga.karana_end_ts,
-                              currentPanchanga.karana_rem
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        style={{
-                          padding: "10px",
-                          borderRadius: "8px",
-                          border: "1px solid #ddd",
-                        }}
-                      >
-                        <strong
-                          style={{
-                            color: "#7f8c8d",
-                            fontSize: "12px",
-                            display: "block",
-                          }}
-                        >
-                          {t("hora", "Hora")}
-                        </strong>
-                        <span style={{ color: "#2c3e50", fontWeight: "bold" }}>
-                          {t(currentPanchanga.hora, currentPanchanga.hora)}
-                        </span>
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: "#7f8c8d",
-                            marginTop: "3px",
-                          }}
-                        >
-                          {t("ends", "Ends")}:{" "}
-                          <span
-                            style={{ color: "#e67e22", fontWeight: "bold" }}
-                          >
-                            {formatPanchangaTime(
-                              currentPanchanga.hora_end,
-                              currentPanchanga.hora_end_ts,
-                              currentPanchanga.hora_rem
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        style={{
-                          padding: "10px",
-                          borderRadius: "8px",
-                          border: "1px solid #ddd",
-                        }}
-                      >
-                        <strong
-                          style={{
-                            color: "#7f8c8d",
-                            fontSize: "12px",
-                            display: "block",
-                          }}
-                        >
-                          {t("lagna", "Lagna")}
-                        </strong>
-                        <span style={{ color: "#2c3e50", fontWeight: "bold" }}>
-                          {t(currentPanchanga.lagna, currentPanchanga.lagna)}
-                        </span>
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: "#7f8c8d",
-                            marginTop: "3px",
-                          }}
-                        >
-                          {t("ends", "Ends")}:{" "}
-                          <span
-                            style={{ color: "#e67e22", fontWeight: "bold" }}
-                          >
-                            {formatPanchangaTime(
-                              currentPanchanga.lagna_end,
-                              currentPanchanga.lagna_end_ts,
-                              currentPanchanga.lagna_rem
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        style={{
-                          padding: "10px",
-                          borderRadius: "8px",
-                          border: "1px solid #ddd",
-                        }}
-                      >
-                        <strong
-                          style={{
-                            color: "#7f8c8d",
-                            fontSize: "12px",
-                            display: "block",
-                          }}
-                        >
-                          {t("muhurtha", "Muhurtha")}
-                        </strong>
-                        <span
-                          style={{
-                            color: currentPanchanga.muhurtha_is_good
-                              ? "#27ae60"
-                              : "#c0392b",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {currentPanchanga.muhurtha}
-                        </span>
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: "#7f8c8d",
-                            marginTop: "3px",
-                          }}
-                        >
-                          {t("ends", "Ends")}:{" "}
-                          <span
-                            style={{ color: "#e67e22", fontWeight: "bold" }}
-                          >
-                            {formatPanchangaTime(
-                              currentPanchanga.muhurtha_end,
-                              currentPanchanga.muhurtha_end_ts,
-                              currentPanchanga.muhurtha_rem
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </details>
-              )}
-
               {/* Time Machine */}
               {prefsRef.current.clock_visible_panels?.includes(
                 "time_machine",
               ) && (
                   <details
                     className="box-white eclock-time-machine-panel"
-                    open={isCompactMobile || undefined}
+                    open
                     style={{
                       padding: "15px",
                       borderRadius: "12px",
@@ -3130,6 +2712,424 @@ export function EClockPage() {
                     </button>
                   </details>
                 )}
+
+              {/* Panchanga Panel */}
+              {prefsRef.current.clock_visible_panels?.includes("panchanga") && (
+                <details
+                  className="box-white eclock-panchanga-panel"
+                  open
+                  style={{
+                    padding: "15px",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
+                    borderTop: "4px solid #2ecc71",
+                  }}
+                >
+                  <summary
+                    style={{
+                      cursor: "pointer",
+                      fontWeight: "bold",
+                      color: "#2c3e50",
+                      fontSize: "16px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      borderBottom: "1px dashed #eee",
+                      paddingBottom: "10px",
+                      marginBottom: "10px",
+                      listStyle: "none",
+                    }}
+                  >
+                    <span>{t("panchanga_details", "Panchanga Details")}</span>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "10px",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "4px",
+                          background: "#e8e8e8",
+                          borderRadius: "14px",
+                          padding: "2px",
+                        }}
+                      >
+                        <button
+                          onClick={() => {
+                            isGhatiFormatRef.current = false;
+                            setIsGhatiUI(false);
+                            drawClock();
+                          }}
+                          style={{
+                            background: !isGhatiUI ? "#3498db" : "transparent",
+                            color: !isGhatiUI ? "white" : "#555",
+                            padding: "4px 10px",
+                            fontSize: "11px",
+                            borderRadius: "12px",
+                            border: "none",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {t("standard_time", "Standard")}
+                        </button>
+                        <button
+                          onClick={() => {
+                            isGhatiFormatRef.current = true;
+                            setIsGhatiUI(true);
+                            drawClock();
+                          }}
+                          style={{
+                            background: isGhatiUI ? "#8e44ad" : "transparent",
+                            color: isGhatiUI ? "white" : "#555",
+                            padding: "4px 10px",
+                            fontSize: "11px",
+                            borderRadius: "12px",
+                            border: "none",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {t("vedic_time", "Vedic")}
+                        </button>
+                      </div>
+                    </div>
+                  </summary>
+                  {currentPanchanga && (
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: "10px",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          padding: "10px",
+                          borderRadius: "8px",
+                          border: "1px solid #ddd",
+                        }}
+                      >
+                        <strong
+                          style={{
+                            color: "#7f8c8d",
+                            fontSize: "12px",
+                            display: "block",
+                          }}
+                        >
+                          {t("tithi", "Tithi")}
+                        </strong>
+                        <span style={{ color: "#2c3e50", fontWeight: "bold" }}>
+                          {currentPanchanga.tithi?.split(" ")[1]
+                            ? `${t(currentPanchanga.tithi.split(" ")[0], currentPanchanga.tithi.split(" ")[0])} ${t(currentPanchanga.tithi.split(" ")[1], currentPanchanga.tithi.split(" ")[1])}`
+                            : t(currentPanchanga.tithi, currentPanchanga.tithi)}
+                        </span>
+                        <div
+                          style={{
+                            fontSize: "11px",
+                            color: "#7f8c8d",
+                            marginTop: "3px",
+                          }}
+                        >
+                          {t("ends", "Ends")}:{" "}
+                          <span
+                            style={{ color: "#e67e22", fontWeight: "bold" }}
+                          >
+                            {formatPanchangaTime(
+                              currentPanchanga.tithi_end,
+                              currentPanchanga.tithi_end_ts,
+                              currentPanchanga.tithi_rem
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          padding: "10px",
+                          borderRadius: "8px",
+                          border: "1px solid #ddd",
+                        }}
+                      >
+                        <strong
+                          style={{
+                            color: "#7f8c8d",
+                            fontSize: "12px",
+                            display: "block",
+                          }}
+                        >
+                          {t("vaara_at_sunrise", "Vaara")}
+                        </strong>
+                        <span style={{ color: "#2c3e50", fontWeight: "bold" }}>
+                          {t(currentPanchanga.vaara, currentPanchanga.vaara)}
+                        </span>
+                        <div
+                          style={{
+                            fontSize: "11px",
+                            color: "#7f8c8d",
+                            marginTop: "3px",
+                          }}
+                        >
+                          {t("ends", "Ends")}:{" "}
+                          <span
+                            style={{ color: "#e67e22", fontWeight: "bold" }}
+                          >
+                            {formatPanchangaTime(
+                              currentPanchanga.vaara_end,
+                              currentPanchanga.vaara_end_ts,
+                              currentPanchanga.vaara_rem
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          padding: "10px",
+                          borderRadius: "8px",
+                          border: "1px solid #ddd",
+                        }}
+                      >
+                        <strong
+                          style={{
+                            color: "#7f8c8d",
+                            fontSize: "12px",
+                            display: "block",
+                          }}
+                        >
+                          {t("nakshatra", "Nakshatra")}
+                        </strong>
+                        <span style={{ color: "#2c3e50", fontWeight: "bold" }}>
+                          {t(
+                            currentPanchanga.nakshatra,
+                            currentPanchanga.nakshatra,
+                          )}
+                        </span>
+                        <div
+                          style={{
+                            fontSize: "11px",
+                            color: "#7f8c8d",
+                            marginTop: "3px",
+                          }}
+                        >
+                          {t("ends", "Ends")}:{" "}
+                          <span
+                            style={{ color: "#e67e22", fontWeight: "bold" }}
+                          >
+                            {formatPanchangaTime(
+                              currentPanchanga.nakshatra_end,
+                              currentPanchanga.nakshatra_end_ts,
+                              currentPanchanga.nakshatra_rem
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          padding: "10px",
+                          borderRadius: "8px",
+                          border: "1px solid #ddd",
+                        }}
+                      >
+                        <strong
+                          style={{
+                            color: "#7f8c8d",
+                            fontSize: "12px",
+                            display: "block",
+                          }}
+                        >
+                          {t("yoga", "Yoga")}
+                        </strong>
+                        <span style={{ color: "#2c3e50", fontWeight: "bold" }}>
+                          {t(currentPanchanga.yoga, currentPanchanga.yoga)}
+                        </span>
+                        <div
+                          style={{
+                            fontSize: "11px",
+                            color: "#7f8c8d",
+                            marginTop: "3px",
+                          }}
+                        >
+                          {t("ends", "Ends")}:{" "}
+                          <span
+                            style={{ color: "#e67e22", fontWeight: "bold" }}
+                          >
+                            {formatPanchangaTime(
+                              currentPanchanga.yoga_end,
+                              currentPanchanga.yoga_end_ts,
+                              currentPanchanga.yoga_rem
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          padding: "10px",
+                          borderRadius: "8px",
+                          border: "1px solid #ddd",
+                        }}
+                      >
+                        <strong
+                          style={{
+                            color: "#7f8c8d",
+                            fontSize: "12px",
+                            display: "block",
+                          }}
+                        >
+                          {t("karana", "Karana")}
+                        </strong>
+                        <span style={{ color: "#2c3e50", fontWeight: "bold" }}>
+                          {t(currentPanchanga.karana, currentPanchanga.karana)}
+                        </span>
+                        <div
+                          style={{
+                            fontSize: "11px",
+                            color: "#7f8c8d",
+                            marginTop: "3px",
+                          }}
+                        >
+                          {t("ends", "Ends")}:{" "}
+                          <span
+                            style={{ color: "#e67e22", fontWeight: "bold" }}
+                          >
+                            {formatPanchangaTime(
+                              currentPanchanga.karana_end,
+                              currentPanchanga.karana_end_ts,
+                              currentPanchanga.karana_rem
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          padding: "10px",
+                          borderRadius: "8px",
+                          border: "1px solid #ddd",
+                        }}
+                      >
+                        <strong
+                          style={{
+                            color: "#7f8c8d",
+                            fontSize: "12px",
+                            display: "block",
+                          }}
+                        >
+                          {t("hora", "Hora")}
+                        </strong>
+                        <span style={{ color: "#2c3e50", fontWeight: "bold" }}>
+                          {t(currentPanchanga.hora, currentPanchanga.hora)}
+                        </span>
+                        <div
+                          style={{
+                            fontSize: "11px",
+                            color: "#7f8c8d",
+                            marginTop: "3px",
+                          }}
+                        >
+                          {t("ends", "Ends")}:{" "}
+                          <span
+                            style={{ color: "#e67e22", fontWeight: "bold" }}
+                          >
+                            {formatPanchangaTime(
+                              currentPanchanga.hora_end,
+                              currentPanchanga.hora_end_ts,
+                              currentPanchanga.hora_rem
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          padding: "10px",
+                          borderRadius: "8px",
+                          border: "1px solid #ddd",
+                        }}
+                      >
+                        <strong
+                          style={{
+                            color: "#7f8c8d",
+                            fontSize: "12px",
+                            display: "block",
+                          }}
+                        >
+                          {t("lagna", "Lagna")}
+                        </strong>
+                        <span style={{ color: "#2c3e50", fontWeight: "bold" }}>
+                          {t(currentPanchanga.lagna, currentPanchanga.lagna)}
+                        </span>
+                        <div
+                          style={{
+                            fontSize: "11px",
+                            color: "#7f8c8d",
+                            marginTop: "3px",
+                          }}
+                        >
+                          {t("ends", "Ends")}:{" "}
+                          <span
+                            style={{ color: "#e67e22", fontWeight: "bold" }}
+                          >
+                            {formatPanchangaTime(
+                              currentPanchanga.lagna_end,
+                              currentPanchanga.lagna_end_ts,
+                              currentPanchanga.lagna_rem
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          padding: "10px",
+                          borderRadius: "8px",
+                          border: "1px solid #ddd",
+                        }}
+                      >
+                        <strong
+                          style={{
+                            color: "#7f8c8d",
+                            fontSize: "12px",
+                            display: "block",
+                          }}
+                        >
+                          {t("muhurtha", "Muhurtha")}
+                        </strong>
+                        <span
+                          style={{
+                            color: currentPanchanga.muhurtha_is_good
+                              ? "#27ae60"
+                              : "#c0392b",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {currentPanchanga.muhurtha}
+                        </span>
+                        <div
+                          style={{
+                            fontSize: "11px",
+                            color: "#7f8c8d",
+                            marginTop: "3px",
+                          }}
+                        >
+                          {t("ends", "Ends")}:{" "}
+                          <span
+                            style={{ color: "#e67e22", fontWeight: "bold" }}
+                          >
+                            {formatPanchangaTime(
+                              currentPanchanga.muhurtha_end,
+                              currentPanchanga.muhurtha_end_ts,
+                              currentPanchanga.muhurtha_rem
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </details>
+              )}
 
 
 
