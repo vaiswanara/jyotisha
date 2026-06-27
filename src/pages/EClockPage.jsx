@@ -133,6 +133,16 @@ const BENEFIC_POSITIONS = {
     Venus: [6, 11, 12],
     Saturn: [3, 5, 6, 11],
     Lagna: [1, 3, 4, 6, 10, 11],
+  },
+  Lagna: {
+    Sun: [3, 4, 6, 10, 11, 12],
+    Moon: [3, 6, 10, 11],
+    Mars: [1, 3, 6, 10, 11],
+    Mercury: [1, 2, 4, 6, 8, 10, 11],
+    Jupiter: [1, 2, 4, 5, 6, 7, 9, 10, 11],
+    Venus: [1, 2, 3, 4, 5, 8, 9, 11],
+    Saturn: [1, 3, 4, 6, 10, 11],
+    Lagna: [3, 6, 10, 11]
   }
 };
 
@@ -144,6 +154,7 @@ const SUBJECT_COLORS = {
   Gu: "#d35400",
   Sk: "#8e44ad",
   Sa: "#34495e",
+  Lg: "#c0392b",
 };
 
 const PAV_SUBJECTS = [
@@ -154,6 +165,7 @@ const PAV_SUBJECTS = [
   { key: "Jupiter", label: "Gu", translationKey: "Gu" },
   { key: "Venus", label: "Sk", translationKey: "Sk" },
   { key: "Saturn", label: "Sa", translationKey: "Sa" },
+  { key: "Lagna", label: "Lg", translationKey: "Lg" },
 ];
 
 const baseClockSize = 615;
