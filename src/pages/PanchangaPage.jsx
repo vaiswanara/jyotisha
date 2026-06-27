@@ -1227,10 +1227,10 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
         (parseInt(muhurthaData[b]["Priority"]) || 99),
     );
 
-    const exportCols = ["Priority", ...PANCHANGA_ALL_COLUMNS, "Muhurtha Notes"];
+    const exportCols = muhurthaColumns;
 
     const csvRows = [
-      exportCols.map((c) => `"${c}"`).join(","),
+      exportCols.map((c) => `"${c.replace(/_/g, " ")}"`).join(","),
     ];
     indices.forEach((idx) => {
       const row = muhurthaData[idx];
