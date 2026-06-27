@@ -2325,8 +2325,8 @@ export function EClockPage() {
               white-space: nowrap;
             }
             .eclock-time-mode-switch {
-              flex: 1;
-              justify-content: flex-end;
+              display: flex !important;
+              gap: 4px;
               min-width: 0;
             }
             .eclock-time-mode-switch button,
