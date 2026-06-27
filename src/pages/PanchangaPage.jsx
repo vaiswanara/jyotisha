@@ -2980,6 +2980,9 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                 </span>
                               </p>
                             )}
+
+                            <div style={{ height: "8px" }} />
+
                             {muhurthaChartData.mid_lagna_window && (
                               <p style={{ margin: "5px 0", fontSize: "14px" }}>
                                 <strong>{muhurthaChartData.lagna_name || "Lagna"} Lagna:</strong>{" "}
@@ -2988,39 +2991,6 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                 </span>
                               </p>
                             )}
-                            {muhurthaChartData.lagna_tyajyam && (
-                              <p style={{ margin: "5px 0", fontSize: "14px" }}>
-                                <strong>Lagna Tyajyamu:</strong>{" "}
-                                <span style={{ color: "#c0392b", fontWeight: "bold" }}>
-                                  {muhurthaChartData.lagna_tyajyam}
-                                </span>
-                              </p>
-                            )}
-
-                            <div style={{ height: "8px" }} />
-
-                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
-                              <strong>Pushkaraamsha:</strong>{" "}
-                              <span style={{ color: "#8e44ad", fontWeight: "bold" }}>
-                                {muhurthaChartData.pushkaramsha_time}
-                              </span>
-                            </p>
-                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
-                              <strong>Pushkara:</strong>{" "}
-                              <span
-                                style={{
-                                  color: muhurthaChartData.is_pushkara
-                                    ? "#27ae60"
-                                    : "#c0392b",
-                                  fontWeight: "bold",
-                                }}
-                              >
-                                {muhurthaChartData.pushkaramsha}
-                              </span>
-                            </p>
-
-                            <div style={{ height: "8px" }} />
-
                             <p style={{ margin: "5px 0", fontSize: "14px" }}>
                               <strong>Muhurtha:</strong>{" "}
                               <span
@@ -3038,9 +3008,36 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                 )
                               </span>
                             </p>
+                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                              <strong>Pushkaraamsha:</strong>{" "}
+                              <span style={{ color: "#8e44ad", fontWeight: "bold" }}>
+                                {muhurthaChartData.pushkaramsha_time}
+                              </span>
+                            </p>
 
                             <div style={{ height: "8px" }} />
 
+                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                              <strong>Pushkara:</strong>{" "}
+                              <span
+                                style={{
+                                  color: muhurthaChartData.is_pushkara
+                                    ? "#27ae60"
+                                    : "#c0392b",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {muhurthaChartData.pushkaramsha}
+                              </span>
+                            </p>
+                            {muhurthaChartData.lagna_tyajyam && (
+                              <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                                <strong>Lagna Tyajyamu:</strong>{" "}
+                                <span style={{ color: "#c0392b", fontWeight: "bold" }}>
+                                  {muhurthaChartData.lagna_tyajyam}
+                                </span>
+                              </p>
+                            )}
                             <p style={{ margin: "5px 0", fontSize: "14px" }}>
                               <strong>Panchakam:</strong>{" "}
                               <span
