@@ -2239,6 +2239,25 @@ export function EClockPage() {
               box-shadow: none !important;
             }
           }
+          
+          .eclock-page .popup-container {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6); z-index: 10000;
+            display: flex; justify-content: center; align-items: flex-start;
+            padding: 20px; backdrop-filter: blur(4px);
+            overflow-y: auto;
+          }
+          .eclock-page .popup-content {
+            background: #fff; padding: 30px; border-radius: 16px;
+            width: 100%; max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 40px auto;
+            box-sizing: border-box;
+          }
+          @media (max-width: 768px) {
+            .eclock-page .popup-container { padding: 15px; }
+            .eclock-page .popup-content { padding: 20px; max-width: 100%; margin: 20px auto; }
+          }
         `}</style>
         <div className="clock-main-layout">
           {/* Left Panel Controls */}
@@ -2701,26 +2720,7 @@ export function EClockPage() {
                         }}
                         onClick={(e) => e.preventDefault()}
                       >
-                        <button
-                          onClick={() => {
-                            fixedTimeMsRef.current = null;
-                            setIsTimeTravel(false);
-                            currentAnglesRef.current = null;
-                            fetchAngles();
-                          }}
-                          style={{
-                            background: "#27ae60",
-                            color: "white",
-                            padding: "4px 8px",
-                            fontSize: "11px",
-                            borderRadius: "12px",
-                            border: "none",
-                            cursor: "pointer",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {t("live_time", "Live Time")}
-                        </button>
+
                         <button
                           onClick={() => setDisplayMode("clock")}
                           style={{
@@ -3133,46 +3133,7 @@ export function EClockPage() {
 
 
 
-              {/* Location */}
-              {prefsRef.current.clock_visible_panels?.includes("location") && (
-                <details
-                  className="box-white"
-                  style={{
-                    padding: "15px",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
-                    borderTop: "4px solid #3498db",
-                  }}
-                >
-                  <summary
-                    style={{
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                      color: "#2c3e50",
-                      fontSize: "16px",
-                      outline: "none",
-                      listStyle: "none",
-                    }}
-                  >
-                    {t("location_expand", "Location (Expand to change)")}
-                  </summary>
-                  <div style={{ marginTop: "15px" }}>
-                    <LocationAutocomplete
-                      city={citySearch}
-                      onLocationSelect={(locData) => {
-                        setCitySearch(locData.city);
-                        locRef.current = {
-                          lat: parseFloat(locData.latitude),
-                          lon: parseFloat(locData.longitude),
-                          tz: parseFloat(locData.timezone || 5.5),
-                          city: locData.city,
-                        };
-                        fetchAngles();
-                      }}
-                    />
-                  </div>
-                </details>
-              )}
+
             </div>
           )}
 
@@ -3309,35 +3270,11 @@ export function EClockPage() {
 
       {isCustomModalOpen && (
         <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0, 0, 0, 0.4)",
-            backdropFilter: "blur(8px)",
-            zIndex: 10000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "20px",
-            boxSizing: "border-box",
-          }}
+          className="popup-container"
           onClick={() => setIsCustomModalOpen(false)}
         >
           <div
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: "16px",
-              width: "100%",
-              maxWidth: "500px",
-              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
-              padding: "24px",
-              boxSizing: "border-box",
-              position: "relative",
-              border: "1px solid rgba(255, 255, 255, 0.8)",
-            }}
+            className="popup-content"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Title */}
