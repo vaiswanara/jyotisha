@@ -2329,7 +2329,8 @@ export function EClockPage() {
               justify-content: flex-end;
               min-width: 0;
             }
-            .eclock-time-mode-switch button {
+            .eclock-time-mode-switch button,
+            .eclock-mobile-mode-switch-header button {
               width: auto !important;
               min-width: 0 !important;
               min-height: 0 !important;
