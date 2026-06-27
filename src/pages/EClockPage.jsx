@@ -293,7 +293,7 @@ export function EClockPage() {
         lat: locRef.current.lat,
         lon: locRef.current.lon,
         tz: locRef.current.tz,
-        timestamp: simTime,
+        timestamp: Math.floor(simTime / 1000),
       });
       const res = await fetch(`${API_URL}?${params.toString()}`, {
         headers: { "x-api-token": API_TOKEN }
