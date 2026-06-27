@@ -63,6 +63,99 @@ const NAKSHATRAS = [
   "Revati",
 ];
 
+const BENEFIC_POSITIONS = {
+  Sun: {
+    Sun: [1, 2, 4, 7, 8, 9, 10, 11],
+    Moon: [3, 6, 10, 11],
+    Mars: [1, 2, 4, 7, 8, 9, 10, 11],
+    Mercury: [3, 5, 6, 9, 10, 11, 12],
+    Jupiter: [5, 6, 9, 11],
+    Venus: [6, 7, 12],
+    Saturn: [1, 2, 4, 7, 8, 9, 10, 11],
+    Lagna: [3, 4, 6, 10, 11, 12],
+  },
+  Moon: {
+    Sun: [3, 6, 7, 8, 10, 11],
+    Moon: [1, 3, 6, 7, 10, 11],
+    Mars: [2, 3, 5, 6, 9, 10, 11],
+    Mercury: [1, 3, 4, 5, 7, 8, 10, 11],
+    Jupiter: [1, 4, 7, 8, 10, 11, 12],
+    Venus: [3, 4, 5, 7, 9, 10, 11],
+    Saturn: [3, 5, 6, 11],
+    Lagna: [3, 6, 10, 11],
+  },
+  Mars: {
+    Sun: [3, 5, 6, 10, 11],
+    Moon: [3, 6, 11],
+    Mars: [1, 2, 4, 7, 8, 10, 11],
+    Mercury: [3, 5, 6, 11],
+    Jupiter: [6, 10, 11, 12],
+    Venus: [6, 8, 11, 12],
+    Saturn: [1, 4, 7, 8, 9, 10, 11],
+    Lagna: [1, 3, 6, 10, 11],
+  },
+  Mercury: {
+    Sun: [5, 6, 9, 11, 12],
+    Moon: [2, 4, 6, 8, 10, 11],
+    Mars: [1, 2, 4, 7, 8, 9, 10, 11],
+    Mercury: [1, 3, 5, 6, 9, 10, 11, 12],
+    Jupiter: [6, 8, 11, 12],
+    Venus: [1, 2, 3, 4, 5, 8, 9, 11],
+    Saturn: [1, 2, 4, 7, 8, 9, 10, 11],
+    Lagna: [1, 2, 4, 6, 8, 10, 11],
+  },
+  Jupiter: {
+    Sun: [1, 2, 3, 4, 7, 8, 9, 10, 11],
+    Moon: [2, 5, 7, 9, 11],
+    Mars: [1, 2, 4, 7, 8, 10, 11],
+    Mercury: [1, 2, 4, 5, 6, 9, 10, 11],
+    Jupiter: [1, 2, 3, 4, 7, 8, 10, 11],
+    Venus: [2, 5, 6, 9, 10, 11],
+    Saturn: [3, 5, 6, 12],
+    Lagna: [1, 2, 4, 5, 6, 7, 9, 10, 11],
+  },
+  Venus: {
+    Sun: [8, 11, 12],
+    Moon: [1, 2, 3, 4, 5, 8, 9, 11, 12],
+    Mars: [3, 4, 6, 9, 11, 12],
+    Mercury: [3, 5, 6, 9, 11],
+    Jupiter: [5, 8, 9, 10, 11],
+    Venus: [1, 2, 3, 4, 5, 8, 9, 10, 11],
+    Saturn: [3, 4, 5, 8, 9, 10, 11],
+    Lagna: [1, 2, 3, 4, 5, 8, 9, 11],
+  },
+  Saturn: {
+    Sun: [1, 2, 4, 7, 8, 10, 11],
+    Moon: [3, 6, 11],
+    Mars: [3, 5, 6, 10, 11, 12],
+    Mercury: [6, 8, 9, 10, 11, 12],
+    Jupiter: [5, 6, 11, 12],
+    Venus: [6, 11, 12],
+    Saturn: [3, 5, 6, 11],
+    Lagna: [1, 3, 4, 6, 10, 11],
+  }
+};
+
+const SUBJECT_COLORS = {
+  Su: "#f39c12",
+  Ch: "#2980b9",
+  Ku: "#e74c3c",
+  Bu: "#27ae60",
+  Gu: "#d35400",
+  Sk: "#8e44ad",
+  Sa: "#34495e",
+};
+
+const PAV_SUBJECTS = [
+  { key: "Sun", label: "Su", translationKey: "Su" },
+  { key: "Moon", label: "Ch", translationKey: "Ch" },
+  { key: "Mars", label: "Ku", translationKey: "Ku" },
+  { key: "Mercury", label: "Bu", translationKey: "Bu" },
+  { key: "Jupiter", label: "Gu", translationKey: "Gu" },
+  { key: "Venus", label: "Sk", translationKey: "Sk" },
+  { key: "Saturn", label: "Sa", translationKey: "Sa" },
+];
+
 const baseClockSize = 615;
 
 export function EClockPage() {
@@ -160,7 +253,7 @@ export function EClockPage() {
   const mousePosRef = useRef({ x: -100, y: -100 });
   const hitboxesRef = useRef([]);
 
-  const manualTimeOffsetRef = useRef(0);
+  const fixedTimeMsRef = useRef(null);
   const isCountdownActiveRef = useRef(false);
   const countdownTargetRef = useRef(null);
   const countdownLabelRef = useRef("Starts In");
@@ -178,6 +271,7 @@ export function EClockPage() {
   // React States for UI
   const [clockZoom, setClockZoom] = useState(1.0);
   const [displayMode, setDisplayMode] = useState("clock");
+  const [pavSubject, setPavSubject] = useState("Sun");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentPanchanga, setCurrentPanchanga] = useState(null);
   const [isTimeTravel, setIsTimeTravel] = useState(false);
@@ -192,7 +286,7 @@ export function EClockPage() {
 
   // --- Data Fetching ---
   const fetchAngles = useCallback(async () => {
-    const simTime = Date.now() + manualTimeOffsetRef.current;
+    const simTime = fixedTimeMsRef.current !== null ? fixedTimeMsRef.current : Date.now();
     try {
       const params = new URLSearchParams({
         endpoint: "clock",
@@ -226,7 +320,7 @@ export function EClockPage() {
       }
 
       setIsOfflineFallback(data.meta && data.meta.engine === "fallback");
-      setIsTimeTravel(manualTimeOffsetRef.current !== 0);
+      setIsTimeTravel(fixedTimeMsRef.current !== null);
     } catch (e) {
       console.error("Clock fetch error", e);
     }
@@ -241,7 +335,7 @@ export function EClockPage() {
       setClockZoom(prefsRef.current.clock_zoom || 1.0);
       if (prefsRef.current.default_display_mode)
         setDisplayMode(prefsRef.current.default_display_mode);
-    } catch (e) {}
+    } catch (e) { }
 
     // Load cities
     const loadCities = async () => {
@@ -286,7 +380,7 @@ export function EClockPage() {
         };
         setCitySearch(locRef.current.city);
       }
-    } catch (e) {}
+    } catch (e) { }
 
     // Init custom dates
     const now = new Date();
@@ -329,7 +423,8 @@ export function EClockPage() {
     if (isNextDay) {
       cleanStr = cleanStr.substring(1).trim();
     } else if (targetTs) {
-      const simDate = new Date(Date.now() + manualTimeOffsetRef.current);
+      const simTime = fixedTimeMsRef.current !== null ? fixedTimeMsRef.current : Date.now();
+      const simDate = new Date(simTime);
       const tzOffsetHours = parseFloat(locRef.current.tz || 5.5);
       const currentLocal = new Date(simDate.getTime() + tzOffsetHours * 3600000);
       const targetLocal = new Date(targetTs * 1000 + tzOffsetHours * 3600000);
@@ -360,7 +455,8 @@ export function EClockPage() {
           if (String(tStr).toUpperCase().includes("PM") && h < 12) h += 12;
           if (String(tStr).toUpperCase().includes("AM") && h === 12) h = 0;
 
-          let simDate = new Date(Date.now() + manualTimeOffsetRef.current);
+          let simTime = fixedTimeMsRef.current !== null ? fixedTimeMsRef.current : Date.now();
+          let simDate = new Date(simTime);
           let tzOffsetHours = parseFloat(locRef.current.tz || 5.5);
           let locDate = new Date(simDate.getTime() + tzOffsetHours * 3600000);
 
@@ -451,7 +547,7 @@ export function EClockPage() {
     const isFull = !!(
       document.fullscreenElement || document.webkitFullscreenElement
     );
-    const dMode = isFull ? prefs.default_display_mode || "clock" : displayMode;
+    const dMode = isFull ? (["chart", "pav"].includes(displayMode) ? displayMode : (prefs.default_display_mode || "clock")) : displayMode;
 
     if (!angles || !angles.Su) return;
 
@@ -465,7 +561,8 @@ export function EClockPage() {
     const cx = canvas.width / 2;
     const cy = canvas.height / 2;
 
-    let simDate = new Date(Date.now() + manualTimeOffsetRef.current);
+    let simTime = fixedTimeMsRef.current !== null ? fixedTimeMsRef.current : Date.now();
+    let simDate = new Date(simTime);
     let tzOffsetHours = parseFloat(locRef.current.tz || 5.5);
     let locDate = new Date(simDate.getTime() + tzOffsetHours * 3600000);
 
@@ -1198,28 +1295,73 @@ export function EClockPage() {
           Ke: prefs.clock_Ke || "#95a5a6",
         };
         let planetsToDraw = [];
-        if (angles.lagna !== undefined)
-          planetsToDraw.push({
-            id: "Lg",
-            color: prefs.clock_Lg || "#c0392b",
-            angle: angles.lagna,
-            isR: false,
-            isC: false,
-            isH: false,
+
+        if (dMode === "pav") {
+          const contributors = [
+            { key: "Su", name: "Sun", label: "Su", color: prefs.clock_Su || "#f39c12" },
+            { key: "Mo", name: "Moon", label: "Ch", color: prefs.clock_Mo || "#2980b9" },
+            { key: "Ku", name: "Mars", label: "Ku", color: prefs.clock_Ku || "#e74c3c" },
+            { key: "Bu", name: "Mercury", label: "Bu", color: prefs.clock_Bu || "#27ae60" },
+            { key: "Gu", name: "Jupiter", label: "Gu", color: prefs.clock_Gu || "#d35400" },
+            { key: "Sk", name: "Venus", label: "Sk", color: prefs.clock_Sk || "#8e44ad" },
+            { key: "Sa", name: "Saturn", label: "Sa", color: prefs.clock_Sa || "#34495e" },
+            { key: "lagna", name: "Lagna", label: "Lg", color: prefs.clock_Lg || "#c0392b" },
+          ];
+
+          contributors.forEach((cData) => {
+            let angle;
+            if (cData.key === "lagna") {
+              angle = angles.lagna;
+            } else {
+              angle = angles[cData.key]?.angle;
+            }
+            if (angle === undefined) return;
+
+            let rashi = Math.floor(angle / 30) + 1; // 1-based rashi
+            const allowedOffsets = BENEFIC_POSITIONS[pavSubject]?.[cData.name] || [];
+
+            for (let H = 1; H <= 12; H++) {
+              const offset = ((H - rashi + 12) % 12) + 1;
+              if (allowedOffsets.includes(offset)) {
+                const virtualAngle = (H - 1) * 30 + (angle % 30);
+                planetsToDraw.push({
+                  id: cData.label,
+                  color: cData.color,
+                  angle: virtualAngle,
+                  isR: cData.key !== "lagna" ? angles[cData.key]?.isR : false,
+                  isC: cData.key !== "lagna" ? angles[cData.key]?.isC : false,
+                  isH: cData.key !== "lagna" ? angles[cData.key]?.isH : false,
+                  tooltipSubject: pavSubject,
+                  tooltipContributor: cData.label,
+                  tooltipRashi: H,
+                });
+              }
+            }
           });
-        Object.keys(pColors).forEach((p) => {
-          if (angles[p] !== undefined)
+        } else {
+          if (angles.lagna !== undefined)
             planetsToDraw.push({
-              id: p === "Mo" ? "Ch" : p,
-              color: pColors[p],
-              angle: angles[p].angle,
-              isR: angles[p].isR,
-              isC: angles[p].isC,
-              isH: angles[p].isH,
-              tithiNum: p === "Mo" ? angles[p].tithi_num : undefined,
-              paksha: p === "Mo" ? angles[p].paksha : undefined,
+              id: "Lg",
+              color: prefs.clock_Lg || "#c0392b",
+              angle: angles.lagna,
+              isR: false,
+              isC: false,
+              isH: false,
             });
-        });
+          Object.keys(pColors).forEach((p) => {
+            if (angles[p] !== undefined)
+              planetsToDraw.push({
+                id: p === "Mo" ? "Ch" : p,
+                color: pColors[p],
+                angle: angles[p].angle,
+                isR: angles[p].isR,
+                isC: angles[p].isC,
+                isH: angles[p].isH,
+                tithiNum: p === "Mo" ? angles[p].tithi_num : undefined,
+                paksha: p === "Mo" ? angles[p].paksha : undefined,
+              });
+          });
+        }
         planetsToDraw.sort((a, b) => a.angle - b.angle);
 
         const B = [
@@ -1251,12 +1393,13 @@ export function EClockPage() {
           { x: 0.5, y: 1.5 },
           { x: 0.5, y: 0.5 },
         ];
-        let lastAngles = [-999, -999, -999, -999];
-        let staggerOffsets = [0, 28, -28, 56];
+        const staggerOffsets = dMode === "pav" ? [0, 22, -22, 42, -42, 60, -60, 75] : [0, 28, -28, 56];
+        const maxLevels = staggerOffsets.length;
+        let lastAngles = Array(maxLevels).fill(-999);
 
         planetsToDraw.forEach((p) => {
           let level = 0;
-          while (level < 4) {
+          while (level < maxLevels) {
             let diff = 999;
             if (lastAngles[level] !== -999) {
               diff = Math.abs(p.angle - lastAngles[level]);
@@ -1265,7 +1408,7 @@ export function EClockPage() {
             if (diff > 7.5) break;
             level++;
           }
-          if (level > 3) level = 3;
+          if (level >= maxLevels) level = maxLevels - 1;
           lastAngles[level] = p.angle;
 
           let rasiIdx = Math.floor(p.angle / 30) % 12;
@@ -1312,12 +1455,17 @@ export function EClockPage() {
 
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          const relDeg = Math.floor((((p.angle % 360) + 360) % 360) % 30);
           ctx.fillStyle = p.color;
-          ctx.font = `bold ${radius - 4}px Arial`;
-          ctx.fillText(tr(p.id, p.id), pt.x, pt.y - 3);
-          ctx.font = `bold ${radius - 8}px Arial`;
-          ctx.fillText(relDeg + "°", pt.x, pt.y + 7);
+          if (dMode === "pav") {
+            ctx.font = `bold ${radius - 2}px Arial`;
+            ctx.fillText(tr(p.id, p.id), pt.x, pt.y);
+          } else {
+            const relDeg = Math.floor((((p.angle % 360) + 360) % 360) % 30);
+            ctx.font = `bold ${radius - 4}px Arial`;
+            ctx.fillText(tr(p.id, p.id), pt.x, pt.y - 3);
+            ctx.font = `bold ${radius - 8}px Arial`;
+            ctx.fillText(relDeg + "°", pt.x, pt.y + 7);
+          }
 
           if (p.isR) {
             let bx = pt.x + radius + 1,
@@ -1353,6 +1501,17 @@ export function EClockPage() {
             ctx.fillText("H", bx, by + 1);
           }
 
+          let tooltipStr = null;
+          if (dMode === "pav" && p.tooltipSubject) {
+            let contributorName = tr(p.id, p.id);
+            let subjectName = tr(p.tooltipSubject, p.tooltipSubject);
+            let rashiName = tr(RASI_NAMES[p.tooltipRashi - 1], RASI_NAMES[p.tooltipRashi - 1]);
+            tooltipStr = tr("pav_tooltip_format", "${contributor} contributes 1 point to ${subject} in ${rashi}")
+              .replace("${contributor}", contributorName)
+              .replace("${subject}", subjectName)
+              .replace("${rashi}", rashiName);
+          }
+
           hitboxesRef.current.push({
             id: p.id,
             x: pt.x,
@@ -1364,8 +1523,25 @@ export function EClockPage() {
             isH: p.isH,
             tithiNum: p.tithiNum,
             paksha: p.paksha,
+            tooltip: tooltipStr,
           });
         });
+
+        if (dMode === "pav") {
+          for (let rasiIdx = 0; rasiIdx < 12; rasiIdx++) {
+            const pos = cellPos[rasiIdx];
+            const cellX = M + pos.c * S;
+            const cellY = M + pos.r * S;
+            const count = planetsToDraw.filter(
+              (p) => Math.floor(p.angle / 30) % 12 === rasiIdx
+            ).length;
+            ctx.fillStyle = count >= 4 ? "#27ae60" : "#7f8c8d";
+            ctx.font = "bold 22px Arial";
+            ctx.textAlign = "right";
+            ctx.textBaseline = "top";
+            ctx.fillText(count.toString(), cellX + S - 12, cellY + 10);
+          }
+        }
       }
 
       ctx.textAlign = "center";
@@ -1374,6 +1550,13 @@ export function EClockPage() {
       ctx.shadowBlur = 6;
       let textElements = [];
       let clkElems = prefs.clock_visible_elements || ["time_date", "brand"];
+      if (dMode === "pav") {
+        let subjectName = tr(pavSubject, pavSubject);
+        textElements.push({
+          type: "pavTitle",
+          val: tr("pav_center_title", "${subject} PAV").replace("${subject}", subjectName).replace("{{subject}}", subjectName)
+        });
+      }
       if (clkElems.includes("time_date")) {
         textElements.push({ type: "time", val: timeStr });
         textElements.push({ type: "date", val: dateStr });
@@ -1418,6 +1601,7 @@ export function EClockPage() {
         if (item.type === "cdTime") return sum + 40;
         if (item.type === "brandName") return sum + 26;
         if (item.type === "brandTag") return sum + 20;
+        if (item.type === "pavTitle") return sum + 28;
         return sum;
       }, 0);
       let currentY = cy - totalHeight / 2 + 10;
@@ -1456,6 +1640,11 @@ export function EClockPage() {
           ctx.fillText(item.val, cx, currentY);
           ctx.fillText(item.val, cx, currentY);
           currentY += 40;
+        } else if (item.type === "pavTitle") {
+          ctx.font = "bold 16px Arial";
+          ctx.fillStyle = "#e67e22";
+          ctx.fillText(item.val, cx, currentY);
+          currentY += 28;
         }
       });
       ctx.shadowBlur = 0;
@@ -1475,7 +1664,7 @@ export function EClockPage() {
     if (dMode === "clock") {
       isCenterHovered =
         (mousePosRef.current.x - cx) * (mousePosRef.current.x - cx) +
-          (mousePosRef.current.y - cy) * (mousePosRef.current.y - cy) <=
+        (mousePosRef.current.y - cy) * (mousePosRef.current.y - cy) <=
         900;
     } else {
       const M = 15,
@@ -1492,14 +1681,14 @@ export function EClockPage() {
       let txt = hovered.tooltip
         ? hovered.tooltip
         : getTooltipText(
-            hovered.id,
-            hovered.angle,
-            hovered.isR,
-            hovered.isC,
-            hovered.isH,
-            hovered.tithiNum,
-            hovered.paksha,
-          );
+          hovered.id,
+          hovered.angle,
+          hovered.isR,
+          hovered.isC,
+          hovered.isH,
+          hovered.tithiNum,
+          hovered.paksha,
+        );
       ctx.save();
       ctx.font = "bold 13px Arial";
       let w = ctx.measureText(txt).width + 20;
@@ -1523,7 +1712,7 @@ export function EClockPage() {
     } else {
       canvas.style.cursor = "default";
     }
-  }, [displayMode]); // Include dependencies that affect drawing structure
+  }, [displayMode, chartStyle, pavSubject]); // Include dependencies that affect drawing structure
 
   // --- Animation Loop ---
   useEffect(() => {
@@ -1654,13 +1843,20 @@ export function EClockPage() {
   };
 
   const adjustTime = (offsetMs) => {
-    manualTimeOffsetRef.current += offsetMs;
-    setIsTimeTravel(manualTimeOffsetRef.current !== 0);
+    if (fixedTimeMsRef.current === null) {
+      fixedTimeMsRef.current = Date.now() + offsetMs;
+    } else {
+      fixedTimeMsRef.current += offsetMs;
+    }
+    setIsTimeTravel(true);
+
+    if (Math.abs(offsetMs) >= 3600000) {
+      currentAnglesRef.current = null;
+    }
 
     // Update Custom Date UI Match
-    const simDate = new Date(Date.now() + manualTimeOffsetRef.current);
     const tzOffsetHours = parseFloat(locRef.current.tz || 5.5);
-    const locDate = new Date(simDate.getTime() + tzOffsetHours * 3600000);
+    const locDate = new Date(fixedTimeMsRef.current + tzOffsetHours * 3600000);
     const pad = (n) => n.toString().padStart(2, "0");
     if (customDateRef.current) {
       customDateRef.current.value = `${locDate.getUTCFullYear()}-${pad(locDate.getUTCMonth() + 1)}-${pad(locDate.getUTCDate())}`;
@@ -1681,16 +1877,32 @@ export function EClockPage() {
     }
     let tStr = tVal || "00:00:00";
     if (tStr.length === 5) tStr += ":00";
-    const targetDateUTC = new Date(`${dVal}T${tStr}Z`);
-    if (isNaN(targetDateUTC.getTime())) {
+
+    // Parse date and time components (user-entered time is in the selected location's LOCAL time)
+    const [year, month, day] = dVal.split("-").map(Number);
+    const [hours, minutes, seconds] = tStr.split(":").map(Number);
+
+    if (
+      isNaN(year) || isNaN(month) || isNaN(day) ||
+      isNaN(hours) || isNaN(minutes) || isNaN(seconds)
+    ) {
       alert("Invalid Date/Time!");
       return;
     }
-    const tzOffsetHours = parseFloat(locRef.current.tz || 5.5);
-    const targetEpoch = targetDateUTC.getTime() - tzOffsetHours * 3600000;
 
-    manualTimeOffsetRef.current = targetEpoch - Date.now();
-    setIsTimeTravel(manualTimeOffsetRef.current !== 0);
+    // Treat the input as the location's local time and convert to UTC epoch
+    const tzOffsetHours = parseFloat(locRef.current.tz || 5.5);
+    // Date.UTC treats args as UTC, so subtracting tz offset gives us the true UTC epoch
+    const localAsUTCMs = Date.UTC(year, month - 1, day, hours, minutes, seconds);
+    const targetEpoch = localAsUTCMs - tzOffsetHours * 3600000;
+
+    fixedTimeMsRef.current = targetEpoch;
+    setIsTimeTravel(true);
+
+    // Reset current angles so the animation snaps instantly to the new target
+    // instead of lerping slowly from the old position (which causes the fast-spin bug)
+    currentAnglesRef.current = null;
+
     fetchAngles();
   };
 
@@ -2434,460 +2646,475 @@ export function EClockPage() {
               {prefsRef.current.clock_visible_panels?.includes(
                 "time_machine",
               ) && (
-                <details
-                  className="box-white eclock-time-machine-panel"
-                  open={isCompactMobile || undefined}
-                  style={{
-                    padding: "15px",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
-                    borderTop: "4px solid #f39c12",
-                  }}
-                >
-                  <summary
+                  <details
+                    className="box-white eclock-time-machine-panel"
+                    open={isCompactMobile || undefined}
                     style={{
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                      color: "#2c3e50",
-                      fontSize: "16px",
-                      outline: "none",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      listStyle: "none",
+                      padding: "15px",
+                      borderRadius: "12px",
+                      boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
+                      borderTop: "4px solid #f39c12",
                     }}
                   >
-                    <span>{t("time_machine_expand", "Time Machine")}</span>
+                    <summary
+                      style={{
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: "#2c3e50",
+                        fontSize: "16px",
+                        outline: "none",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        listStyle: "none",
+                      }}
+                    >
+                      <span>{t("time_machine_expand", "Time Machine")}</span>
+                      <div
+                        className="eclock-time-mode-switch"
+                        style={{
+                          display: "flex",
+                          gap: "4px",
+                          background: "#e8e8e8",
+                          borderRadius: "14px",
+                          padding: "2px",
+                        }}
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        <button
+                          onClick={() => {
+                            fixedTimeMsRef.current = null;
+                            setIsTimeTravel(false);
+                            currentAnglesRef.current = null;
+                            fetchAngles();
+                          }}
+                          style={{
+                            background: "#27ae60",
+                            color: "white",
+                            padding: "4px 8px",
+                            fontSize: "11px",
+                            borderRadius: "12px",
+                            border: "none",
+                            cursor: "pointer",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {t("live_time", "Live Time")}
+                        </button>
+                        <button
+                          onClick={() => setDisplayMode("clock")}
+                          style={{
+                            background:
+                              displayMode === "clock" ? "#e67e22" : "transparent",
+                            color: displayMode === "clock" ? "white" : "#555",
+                            padding: "4px 10px",
+                            fontSize: "11px",
+                            borderRadius: "12px",
+                            border: "none",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {t("clock", "Clock")}
+                        </button>
+                        <button
+                          onClick={() => setDisplayMode("chart")}
+                          style={{
+                            background:
+                              displayMode === "chart" ? "#e67e22" : "transparent",
+                            color: displayMode === "chart" ? "white" : "#555",
+                            padding: "4px 10px",
+                            fontSize: "11px",
+                            borderRadius: "12px",
+                            border: "none",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {t("chart", "Chart")}
+                        </button>
+                        <button
+                          onClick={() => setDisplayMode("pav")}
+                          style={{
+                            background:
+                              displayMode === "pav" ? "#e67e22" : "transparent",
+                            color: displayMode === "pav" ? "white" : "#555",
+                            padding: "4px 10px",
+                            fontSize: "11px",
+                            borderRadius: "12px",
+                            border: "none",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {t("PAV", "PAV")}
+                        </button>
+                      </div>
+                    </summary>
                     <div
-                      className="eclock-time-mode-switch"
+                      className="eclock-time-status"
+                      style={{
+                        marginTop: "15px",
+                        marginBottom: "15px",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: isOfflineFallback
+                            ? "#c0392b"
+                            : isTimeTravel
+                              ? "#c0392b"
+                              : "#27ae60",
+                          padding: "4px 12px",
+                          borderRadius: "12px",
+                          fontSize: "12px",
+                          fontWeight: "bold",
+                          border: `1px solid ${isOfflineFallback || isTimeTravel ? "#e74c3c" : "#2ecc71"}`,
+                          background:
+                            isOfflineFallback || isTimeTravel
+                              ? "#fdedec"
+                              : "#eafaf1",
+                        }}
+                      >
+                        {isOfflineFallback
+                          ? t("ephemeris_offline", "EPHEMERIS OFFLINE")
+                          : isTimeTravel
+                            ? t("time_travel", "TIME TRAVEL")
+                            : t("live_time", "LIVE TIME")}
+                      </span>
+                    </div>
+                    <div
+                      className="eclock-time-nav-row"
                       style={{
                         display: "flex",
-                        gap: "4px",
-                        background: "#e8e8e8",
-                        borderRadius: "14px",
-                        padding: "2px",
+                        gap: "5px",
+                        flexWrap: "wrap",
+                        justifyContent: "center",
+                        marginBottom: "5px",
                       }}
-                      onClick={(e) => e.preventDefault()}
                     >
                       <button
-                        onClick={() => {
-                          manualTimeOffsetRef.current = 0;
-                          setIsTimeTravel(false);
-                          fetchAngles();
-                        }}
+                        onClick={() => adjustTime(-60000)}
                         style={{
-                          background: "#27ae60",
+                          background: "#e67e22",
                           color: "white",
-                          padding: "4px 8px",
-                          fontSize: "11px",
-                          borderRadius: "12px",
+                          flex: 1,
+                          minWidth: "35px",
+                          padding: "8px 2px",
                           border: "none",
+                          borderRadius: "4px",
                           cursor: "pointer",
-                          whiteSpace: "nowrap",
                         }}
                       >
-                        {t("live_time", "Live Time")}
+                        -1M
                       </button>
                       <button
-                        onClick={() => setDisplayMode("clock")}
+                        onClick={() => adjustTime(-3600000)}
                         style={{
-                          background:
-                            displayMode === "clock" ? "#e67e22" : "transparent",
-                          color: displayMode === "clock" ? "white" : "#555",
-                          padding: "4px 10px",
-                          fontSize: "11px",
-                          borderRadius: "12px",
+                          background: "#d35400",
+                          color: "white",
+                          flex: 1,
+                          minWidth: "35px",
+                          padding: "8px 2px",
                           border: "none",
+                          borderRadius: "4px",
                           cursor: "pointer",
                         }}
                       >
-                        {t("clock", "Clock")}
+                        -1H
                       </button>
                       <button
-                        onClick={() => setDisplayMode("chart")}
+                        onClick={() => adjustTime(-86400000)}
                         style={{
-                          background:
-                            displayMode === "chart" ? "#e67e22" : "transparent",
-                          color: displayMode === "chart" ? "white" : "#555",
-                          padding: "4px 10px",
-                          fontSize: "11px",
-                          borderRadius: "12px",
+                          background: "#e74c3c",
+                          color: "white",
+                          flex: 1,
+                          minWidth: "35px",
+                          padding: "8px 2px",
                           border: "none",
+                          borderRadius: "4px",
                           cursor: "pointer",
                         }}
                       >
-                        {t("chart", "Chart")}
+                        -1D
+                      </button>
+                      <button
+                        onClick={() => adjustTime(-604800000)}
+                        style={{
+                          background: "#c0392b",
+                          color: "white",
+                          flex: 1,
+                          minWidth: "35px",
+                          padding: "8px 2px",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        -1W
+                      </button>
+                      <button
+                        onClick={() => adjustTime(-2592000000)}
+                        style={{
+                          background: "#9b59b6",
+                          color: "white",
+                          flex: 1,
+                          minWidth: "35px",
+                          padding: "8px 2px",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        -1Mo
+                      </button>
+                      <button
+                        onClick={() => adjustTime(-31536000000)}
+                        style={{
+                          background: "#8e44ad",
+                          color: "white",
+                          flex: 1,
+                          minWidth: "35px",
+                          padding: "8px 2px",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        -1Y
                       </button>
                     </div>
-                  </summary>
-                  <div
-                    className="eclock-time-status"
-                    style={{
-                      marginTop: "15px",
-                      marginBottom: "15px",
-                      display: "flex",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <span
+                    <div
+                      className="eclock-time-live-row"
+                      aria-hidden="true"
                       style={{
-                        color: isOfflineFallback
-                          ? "#c0392b"
-                          : isTimeTravel
-                            ? "#c0392b"
-                            : "#27ae60",
-                        padding: "4px 12px",
-                        borderRadius: "12px",
-                        fontSize: "12px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        margin: "7px 0",
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: "42px",
+                          height: "2px",
+                          borderRadius: "999px",
+                          background: "rgba(122, 83, 48, 0.22)",
+                        }}
+                      />
+                    </div>
+                    <div
+                      className="eclock-time-nav-row"
+                      style={{
+                        display: "flex",
+                        gap: "5px",
+                        flexWrap: "wrap",
+                        justifyContent: "center",
+                        marginTop: "5px",
+                      }}
+                    >
+                      <button
+                        onClick={() => adjustTime(60000)}
+                        style={{
+                          background: "#e67e22",
+                          color: "white",
+                          flex: 1,
+                          minWidth: "35px",
+                          padding: "8px 2px",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        +1M
+                      </button>
+                      <button
+                        onClick={() => adjustTime(3600000)}
+                        style={{
+                          background: "#d35400",
+                          color: "white",
+                          flex: 1,
+                          minWidth: "35px",
+                          padding: "8px 2px",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        +1H
+                      </button>
+                      <button
+                        onClick={() => adjustTime(86400000)}
+                        style={{
+                          background: "#e74c3c",
+                          color: "white",
+                          flex: 1,
+                          minWidth: "35px",
+                          padding: "8px 2px",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        +1D
+                      </button>
+                      <button
+                        onClick={() => adjustTime(604800000)}
+                        style={{
+                          background: "#c0392b",
+                          color: "white",
+                          flex: 1,
+                          minWidth: "35px",
+                          padding: "8px 2px",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        +1W
+                      </button>
+                      <button
+                        onClick={() => adjustTime(2592000000)}
+                        style={{
+                          background: "#9b59b6",
+                          color: "white",
+                          flex: 1,
+                          minWidth: "35px",
+                          padding: "8px 2px",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        +1Mo
+                      </button>
+                      <button
+                        onClick={() => adjustTime(31536000000)}
+                        style={{
+                          background: "#8e44ad",
+                          color: "white",
+                          flex: 1,
+                          minWidth: "35px",
+                          padding: "8px 2px",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        +1Y
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => {
+                        const link = document.createElement("a");
+                        const simTime = fixedTimeMsRef.current !== null ? fixedTimeMsRef.current : Date.now();
+                        const simDate = new Date(simTime);
+                        const pad = (n) => n.toString().padStart(2, "0");
+                        const timestamp = `${simDate.getFullYear()}${pad(simDate.getMonth() + 1)}${pad(simDate.getDate())}_${pad(simDate.getHours())}${pad(simDate.getMinutes())}`;
+                        link.download = `AstroClock_${timestamp}.png`;
+                        link.href = canvasRef.current.toDataURL("image/png", 1.0);
+                        link.click();
+                      }}
+                      className="eclock-time-download"
+                      style={{
+                        marginTop: "15px",
+                        width: "100%",
+                        background: "#2980b9",
+                        color: "white",
+                        padding: "10px",
+                        border: "none",
+                        borderRadius: "8px",
                         fontWeight: "bold",
-                        border: `1px solid ${isOfflineFallback || isTimeTravel ? "#e74c3c" : "#2ecc71"}`,
-                        background:
-                          isOfflineFallback || isTimeTravel
-                            ? "#fdedec"
-                            : "#eafaf1",
-                      }}
-                    >
-                      {isOfflineFallback
-                        ? t("ephemeris_offline", "EPHEMERIS OFFLINE")
-                        : isTimeTravel
-                          ? t("time_travel", "TIME TRAVEL")
-                          : t("live_time", "LIVE TIME")}
-                    </span>
-                  </div>
-                  <div
-                    className="eclock-time-nav-row"
-                    style={{
-                      display: "flex",
-                      gap: "5px",
-                      flexWrap: "wrap",
-                      justifyContent: "center",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    <button
-                      onClick={() => adjustTime(-60000)}
-                      style={{
-                        background: "#e67e22",
-                        color: "white",
-                        flex: 1,
-                        minWidth: "35px",
-                        padding: "8px 2px",
-                        border: "none",
-                        borderRadius: "4px",
                         cursor: "pointer",
                       }}
                     >
-                      -1M
+                      {t("download_clock_image", "Download Clock Image")}
                     </button>
-                    <button
-                      onClick={() => adjustTime(-3600000)}
-                      style={{
-                        background: "#d35400",
-                        color: "white",
-                        flex: 1,
-                        minWidth: "35px",
-                        padding: "8px 2px",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      -1H
-                    </button>
-                    <button
-                      onClick={() => adjustTime(-86400000)}
-                      style={{
-                        background: "#e74c3c",
-                        color: "white",
-                        flex: 1,
-                        minWidth: "35px",
-                        padding: "8px 2px",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      -1D
-                    </button>
-                    <button
-                      onClick={() => adjustTime(-604800000)}
-                      style={{
-                        background: "#c0392b",
-                        color: "white",
-                        flex: 1,
-                        minWidth: "35px",
-                        padding: "8px 2px",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      -1W
-                    </button>
-                    <button
-                      onClick={() => adjustTime(-2592000000)}
-                      style={{
-                        background: "#9b59b6",
-                        color: "white",
-                        flex: 1,
-                        minWidth: "35px",
-                        padding: "8px 2px",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      -1Mo
-                    </button>
-                    <button
-                      onClick={() => adjustTime(-31536000000)}
-                      style={{
-                        background: "#8e44ad",
-                        color: "white",
-                        flex: 1,
-                        minWidth: "35px",
-                        padding: "8px 2px",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      -1Y
-                    </button>
-                  </div>
-                  <div
-                    className="eclock-time-live-row"
-                    aria-hidden="true"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      margin: "7px 0",
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: "42px",
-                        height: "2px",
-                        borderRadius: "999px",
-                        background: "rgba(122, 83, 48, 0.22)",
-                      }}
-                    />
-                  </div>
-                  <div
-                    className="eclock-time-nav-row"
-                    style={{
-                      display: "flex",
-                      gap: "5px",
-                      flexWrap: "wrap",
-                      justifyContent: "center",
-                      marginTop: "5px",
-                    }}
-                  >
-                    <button
-                      onClick={() => adjustTime(60000)}
-                      style={{
-                        background: "#e67e22",
-                        color: "white",
-                        flex: 1,
-                        minWidth: "35px",
-                        padding: "8px 2px",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      +1M
-                    </button>
-                    <button
-                      onClick={() => adjustTime(3600000)}
-                      style={{
-                        background: "#d35400",
-                        color: "white",
-                        flex: 1,
-                        minWidth: "35px",
-                        padding: "8px 2px",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      +1H
-                    </button>
-                    <button
-                      onClick={() => adjustTime(86400000)}
-                      style={{
-                        background: "#e74c3c",
-                        color: "white",
-                        flex: 1,
-                        minWidth: "35px",
-                        padding: "8px 2px",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      +1D
-                    </button>
-                    <button
-                      onClick={() => adjustTime(604800000)}
-                      style={{
-                        background: "#c0392b",
-                        color: "white",
-                        flex: 1,
-                        minWidth: "35px",
-                        padding: "8px 2px",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      +1W
-                    </button>
-                    <button
-                      onClick={() => adjustTime(2592000000)}
-                      style={{
-                        background: "#9b59b6",
-                        color: "white",
-                        flex: 1,
-                        minWidth: "35px",
-                        padding: "8px 2px",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      +1Mo
-                    </button>
-                    <button
-                      onClick={() => adjustTime(31536000000)}
-                      style={{
-                        background: "#8e44ad",
-                        color: "white",
-                        flex: 1,
-                        minWidth: "35px",
-                        padding: "8px 2px",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      +1Y
-                    </button>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const link = document.createElement("a");
-                      const simDate = new Date(
-                        Date.now() + manualTimeOffsetRef.current,
-                      );
-                      const pad = (n) => n.toString().padStart(2, "0");
-                      const timestamp = `${simDate.getFullYear()}${pad(simDate.getMonth() + 1)}${pad(simDate.getDate())}_${pad(simDate.getHours())}${pad(simDate.getMinutes())}`;
-                      link.download = `AstroClock_${timestamp}.png`;
-                      link.href = canvasRef.current.toDataURL("image/png", 1.0);
-                      link.click();
-                    }}
-                    className="eclock-time-download"
-                    style={{
-                      marginTop: "15px",
-                      width: "100%",
-                      background: "#2980b9",
-                      color: "white",
-                      padding: "10px",
-                      border: "none",
-                      borderRadius: "8px",
-                      fontWeight: "bold",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {t("download_clock_image", "Download Clock Image")}
-                  </button>
-                </details>
-              )}
+                  </details>
+                )}
 
               {/* Custom Date */}
               {prefsRef.current.clock_visible_panels?.includes(
                 "custom_date",
               ) && (
-                <details
-                  className="box-white"
-                  style={{
-                    padding: "15px",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
-                    borderTop: "4px solid #16a085",
-                  }}
-                >
-                  <summary
+                  <details
+                    className="box-white"
                     style={{
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                      color: "#2c3e50",
-                      fontSize: "16px",
-                      outline: "none",
-                      listStyle: "none",
+                      padding: "15px",
+                      borderRadius: "12px",
+                      boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
+                      borderTop: "4px solid #16a085",
                     }}
                   >
-                    {t(
-                      "custom_date_time_expand",
-                      "Custom Date & Time (Expand)",
-                    )}
-                  </summary>
-                  <div
-                    style={{
-                      marginTop: "15px",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "10px",
-                    }}
-                  >
+                    <summary
+                      style={{
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        color: "#2c3e50",
+                        fontSize: "16px",
+                        outline: "none",
+                        listStyle: "none",
+                      }}
+                    >
+                      {t(
+                        "custom_date_time_expand",
+                        "Custom Date & Time (Expand)",
+                      )}
+                    </summary>
                     <div
                       style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
+                        marginTop: "15px",
+                        display: "flex",
+                        flexDirection: "column",
                         gap: "10px",
                       }}
                     >
-                      <input
-                        type="date"
-                        ref={customDateRef}
+                      <div
                         style={{
-                          padding: "8px",
-                          border: "1px solid #ccc",
-                          borderRadius: "5px",
-                          width: "100%",
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: "10px",
                         }}
-                      />
-                      <input
-                        type="time"
-                        step="1"
-                        ref={customTimeRef}
+                      >
+                        <input
+                          type="date"
+                          ref={customDateRef}
+                          style={{
+                            padding: "8px",
+                            border: "1px solid #ccc",
+                            borderRadius: "5px",
+                            width: "100%",
+                          }}
+                        />
+                        <input
+                          type="time"
+                          step="1"
+                          ref={customTimeRef}
+                          style={{
+                            padding: "8px",
+                            border: "1px solid #ccc",
+                            borderRadius: "5px",
+                            width: "100%",
+                          }}
+                        />
+                      </div>
+                      <button
+                        onClick={jumpToCustomTime}
                         style={{
-                          padding: "8px",
-                          border: "1px solid #ccc",
-                          borderRadius: "5px",
+                          background: "#16a085",
+                          color: "white",
+                          padding: "10px",
                           width: "100%",
+                          border: "none",
+                          borderRadius: "4px",
+                          fontWeight: "bold",
+                          cursor: "pointer",
                         }}
-                      />
+                      >
+                        {t("jump_to_date", "Jump to Date")}
+                      </button>
                     </div>
-                    <button
-                      onClick={jumpToCustomTime}
-                      style={{
-                        background: "#16a085",
-                        color: "white",
-                        padding: "10px",
-                        width: "100%",
-                        border: "none",
-                        borderRadius: "4px",
-                        fontWeight: "bold",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {t("jump_to_date", "Jump to Date")}
-                    </button>
-                  </div>
-                </details>
-              )}
+                  </details>
+                )}
 
               {/* Location */}
               {prefsRef.current.clock_visible_panels?.includes("location") && (
@@ -2940,58 +3167,124 @@ export function EClockPage() {
               background: isFullscreen
                 ? prefsRef.current.clock_present_bg || "#111"
                 : "transparent",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
               ...(isFullscreen
                 ? {
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    width: "100vw",
-                    height: "100vh",
-                    zIndex: 9999,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100vw",
+                  height: "100vh",
+                  zIndex: 9999,
+                }
                 : {}),
             }}
           >
             <div
               style={{
-                width: "100%",
                 display: "flex",
-                justifyContent: "center",
+                flexDirection: "column",
                 alignItems: "center",
-                overflowX: "auto",
+                width: "100%",
+                gap: "4px",
               }}
             >
-              <canvas
-                ref={canvasRef}
-                width="615"
-                height="615"
-                onClick={handleCanvasClick}
-                onMouseMove={handleCanvasMouseMove}
-                onMouseLeave={() => {
-                  mousePosRef.current = { x: -100, y: -100 };
-                }}
+              <div
                 style={{
-                  width:
-                    clockZoom > 1.0 ? `${baseClockSize * clockZoom}px` : "100%",
-                  maxWidth:
-                    clockZoom > 1.0 ? "none" : `min(100%, calc(100vh - 120px))`,
-                  height: "auto",
-                  aspectRatio: "1 / 1",
-                  display: "block",
-                  margin: "0 auto",
-                  borderRadius: displayMode === "clock" ? "50%" : "12px",
-                  boxShadow: isFullscreen
-                    ? "none"
-                    : "0 5px 25px rgba(142, 68, 173, 0.15)",
-                  border: isFullscreen ? "none" : "1px solid #f4ecf7",
-                  transition:
-                    "width 0.3s ease, max-width 0.3s ease, border-radius 0.3s ease",
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  overflowX: "auto",
                 }}
-              />
+              >
+                <canvas
+                  ref={canvasRef}
+                  width="615"
+                  height="615"
+                  onClick={handleCanvasClick}
+                  onMouseMove={handleCanvasMouseMove}
+                  onMouseLeave={() => {
+                    mousePosRef.current = { x: -100, y: -100 };
+                  }}
+                  style={{
+                    width:
+                      clockZoom > 1.0 ? `${baseClockSize * clockZoom}px` : "100%",
+                    maxWidth:
+                      clockZoom > 1.0 ? "none" : `min(100%, calc(100vh - 120px))`,
+                    height: "auto",
+                    aspectRatio: "1 / 1",
+                    display: "block",
+                    margin: "0 auto",
+                    borderRadius: displayMode === "clock" ? "50%" : "12px",
+                    boxShadow: isFullscreen
+                      ? "none"
+                      : "0 5px 25px rgba(142, 68, 173, 0.15)",
+                    border: isFullscreen ? "none" : "1px solid #f4ecf7",
+                    transition:
+                      "width 0.3s ease, max-width 0.3s ease, border-radius 0.3s ease",
+                  }}
+                />
+              </div>
+              {displayMode === "pav" && (
+                <div
+                  className="pav-subject-selector"
+                  style={{
+                    display: "flex",
+                    gap: "16px",
+                    marginTop: 0,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flexWrap: "nowrap",
+                    background: "transparent",
+                    border: "none",
+                    padding: 0,
+                    boxShadow: "none",
+                  }}
+                >
+                  {PAV_SUBJECTS.map((sub) => {
+                    const isActive = pavSubject === sub.key;
+                    const cColor = SUBJECT_COLORS[sub.label] || "#34495e";
+                    return (
+                      <button
+                        key={sub.key}
+                        onClick={() => setPavSubject(sub.key)}
+                        style={{
+                          background: "transparent",
+                          color: isActive ? cColor : (isFullscreen ? "rgba(255, 255, 255, 0.6)" : "#7f8c8d"),
+                          border: "none",
+                          borderBottom: `3px solid ${isActive ? cColor : "transparent"}`,
+                          padding: "6px 4px",
+                          fontSize: "16px",
+                          fontWeight: "bold",
+                          cursor: "pointer",
+                          transition: "all 0.15s ease",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isActive) {
+                            e.currentTarget.style.color = cColor;
+                            e.currentTarget.style.borderBottom = `3px solid ${cColor}80`;
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isActive) {
+                            e.currentTarget.style.color = isFullscreen ? "rgba(255, 255, 255, 0.6)" : "#7f8c8d";
+                            e.currentTarget.style.borderBottom = "3px solid transparent";
+                          }
+                        }}
+                      >
+                        {t(sub.translationKey, sub.label)}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>

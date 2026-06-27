@@ -111,6 +111,13 @@ export function EPrashnaPage({ logoUrl }) {
   const [database, setDatabase] = useState([]);
   const [selectedQNo, setSelectedQNo] = useState("");
 
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [helpActiveTab, setHelpActiveTab] = useState(lang);
+
+  useEffect(() => {
+    setHelpActiveTab(lang);
+  }, [lang]);
+
   const [isSpinning, setIsSpinning] = useState(false);
   const [interactEnabled, setInteractEnabled] = useState(false);
   const [resultText, setResultText] = useState("");
@@ -240,10 +247,6 @@ export function EPrashnaPage({ logoUrl }) {
       >
         <div
           style={{
-            background: "#fff",
-            padding: "20px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
             width: "100%",
             maxWidth: "650px",
             marginBottom: "20px",
@@ -257,101 +260,196 @@ export function EPrashnaPage({ logoUrl }) {
 
           {/* STEP 1 */}
           {step === 1 && (
-            <div style={{ animation: "fadeInUp 0.4s ease-out" }}>
-              <div
-                style={{
-                  marginBottom: "15px",
-                }}
-              >
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "13px",
-                    fontWeight: "bold",
-                    textTransform: "uppercase",
-                    color: "#7f8c8d",
-                    marginBottom: "10px",
-                  }}
-                >
-                  {T.selectLabel}
-                </label>
-                <select
-                  value={selectedQNo}
-                  onChange={(e) => setSelectedQNo(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "14px 16px",
-                    fontSize: "16px",
-                    borderRadius: "8px",
-                    border: "1px solid #ccc",
-                    outline: "none",
-                    cursor: "pointer",
-                    background: "#fff",
-                  }}
-                >
-                  <option value="">{T.select}</option>
-                  {questionsData.map((q) => (
-                    <option key={q.Q_no} value={q.Q_no}>
-                      {q.Q_no}. {q.Chakra_Name[lang] || q.Chakra_Name["kn"]}
-                    </option>
-                  ))}
-                </select>
+            <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
+              {/* Divider above the card */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "25px", gap: "15px", width: "100%" }}>
+                <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg, transparent, #8e44ad, transparent)", opacity: 0.6 }}></div>
+                <span style={{ color: "#8e44ad", fontSize: "12px", letterSpacing: "4px", opacity: 0.8 }}>✦✦✦</span>
+                <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg, transparent, #8e44ad, transparent)", opacity: 0.6 }}></div>
               </div>
 
-              {selectedQNo && currentQData && (
+              <div
+                style={{
+                  background: "#fff",
+                  padding: "20px",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+                  width: "100%",
+                  position: "relative",
+                  overflow: "hidden",
+                  animation: "fadeInUp 0.4s ease-out",
+                }}
+              >
                 <div
                   style={{
-                    marginTop: "20px",
-                    animation: "fadeInUp 0.4s ease-out",
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: "4px",
+                    background: "linear-gradient(90deg, #8e44ad, #3498db)",
+                  }}
+                ></div>
+
+                <div
+                  style={{
+                    marginBottom: "15px",
                   }}
                 >
-                  <div
+                  <label
                     style={{
-                      background: "#fdfefe",
-                      border: "1px solid #dce6ee",
-                      borderRadius: "8px",
-                      padding: "18px",
-                      fontSize: "15px",
-                      lineHeight: "1.6",
-                      color: "#2c3e50",
-                      marginBottom: "20px",
+                      display: "block",
+                      fontSize: "13px",
+                      fontWeight: "bold",
+                      textTransform: "uppercase",
+                      color: "#7f8c8d",
+                      marginBottom: "10px",
+                      textAlign: "center",
                     }}
                   >
-                    {currentQData.Chakra_Meaning[lang] ||
-                      currentQData.Chakra_Meaning["kn"]}
-                  </div>
-                  <button
-                    onClick={startChakra}
+                    {T.selectLabel}
+                  </label>
+                  <select
+                    value={selectedQNo}
+                    onChange={(e) => setSelectedQNo(e.target.value)}
                     style={{
                       width: "100%",
-                      background: "linear-gradient(135deg, #8e44ad, #732d91)",
-                      color: "#fff",
-                      border: "none",
-                      padding: "16px 20px",
+                      padding: "14px 16px",
+                      fontSize: "16px",
                       borderRadius: "8px",
-                      fontSize: "17px",
-                      fontWeight: "bold",
+                      border: "1px solid #ccc",
+                      outline: "none",
                       cursor: "pointer",
-                      boxShadow: "0 4px 10px rgba(142, 68, 173, 0.2)",
-                      transition: "transform 0.2s",
+                      background: "#fff",
                     }}
-                    onMouseOver={(e) =>
-                      (e.currentTarget.style.transform = "translateY(-2px)")
-                    }
-                    onMouseOut={(e) =>
-                      (e.currentTarget.style.transform = "translateY(0)")
-                    }
                   >
-                    {T.startBtn}
-                  </button>
+                    <option value="">{T.select}</option>
+                    {questionsData.map((q) => (
+                      <option key={q.Q_no} value={q.Q_no}>
+                        {q.Q_no}. {q.Chakra_Name[lang] || q.Chakra_Name["kn"]}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              )}
+
+                {selectedQNo && currentQData && (
+                  <div
+                    style={{
+                      marginTop: "20px",
+                      animation: "fadeInUp 0.4s ease-out",
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: "#fdfefe",
+                        border: "1px solid #dce6ee",
+                        borderRadius: "8px",
+                        padding: "18px",
+                        fontSize: "15px",
+                        lineHeight: "1.6",
+                        color: "#2c3e50",
+                        marginBottom: "20px",
+                      }}
+                    >
+                      {currentQData.Chakra_Meaning[lang] ||
+                        currentQData.Chakra_Meaning["kn"]}
+                    </div>
+                    <button
+                      onClick={startChakra}
+                      style={{
+                        width: "100%",
+                        background: "linear-gradient(135deg, #8e44ad, #732d91)",
+                        color: "#fff",
+                        border: "none",
+                        padding: "16px 20px",
+                        borderRadius: "8px",
+                        fontSize: "17px",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                        boxShadow: "0 4px 10px rgba(142, 68, 173, 0.2)",
+                        transition: "transform 0.2s",
+                      }}
+                      onMouseOver={(e) =>
+                        (e.currentTarget.style.transform = "translateY(-2px)")
+                      }
+                      onMouseOut={(e) =>
+                        (e.currentTarget.style.transform = "translateY(0)")
+                      }
+                    >
+                      {T.startBtn}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Divider below the card */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", margin: "25px 0", gap: "15px", width: "100%" }}>
+                <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg, transparent, #8e44ad, transparent)", opacity: 0.6 }}></div>
+                <span style={{ color: "#8e44ad", fontSize: "12px", letterSpacing: "4px", opacity: 0.8 }}>✦✦✦</span>
+                <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg, transparent, #8e44ad, transparent)", opacity: 0.6 }}></div>
+              </div>
+
+              {/* How to use button */}
+              <button
+                onClick={() => setIsHelpOpen(true)}
+                style={{
+                  background: "#732d91",
+                  color: "#fff",
+                  border: "none",
+                  padding: "12px 28px",
+                  borderRadius: "8px",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 10px rgba(115, 45, 145, 0.25)",
+                  transition: "all 0.2s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                  e.currentTarget.style.boxShadow = "0 6px 14px rgba(115, 45, 145, 0.35)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 4px 10px rgba(115, 45, 145, 0.25)";
+                }}
+              >
+                📖 How to use this app?
+              </button>
+
+              {/* Reference book link */}
+              <div style={{ marginTop: "12px", fontSize: "14px", color: "#857869", fontWeight: "500", textAlign: "center" }}>
+                Reference Book:{" "}
+                <a
+                  href="https://dn720006.ca.archive.org/0/items/hanuman-jyotish/hanuman-jyotish_text.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: "#c0392b",
+                    textDecoration: "underline",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Hanumaan Jyotisham
+                </a>
+              </div>
             </div>
           )}
 
           {/* STEP 2 */}
           {step === 2 && (
-            <div style={{ animation: "fadeInUp 0.4s ease-out" }}>
+            <div
+              style={{
+                background: "#fff",
+                padding: "20px",
+                borderRadius: "12px",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+                width: "100%",
+                animation: "fadeInUp 0.4s ease-out",
+              }}
+            >
               <div
                 style={{
                   background: "#fdfefe",
@@ -450,7 +548,7 @@ export function EPrashnaPage({ logoUrl }) {
 
           {/* STEP 3 */}
           {step === 3 && (
-            <div style={{ animation: "fadeInUp 0.4s ease-out" }}>
+            <div style={{ width: "100%", animation: "fadeInUp 0.4s ease-out" }}>
               <div
                 style={{
                   background: "#fff",
@@ -550,6 +648,247 @@ export function EPrashnaPage({ logoUrl }) {
           )}
         </div>
       </section>
+
+      {/* Help Modal */}
+      {isHelpOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+            padding: "20px",
+          }}
+          onClick={() => setIsHelpOpen(false)}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: "12px",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+              width: "100%",
+              maxWidth: "500px",
+              position: "relative",
+              overflow: "hidden",
+              animation: "fadeInUp 0.3s ease-out",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top gradient border */}
+            <div
+              style={{
+                height: "4px",
+                background: "linear-gradient(90deg, #8e44ad, #3498db)",
+              }}
+            ></div>
+
+            {/* Header */}
+            <div
+              style={{
+                padding: "20px 20px 10px 20px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                borderBottom: "1px solid #eaeaea",
+              }}
+            >
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                  color: "#2c3e50",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                📖 How to use this app?
+              </h3>
+              <button
+                onClick={() => setIsHelpOpen(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "20px",
+                  color: "#95a5a6",
+                  cursor: "pointer",
+                  padding: "0 5px",
+                  lineHeight: 1,
+                }}
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Language tabs */}
+            <div
+              style={{
+                display: "flex",
+                background: "#f8f9fa",
+                borderBottom: "1px solid #eaeaea",
+              }}
+            >
+              <button
+                onClick={() => setHelpActiveTab("en")}
+                style={{
+                  flex: 1,
+                  padding: "12px",
+                  background: helpActiveTab === "en" ? "#fff" : "transparent",
+                  color: helpActiveTab === "en" ? "#8e44ad" : "#7f8c8d",
+                  border: "none",
+                  borderRadius: 0,
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  borderBottom: helpActiveTab === "en" ? "2px solid #8e44ad" : "none",
+                }}
+              >
+                English
+              </button>
+              <button
+                onClick={() => setHelpActiveTab("te")}
+                style={{
+                  flex: 1,
+                  padding: "12px",
+                  background: helpActiveTab === "te" ? "#fff" : "transparent",
+                  color: helpActiveTab === "te" ? "#8e44ad" : "#7f8c8d",
+                  border: "none",
+                  borderRadius: 0,
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  borderBottom: helpActiveTab === "te" ? "2px solid #8e44ad" : "none",
+                }}
+              >
+                తెలుగు
+              </button>
+              <button
+                onClick={() => setHelpActiveTab("kn")}
+                style={{
+                  flex: 1,
+                  padding: "12px",
+                  background: helpActiveTab === "kn" ? "#fff" : "transparent",
+                  color: helpActiveTab === "kn" ? "#8e44ad" : "#7f8c8d",
+                  border: "none",
+                  borderRadius: 0,
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  borderBottom: helpActiveTab === "kn" ? "2px solid #8e44ad" : "none",
+                }}
+              >
+                ಕನ್ನಡ
+              </button>
+            </div>
+
+            {/* Content Area */}
+            <div
+              style={{
+                padding: "20px",
+                maxHeight: "350px",
+                overflowY: "auto",
+                fontSize: "15px",
+                lineHeight: "1.6",
+                color: "#2c3e50",
+              }}
+            >
+              {helpActiveTab === "en" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <span style={{ fontWeight: "bold", color: "#8e44ad" }}>1.</span>
+                    <span><strong>Choose a Question:</strong> Select a question that matches your query from the dropdown list.</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <span style={{ fontWeight: "bold", color: "#8e44ad" }}>2.</span>
+                    <span><strong>Concentrate & Pray:</strong> Close your eyes, think of your question, and pray to the Almighty or your deity.</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <span style={{ fontWeight: "bold", color: "#8e44ad" }}>3.</span>
+                    <span><strong>Spin the Chakra:</strong> Touch or click on any petal of the Sri Prashna Chakra.</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <span style={{ fontWeight: "bold", color: "#8e44ad" }}>4.</span>
+                    <span><strong>Receive Guidance:</strong> Once the chakra stops spinning, it will display the outcome and prediction for your question.</span>
+                  </div>
+                </div>
+              )}
+
+              {helpActiveTab === "te" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <span style={{ fontWeight: "bold", color: "#8e44ad" }}>1.</span>
+                    <span><strong>ప్రశ్నను ఎంచుకోండి:</strong> మీ మనసులోని సందేహానికి సరిపోయే ప్రశ్నను డ్రాప్‌డౌన్ జాబితా నుండి ఎంచుకోండి.</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <span style={{ fontWeight: "bold", color: "#8e44ad" }}>2.</span>
+                    <span><strong>దైవస్మరణ చేయండి:</strong> మీ ప్రశ్నను మనసులో తలుచుకుని, కళ్ళు మూసుకుని భగవంతుని లేదా మీ ఇష్టదైవాన్ని ప్రార్థించండి.</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <span style={{ fontWeight: "bold", color: "#8e44ad" }}>3.</span>
+                    <span><strong>చక్రాన్ని తాకండి:</strong> ప్రసన్న చిత్తముతో ప్రశాంతంగా ప్రశ్నా చక్రం యొక్క ఏదైనా ఒక దళంపై క్లిక్ చేయండి/తాకండి.</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <span style={{ fontWeight: "bold", color: "#8e44ad" }}>4.</span>
+                    <span><strong>ఫలితాన్ని పొందండి:</strong> చక్రం తిరగడం ఆగిపోయిన తర్వాత, మీ ప్రశ్నకు సంబంధించిన ఫలితం మరియు మార్గదర్శకత్వం చూపబడుతుంది.</span>
+                  </div>
+                </div>
+              )}
+
+              {helpActiveTab === "kn" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <span style={{ fontWeight: "bold", color: "#8e44ad" }}>1.</span>
+                    <span><strong>ಪ್ರಶ್ನೆಯನ್ನು ಆರಿಸಿ:</strong> ನಿಮ್ಮ ಮನಸ್ಸಿನಲ್ಲಿರುವ ಪ್ರಶ್ನೆಗೆ ಸೂಕ್ತವಾದ ಪ್ರಶ್ನೆಯನ್ನು ಡ್ರಾಪ್‌ಡೌನ್ ಪಟ್ಟಿಯಿಂದ ಆರಿಸಿ.</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <span style={{ fontWeight: "bold", color: "#8e44ad" }}>2.</span>
+                    <span><strong>ಧ್ಯಾನಿಸಿ ಮತ್ತು ಪ್ರಾರ್ಥಿಸಿ:</strong> ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಮನಸ್ಸಿನಲ್ಲಿಟ್ಟುಕೊಂಡು, ಕಣ್ಣುಗಳನ್ನು ಮುಚ್ಚಿ ಇಷ್ಟದೇವತೆಯನ್ನು ಅಥವಾ ಭಗವಂತನನ್ನು ಸ್ಮರಿಸಿಕೊಳ್ಳಿ.</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <span style={{ fontWeight: "bold", color: "#8e44ad" }}>3.</span>
+                    <span><strong>ಚಕ್ರವನ್ನು ಸ್ಪರ್ಶಿಸಿ:</strong> ಪ್ರಶಾಂತ ಮನಸ್ಸಿನಿಂದ ಪ್ರಶ್ನಾ ಚಕ್ರದ ಯಾವುದೇ ಒಂದು ದಳದ ಮೇಲೆ ಕ್ಲಿಕ್ ಮಾಡಿ/ಸ್ಪರ್ಶಿಸಿ.</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <span style={{ fontWeight: "bold", color: "#8e44ad" }}>4.</span>
+                    <span><strong>ಫಲಿತಾಂಶವನ್ನು ವೀಕ್ಷಿಸಿ:</strong> ಚಕ್ರವು ತಿರುಗಿ ನಿಂತ ನಂತರ, ನಿಮ್ಮ ಪ್ರಶ್ನೆಗೆ ಸೂಕ್ತವಾದ ಫಲಿತಾಂಶ ಮತ್ತು ಮಾರ್ಗದರ್ಶನವನ್ನು ಕಾಣಬಹುದು.</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div
+              style={{
+                padding: "15px 20px",
+                borderTop: "1px solid #eaeaea",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <button
+                onClick={() => setIsHelpOpen(false)}
+                style={{
+                  background: "linear-gradient(135deg, #8e44ad, #732d91)",
+                  color: "#fff",
+                  padding: "8px 20px",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  border: "none",
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

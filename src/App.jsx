@@ -167,26 +167,12 @@ export default function App() {
   const [toast, setToast] = useState(null); // { message: "", type: "info" }
   const [toastVisible, setToastVisible] = useState(false);
 
-  // Splash screen — iOS standalone PWA only (Android has its own system splash)
-  const [splashVisible, setSplashVisible] = useState(() => {
-    const isIos =
-      /iPhone|iPad|iPod/.test(navigator.userAgent) ||
-      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    const isStandaloneMode =
-      window.navigator.standalone ||
-      window.matchMedia("(display-mode: standalone)").matches;
-    return isIos && !!isStandaloneMode;
-  });
-  const [splashFading, setSplashFading] = useState(false);
-
+  // TV detection
   useEffect(() => {
-    if (!splashVisible) return;
-    const fadeTimer = setTimeout(() => setSplashFading(true), 1600);
-    const hideTimer = setTimeout(() => setSplashVisible(false), 2000);
-    return () => {
-      clearTimeout(fadeTimer);
-      clearTimeout(hideTimer);
-    };
+    const isTV = /TV|SmartTV|AppleTV|AndroidTV|Roku|Tizen|WebOS|Chromecast|Viera|BRAVIA/i.test(navigator.userAgent);
+    if (isTV) {
+      document.body.classList.add("is-tv");
+    }
   }, []);
 
   // Override global window.alert to show custom toast
@@ -596,10 +582,30 @@ export default function App() {
 
   useEffect(() => {
     // మొదటిసారి యాప్ లోడ్ అయినప్పుడు డీఫాల్ట్ సెట్టింగ్స్ ని సెట్ చేయడం
+    const targetDoshas = [
+      "Saptamastha Graha",
+      "Bhrigu Shatka",
+      "Ashtamastha Kuja",
+      "Sankranti Dosha",
+      "Asthangatha",
+      "Grahanam (Eclipse)",
+      "Grahana Utpata Dosha",
+      "Rahu Kalam"
+    ];
     const prefsStr = localStorage.getItem("eclock_prefs");
     let parsedPrefs = {};
     try {
-      if (prefsStr) parsedPrefs = JSON.parse(prefsStr);
+      if (prefsStr) {
+        parsedPrefs = JSON.parse(prefsStr);
+        if (parsedPrefs.active_doshas) {
+          let cleaned = parsedPrefs.active_doshas.filter(d => targetDoshas.includes(d));
+          targetDoshas.forEach(d => {
+            if (!cleaned.includes(d)) cleaned.push(d);
+          });
+          parsedPrefs.active_doshas = cleaned;
+          localStorage.setItem("eclock_prefs", JSON.stringify(parsedPrefs));
+        }
+      }
     } catch (e) {}
 
     if (
@@ -806,42 +812,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      {/* Splash Screen — iOS & Android PWA */}
-      {splashVisible && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 99999,
-            background: "#ffffff",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "28px",
-            opacity: splashFading ? 0 : 1,
-            transition: "opacity 0.4s ease",
-            pointerEvents: "none",
-          }}
-        >
-          <img
-            src={logoUrl}
-            alt="e-JYOTISHA"
-            style={{ width: "160px", height: "160px", objectFit: "contain" }}
-          />
-          <span
-            style={{
-              fontFamily: "Poppins, sans-serif",
-              fontSize: "2rem",
-              fontWeight: "700",
-              color: "#2d3436",
-              letterSpacing: "0.02em",
-            }}
-          >
-            e-JYOTISHA
-          </span>
-        </div>
-      )}
+
       <Sidebar
         isOpen={isSidebarOpen}
         logoUrl={logoUrl}

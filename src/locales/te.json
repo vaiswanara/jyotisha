@@ -520,5 +520,19 @@
   "readOnline": "ఆన్‌లైన్‌లో చదవండి",
   "viewDownload": "చూడండి / డౌన్‌లోడ్",
   "searchProfiles": "ప్రొఫైల్స్ వెతకండి...",
-  "noMatchingProfiles": "సరిపోలే ప్రొఫైల్స్ ఏవీ కనుగొనబడలేదు."
+  "noMatchingProfiles": "సరిపోలే ప్రొఫైల్స్ ఏవీ కనుగొనబడలేదు.",
+  "endsOn": "ముగింపు తేదీ: {{date}}",
+  "nextStarts": "తదుపరి ప్రారంభం: {{date}}",
+  "nextStableStarts": "తదుపరి స్థిరమైన గురు బలం: {{date}}",
+  "nextTempStarts": "తదుపరి తాత్కాలిక గురు బలం: {{date}} (అతిచారం - {{duration}} రోజులు)",
+  "currentTempEnds": "తాత్కాలిక గురు బలం ముగింపు తేదీ: {{date}} (అతిచారం)",
+  "currentStableEnds": "స్థిరమైన గురు బలం ముగింపు తేదీ: {{date}}",
+  "nextStableShaniStarts": "తదుపరి స్థిరమైన శని బలం: {{date}}",
+  "nextTempShaniStarts": "తదుపరి తాత్కాలిక శని బలం: {{date}} (అతిచారం - {{duration}} రోజులు)",
+  "currentTempShaniEnds": "తాత్కాలిక శని బలం ముగింపు తేదీ: {{date}} (అతిచారం)",
+  "currentStableShaniEnds": "స్థిరమైన శని బలం ముగింపు తేదీ: {{date}}",
+  "PAV": "PAV",
+  "select_planet_pav": "PAV గ్రహం:",
+  "pav_center_title": "${subject} PAV",
+  "pav_tooltip_format": "${rashi} లో ${subject} కి ${contributor} ఒక బిందువును ఇస్తుంది"
 }

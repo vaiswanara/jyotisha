@@ -3,6 +3,33 @@ import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
 import "./styles/global.css";
 import "./i18n.js";
+// Handle chunk/module load failures (which happen when we update the app and old hashes are missing)
+window.addEventListener("error", (event) => {
+  const target = event.target || {};
+  if (target.tagName === "SCRIPT" || target.tagName === "LINK") {
+    const src = target.src || target.href || "";
+    if (src.includes("/assets/")) {
+      console.warn("Resource load failed. Reloading to get the latest version...", src);
+      window.location.reload();
+    }
+  }
+}, true);
+
+window.addEventListener("unhandledrejection", (event) => {
+  const error = event.reason || {};
+  const errorText = String(error.message || error);
+  if (
+    errorText.includes("ChunkLoadError") ||
+    errorText.includes("Loading chunk") ||
+    errorText.includes("Failed to fetch dynamically imported module") ||
+    error.name === "ChunkLoadError"
+  ) {
+    event.preventDefault();
+    console.warn("Dynamic import failed. Reloading to get the latest version...", errorText);
+    window.location.reload();
+  }
+});
+
 
 
 // Waking up backend server on Render/free hosting as early as possible

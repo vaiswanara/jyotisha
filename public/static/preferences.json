@@ -116,17 +116,14 @@
     "Muhurtha_Notes"
   ],
   "active_doshas": [
-    "Papakartari Lagna",
     "Saptamastha Graha",
-    "Ashtamastha Graha",
-    "Shashtashta Chandra",
     "Bhrigu Shatka",
     "Ashtamastha Kuja",
-    "Riktha Tithi",
-    "Amavasya Tithi",
-    "Vishti Karana",
-    "Bad Panchakam",
-    "Udayasta Shuddhi"
+    "Sankranti Dosha",
+    "Asthangatha",
+    "Grahanam (Eclipse)",
+    "Grahana Utpata Dosha",
+    "Rahu Kalam"
   ],
   "active_panchakas": ["Mrityu", "Agni", "Raja", "Chora", "Roga"],
   "export_columns": [

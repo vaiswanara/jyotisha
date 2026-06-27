@@ -169,7 +169,7 @@ class VedicAstroEngine {
         VedicAstroEngine.initPaths();
         if (!VedicAstroEngine.exePath)
             return "";
-        const epheArg = `-edir${VedicAstroEngine.ephePath}${path.sep}`;
+        const epheArg = `"-edir${VedicAstroEngine.ephePath}"`;
         const cmd = `"${VedicAstroEngine.exePath}" ${epheArg} ${args}`;
         try {
             const execEnv = { ...process.env };
@@ -475,7 +475,7 @@ class VedicAstroEngine {
         const x = Math.sin(E) * Math.cos(eps) + Math.tan(lat) * Math.sin(eps);
         let asc = this.rad2deg(Math.atan2(y, x));
         asc = this.fmod360(asc);
-        return this.toSidereal(asc);
+        return this.toSidereal((asc + 180) % 360);
     }
     calculateAll(latitude, longitude) {
         const ascSid = this.calcAscendant(latitude, longitude);

@@ -390,7 +390,7 @@ export function HomePage({
           box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
         .card-home .icon {
-          font-size: 44px;
+          font-size: 53px;
           margin-bottom: 12px;
           transition: transform 0.3s ease;
         }
@@ -447,7 +447,7 @@ export function HomePage({
             box-shadow: none;
           }
           .card-home .icon {
-            font-size: 38px;
+            font-size: 46px;
             margin-bottom: 6px;
           }
           .card-home:hover .icon {

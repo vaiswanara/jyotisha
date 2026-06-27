@@ -1,0 +1,312 @@
+[
+    {
+        "Masa_Name": "Magha",
+        "Start_Date": "2026-01-19 01:22 AM",
+        "End_Date": "2026-02-17 05:31 PM"
+    },
+    {
+        "Masa_Name": "Phalguna",
+        "Start_Date": "2026-02-17 05:31 PM",
+        "End_Date": "2026-03-19 06:53 AM"
+    },
+    {
+        "Masa_Name": "Chaitra",
+        "Start_Date": "2026-03-19 06:53 AM",
+        "End_Date": "2026-04-17 05:21 PM"
+    },
+    {
+        "Masa_Name": "Vaisakha",
+        "Start_Date": "2026-04-17 05:21 PM",
+        "End_Date": "2026-05-17 01:31 AM"
+    },
+    {
+        "Masa_Name": "Adhika Jyeshtha",
+        "Start_Date": "2026-05-17 01:31 AM",
+        "End_Date": "2026-06-15 08:24 AM"
+    },
+    {
+        "Masa_Name": "Nija Jyeshtha",
+        "Start_Date": "2026-06-15 08:24 AM",
+        "End_Date": "2026-07-14 03:13 PM"
+    },
+    {
+        "Masa_Name": "Ashadha",
+        "Start_Date": "2026-07-14 03:13 PM",
+        "End_Date": "2026-08-12 11:06 PM"
+    },
+    {
+        "Masa_Name": "Shravana",
+        "Start_Date": "2026-08-12 11:06 PM",
+        "End_Date": "2026-09-11 08:57 AM"
+    },
+    {
+        "Masa_Name": "Bhadrapada",
+        "Start_Date": "2026-09-11 08:57 AM",
+        "End_Date": "2026-10-10 09:20 PM"
+    },
+    {
+        "Masa_Name": "Ashwayuja",
+        "Start_Date": "2026-10-10 09:20 PM",
+        "End_Date": "2026-11-09 12:32 PM"
+    },
+    {
+        "Masa_Name": "Kartika",
+        "Start_Date": "2026-11-09 12:32 PM",
+        "End_Date": "2026-12-09 06:21 AM"
+    },
+    {
+        "Masa_Name": "Margashirsha",
+        "Start_Date": "2026-12-09 06:21 AM",
+        "End_Date": "2027-01-08 01:54 AM"
+    },
+    {
+        "Masa_Name": "Pushya",
+        "Start_Date": "2027-01-08 01:54 AM",
+        "End_Date": "2027-02-06 09:26 PM"
+    },
+    {
+        "Masa_Name": "Magha",
+        "Start_Date": "2027-02-06 09:26 PM",
+        "End_Date": "2027-03-08 02:59 PM"
+    },
+    {
+        "Masa_Name": "Phalguna",
+        "Start_Date": "2027-03-08 02:59 PM",
+        "End_Date": "2027-04-07 05:21 AM"
+    },
+    {
+        "Masa_Name": "Chaitra",
+        "Start_Date": "2027-04-07 05:21 AM",
+        "End_Date": "2027-05-06 04:28 PM"
+    },
+    {
+        "Masa_Name": "Vaisakha",
+        "Start_Date": "2027-05-06 04:28 PM",
+        "End_Date": "2027-06-05 01:10 AM"
+    },
+    {
+        "Masa_Name": "Jyeshtha",
+        "Start_Date": "2027-06-05 01:10 AM",
+        "End_Date": "2027-07-04 08:32 AM"
+    },
+    {
+        "Masa_Name": "Ashadha",
+        "Start_Date": "2027-07-04 08:32 AM",
+        "End_Date": "2027-08-02 03:35 PM"
+    },
+    {
+        "Masa_Name": "Shravana",
+        "Start_Date": "2027-08-02 03:35 PM",
+        "End_Date": "2027-08-31 11:11 PM"
+    },
+    {
+        "Masa_Name": "Bhadrapada",
+        "Start_Date": "2027-08-31 11:11 PM",
+        "End_Date": "2027-09-30 08:06 AM"
+    },
+    {
+        "Masa_Name": "Ashwayuja",
+        "Start_Date": "2027-09-30 08:06 AM",
+        "End_Date": "2027-10-29 07:06 PM"
+    },
+    {
+        "Masa_Name": "Kartika",
+        "Start_Date": "2027-10-29 07:06 PM",
+        "End_Date": "2027-11-28 08:54 AM"
+    },
+    {
+        "Masa_Name": "Margashirsha",
+        "Start_Date": "2027-11-28 08:54 AM",
+        "End_Date": "2027-12-28 01:42 AM"
+    },
+    {
+        "Masa_Name": "Pushya",
+        "Start_Date": "2027-12-28 01:42 AM",
+        "End_Date": "2028-01-26 08:42 PM"
+    },
+    {
+        "Masa_Name": "Magha",
+        "Start_Date": "2028-01-26 08:42 PM",
+        "End_Date": "2028-02-25 04:07 PM"
+    },
+    {
+        "Masa_Name": "Phalguna",
+        "Start_Date": "2028-02-25 04:07 PM",
+        "End_Date": "2028-03-26 10:01 AM"
+    },
+    {
+        "Masa_Name": "Chaitra",
+        "Start_Date": "2028-03-26 10:01 AM",
+        "End_Date": "2028-04-25 01:16 AM"
+    },
+    {
+        "Masa_Name": "Vaisakha",
+        "Start_Date": "2028-04-25 01:16 AM",
+        "End_Date": "2028-05-24 01:46 PM"
+    },
+    {
+        "Masa_Name": "Jyeshtha",
+        "Start_Date": "2028-05-24 01:46 PM",
+        "End_Date": "2028-06-22 11:57 PM"
+    },
+    {
+        "Masa_Name": "Ashadha",
+        "Start_Date": "2028-06-22 11:57 PM",
+        "End_Date": "2028-07-22 08:31 AM"
+    },
+    {
+        "Masa_Name": "Shravana",
+        "Start_Date": "2028-07-22 08:31 AM",
+        "End_Date": "2028-08-20 04:13 PM"
+    },
+    {
+        "Masa_Name": "Bhadrapada",
+        "Start_Date": "2028-08-20 04:13 PM",
+        "End_Date": "2028-09-18 11:53 PM"
+    },
+    {
+        "Masa_Name": "Ashwayuja",
+        "Start_Date": "2028-09-18 11:53 PM",
+        "End_Date": "2028-10-18 08:26 AM"
+    },
+    {
+        "Masa_Name": "Kartika",
+        "Start_Date": "2028-10-18 08:26 AM",
+        "End_Date": "2028-11-16 06:48 PM"
+    },
+    {
+        "Masa_Name": "Margashirsha",
+        "Start_Date": "2028-11-16 06:48 PM",
+        "End_Date": "2028-12-16 07:36 AM"
+    },
+    {
+        "Masa_Name": "Pushya",
+        "Start_Date": "2028-12-16 07:36 AM",
+        "End_Date": "2029-01-14 10:54 PM"
+    },
+    {
+        "Masa_Name": "Magha",
+        "Start_Date": "2029-01-14 10:54 PM",
+        "End_Date": "2029-02-13 04:01 PM"
+    },
+    {
+        "Masa_Name": "Phalguna",
+        "Start_Date": "2029-02-13 04:01 PM",
+        "End_Date": "2029-03-15 09:49 AM"
+    },
+    {
+        "Masa_Name": "Adhika Chaitra",
+        "Start_Date": "2029-03-15 09:49 AM",
+        "End_Date": "2029-04-14 03:10 AM"
+    },
+    {
+        "Masa_Name": "Nija Chaitra",
+        "Start_Date": "2029-04-14 03:10 AM",
+        "End_Date": "2029-05-13 07:12 PM"
+    },
+    {
+        "Masa_Name": "Vaisakha",
+        "Start_Date": "2029-05-13 07:12 PM",
+        "End_Date": "2029-06-12 09:20 AM"
+    },
+    {
+        "Masa_Name": "Jyeshtha",
+        "Start_Date": "2029-06-12 09:20 AM",
+        "End_Date": "2029-07-11 09:21 PM"
+    },
+    {
+        "Masa_Name": "Ashadha",
+        "Start_Date": "2029-07-11 09:21 PM",
+        "End_Date": "2029-08-10 07:25 AM"
+    },
+    {
+        "Masa_Name": "Shravana",
+        "Start_Date": "2029-08-10 07:25 AM",
+        "End_Date": "2029-09-08 04:14 PM"
+    },
+    {
+        "Masa_Name": "Bhadrapada",
+        "Start_Date": "2029-09-08 04:14 PM",
+        "End_Date": "2029-10-08 12:44 AM"
+    },
+    {
+        "Masa_Name": "Ashwayuja",
+        "Start_Date": "2029-10-08 12:44 AM",
+        "End_Date": "2029-11-06 09:54 AM"
+    },
+    {
+        "Masa_Name": "Kartika",
+        "Start_Date": "2029-11-06 09:54 AM",
+        "End_Date": "2029-12-05 08:22 PM"
+    },
+    {
+        "Masa_Name": "Margashirsha",
+        "Start_Date": "2029-12-05 08:22 PM",
+        "End_Date": "2030-01-04 08:19 AM"
+    },
+    {
+        "Masa_Name": "Pushya",
+        "Start_Date": "2030-01-04 08:19 AM",
+        "End_Date": "2030-02-02 09:37 PM"
+    },
+    {
+        "Masa_Name": "Magha",
+        "Start_Date": "2030-02-02 09:37 PM",
+        "End_Date": "2030-03-04 12:04 PM"
+    },
+    {
+        "Masa_Name": "Phalguna",
+        "Start_Date": "2030-03-04 12:04 PM",
+        "End_Date": "2030-04-03 03:32 AM"
+    },
+    {
+        "Masa_Name": "Chaitra",
+        "Start_Date": "2030-04-03 03:32 AM",
+        "End_Date": "2030-05-02 07:42 PM"
+    },
+    {
+        "Masa_Name": "Vaisakha",
+        "Start_Date": "2030-05-02 07:42 PM",
+        "End_Date": "2030-06-01 11:51 AM"
+    },
+    {
+        "Masa_Name": "Jyeshtha",
+        "Start_Date": "2030-06-01 11:51 AM",
+        "End_Date": "2030-07-01 03:04 AM"
+    },
+    {
+        "Masa_Name": "Ashadha",
+        "Start_Date": "2030-07-01 03:04 AM",
+        "End_Date": "2030-07-30 04:41 PM"
+    },
+    {
+        "Masa_Name": "Shravana",
+        "Start_Date": "2030-07-30 04:41 PM",
+        "End_Date": "2030-08-29 04:37 AM"
+    },
+    {
+        "Masa_Name": "Bhadrapada",
+        "Start_Date": "2030-08-29 04:37 AM",
+        "End_Date": "2030-09-27 03:24 PM"
+    },
+    {
+        "Masa_Name": "Ashwayuja",
+        "Start_Date": "2030-09-27 03:24 PM",
+        "End_Date": "2030-10-27 01:46 AM"
+    },
+    {
+        "Masa_Name": "Kartika",
+        "Start_Date": "2030-10-27 01:46 AM",
+        "End_Date": "2030-11-25 12:16 PM"
+    },
+    {
+        "Masa_Name": "Margashirsha",
+        "Start_Date": "2030-11-25 12:16 PM",
+        "End_Date": "2030-12-24 11:02 PM"
+    },
+    {
+        "Masa_Name": "Pushya",
+        "Start_Date": "2030-12-24 11:02 PM",
+        "End_Date": "2031-01-23 10:00 AM"
+    }
+]

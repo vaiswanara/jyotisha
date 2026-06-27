@@ -520,5 +520,19 @@
   "readOnline": "ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ಓದಿ",
   "viewDownload": "ವೀಕ್ಷಿಸಿ / ಡೌನ್‌ಲೋಡ್",
   "searchProfiles": "ಪ್ರೊಫೈಲ್ಸ್ ಹುಡುಕಿ...",
-  "noMatchingProfiles": "ಹೊಂದುವಂತಹ ಪ್ರೊಫೈಲ್ಸ್ ಪತ್ತೆಯಾಗಿಲ್ಲ."
+  "noMatchingProfiles": "ಹೊಂದುವಂತಹ ಪ್ರೊಫೈಲ್ಸ್ ಪತ್ತೆಯಾಗಿಲ್ಲ.",
+  "endsOn": "ಮುಕ್ತಾಯ ದಿನಾಂಕ: {{date}}",
+  "nextStarts": "ಮುಂದಿನ ಆರಂಭ: {{date}}",
+  "nextStableStarts": "ಮುಂದಿನ ಸ್ಥಿರ ಗುರು ಬಲ: {{date}}",
+  "nextTempStarts": "ಮುಂದಿನ ತಾತ್ಕಾಲಿಕ ಗುರು ಬಲ: {{date}} (ಅತಿಚಾರ - {{duration}} ದಿನಗಳು)",
+  "currentTempEnds": "ತಾತ್ಕಾಲಿಕ ಗುರು ಬಲ ಮುಕ್ತಾಯ: {{date}} (ಅತಿಚಾರ)",
+  "currentStableEnds": "ಸ್ಥಿರ ಗುರು ಬಲ ಮುಕ್ತಾಯ: {{date}}",
+  "nextStableShaniStarts": "ಮುಂದಿನ ಸ್ಥಿರ ಶನಿ ಬಲ: {{date}}",
+  "nextTempShaniStarts": "ಮುಂದಿನ ತಾತ್ಕಾಲಿಕ ಶನಿ ಬಲ: {{date}} (ಅತಿಚಾರ - {{duration}} ದಿನಗಳು)",
+  "currentTempShaniEnds": "ತಾತ್ಕಾಲಿಕ ಶನಿ ಬಲ ಮುಕ್ತಾಯ: {{date}} (ಅತಿಚಾರ)",
+  "currentStableShaniEnds": "ಸ್ಥಿರ ಶನಿ ಬಲ ಮುಕ್ತಾಯ: {{date}}",
+  "PAV": "PAV",
+  "select_planet_pav": "PAV ಗ್ರಹ:",
+  "pav_center_title": "${subject} PAV",
+  "pav_tooltip_format": "${rashi} ಯಲ್ಲಿ ${subject} ಗೆ ${contributor} ಒಂದು ಬಿಂದುವನ್ನು ನೀಡುತ್ತದೆ"
 }

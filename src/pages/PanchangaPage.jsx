@@ -2508,129 +2508,140 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                     <div
                       style={{
                         display: "flex",
-                        gap: "10px",
-                        flexWrap: "wrap",
-                        alignItems: "center",
+                        flexDirection: "column",
+                        gap: "12px",
                         padding: "15px 20px",
                         borderBottom: "2px solid #eee",
                         background: "#fdfefe",
                       }}
                     >
-                      <input
-                        type="text"
-                        placeholder="Custom message for PDF export..."
+                      <div
                         style={{
-                          ...inputStyle,
-                          flex: 1,
-                          padding: "8px 12px",
-                          minWidth: "200px",
-                        }}
-                        value={muhurthaForm.pdfMessage}
-                        onChange={(e) =>
-                          setMuhurthaForm((f) => ({
-                            ...f,
-                            pdfMessage: e.target.value,
-                          }))
-                        }
-                      />
-                      <button
-                        style={{ ...actionBtnStyle, background: "#8e44ad" }}
-                        onClick={updateTableNotes}
-                      >
-                        🔄 Global Notes
-                      </button>
-                      <button
-                        style={{ ...actionBtnStyle, background: "#c0392b" }}
-                        onClick={() => {
-                          if (muhurthaSelectedRows.size === 0) {
-                            return alert("Please select at least one row to delete!");
-                          }
-                          if (!window.confirm("Are you sure you want to delete the selected rows?")) {
-                            return;
-                          }
-                          const newData = muhurthaData.filter(
-                            (_, i) => !muhurthaSelectedRows.has(i),
-                          );
-                          setMuhurthaData(newData);
-                          setMuhurthaSelectedRows(new Set());
-                          
-                          const savedProfiles = JSON.parse(localStorage.getItem("panchanga_profiles") || "{}");
-                          if (savedProfiles[selectedProfileName]) {
-                            if (Array.isArray(savedProfiles[selectedProfileName])) savedProfiles[selectedProfileName] = newData;
-                            else savedProfiles[selectedProfileName].rows = newData;
-                            localStorage.setItem("panchanga_profiles", JSON.stringify(savedProfiles));
-                          }
+                          display: "flex",
+                          gap: "10px",
+                          flexWrap: "wrap",
+                          alignItems: "center",
                         }}
                       >
-                        🗑️ Delete Rows
-                      </button>
-                      <button
-                        style={{ ...actionBtnStyle, background: "#d35400" }}
-                        onClick={exportMuhurthaPDF}
-                      >
-                        📄 Export PDF
-                      </button>
-                      <button
-                        style={{ ...actionBtnStyle, background: "#f39c12" }}
-                        onClick={handleRenameTable}
-                      >
-                        ✏️ Rename Table
-                      </button>
-                      <button
-                        style={{ ...actionBtnStyle, background: "#c0392b" }}
-                        onClick={() => {
-                          const profileName = formData.profileName.trim();
-                          if (!profileName)
-                            return alert(
-                              "Please enter a profile name to delete.",
+                        <button
+                          style={{ ...actionBtnStyle, background: "#8e44ad" }}
+                          onClick={updateTableNotes}
+                        >
+                          Global Notes
+                        </button>
+                        <button
+                          style={{ ...actionBtnStyle, background: "#c0392b" }}
+                          onClick={() => {
+                            if (muhurthaSelectedRows.size === 0) {
+                              return alert("Please select at least one row to delete!");
+                            }
+                            if (!window.confirm("Are you sure you want to delete the selected rows?")) {
+                              return;
+                            }
+                            const newData = muhurthaData.filter(
+                              (_, i) => !muhurthaSelectedRows.has(i),
                             );
-                          const savedProfiles = JSON.parse(
-                            localStorage.getItem("panchanga_profiles") || "{}",
-                          );
-                          if (!savedProfiles[profileName]) {
-                            return alert(
-                              `Profile "${profileName}" does not exist.`,
+                            setMuhurthaData(newData);
+                            setMuhurthaSelectedRows(new Set());
+                            
+                            const savedProfiles = JSON.parse(localStorage.getItem("panchanga_profiles") || "{}");
+                            if (savedProfiles[selectedProfileName]) {
+                              if (Array.isArray(savedProfiles[selectedProfileName])) savedProfiles[selectedProfileName] = newData;
+                              else savedProfiles[selectedProfileName].rows = newData;
+                              localStorage.setItem("panchanga_profiles", JSON.stringify(savedProfiles));
+                            }
+                          }}
+                        >
+                          Delete Rows
+                        </button>
+                        <button
+                          style={{ ...actionBtnStyle, background: "#d35400" }}
+                          onClick={exportMuhurthaPDF}
+                        >
+                          Export PDF
+                        </button>
+                        <button
+                          style={{ ...actionBtnStyle, background: "#f39c12" }}
+                          onClick={handleRenameTable}
+                        >
+                          Rename Table
+                        </button>
+                        <button
+                          style={{ ...actionBtnStyle, background: "#c0392b" }}
+                          onClick={() => {
+                            const profileName = formData.profileName.trim();
+                            if (!profileName)
+                              return alert(
+                                "Please enter a profile name to delete.",
+                              );
+                            const savedProfiles = JSON.parse(
+                              localStorage.getItem("panchanga_profiles") || "{}",
                             );
+                            if (!savedProfiles[profileName]) {
+                              return alert(
+                                `Profile "${profileName}" does not exist.`,
+                              );
+                            }
+                            if (
+                              window.confirm(
+                                `Are you sure you want to delete profile "${profileName}"?`,
+                              )
+                            ) {
+                              delete savedProfiles[profileName];
+                              localStorage.setItem(
+                                "panchanga_profiles",
+                                JSON.stringify(savedProfiles),
+                              );
+                              setSavedProfilesList(Object.keys(savedProfiles));
+                              setResultData([]);
+                              alert(
+                                `Profile "${profileName}" deleted successfully!`,
+                              );
+                            }
+                          }}
+                        >
+                          Delete Table
+                        </button>
+                        <button
+                          style={{ ...actionBtnStyle, background: "#27ae60" }}
+                          onClick={exportMuhurthaCSV}
+                        >
+                          Export CSV
+                        </button>
+                        <button
+                          style={{ ...actionBtnStyle, background: "#2ecc71" }}
+                          onClick={() => muhurthaCsvRef.current.click()}
+                        >
+                          Import CSV
+                        </button>
+                        <input
+                          type="file"
+                          accept=".csv"
+                          ref={muhurthaCsvRef}
+                          style={{ display: "none" }}
+                          onChange={(e) => handleImportCSV(e, "muhurtha")}
+                        />
+                      </div>
+                      
+                      <div style={{ display: "flex", width: "100%" }}>
+                        <input
+                          type="text"
+                          placeholder="Custom message for PDF export..."
+                          style={{
+                            ...inputStyle,
+                            width: "100%",
+                            padding: "8px 12px",
+                            boxSizing: "border-box",
+                          }}
+                          value={muhurthaForm.pdfMessage}
+                          onChange={(e) =>
+                            setMuhurthaForm((f) => ({
+                              ...f,
+                              pdfMessage: e.target.value,
+                            }))
                           }
-                          if (
-                            window.confirm(
-                              `Are you sure you want to delete profile "${profileName}"?`,
-                            )
-                          ) {
-                            delete savedProfiles[profileName];
-                            localStorage.setItem(
-                              "panchanga_profiles",
-                              JSON.stringify(savedProfiles),
-                            );
-                            setSavedProfilesList(Object.keys(savedProfiles));
-                            setResultData([]);
-                            alert(
-                              `Profile "${profileName}" deleted successfully!`,
-                            );
-                          }
-                        }}
-                      >
-                        🗑️ Delete Table
-                      </button>
-                      <button
-                        style={{ ...actionBtnStyle, background: "#27ae60" }}
-                        onClick={exportMuhurthaCSV}
-                      >
-                        📊 Export CSV
-                      </button>
-                      <button
-                        style={{ ...actionBtnStyle, background: "#2ecc71" }}
-                        onClick={() => muhurthaCsvRef.current.click()}
-                      >
-                        📂 Import CSV
-                      </button>
-                      <input
-                        type="file"
-                        accept=".csv"
-                        ref={muhurthaCsvRef}
-                        style={{ display: "none" }}
-                        onChange={(e) => handleImportCSV(e, "muhurtha")}
-                      />
+                        />
+                      </div>
                     </div>
                      <div className="table-scroll" style={{ maxHeight: "400px", overflow: "auto" }}>
                       <table>
@@ -2899,6 +2910,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                             maxWidth: "400px",
                             display: "flex",
                             flexDirection: "column",
+                            gap: "16px",
                           }}
                         >
                           <div
@@ -2908,7 +2920,6 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                               borderRadius: "12px",
                               border: "1px solid #eaeaea",
                               boxShadow: "0 4px 10px rgba(0,0,0,0.03)",
-                              height: "100%",
                               boxSizing: "border-box",
                             }}
                           >
@@ -2926,6 +2937,39 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                 {muhurthaChartData.lagna_rem_pct}%)
                               </span>
                             </p>
+                            {muhurthaChartData.lagna_name && (
+                              <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                                <strong>{muhurthaChartData.lagna_name} Lagna:</strong>{" "}
+                                <span style={{ color: "#e67e22", fontWeight: "bold" }}>
+                                  {muhurthaChartData.lagna_start} - {muhurthaChartData.lagna_end}
+                                </span>
+                              </p>
+                            )}
+                            {muhurthaChartData.mid_lagna_window && (
+                              <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                                <strong>Lagna Mid:</strong>{" "}
+                                <span style={{ color: "#27ae60", fontWeight: "bold" }}>
+                                  {muhurthaChartData.mid_lagna_window}
+                                </span>
+                              </p>
+                            )}
+                            {muhurthaChartData.lagna_tyajyam && (
+                              <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                                <strong>Lagna Tyajyamu:</strong>{" "}
+                                <span style={{ color: "#c0392b", fontWeight: "bold" }}>
+                                  {muhurthaChartData.lagna_tyajyam}
+                                </span>
+                              </p>
+                            )}
+
+                            <div style={{ height: "8px" }} />
+
+                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                              <strong>Pushkaraamsha:</strong>{" "}
+                              <span style={{ color: "#8e44ad", fontWeight: "bold" }}>
+                                {muhurthaChartData.pushkaramsha_time}
+                              </span>
+                            </p>
                             <p style={{ margin: "5px 0", fontSize: "14px" }}>
                               <strong>Pushkara:</strong>{" "}
                               <span
@@ -2939,20 +2983,9 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                 {muhurthaChartData.pushkaramsha}
                               </span>
                             </p>
-                            {muhurthaChartData.lagna_name && (
-                              <p style={{ margin: "5px 0", fontSize: "14px" }}>
-                                <strong>{muhurthaChartData.lagna_name} Lagna:</strong>{" "}
-                                <span style={{ color: "#e67e22", fontWeight: "bold" }}>
-                                  {muhurthaChartData.lagna_start} - {muhurthaChartData.lagna_end}
-                                </span>
-                              </p>
-                            )}
-                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
-                              <strong>Pushkaraamsha:</strong>{" "}
-                              <span style={{ color: "#8e44ad", fontWeight: "bold" }}>
-                                {muhurthaChartData.pushkaramsha_time}
-                              </span>
-                            </p>
+
+                            <div style={{ height: "8px" }} />
+
                             <p style={{ margin: "5px 0", fontSize: "14px" }}>
                               <strong>Muhurtha:</strong>{" "}
                               <span
@@ -2967,6 +3000,9 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                 {muhurthaChartData.current_muhurtha_end})
                               </span>
                             </p>
+
+                            <div style={{ height: "8px" }} />
+
                             <p style={{ margin: "5px 0", fontSize: "14px" }}>
                               <strong>Panchakam:</strong>{" "}
                               <span
@@ -2980,39 +3016,54 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                 {muhurthaChartData.panchaka}
                               </span>
                             </p>
-                            <hr
-                              style={{
-                                border: 0,
-                                borderTop: "1px dashed #eee",
-                                margin: "10px 0",
-                              }}
-                            />
-                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                          </div>
+
+                          <div
+                            style={{
+                              background: "#fff",
+                              padding: "20px",
+                              borderRadius: "12px",
+                              border: "1px solid #eaeaea",
+                              boxShadow: "0 4px 10px rgba(0,0,0,0.03)",
+                              boxSizing: "border-box",
+                            }}
+                          >
+                             <h4
+                              style={{ margin: "0 0 10px 0", color: "#2c3e50" }}
+                            >
+                              Inauspicious Timings
+                            </h4>
+                             <p style={{ margin: "5px 0", fontSize: "14px" }}>
                               <strong>Rahu Kalam:</strong>{" "}
                               <span style={{ color: "#e67e22" }}>
-                                {chartSelectedInfo?.rahu ||
-                                  muhurthaChartData.rahu_kalam ||
-                                  "-"}
+                                {muhurthaChartData.rahu_kalam || "-"}
                               </span>
                             </p>
+
+                            <div style={{ height: "8px" }} />
+
                             <p style={{ margin: "5px 0", fontSize: "14px" }}>
                               <strong>Yamagandam:</strong>{" "}
                               <span style={{ color: "#e67e22" }}>
-                                {chartSelectedInfo?.yama ||
-                                  muhurthaChartData.yamagandam ||
-                                  "-"}
+                                {muhurthaChartData.yamagandam || "-"}
                               </span>
                             </p>
+
+                            <div style={{ height: "8px" }} />
+
                             <div style={{ margin: "8px 0", fontSize: "14px" }}>
                               <strong>Varjyam:</strong>
                               <div style={{ color: "#c0392b", marginTop: "2px", fontWeight: "bold" }}>
-                                {renderIntervalList(chartSelectedInfo?.varjyam || muhurthaChartData.varjyam)}
+                                {renderIntervalList(muhurthaChartData.varjyam)}
                               </div>
                             </div>
+
+                            <div style={{ height: "8px" }} />
+
                             <div style={{ margin: "8px 0", fontSize: "14px" }}>
                               <strong>Durmuhurtham:</strong>
                               <div style={{ color: "#d35400", marginTop: "2px", fontWeight: "bold" }}>
-                                {renderIntervalList(chartSelectedInfo?.durm || muhurthaChartData.durmuhurtham)}
+                                {renderIntervalList(muhurthaChartData.durmuhurtham)}
                               </div>
                             </div>
                           </div>
@@ -3046,9 +3097,9 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                 alignItems: "center",
                               }}
                             >
-                              <span>Ekavimshathi (21) Mahadoshas</span>
+                              <span>{t("Doshas", "Doshas")}</span>
                               <span
-                                title="Read about 21 Doshas"
+                                title="Read about Doshas"
                                 onClick={() => setShowDoshaInfo(true)}
                                 style={{
                                   fontSize: "14px",
@@ -3081,27 +3132,14 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                   localStorage.getItem("eclock_prefs") || "{}",
                                 );
                                 const activeDoshas = prefs.active_doshas || [
-                                  "Papakartari Lagna",
-                                  "Papa Lagna",
                                   "Saptamastha Graha",
-                                  "Ashtamastha Graha",
-                                  "Shashtashta Chandra",
                                   "Bhrigu Shatka",
                                   "Ashtamastha Kuja",
-                                  "Riktha Tithi",
-                                  "Amavasya Tithi",
-                                  "Vishti Karana",
-                                  "Malefic Yoga",
-                                  "Gandanta (Moon)",
-                                  "Gandanta (Lagna)",
+                                  "Sankranti Dosha",
                                   "Asthangatha",
-                                  "Bad Panchakam",
-                                  "Krura Muhurtha",
                                   "Grahanam (Eclipse)",
-                                  "Kendra Papa",
-                                  "Trikona Papa",
-                                  "Kuja Dosha",
-                                  "Udayasta Shuddhi",
+                                  "Grahana Utpata Dosha",
+                                  "Rahu Kalam",
                                 ];
                                 const filteredDoshas = (
                                   muhurthaChartData.doshas || []
@@ -3267,7 +3305,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
               </button>
             </div>
             <p style={{ fontSize: "14.5px", color: "#555", lineHeight: "1.6" }}>
-              These are 21 major astrological blemishes strictly analyzed in
+              These are 17 major astrological blemishes strictly analyzed in
               Vedic Astrology for selecting an auspicious Muhurtha.
             </p>
             <ol
@@ -3280,24 +3318,15 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
               }}
             >
               <li>
-                <b>Papakartari Lagna:</b> Malefic planets present in the 2nd and
-                12th houses from Lagna.
-              </li>
-              <li>
-                <b>Papa Lagna:</b> Malefic planets occupying the 1st house
-                (Lagna) directly.
-              </li>
-              <li>
                 <b>Saptamastha Graha:</b> Any planet situated in the 7th house
                 (afflicts marriage & partnerships).
               </li>
               <li>
-                <b>Ashtamastha Graha:</b> Any planet situated in the 8th house
-                (Lagnashtama dosha).
-              </li>
-              <li>
                 <b>Ch in 6,8,12:</b> The Moon placed in the 6th, 8th, or 12th
                 house from Lagna.
+              </li>
+              <li>
+                <b>Sagraha Chandra Dosha:</b> Moon conjoined with any other planet in the same Rasi.
               </li>
               <li>
                 <b>Bhrigu Shatka:</b> Venus (Shukra) placed in the 6th house
@@ -3308,28 +3337,11 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                 from Lagna.
               </li>
               <li>
-                <b>Riktha Tithi:</b> Muhurtha falling on the 4th (Chaviti), 9th
-                (Navami), or 14th (Chaturdashi) lunar days.
-              </li>
-              <li>
-                <b>Amavasya Tithi:</b> Muhurtha falling on a New Moon day
-                (Amavasya).
-              </li>
-              <li>
-                <b>Vishti Karana:</b> Time segment overlapping with Bhadra /
-                Vishti Karana.
-              </li>
-              <li>
-                <b>Malefic Yoga:</b> Extremely negative daily Yogas like
-                Vyatipata (16) and Vaidhriti (26).
-              </li>
-              <li>
                 <b>Gandanta (Moon):</b> Moon in the junction of Water and Fire
                 signs (Ashlesha-Magha, Jyeshtha-Mula, Revati-Ashwini).
               </li>
               <li>
-                <b>Gandanta (Lagna):</b> Lagna at the extreme boundary (less
-                than 1° or greater than 29°) of any Rasi.
+                <b>Sankranti Dosha:</b> Sun transitioning from one Rasi to another (avoid hours around Sankranti).
               </li>
               <li>
                 <b>Asthangatha (Combustion):</b> Benefics like Jupiter (Guru) or
@@ -3344,24 +3356,25 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                 (e.g., Rudra, Ahi, Pitru).
               </li>
               <li>
-                <b>Grahanam (Eclipse):</b> Sun or Moon located within 15° of
-                Rahu or Ketu.
+                <b>Dagdha Tithi Dosha:</b> Inauspicious combination of weekday and Tithi (burnt days).
               </li>
               <li>
-                <b>Kendra Papa:</b> Malefic planets placed in angles/Kendras
-                (1st, 4th, 7th, 10th houses).
+                <b>Grahanam (Eclipse):</b> Muhurtha falling exactly on a Solar or Lunar Eclipse day.
               </li>
               <li>
-                <b>Trikona Papa:</b> Malefic planets placed in trines/Trikonas
-                (5th, 9th houses).
+                <b>Grahana Utpata Dosha:</b> Muhurtha falling in a Nakshatra where an eclipse occurred in the last 6 months.
               </li>
               <li>
-                <b>Kuja Dosha:</b> Mars placed in the 1st, 2nd, 4th, 7th, 8th,
-                or 12th house.
+                <b>Rahu Kalam:</b> Muhurtha time overlapping with Rahu Kalam (avoided for auspicious works).
               </li>
               <li>
-                <b>Udayasta Shuddhi:</b> Malefic planets in both 1st and 7th
-                houses without any benefic aspect.
+                <b>Yamagandam:</b> Muhurtha time overlapping with Yamagandam (avoided for auspicious works).
+              </li>
+              <li>
+                <b>Varjyam:</b> Muhurtha time overlapping with Varjyam (tyajyam) window.
+              </li>
+              <li>
+                <b>Durmuhurtham:</b> Muhurtha time overlapping with Durmuhurtham window.
               </li>
             </ol>
             <div style={{ textAlign: "center", marginTop: "25px" }}>

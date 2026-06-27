@@ -1,3 +1,10 @@
+27-06-2026
+- updated eka-vimshathi doshas and calculations and displayed the filtered doshas in muhurtha section.
+ 
+
+22-06-2026
+- added PAV tab at Time Machine Section in eclock page. This displays animated Prastara ashtakavarga.
+
 19-06-2026
 - Added Eastern Chart Style in the app .
 

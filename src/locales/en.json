@@ -548,5 +548,19 @@
   "readOnline": "Read Online",
   "viewDownload": "View / Download",
   "searchProfiles": "Search profiles...",
-  "noMatchingProfiles": "No matching profiles found."
+  "noMatchingProfiles": "No matching profiles found.",
+  "endsOn": "Ends on: {{date}}",
+  "nextStarts": "Next starts: {{date}}",
+  "nextStableStarts": "Next stable Guru Balam: {{date}}",
+  "nextTempStarts": "Next temporary Guru Balam: {{date}} (Atichara - {{duration}} days)",
+  "currentTempEnds": "Temporary Guru Balam ends: {{date}} (Atichara)",
+  "currentStableEnds": "Stable Guru Balam ends: {{date}}",
+  "nextStableShaniStarts": "Next stable Shani Balam: {{date}}",
+  "nextTempShaniStarts": "Next temporary Shani Balam: {{date}} (Atichara - {{duration}} days)",
+  "currentTempShaniEnds": "Temporary Shani Balam ends: {{date}} (Atichara)",
+  "currentStableShaniEnds": "Stable Shani Balam ends: {{date}}",
+  "PAV": "PAV",
+  "select_planet_pav": "PAV Planet:",
+  "pav_center_title": "${subject} PAV",
+  "pav_tooltip_format": "${contributor} contributes 1 point to ${subject} in ${rashi}"
 }

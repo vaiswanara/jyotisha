@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
   plugins: [
     react(),
     VitePWA({
-      registerType: "prompt", // యూజర్ అనుమతితో వర్షన్ అప్‌డేట్ అవుతుంది (అప్‌డేట్ బటన్ చూపిస్తుంది)
+      registerType: "autoUpdate", // ఆటోమేటిక్‌గా వర్షన్ అప్‌డేట్ అవుతుంది
       devOptions: {
         enabled: true, // లోకల్ సర్వర్‌లో (npm run dev) కూడా PWA యాక్టివేట్ చేయడానికి
       },

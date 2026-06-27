@@ -196,18 +196,20 @@ export function MatchDetailsForm({
         .popup-container {
           position: fixed; top: 0; left: 0; right: 0; bottom: 0;
           background: rgba(0,0,0,0.6); z-index: 1000;
-          display: flex; justify-content: center; align-items: center;
+          display: flex; justify-content: center; align-items: flex-start;
           padding: 20px; backdrop-filter: blur(4px);
+          overflow-y: auto;
         }
         .popup-content {
           background: #fff; padding: 30px; border-radius: 16px;
-          width: 100%; max-width: 650px; max-height: 90vh;
-          overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+          width: 100%; max-width: 650px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+          margin: 40px auto;
           box-sizing: border-box;
         }
         @media (max-width: 768px) {
           .popup-container { padding: 15px; }
-          .popup-content { padding: 20px; }
+          .popup-content { padding: 20px; margin: 20px auto; }
         }
         .popup-tab {
           flex: 1;

@@ -1168,3 +1168,36 @@ body {
     transform: translate(-50%, 0) scale(1);
   }
 }
+
+.balams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .balams-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Smart TV layout & Sidebar styling */
+.is-tv body {
+  font-size: 17px !important;
+}
+.is-tv .page,
+.is-tv .new-horo-page {
+  max-width: 95% !important;
+  margin: 0 auto !important;
+  padding: 20px !important;
+}
+.is-tv .sidebar {
+  overflow-y: auto !important;
+  max-height: 100vh !important;
+  height: auto !important;
+}
+.is-tv .sidebar-nav {
+  overflow-y: visible !important;
+  flex: none !important;
+}

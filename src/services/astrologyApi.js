@@ -1,5 +1,16 @@
-export const API_URL =
-  import.meta.env.VITE_API_URL || "https://api.vaiswanara.com/api";
+let resolvedApiUrl = "https://api.vaiswanara.com/api";
+
+if (import.meta.env.DEV) {
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    resolvedApiUrl = `http://${window.location.hostname}:3000/api`;
+  } else {
+    resolvedApiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+  }
+} else {
+  resolvedApiUrl = import.meta.env.VITE_API_URL || "https://api.vaiswanara.com/api";
+}
+
+export const API_URL = resolvedApiUrl;
 
 export const API_TOKEN =
   import.meta.env.VITE_API_TOKEN ||

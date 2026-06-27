@@ -217,9 +217,6 @@ function getLagnaRashi(ts, lat, lon, tz, ayKey, fastMode) {
         isSwetestUsed = false;
     }
     let ascLon = engine.calcAscendant(lat, lon);
-    if (!isSwetestUsed) {
-        ascLon = (ascLon + 180) % 360;
-    }
     return Math.floor(ascLon / 30);
 }
 function getLagnaDeg(ts, lat, lon, tz, ayKey, fastMode) {
@@ -232,9 +229,6 @@ function getLagnaDeg(ts, lat, lon, tz, ayKey, fastMode) {
         isSwetestUsed = false;
     }
     let ascLon = engine.calcAscendant(lat, lon);
-    if (!isSwetestUsed) {
-        ascLon = (ascLon + 180) % 360;
-    }
     return ascLon;
 }
 function getLagnaBoundary(targetTs, targetRasi, isStart, lat, lon, tz, ayKey) {
@@ -404,85 +398,171 @@ function getPushkaraInfo(lagnaRashi, ascDeg, startLagnaTs, endLagnaTs, lat, lon,
         window: `${fmt(pStartTs)} - ${fmt(pEndTs)}`,
     };
 }
-function evaluateMuhurthaDoshas(planets, panchanga, muhurthaInfo) {
+function evaluateMuhurthaDoshas(planets, panchanga, muhurthaInfo, engine, timestamp, lat, lon, tz, ayKey, rahuStart, yamaStart, mDayDuration, vStart1, vEnd1, vStart2, vEnd2, mSunriseTs, mVaaraNum) {
     const doshas = [];
     const lagnaRashi = planets[constants_1.Planet.Ascendant].rashi;
     const lagnaDeg = planets[constants_1.Planet.Ascendant].degree;
     const moonHouse = planets[constants_1.Planet.Moon]?.house || 0;
     const marsHouse = planets[constants_1.Planet.Mars]?.house || 0;
     const venusHouse = planets[constants_1.Planet.Venus]?.house || 0;
-    const houseHasMalefic = {};
+    // 1. Saptamastha Graha
+    const saturnHouse = planets[constants_1.Planet.Saturn]?.house || 0;
+    const houseHasAnyGraha = {};
     for (const p of [
+        constants_1.Planet.Sun,
+        constants_1.Planet.Moon,
         constants_1.Planet.Mars,
+        constants_1.Planet.Mercury,
+        constants_1.Planet.Jupiter,
+        constants_1.Planet.Venus,
         constants_1.Planet.Saturn,
         constants_1.Planet.Rahu,
         constants_1.Planet.Ketu,
-        constants_1.Planet.Sun,
     ]) {
         if (planets[p]?.house)
-            houseHasMalefic[planets[p].house] = true;
+            houseHasAnyGraha[planets[p].house] = true;
     }
-    if (houseHasMalefic[12] && houseHasMalefic[2])
-        doshas.push("Papakartari Lagna");
-    if (houseHasMalefic[1])
-        doshas.push("Papa Lagna");
-    if (planets[constants_1.Planet.Saturn]?.house === 7 || houseHasMalefic[7])
+    if (saturnHouse === 7 || houseHasAnyGraha[7]) {
         doshas.push("Saptamastha Graha");
-    if (houseHasMalefic[8])
-        doshas.push("Ashtamastha Graha");
-    if ([6, 8, 12].includes(moonHouse))
+    }
+    // 2. Ch in 6,8,12 (Shashtashta Chandra)
+    if ([6, 8, 12].includes(moonHouse)) {
         doshas.push("Shashtashta Chandra");
-    if (venusHouse === 6)
-        doshas.push("Bhrigu Shatka");
-    if (marsHouse === 8)
-        doshas.push("Ashtamastha Kuja");
-    const tithiNum = panchanga.tithi_number || 0;
-    if ([4, 9, 14, 19, 24, 29].includes(tithiNum))
-        doshas.push("Riktha Tithi");
-    if (tithiNum === 30)
-        doshas.push("Amavasya Tithi");
-    if (panchanga.karana === "Vishti")
-        doshas.push("Vishti Karana");
-    if (["Vyatipata", "Vaidhriti"].includes(panchanga.yoga))
-        doshas.push("Malefic Yoga");
-    if (["Ashlesha", "Jyeshtha", "Revati"].includes(planets[constants_1.Planet.Moon]?.nakshatra) &&
-        planets[constants_1.Planet.Moon]?.pada === 4)
-        doshas.push("Gandanta (Moon)");
-    if (lagnaDeg < 1 || lagnaDeg > 29)
-        doshas.push("Gandanta (Lagna)");
-    if (planets[constants_1.Planet.Jupiter]?.combust || planets[constants_1.Planet.Venus]?.combust)
-        doshas.push("Asthangatha (Combustion)");
-    if (!muhurthaInfo.is_good)
-        doshas.push("Krura Muhurtha");
-    const sl = planets[constants_1.Planet.Sun]?.longitude;
-    const ml = planets[constants_1.Planet.Moon]?.longitude;
-    const rl = planets[constants_1.Planet.Rahu]?.longitude;
-    const kl = planets[constants_1.Planet.Ketu]?.longitude;
-    if (sl !== undefined && rl !== undefined) {
-        for (const pair of [
-            [sl, rl],
-            [ml, rl],
-            [sl, kl],
-            [ml, kl],
+    }
+    // 3. Sagraha Chandra Dosha (new)
+    const moonRashi = planets[constants_1.Planet.Moon]?.rashi;
+    if (moonRashi !== undefined) {
+        for (const p of [
+            constants_1.Planet.Sun,
+            constants_1.Planet.Mars,
+            constants_1.Planet.Mercury,
+            constants_1.Planet.Jupiter,
+            constants_1.Planet.Venus,
+            constants_1.Planet.Saturn,
+            constants_1.Planet.Rahu,
+            constants_1.Planet.Ketu,
         ]) {
-            if (pair[0] === undefined || pair[1] === undefined)
-                continue;
-            let diff = Math.abs(pair[0] - pair[1]);
-            diff = Math.min(diff, 360 - diff);
-            if (diff <= 15) {
-                doshas.push("Grahanam (Eclipse)");
+            if (planets[p]?.rashi === moonRashi) {
+                doshas.push("Sagraha Chandra Dosha");
                 break;
             }
         }
     }
-    if ([1, 4, 7, 10].some((h) => houseHasMalefic[h]))
-        doshas.push("Kendra Papa");
-    if ([5, 9].some((h) => houseHasMalefic[h]))
-        doshas.push("Trikona Papa");
-    if ([1, 2, 4, 7, 8, 12].includes(marsHouse))
-        doshas.push("Kuja Dosha");
-    if (houseHasMalefic[1] && houseHasMalefic[7])
-        doshas.push("Udayasta Shuddhi");
+    // 4. Bhrigu Shatka
+    if (venusHouse === 6) {
+        doshas.push("Bhrigu Shatka");
+    }
+    // 5. Ashtamastha Kuja
+    if (marsHouse === 8) {
+        doshas.push("Ashtamastha Kuja");
+    }
+    // 6. Gandanta (Moon)
+    if (["Ashlesha", "Jyeshtha", "Revati"].includes(planets[constants_1.Planet.Moon]?.nakshatra) &&
+        planets[constants_1.Planet.Moon]?.pada === 4) {
+        doshas.push("Gandanta (Moon)");
+    }
+    // 7. Sankranti Dosha
+    const sl = planets[constants_1.Planet.Sun]?.longitude;
+    if (sl !== undefined) {
+        const degInRashi = sl % 30;
+        if (degInRashi < 0.25 || degInRashi > 29.75) {
+            doshas.push("Sankranti Dosha");
+        }
+    }
+    // 8. Asthangatha (Combustion)
+    if (planets[constants_1.Planet.Jupiter]?.combust || planets[constants_1.Planet.Venus]?.combust) {
+        doshas.push("Asthangatha");
+    }
+    // 9. Bad Panchakam
+    let wd = new Date((timestamp + tz * 3600) * 1000).getUTCDay();
+    const { sunrise: mSunriseTs_local } = getPreciseSunriseSunset(timestamp, lat, lon, tz);
+    if (timestamp < mSunriseTs_local) {
+        wd = (wd - 1 + 7) % 7;
+    }
+    const hinduWd = wd + 1;
+    const panchaka = panchakaResult(hinduWd, panchanga.tithi_number || 0, (planets[constants_1.Planet.Moon]?.nak_index || 0) + 1, lagnaRashi);
+    if (!panchaka.is_good) {
+        doshas.push("Bad Panchakam");
+    }
+    // 10. Krura Muhurtha
+    if (!muhurthaInfo.is_good) {
+        doshas.push("Krura Muhurtha");
+    }
+    // 11. Dagdha Tithi Dosha
+    const tithiInPaksha = (((panchanga.tithi_number || 1) - 1) % 15) + 1;
+    const vara = panchanga.vara;
+    if ((vara === "Ravivara" && tithiInPaksha === 12) ||
+        (vara === "Somavara" && tithiInPaksha === 11) ||
+        (vara === "Mangalavara" && tithiInPaksha === 5) ||
+        (vara === "Budhavara" && tithiInPaksha === 3) ||
+        (vara === "Guruvara" && tithiInPaksha === 6) ||
+        (vara === "Shukravara" && tithiInPaksha === 8) ||
+        (vara === "Shanivara" && tithiInPaksha === 9)) {
+        doshas.push("Dagdha Tithi Dosha");
+    }
+    // 12. Grahanam (Eclipse) & 13. Grahana Utpata Dosha (using precomputed eclipses_data.json)
+    const eclipsesFile = path_1.default.join(__dirname, "eclipses_data.json");
+    let eclipseList = [];
+    try {
+        if (fs_1.default.existsSync(eclipsesFile)) {
+            eclipseList = JSON.parse(fs_1.default.readFileSync(eclipsesFile, "utf8"));
+        }
+    }
+    catch (e) { }
+    const localD = new Date((timestamp + tz * 3600) * 1000);
+    const yyyy = localD.getUTCFullYear();
+    const mm = String(localD.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(localD.getUTCDate()).padStart(2, "0");
+    const localDateStr = `${yyyy}-${mm}-${dd}`;
+    const isEclipseDay = eclipseList.some((e) => e.date === localDateStr);
+    if (isEclipseDay) {
+        doshas.push("Grahanam (Eclipse)");
+    }
+    const currentMoonNak = planets[constants_1.Planet.Moon]?.nakshatra;
+    if (currentMoonNak && eclipseList.length > 0) {
+        const targetMs = timestamp * 1000;
+        const sixMonthsMs = 180 * 86400 * 1000;
+        const pastEclipsesIn6m = eclipseList.filter((e) => e.utcTimestamp < targetMs && e.utcTimestamp >= targetMs - sixMonthsMs);
+        for (const e of pastEclipsesIn6m) {
+            if (e.nakshatra && e.nakshatra.toLowerCase() === currentMoonNak.toLowerCase()) {
+                doshas.push("Grahana Utpata Dosha");
+                break;
+            }
+        }
+    }
+    // 14. Rahu Kalam
+    const rahuEnd = rahuStart + Math.floor(mDayDuration * 0.125);
+    if (timestamp >= rahuStart && timestamp <= rahuEnd) {
+        doshas.push("Rahu Kalam");
+    }
+    // 15. Yamagandam
+    const yamaEnd = yamaStart + Math.floor(mDayDuration * 0.125);
+    if (timestamp >= yamaStart && timestamp <= yamaEnd) {
+        doshas.push("Yamagandam");
+    }
+    // 16. Varjyam
+    if ((timestamp >= vStart1 && timestamp <= vEnd1) ||
+        (timestamp >= vStart2 && timestamp <= vEnd2)) {
+        doshas.push("Varjyam");
+    }
+    // 17. Durmuhurtham
+    const durmuhurthams = {
+        0: [13],
+        1: [8, 11],
+        2: [3, 10],
+        3: [5],
+        4: [8],
+        5: [3, 8],
+        6: [1],
+    };
+    for (const mdIdx of durmuhurthams[mVaaraNum] || []) {
+        const mStart = mSunriseTs + Math.floor(mDayDuration * (mdIdx / 15.0));
+        const mEnd = mSunriseTs + Math.floor(mDayDuration * ((mdIdx + 1) / 15.0));
+        if (timestamp >= mStart && timestamp <= mEnd) {
+            doshas.push("Durmuhurtham");
+            break;
+        }
+    }
     return Array.from(new Set(doshas));
 }
 function formatTsLocal(ts, tz) {
@@ -1486,7 +1566,7 @@ app.all(apiPaths, async (req, res) => {
                     Nakshatra: nakName,
                     "Nakshatra End": formatTsLocal(nEndTs, tz),
                     Nakshatra_is_good: true,
-                    "Moon Rasi": rashiNames[moonRasiIdx + 1],
+                    "Moon Rasi": rashiNames[moonRasiIdx],
                     Yoga: yogaName,
                     "Yoga End": formatTsLocal(yEndTs, tz),
                     Yoga_is_good: true,
@@ -1828,7 +1908,7 @@ app.all(apiPaths, async (req, res) => {
             const startLagnaTs = getLagnaBoundary(timestamp, lagnaRashiIndex, true, lat, lon, tz, ayKeyForBoundary);
             const endLagnaTs = getLagnaBoundary(timestamp, lagnaRashiIndex, false, lat, lon, tz, ayKeyForBoundary);
             const midTs = Math.floor((startLagnaTs + endLagnaTs) / 2);
-            const midWindow = `${formatTsLocal(midTs - 1440, tz)} - ${formatTsLocal(midTs + 1440, tz)}`;
+            const midWindow = `${formatTsLocal(midTs - 1800, tz)} to ${formatTsLocal(midTs + 1800, tz)}`;
             const pushkaraInfo = getPushkaraInfo(planets[constants_1.Planet.Ascendant].rashi, ascDeg, startLagnaTs, endLagnaTs, lat, lon, tz, ayKeyForBoundary);
             // getMuhurthaInfo Logic
             const { sunrise: mSunriseTs, sunset: mSunsetTs } = getPreciseSunriseSunset(timestamp, lat, lon, tz);
@@ -1965,7 +2045,31 @@ app.all(apiPaths, async (req, res) => {
             }
             const hinduWd = wd + 1; // Sunday=1, Monday=2, ..., Saturday=7
             const panchaka = panchakaResult(hinduWd, panchanga.tithi_number || 0, (planets[constants_1.Planet.Moon]?.nak_index || 0) + 1, planets[constants_1.Planet.Ascendant].rashi);
-            const doshas = evaluateMuhurthaDoshas(planets, panchanga, muhurthaInfo);
+            // Calculate Lagna Tyajyamu (1/2 Ghati = 12 minutes duration)
+            const lagnaDur = endLagnaTs - startLagnaTs;
+            const rashiTyajyaStarts = {
+                1: 30, // Mesha
+                2: 16, // Vrushabha
+                3: 23, // Mithuna
+                4: 2, // Karka
+                5: 21, // Simha
+                6: 14, // Kanya
+                7: 10, // Tula
+                8: 20, // Vrischika
+                9: 9, // Dhanu
+                10: 4, // Makara
+                11: 23, // Kumbha
+                12: 11, // Meena
+            };
+            const rasiNum = planets[constants_1.Planet.Ascendant]?.rashi || 1;
+            const startPart = rashiTyajyaStarts[rasiNum] || 1;
+            const tyajyaStart = startLagnaTs + Math.floor((lagnaDur * (startPart - 1)) / 30);
+            const tyajyaEnd = tyajyaStart + 720; // 12 minutes
+            const lagnaTyajyamStr = `${formatTsLocal(tyajyaStart, tz)} - ${formatTsLocal(tyajyaEnd, tz)}`;
+            const doshas = evaluateMuhurthaDoshas(planets, panchanga, muhurthaInfo, engine, timestamp, lat, lon, tz, ayKey, rahuStart, yamaStart, mDayDuration, vStart1, vEnd1, vStart2, vEnd2, mSunriseTs, mVaaraNum);
+            if (timestamp >= tyajyaStart && timestamp <= tyajyaEnd) {
+                doshas.push("Lagna Tyajyam");
+            }
             return jsonAndCache({
                 endpoint: "muhurtha_chart",
                 ayanamsha_name: engine.getAyanamshaName(),
@@ -1989,6 +2093,7 @@ app.all(apiPaths, async (req, res) => {
                 yamagandam: muhurthaInfo.yamagandam,
                 durmuhurtham: muhurthaInfo.durmuhurtham,
                 varjyam: muhurthaInfo.varjyam,
+                lagna_tyajyam: lagnaTyajyamStr,
                 doshas,
             });
         }

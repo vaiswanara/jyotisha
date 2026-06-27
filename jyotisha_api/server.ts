@@ -134,7 +134,7 @@ const isSyncEnabled = (): boolean => {
     try {
       const data = JSON.parse(fs.readFileSync(settingsFile, "utf-8"));
       return data.enableUserSync === true;
-    } catch (e) {}
+    } catch (e) { }
   }
   return false;
 };
@@ -241,9 +241,6 @@ function getLagnaRashi(
     isSwetestUsed = false;
   }
   let ascLon = engine.calcAscendant(lat, lon);
-  if (!isSwetestUsed) {
-    ascLon = (ascLon + 180) % 360;
-  }
   return Math.floor(ascLon / 30);
 }
 
@@ -273,9 +270,6 @@ function getLagnaDeg(
     isSwetestUsed = false;
   }
   let ascLon = engine.calcAscendant(lat, lon);
-  if (!isSwetestUsed) {
-    ascLon = (ascLon + 180) % 360;
-  }
   return ascLon;
 }
 
@@ -496,6 +490,21 @@ function evaluateMuhurthaDoshas(
   planets: any,
   panchanga: any,
   muhurthaInfo: any,
+  engine: any,
+  timestamp: number,
+  lat: number,
+  lon: number,
+  tz: number,
+  ayKey: string,
+  rahuStart: number,
+  yamaStart: number,
+  mDayDuration: number,
+  vStart1: number,
+  vEnd1: number,
+  vStart2: number,
+  vEnd2: number,
+  mSunriseTs: number,
+  mVaaraNum: number,
 ) {
   const doshas: string[] = [];
   const lagnaRashi = planets[Planet.Ascendant].rashi;
@@ -503,66 +512,197 @@ function evaluateMuhurthaDoshas(
   const moonHouse = planets[Planet.Moon]?.house || 0;
   const marsHouse = planets[Planet.Mars]?.house || 0;
   const venusHouse = planets[Planet.Venus]?.house || 0;
-  const houseHasMalefic: Record<number, boolean> = {};
+
+  // 1. Saptamastha Graha
+  const saturnHouse = planets[Planet.Saturn]?.house || 0;
+  const houseHasAnyGraha: Record<number, boolean> = {};
   for (const p of [
+    Planet.Sun,
+    Planet.Moon,
     Planet.Mars,
+    Planet.Mercury,
+    Planet.Jupiter,
+    Planet.Venus,
     Planet.Saturn,
     Planet.Rahu,
     Planet.Ketu,
-    Planet.Sun,
   ]) {
-    if (planets[p]?.house) houseHasMalefic[planets[p].house] = true;
+    if (planets[p]?.house) houseHasAnyGraha[planets[p].house] = true;
   }
-  if (houseHasMalefic[12] && houseHasMalefic[2])
-    doshas.push("Papakartari Lagna");
-  if (houseHasMalefic[1]) doshas.push("Papa Lagna");
-  if (planets[Planet.Saturn]?.house === 7 || houseHasMalefic[7])
+  if (saturnHouse === 7 || houseHasAnyGraha[7]) {
     doshas.push("Saptamastha Graha");
-  if (houseHasMalefic[8]) doshas.push("Ashtamastha Graha");
-  if ([6, 8, 12].includes(moonHouse)) doshas.push("Shashtashta Chandra");
-  if (venusHouse === 6) doshas.push("Bhrigu Shatka");
-  if (marsHouse === 8) doshas.push("Ashtamastha Kuja");
-  const tithiNum = panchanga.tithi_number || 0;
-  if ([4, 9, 14, 19, 24, 29].includes(tithiNum)) doshas.push("Riktha Tithi");
-  if (tithiNum === 30) doshas.push("Amavasya Tithi");
-  if (panchanga.karana === "Vishti") doshas.push("Vishti Karana");
-  if (["Vyatipata", "Vaidhriti"].includes(panchanga.yoga))
-    doshas.push("Malefic Yoga");
+  }
+
+  // 2. Ch in 6,8,12 (Shashtashta Chandra)
+  if ([6, 8, 12].includes(moonHouse)) {
+    doshas.push("Shashtashta Chandra");
+  }
+
+  // 3. Sagraha Chandra Dosha (new)
+  const moonRashi = planets[Planet.Moon]?.rashi;
+  if (moonRashi !== undefined) {
+    for (const p of [
+      Planet.Sun,
+      Planet.Mars,
+      Planet.Mercury,
+      Planet.Jupiter,
+      Planet.Venus,
+      Planet.Saturn,
+      Planet.Rahu,
+      Planet.Ketu,
+    ]) {
+      if (planets[p]?.rashi === moonRashi) {
+        doshas.push("Sagraha Chandra Dosha");
+        break;
+      }
+    }
+  }
+
+  // 4. Bhrigu Shatka
+  if (venusHouse === 6) {
+    doshas.push("Bhrigu Shatka");
+  }
+
+  // 5. Ashtamastha Kuja
+  if (marsHouse === 8) {
+    doshas.push("Ashtamastha Kuja");
+  }
+
+  // 6. Gandanta (Moon)
   if (
     ["Ashlesha", "Jyeshtha", "Revati"].includes(
       planets[Planet.Moon]?.nakshatra,
     ) &&
     planets[Planet.Moon]?.pada === 4
-  )
+  ) {
     doshas.push("Gandanta (Moon)");
-  if (lagnaDeg < 1 || lagnaDeg > 29) doshas.push("Gandanta (Lagna)");
-  if (planets[Planet.Jupiter]?.combust || planets[Planet.Venus]?.combust)
-    doshas.push("Asthangatha (Combustion)");
-  if (!muhurthaInfo.is_good) doshas.push("Krura Muhurtha");
+  }
+
+  // 7. Sankranti Dosha
   const sl = planets[Planet.Sun]?.longitude;
-  const ml = planets[Planet.Moon]?.longitude;
-  const rl = planets[Planet.Rahu]?.longitude;
-  const kl = planets[Planet.Ketu]?.longitude;
-  if (sl !== undefined && rl !== undefined) {
-    for (const pair of [
-      [sl, rl],
-      [ml, rl],
-      [sl, kl],
-      [ml, kl],
-    ]) {
-      if (pair[0] === undefined || pair[1] === undefined) continue;
-      let diff = Math.abs(pair[0] - pair[1]);
-      diff = Math.min(diff, 360 - diff);
-      if (diff <= 15) {
-        doshas.push("Grahanam (Eclipse)");
+  if (sl !== undefined) {
+    const degInRashi = sl % 30;
+    if (degInRashi < 0.25 || degInRashi > 29.75) {
+      doshas.push("Sankranti Dosha");
+    }
+  }
+
+  // 8. Asthangatha (Combustion)
+  if (planets[Planet.Jupiter]?.combust || planets[Planet.Venus]?.combust) {
+    doshas.push("Asthangatha");
+  }
+
+  // 9. Bad Panchakam
+  let wd = new Date((timestamp + tz * 3600) * 1000).getUTCDay();
+  const { sunrise: mSunriseTs_local } = getPreciseSunriseSunset(timestamp, lat, lon, tz);
+  if (timestamp < mSunriseTs_local) {
+    wd = (wd - 1 + 7) % 7;
+  }
+  const hinduWd = wd + 1;
+  const panchaka = panchakaResult(
+    hinduWd,
+    panchanga.tithi_number || 0,
+    (planets[Planet.Moon]?.nak_index || 0) + 1,
+    lagnaRashi,
+  );
+  if (!panchaka.is_good) {
+    doshas.push("Bad Panchakam");
+  }
+
+  // 10. Krura Muhurtha
+  if (!muhurthaInfo.is_good) {
+    doshas.push("Krura Muhurtha");
+  }
+
+  // 11. Dagdha Tithi Dosha
+  const tithiInPaksha = (((panchanga.tithi_number || 1) - 1) % 15) + 1;
+  const vara = panchanga.vara;
+  if (
+    (vara === "Ravivara" && tithiInPaksha === 12) ||
+    (vara === "Somavara" && tithiInPaksha === 11) ||
+    (vara === "Mangalavara" && tithiInPaksha === 5) ||
+    (vara === "Budhavara" && tithiInPaksha === 3) ||
+    (vara === "Guruvara" && tithiInPaksha === 6) ||
+    (vara === "Shukravara" && tithiInPaksha === 8) ||
+    (vara === "Shanivara" && tithiInPaksha === 9)
+  ) {
+    doshas.push("Dagdha Tithi Dosha");
+  }
+
+  // 12. Grahanam (Eclipse) & 13. Grahana Utpata Dosha (using precomputed eclipses_data.json)
+  const eclipsesFile = path.join(__dirname, "eclipses_data.json");
+  let eclipseList: any[] = [];
+  try {
+    if (fs.existsSync(eclipsesFile)) {
+      eclipseList = JSON.parse(fs.readFileSync(eclipsesFile, "utf8"));
+    }
+  } catch (e) { }
+
+  const localD = new Date((timestamp + tz * 3600) * 1000);
+  const yyyy = localD.getUTCFullYear();
+  const mm = String(localD.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(localD.getUTCDate()).padStart(2, "0");
+  const localDateStr = `${yyyy}-${mm}-${dd}`;
+
+  const isEclipseDay = eclipseList.some((e) => e.date === localDateStr);
+  if (isEclipseDay) {
+    doshas.push("Grahanam (Eclipse)");
+  }
+
+  const currentMoonNak = planets[Planet.Moon]?.nakshatra;
+  if (currentMoonNak && eclipseList.length > 0) {
+    const targetMs = timestamp * 1000;
+    const sixMonthsMs = 180 * 86400 * 1000;
+    const pastEclipsesIn6m = eclipseList.filter(
+      (e) => e.utcTimestamp < targetMs && e.utcTimestamp >= targetMs - sixMonthsMs,
+    );
+    for (const e of pastEclipsesIn6m) {
+      if (e.nakshatra && e.nakshatra.toLowerCase() === currentMoonNak.toLowerCase()) {
+        doshas.push("Grahana Utpata Dosha");
         break;
       }
     }
   }
-  if ([1, 4, 7, 10].some((h) => houseHasMalefic[h])) doshas.push("Kendra Papa");
-  if ([5, 9].some((h) => houseHasMalefic[h])) doshas.push("Trikona Papa");
-  if ([1, 2, 4, 7, 8, 12].includes(marsHouse)) doshas.push("Kuja Dosha");
-  if (houseHasMalefic[1] && houseHasMalefic[7]) doshas.push("Udayasta Shuddhi");
+
+  // 14. Rahu Kalam
+  const rahuEnd = rahuStart + Math.floor(mDayDuration * 0.125);
+  if (timestamp >= rahuStart && timestamp <= rahuEnd) {
+    doshas.push("Rahu Kalam");
+  }
+
+  // 15. Yamagandam
+  const yamaEnd = yamaStart + Math.floor(mDayDuration * 0.125);
+  if (timestamp >= yamaStart && timestamp <= yamaEnd) {
+    doshas.push("Yamagandam");
+  }
+
+  // 16. Varjyam
+  if (
+    (timestamp >= vStart1 && timestamp <= vEnd1) ||
+    (timestamp >= vStart2 && timestamp <= vEnd2)
+  ) {
+    doshas.push("Varjyam");
+  }
+
+  // 17. Durmuhurtham
+  const durmuhurthams: Record<number, number[]> = {
+    0: [13],
+    1: [8, 11],
+    2: [3, 10],
+    3: [5],
+    4: [8],
+    5: [3, 8],
+    6: [1],
+  };
+  for (const mdIdx of durmuhurthams[mVaaraNum] || []) {
+    const mStart = mSunriseTs + Math.floor(mDayDuration * (mdIdx / 15.0));
+    const mEnd = mSunriseTs + Math.floor(mDayDuration * ((mdIdx + 1) / 15.0));
+    if (timestamp >= mStart && timestamp <= mEnd) {
+      doshas.push("Durmuhurtham");
+      break;
+    }
+  }
+
   return Array.from(new Set(doshas));
 }
 
@@ -618,7 +758,7 @@ function checkMoonAboveHorizon(date: Date, lat: number, lon: number): boolean {
   try {
     const pos = SunCalc.getMoonPosition(date, lat, lon);
     const altDeg = pos.altitude * (180 / Math.PI);
-    return altDeg >= -1.0; 
+    return altDeg >= -1.0;
   } catch (e) {
     return false;
   }
@@ -628,7 +768,7 @@ function checkSunAboveHorizon(date: Date, lat: number, lon: number): boolean {
   try {
     const pos = SunCalc.getPosition(date, lat, lon);
     const altDeg = pos.altitude * (180 / Math.PI);
-    return altDeg >= -1.0; 
+    return altDeg >= -1.0;
   } catch (e) {
     return false;
   }
@@ -636,40 +776,40 @@ function checkSunAboveHorizon(date: Date, lat: number, lon: number): boolean {
 
 function getCorrectContactUtcTime(maxUtc: Date | null, contactTimeStr: string): Date | null {
   if (!maxUtc || !contactTimeStr || contactTimeStr.trim() === "-") return null;
-  
+
   const y = maxUtc.getUTCFullYear();
-  const m = maxUtc.getUTCMonth(); 
+  const m = maxUtc.getUTCMonth();
   const d = maxUtc.getUTCDate();
-  
+
   const timeParts = contactTimeStr.trim().split(":");
   const hours = parseInt(timeParts[0] || "0");
   const minutes = parseInt(timeParts[1] || "0");
   const secondsFloat = parseFloat(timeParts[2] || "0");
   const seconds = Math.floor(secondsFloat);
   const ms = Math.round((secondsFloat % 1) * 1000);
-  
+
   const cand = new Date(Date.UTC(y, m, d, hours, minutes, seconds, ms));
   const diffHours = (cand.getTime() - maxUtc.getTime()) / (3600 * 1000);
-  
+
   if (diffHours > 12) {
     cand.setUTCDate(cand.getUTCDate() - 1);
   } else if (diffHours < -12) {
     cand.setUTCDate(cand.getUTCDate() + 1);
   }
-  
+
   return cand;
 }
 
 function parseSwetestEclipses(
-  output: string, 
-  tzOffsetHours: number, 
+  output: string,
+  tzOffsetHours: number,
   eventType: "solar" | "lunar",
   lat?: number,
   lon?: number
 ) {
   const eclipses: any[] = [];
   const lines = output.split("\n");
-  
+
   // Regex for Line 1 (Solar and Lunar)
   const regexLine1 = /^\s*(partial|total|annular|total\/annular|annular\/total|non-central|penumb\.\s+lunar\s+eclipse|partial\s+lunar\s+eclipse|total\s+lunar\s+eclipse)\s+(\d{1,2}\.\d{1,2}\.\d{4})\s+(\d{1,2}:\d{2}:\d{2}(?:\.\d+)?)\s+([\d./-]+)\s+saros\s+(\d+\/\d+)\s+([\d.]+)/i;
 
@@ -678,16 +818,16 @@ function parseSwetestEclipses(
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const match = line.match(regexLine1);
-    
+
     if (match) {
       if (currentEclipse) {
         eclipses.push(currentEclipse);
       }
-      
+
       const rawType = match[1].trim();
       const dateStr = match[2].trim();
       const timeStr = match[3].trim();
-      const rawValues = match[4].trim(); 
+      const rawValues = match[4].trim();
       const saros = match[5].trim();
       const julianDay = parseFloat(match[6].trim());
 
@@ -720,7 +860,7 @@ function parseSwetestEclipses(
       };
     } else if (currentEclipse && line.trim() !== "") {
       let lineClean = line.replace(/dt=[\d.]+/, "").trim();
-      
+
       if (eventType === "solar") {
         const durMatch = lineClean.match(/(\d+\s+min\s+[\d.]+\s+sec)/i);
         if (durMatch) {
@@ -733,7 +873,7 @@ function parseSwetestEclipses(
 
       const times = lineClean.split(/\s+/).filter(t => t.trim() !== "");
       const maxUtc = currentEclipse.utcTimestamp ? new Date(currentEclipse.utcTimestamp) : null;
-      
+
       if (eventType === "solar") {
         const labels = ["C1 (Partial Begins)", "C2 (Totality Begins)", "C3 (Totality Ends)", "C4 (Partial Ends)"];
         currentEclipse.contactTimes = times
@@ -819,7 +959,7 @@ function parseSwetestEclipses(
                 const mTimes = SunCalc.getMoonTimes(d, lat, lon);
                 if (mTimes.rise) riseSetTimes.push({ label: "Moonrise", time: mTimes.rise });
                 if (mTimes.set) riseSetTimes.push({ label: "Moonset", time: mTimes.set });
-              } catch (e) {}
+              } catch (e) { }
             }
           }
         } else {
@@ -834,7 +974,7 @@ function parseSwetestEclipses(
                 const sTimes = SunCalc.getTimes(d, lat, lon);
                 if (sTimes.sunrise) riseSetTimes.push({ label: "Sunrise", time: sTimes.sunrise });
                 if (sTimes.sunset) riseSetTimes.push({ label: "Sunset", time: sTimes.sunset });
-              } catch (e) {}
+              } catch (e) { }
             }
           }
         }
@@ -857,7 +997,7 @@ function parseSwetestEclipses(
 
       // Chronological sort
       currentEclipse.contactTimes.sort((a: any, b: any) => a.utcTime.getTime() - b.utcTime.getTime());
-      
+
       eclipses.push(currentEclipse);
       currentEclipse = null;
     }
@@ -884,7 +1024,7 @@ function parseUtcDateTime(dateStr: string, timeStr: string): Date | null {
   const secondsFloat = parseFloat(timeParts[2] || "0");
   const seconds = Math.floor(secondsFloat);
   const ms = Math.round((secondsFloat % 1) * 1000);
-  
+
   if (isNaN(y) || isNaN(m) || isNaN(d)) return null;
   return new Date(Date.UTC(y, m - 1, d, hours, minutes, seconds, ms));
 }
@@ -1804,7 +1944,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
           Nakshatra: nakName,
           "Nakshatra End": formatTsLocal(nEndTs, tz),
           Nakshatra_is_good: true,
-          "Moon Rasi": rashiNames[moonRasiIdx + 1],
+          "Moon Rasi": rashiNames[moonRasiIdx],
           Yoga: yogaName,
           "Yoga End": formatTsLocal(yEndTs, tz),
           Yoga_is_good: true,
@@ -2121,7 +2261,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         vaara_end_ts: vaaraEndTs,
         vaara_rem: Math.floor(
           ((vaaraEndTs - timestamp) / Math.max(1, vaaraEndTs - vaaraStartTs)) *
-            100,
+          100,
         ),
         tithi: pPaksha + " " + panchanga.tithi,
         tithi_end: formatTsLocal(tithiEndTs, tz),
@@ -2242,7 +2382,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
       const startLagnaTs = getLagnaBoundary(timestamp, lagnaRashiIndex, true, lat, lon, tz, ayKeyForBoundary);
       const endLagnaTs = getLagnaBoundary(timestamp, lagnaRashiIndex, false, lat, lon, tz, ayKeyForBoundary);
       const midTs = Math.floor((startLagnaTs + endLagnaTs) / 2);
-      const midWindow = `${formatTsLocal(midTs - 1440, tz)} - ${formatTsLocal(midTs + 1440, tz)}`;
+      const midWindow = `${formatTsLocal(midTs - 1800, tz)} to ${formatTsLocal(midTs + 1800, tz)}`;
 
       const pushkaraInfo = getPushkaraInfo(
         planets[Planet.Ascendant]!.rashi,
@@ -2431,7 +2571,53 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         (planets[Planet.Moon]?.nak_index || 0) + 1,
         planets[Planet.Ascendant]!.rashi,
       );
-      const doshas = evaluateMuhurthaDoshas(planets, panchanga, muhurthaInfo);
+      // Calculate Lagna Tyajyamu (1/2 Ghati = 12 minutes duration)
+      const lagnaDur = endLagnaTs - startLagnaTs;
+      const rashiTyajyaStarts: Record<number, number> = {
+        1: 30, // Mesha
+        2: 16, // Vrushabha
+        3: 23, // Mithuna
+        4: 2,  // Karka
+        5: 21, // Simha
+        6: 14, // Kanya
+        7: 10, // Tula
+        8: 20, // Vrischika
+        9: 9,  // Dhanu
+        10: 4, // Makara
+        11: 23, // Kumbha
+        12: 11, // Meena
+      };
+
+      const rasiNum = planets[Planet.Ascendant]?.rashi || 1;
+      const startPart = rashiTyajyaStarts[rasiNum] || 1;
+      const tyajyaStart = startLagnaTs + Math.floor((lagnaDur * (startPart - 1)) / 30);
+      const tyajyaEnd = tyajyaStart + 720; // 12 minutes
+      const lagnaTyajyamStr = `${formatTsLocal(tyajyaStart, tz)} - ${formatTsLocal(tyajyaEnd, tz)}`;
+
+      const doshas = evaluateMuhurthaDoshas(
+        planets,
+        panchanga,
+        muhurthaInfo,
+        engine,
+        timestamp,
+        lat,
+        lon,
+        tz,
+        ayKey,
+        rahuStart,
+        yamaStart,
+        mDayDuration,
+        vStart1,
+        vEnd1,
+        vStart2,
+        vEnd2,
+        mSunriseTs,
+        mVaaraNum,
+      );
+
+      if (timestamp >= tyajyaStart && timestamp <= tyajyaEnd) {
+        doshas.push("Lagna Tyajyam");
+      }
 
       return jsonAndCache({
         endpoint: "muhurtha_chart",
@@ -2456,6 +2642,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         yamagandam: muhurthaInfo.yamagandam,
         durmuhurtham: muhurthaInfo.durmuhurtham,
         varjyam: muhurthaInfo.varjyam,
+        lagna_tyajyam: lagnaTyajyamStr,
         doshas,
       });
     } else if (endpoint === "match") {
@@ -2599,7 +2786,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
       if (fs.existsSync(subFile)) {
         try {
           subscribers = JSON.parse(fs.readFileSync(subFile, "utf-8"));
-        } catch (e) {}
+        } catch (e) { }
       }
 
       if (action === "subscribe" && sub_endpoint && keys) {
@@ -2684,7 +2871,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
             const data = fs.readFileSync(publicLessons, "utf-8");
             fs.writeFileSync(lessonsFile, data);
             return res.json(JSON.parse(data));
-          } catch (e) {}
+          } catch (e) { }
         }
         return res.json({ lessons: [] });
       }
@@ -2717,7 +2904,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         if (fs.existsSync(path.dirname(publicLessons))) {
           try {
             fs.writeFileSync(publicLessons, JSON.stringify({ lessons }, null, 2));
-          } catch (e) {}
+          } catch (e) { }
         }
 
         res.setHeader("X-Cache", "BYPASS");
@@ -2735,7 +2922,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
             const data = fs.readFileSync(publicLibrary, "utf-8");
             fs.writeFileSync(libraryFile, data);
             return res.json(JSON.parse(data));
-          } catch (e) {}
+          } catch (e) { }
         }
         // Fallback 2: Initialize from src/data directory if available
         const srcLibrary = path.join(process.cwd(), "..", "src", "data", "library.json");
@@ -2744,7 +2931,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
             const data = fs.readFileSync(srcLibrary, "utf-8");
             fs.writeFileSync(libraryFile, data);
             return res.json(JSON.parse(data));
-          } catch (e) {}
+          } catch (e) { }
         }
         return res.json([]);
       }
@@ -2777,7 +2964,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         if (fs.existsSync(path.dirname(publicLibrary))) {
           try {
             fs.writeFileSync(publicLibrary, JSON.stringify(library, null, 2));
-          } catch (e) {}
+          } catch (e) { }
         }
 
         // Sync to src/data folder if in dev environment
@@ -2785,7 +2972,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         if (fs.existsSync(path.dirname(srcLibrary))) {
           try {
             fs.writeFileSync(srcLibrary, JSON.stringify(library, null, 2));
-          } catch (e) {}
+          } catch (e) { }
         }
 
         res.setHeader("X-Cache", "BYPASS");
@@ -2802,7 +2989,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
             const data = fs.readFileSync(publicTicker, "utf-8");
             fs.writeFileSync(tickerFile, data);
             return res.json(JSON.parse(data));
-          } catch (e) {}
+          } catch (e) { }
         }
         const srcTicker = path.join(process.cwd(), "..", "src", "data", "ticker.json");
         if (fs.existsSync(srcTicker)) {
@@ -2810,7 +2997,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
             const data = fs.readFileSync(srcTicker, "utf-8");
             fs.writeFileSync(tickerFile, data);
             return res.json(JSON.parse(data));
-          } catch (e) {}
+          } catch (e) { }
         }
         return res.json({ speed: "normal", tickers: [] });
       }
@@ -2835,11 +3022,11 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         fs.writeFileSync(tickerFile, JSON.stringify(ticker, null, 2));
         const publicTicker = path.join(process.cwd(), "..", "public", "static", "ticker.json");
         if (fs.existsSync(path.dirname(publicTicker))) {
-          try { fs.writeFileSync(publicTicker, JSON.stringify(ticker, null, 2)); } catch (e) {}
+          try { fs.writeFileSync(publicTicker, JSON.stringify(ticker, null, 2)); } catch (e) { }
         }
         const srcTicker = path.join(process.cwd(), "..", "src", "data", "ticker.json");
         if (fs.existsSync(path.dirname(srcTicker))) {
-          try { fs.writeFileSync(srcTicker, JSON.stringify(ticker, null, 2)); } catch (e) {}
+          try { fs.writeFileSync(srcTicker, JSON.stringify(ticker, null, 2)); } catch (e) { }
         }
         res.setHeader("X-Cache", "BYPASS");
         return res.json({ status: "success", message: "Ticker saved successfully" });
@@ -2904,7 +3091,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
       const lon = parseFloat(String(input.longitude || input.lon || 77.5946));
       const tz = parseFloat(String(input.timezone || input.tz || 5.5));
       const count = Math.min(20, Math.max(1, parseInt(String(input.count || 5))));
-      const fromDate = String(input.date || new Date().toISOString().split("T")[0]); 
+      const fromDate = String(input.date || new Date().toISOString().split("T")[0]);
       const [year, month, day] = fromDate.split("-").map(Number);
       const swetestDateStr = `${day}.${month}.${year}`;
 
@@ -2951,7 +3138,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         if (fs.existsSync(p)) {
           try {
             return JSON.parse(fs.readFileSync(p, "utf-8"));
-          } catch (e) {}
+          } catch (e) { }
         }
         return null;
       };

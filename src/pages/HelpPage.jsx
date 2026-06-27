@@ -66,17 +66,19 @@ const GUIDE_SECTIONS = {
           },
           {
             q: "What daily information do I get on the Dashboard?",
-            a: "Once configured, your dashboard displays personalized daily parameters calculated at sunrise:<br/>" +
+            a: "Once configured, your dashboard displays personalized daily parameters calculated in real-time:<br/>" +
               "• <b>Birth Details</b>: Your Birth Nakshatra and Rashi.<br/>" +
-              "• <b>Daily Strengths</b>: Your personalized <b>Tarabala</b> (strength of the day), <b>Chandrabala</b> (moon strength), <b>Gurubala</b> (jupiter transit strength), and <b>Shanibala</b> (saturn transit strength and Sade Sati alert).<br/>" +
-              "• <b>Daily Panchanga</b>: Tithi, Vara, Nakshatra, Yoga, and Karana at sunrise.<br/>" +
+              "• <b>Daily Strengths</b>: Your personalized <b>Tarabala</b> (strength of the day) and <b>Chandrabala</b> (moon strength). It also displays transit strengths and next transit date predictions for <b>Gurubala</b> (jupiter) and <b>Shanibala</b> (saturn, including Sade Sati alert) utilizing an offline static database. Stacks responsively on mobile screens (<= 600px).<br/>" +
+              "• <b>Daily Panchanga</b>: Displays Tithi, Vara (with Sanskrit short weekday display e.g., Bhaanu, Soma, etc.), Nakshatra, Yoga, and Karana calculated in real-time.<br/>" +
+              "• <b>Quick Reset</b>: A borderless, transparent reset button (🔄) next to the date/time fields on the Me Profile page allows you to quickly reset coordinates/time to current local values.<br/>" +
               "• <b>Daily Vedic Sankalpa</b>: Now moved to its own dedicated <b>Sankalpa</b> page."
           },
           {
             q: "What is the new Sankalpa page and how to use it?",
             a: "The <b>Sankalpa</b> page displays a customized daily Vedic Nitya Sankalpam calculated in real-time. Key features:<br/>" +
               "• <b>Dedicated Tab</b>: Accessible directly from the bottom navigation bar (☀️ icon).<br/>" +
-              "• <b>Edit Date</b>: Click the **'Edit Date'** link in the top-right corner to open the date and time picker. This allows you to generate a Sankalpa for any specific day and time.<br/>" +
+              "• <b>Collapsible Date/Time Picker</b>: Click the **'Edit Date'** link in the top-right corner to open the date and time picker. Click it again to collapse.<br/>" +
+              "• <b>Quick Controls</b>: Use the **'Today'** button or the transparent reset button (🔄) to quickly set or reset the date and time to the current local values.<br/>" +
               "• <b>Real-time Calculation</b>: Calculates the exact astrological factors dynamically."
           }
         ]
@@ -141,12 +143,14 @@ const GUIDE_SECTIONS = {
             q: "How to generate a Panchanga Table?",
             a: "Follow these steps to generate a multi-day Panchanga:<br/>" +
               "1. Go to the <b>e-Panchanga</b> page.<br/>" +
-              "2. Enter the Start Date, Location, and Range (from 30 to 90 days).<br/>" +
+              "2. Enter the Start Date, Location, and Range.<br/>" +
+              "   - **Collapsible Search Sections**: The 'Place' and optional 'Tarabalam & Chandra Balam' sections are collapsible by default to save screen space.<br/>" +
               "3. Click <b>'Calculate'</b>.<br/>" +
               "4. Use the following advanced tools:<br/>" +
-              "   - <b>Pan Shudhi Filter</b>: Filter the table to display only highly auspicious dates.<br/>" +
-              "   - <b>Export</b>: Download the table in CSV or JSON format.<br/>" +
-              "   - <b>Save Profile</b>: Save the configuration to local profiles."
+              "   - <b>Scrollable Table</b>: The search results table is restricted to a scrollable container (max height 450px, displaying ~10 rows) with location details displayed right below it.<br/>" +
+              "   - <b>Rename Table</b>: Click the **'Rename Table'** button in the actions panel to rename saved tables directly.<br/>" +
+              "   - <b>Export</b>: Download the table in JSON or CSV format (exports all 22 standardized calculated columns).<br/>" +
+              "   - <b>Save Profile</b>: Save your search configuration to local profiles."
           },
           {
             q: "How to find Muhurthas and analyze timings?",
@@ -154,9 +158,11 @@ const GUIDE_SECTIONS = {
               "1. On the <b>e-Panchanga</b> page, select the <b>Muhurtha</b> tab.<br/>" +
               "2. The app evaluates the selected date for:<br/>" +
               "   - <b>Lagna & Pushkaramsha</b>: Dynamic auspicious time windows.<br/>" +
-              "   - <b>Inauspicious Times</b>: Rahukala, Yamagandam, Durmuhurtha, and Varjyam.<br/>" +
+              "   - <b>Inauspicious Times</b>: Rahukala, Yamagandam, Durmuhurtha, and Varjyam (rendered line-by-line).<br/>" +
               "   - <b>Panchaka Status</b>: Checks for Mrityu, Agni, Raja, Chora, or Roga panchakas.<br/>" +
-              "   - <b>Ekavimsati Doshas</b>: Scans for the 21 major structural doshas (Papakartari, Papa Lagna, Kendra/Trikona Papa, bad panchaka, etc.)."
+              "   - <b>Ekavimsati Doshas</b>: Scans for the 21 major structural doshas.<br/>" +
+              "   - <b>Scrollable Saved Table</b>: Saved Muhurtha tables are wrapped in a scrollable view (max height 400px).<br/>" +
+              "   - <b>Chart Coordinates Sync</b>: Muhurtha D1/D9 chart coordinates automatically sync with the loaded profile's saved location."
           }
         ]
       },
@@ -196,8 +202,8 @@ const GUIDE_SECTIONS = {
             a: "Follow these steps to backup and restore profiles:<br/>" +
               "1. Go to the <b>Profiles</b> page.<br/>" +
               "2. Manage your saved birth profiles, matching combinations, or search criteria.<br/>" +
-              "3. Click <b>'Export JSON'</b> to download a backup file of all your data.<br/>" +
-              "4. Use <b>'Import'</b> to upload a backup file and restore it on any device."
+              "3. Click <b>'Export JSON'</b> to download a backup file of all your data (now including location metadata like city, lat, lon, tz).<br/>" +
+              "4. Use <b>'Import'</b> to upload a backup file and restore it on any device. The import logic now auto-detects single-table JSON files and wraps them reactively under their original filename."
           },
           {
             q: "What is the Astro Clock & Time Machine?",
@@ -370,13 +376,18 @@ const GUIDE_SECTIONS = {
         items: [
           {
             q: "డ్యాష్‌బోర్డ్ (Me) ఎలా సెట్ చేయాలి?",
-            a: "యాప్‌లో <b>Me</b> మెనూకు వెళ్లి మీ పేరు, జనన వివరాలు నమోదు చేసి సేవ్ చేయండి. దీని ద్వారా ప్రతిరోజూ మీకు తారాబలం, చంద్రబలం, గురుబలం, శనిబలం లభిస్తాయి (నిత్య సంకల్పం ఇప్పుడు ప్రత్యేకమైన <b>సంకల్ప</b> పేజీలోకి మార్చబడింది)."
+            a: "యాప్‌లో <b>Me</b> మెనూకు వెళ్లి మీ పేరు, జనన వివరాలు నమోదు చేసి సేవ్ చేయండి. దీనికి సంబంధించిన విశేషాలు:<br/>" +
+              "• <b>వ్యక్తిగత బలాలు</b>: ప్రతిరోజూ మీకు తారాబలం, చంద్రబలం లభిస్తాయి. అలాగే రాబోయే గురుబలం, శనిబలం గోచార మార్పుల (transit) తేదీలను కూడా ముందే చూపిస్తుంది.<br/>" +
+              "• <b>రియల్-టైమ్ పంచాంగం</b>: ఇప్పుడు పంచాంగం సూర్యోదయ సమయానికే కాకుండా రియల్-టైమ్‌లో గణింపబడుతుంది. రోజువారీ పంచాంగంలో సంస్కృత వారాల పేర్లు (భాను, సోమ, మంగళ, బుధ, గురు, శుక్ర, శని) కూడా కనిపిస్తాయి.<br/>" +
+              "• <b>మొబైల్ రెస్పాన్సివ్ డిజైన్</b>: మొబైల్ స్క్రీన్‌లలో బలాల గ్రిడ్ సులభంగా చూసే విధంగా నిలువుగా (vertically) సర్దుబాటు అవుతుంది.<br/>" +
+              "• <b>త్వరిత రీసెట్ (Quick Reset)</b>: తేదీ మరియు సమయం ఫీల్డ్ పక్కన ఉండే 🔄 బటన్ ద్వారా ప్రస్తుత సమయానికి తక్షణమే రీసెట్ చేసుకోవచ్చు. (నిత్య సంకల్పం ఇప్పుడు ప్రత్యేకమైన <b>సంకల్ప</b> పేజీలోకి మార్చబడింది)."
           },
           {
             q: "కొత్త సంకల్ప పేజీ అంటే ఏమిటి, దానిని ఎలా ఉపయోగించాలి?",
             a: "<b>సంకల్ప</b> పేజీ అనేది మీ రోజువారీ నిత్య సంకల్పాన్ని రియల్-టైమ్‌లో గణిస్తుంది. దీని ఫీచర్లు:<br/>" +
               "• <b>ప్రత్యేక ట్యాబ్</b>: క్రింది నావిగేషన్ బార్ లో సూర్యుని (☀️) గుర్తుతో ఉంటుంది.<br/>" +
-              "• <b>తేదీ మార్చడం (Edit Date)</b>: కుడి వైపు పైభాగంలో ఉన్న **'Edit Date'** ని క్లిక్ చేసి, మీకు కావలసిన తేదీ మరియు సమయానికి సంకల్పాన్ని గణించవచ్చు."
+              "• <b>తేదీ & సమయ ఎంపిక (Date & Time Picker)</b>: కుడి వైపు పైభాగంలో ఉన్న **'Edit Date'** ని క్లిక్ చేసి, తేదీ మరియు సమయాన్ని మార్చుకోవచ్చు. ఈ సెక్షన్ క్లిక్ చేస్తే సులభంగా మూసుకోవచ్చు/తెరవవచ్చు (collapsible).<br/>" +
+              "• <b>త్వరిత రీసెట్ & టుడే బటన్</b>: ప్రస్తుత తేదీ, సమయానికి మార్చడానికి **'Today'** బటన్ మరియు 🔄 రీసెట్ బటన్ ఉపయోగపడతాయి."
           }
         ]
       },
@@ -513,13 +524,18 @@ const GUIDE_SECTIONS = {
         items: [
           {
             q: "ನನ್ನ ಪ್ರೊಫೈಲ್ ಸೆಟ್ ಮಾಡುವುದು ಹೇಗೆ?",
-            a: "ಆಪ್‌ನಲ್ಲಿ <b>Me</b> ಮೆನುವಿಗೆ ಹೋಗಿ ನಿಮ್ಮ ಹೆಸರು, ಜನ್ಮ ವಿವರಗಳನ್ನು ನಮೂದಿಸಿ ಸೇವ್ ಮಾಡಿ. ಇದರಿಂದ ಪ್ರತಿದಿನ ನಿಮಗೆ ತಾರಾಬಲ, ಚಂದ್ರಬಲ, ಗುರುಬಲ, ಶನಿಬಲ ಲಭಿಸುತ್ತದೆ (ದಿನನಿತ್ಯದ ಸಂಕಲ್ಪವನ್ನು ಈಗ ಪ್ರತ್ಯೇಕವಾದ <b>ಸಂಕಲ್ಪ</b> ಪುಟಕ್ಕೆ ಸ್ಥಳಾಂತರಿಸಲಾಗಿದೆ)."
+            a: "ಆಪ್‌ನಲ್ಲಿ <b>Me</b> ಮೆನುವಿಗೆ ಹೋಗಿ ನಿಮ್ಮ ಹೆಸರು, ಜನ್ಮ ವಿವರಗಳನ್ನು ನಮೂದಿಸಿ ಸೇವ್ ಮಾಡಿ. ಇದರ ಪ್ರಮುಖ ಮಾಹಿತಿ:<br/>" +
+              "• <b>ವೈಯಕ್ತಿಕ ಬಲಗಳು</b>: ಪ್ರತಿದಿನ ನಿಮಗೆ ತಾರಾಬಲ, ಚಂದ್ರಬಲ ಸಿಗುತ್ತವೆ. ಅಲ್ಲದೆ ಮುಂದಿನ ಗುರುಬಲ ಮತ್ತು ಶನಿಬಲದ ಗೋಚಾರ ಬದಲಾವಣೆಯ (transit) ದಿನಾಂಕಗಳನ್ನು ಸಹ ತೋರಿಸುತ್ತದೆ.<br/>" +
+              "• <b>ರಿಯಲ್-ಟೈಮ್ ಪಂಚಾಂಗ</b>: ಪಂಚಾಂಗವು ಸೂರ್ಯೋದಯಕ್ಕೆ ಮಾತ್ರ ಸೀಮಿತವಾಗಿರದೆ ರಿಯಲ್-ಟೈಮ್‌ನಲ್ಲಿ ಲೆಕ್ಕಾಚಾರವಾಗುತ್ತದೆ. ಇದರಲ್ಲಿ ದಿನನಿತ್ಯದ ಸಂಸ್ಕೃತ ವಾರಗಳ ಹೆಸರುಗಳನ್ನು (ಭಾನು, ಸೋಮ, ಮಂಗಳ, ಬುಧ, ಗುರು, ಶುಕ್ರ, ಶನಿ) ಪ್ರದರ್ಶಿಸಲಾಗುತ್ತದೆ.<br/>" +
+              "• <b>ರೆಸ್ಪಾನ್ಸಿವ್ ಲೇಔಟ್</b>: ಮೊಬೈಲ್ ಸ್ಕ್ರೀನ್‌ಗಳಲ್ಲಿ ಬಲಗಳ ಗ್ರಿಡ್ ಸುಲಭವಾಗಿ ವೀಕ್ಷಿಸಲು ಅನುಕೂಲಕರವಾಗಿ ಹೊಂದಿಕೊಳ್ಳುತ್ತದೆ.<br/>" +
+              "• <b>ತ್ವರಿತ ರಿಸೆಟ್ (Quick Reset)</b>: ದಿನಾಂಕ ಮತ್ತು ಸಮಯದ ಪಕ್ಕದಲ್ಲಿರುವ 🔄 ಬಟನ್ ಮೂಲಕ ಪ್ರಸ್ತುತ ಸಮಯಕ್ಕೆ ತಕ್ಷಣವೇ ರಿಸೆಟ್ ಮಾಡಬಹುದು. (ದಿನನಿತ್ಯದ ಸಂಕಲ್ಪವನ್ನು ಈಗ ಪ್ರತ್ಯೇಕವಾದ <b>ಸಂಕಲ್ಪ</b> ಪುಟಕ್ಕೆ ಸ್ಥಳಾಂತರಿಸಲಾಗಿದೆ)."
           },
           {
             q: "ಹೊಸ ಸಂಕಲ್ಪ ಪುಟ ಎಂದರೇನು ಮತ್ತು ಅದನ್ನು ಹೇಗೆ ಬಳಸುವುದು?",
             a: "<b>ಸಂಕಲ್ಪ</b> ಪುಟವು ನಿಮ್ಮ ದೈನಂದಿನ ನಿತ್ಯ ಸಂಕಲ್ಪವನ್ನು ರಿಯಲ್-ಟೈಮ್‌ನಲ್ಲಿ ಲೆಕ್ಕಾಚಾರ ಮಾಡುತ್ತದೆ. ಇದರ ವೈಶಿಷ್ಟ್ಯಗಳು:<br/>" +
               "• <b>ಪ್ರತ್ಯೇಕ ಟ್ಯಾಬ್</b>: ಕೆಳಗಿನ ನ್ಯಾವಿಗೇಷನ್ ಬಾರ್‌ನಲ್ಲಿ ಸೂರ್ಯನ (☀️) ಐಕಾನ್ ಮೂಲಕ ಪ್ರವೇಶಿಸಬಹುದು.<br/>" +
-              "• <b>ದಿನಾಂಕ ಬದಲಾವಣೆ (Edit Date)</b>: ಮೇಲಿನ ಬಲ ಮೂಲೆಯಲ್ಲಿರುವ **'Edit Date'** ಕ್ಲಿಕ್ ಮಾಡಿ ನಿಮಗೆ ಬೇಕಾದ ದಿನಾಂಕ ಮತ್ತು ಸಮಯಕ್ಕೆ ಸಂಕಲ್ಪವನ್ನು ಲೆಕ್ಕಹಾಕಬಹುದು."
+              "• <b>ದಿನಾಂಕ ಮತ್ತು ಸಮಯದ ಆಯ್ಕೆ (Date & Time Picker)</b>: ಮೇಲಿನ ಬಲ ಮೂಲೆಯಲ್ಲಿರುವ **'Edit Date'** ಕ್ಲಿಕ್ ಮಾಡಿ ದಿನಾಂಕ ಮತ್ತು ಸಮಯವನ್ನು ಬದಲಾಯಿಸಬಹುದು. ಈ ಭಾಗವನ್ನು ಸುಲಭವಾಗಿ ಮರೆಮಾಡಬಹುದು ಅಥವಾ ವಿಸ್ತರಿಸಬಹುದು (collapsible).<br/>" +
+              "• <b>ತ್ವರಿತ ರಿಸೆಟ್ ಮತ್ತು ಟುಡೇ ಬಟನ್</b>: ಪ್ರಸ್ತುತ ದಿನಾಂಕ ಮತ್ತು ಸಮಯಕ್ಕೆ ಹೊಂದಿಸಲು **'Today'** ಬಟನ್ ಮತ್ತು 🔄 ರಿಸೆಟ್ ಬಟನ್ ಬಳಸಬಹುದು."
           }
         ]
       },
