@@ -5,6 +5,10 @@
 - Backup & Sync Integration: Integrated custom events into local individual backups, Master Backups, and Google Drive Sync on the Settings page.
 - Dhanishtha Nakshatra Translation Fix: Added localizations for the spelling "Dhanishtha" across Telugu, Kannada, and English translation files to fix unlocalized displays in the Horoscope UI and generated PDF tables.
 
+- "Clear Global Notes" new feature added in Settings page Backup/Restore tab.
+
+- Changed Settings page design and Layout. In General Tab "Visibility of Sidebar Pages" section updated.
+
 27-06-2026
 - updated eka-vimshathi doshas and calculations and displayed the filtered doshas in muhurtha section.
  
