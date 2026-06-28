@@ -2781,6 +2781,8 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                     borderRadius: "8px",
                     overflow: "hidden",
                     background: "#fafafa",
+                    maxHeight: "450px",
+                    overflowY: "auto",
                   }}
                 >
                   {customEvents.length === 0 ? (
