@@ -222,16 +222,20 @@ const MASTER_LISTS = {
     "Muhurtha_Notes",
   ],
   sidebar_pages: [
+    "Sankalpa",
     "e-Jataka",
     "e-Match",
     "e-Panchanga",
     "echakra",
     "e-Clock",
     "Profiles",
-    "Me",
     "e-PATA",
+    "e-Library",
+    "PrecisionTest",
+    "Help",
     "Privacy",
     "e-Install",
+    "Feedback",
   ],
 };
 
@@ -625,6 +629,22 @@ export function SettingsPage({ logoUrl, onNavigate }) {
       setIsGdriveLoading(false);
     }
   };
+
+  const handleClearGlobalNotes = () => {
+    const confirmBackup = window.confirm(
+      "Warning: This will delete ALL saved Global Notes permanently. Please make sure you have exported/backed up your notes or tables if needed before proceeding.\n\nDo you want to continue?"
+    );
+    if (!confirmBackup) return;
+
+    const finalConfirm = window.confirm(
+      "Are you absolutely sure you want to delete all Global Notes? This action cannot be undone."
+    );
+    if (!finalConfirm) return;
+
+    localStorage.removeItem("muhurtha_global_notes");
+    alert("All Global Notes have been cleared successfully.");
+  };
+
   // ==== Backup & Restore Logic ====
   const getTimestamp = () => {
     const now = new Date();
@@ -1057,11 +1077,42 @@ export function SettingsPage({ logoUrl, onNavigate }) {
     },
   };
 
+  const SECTION_COLORS = {
+    // General Tab
+    sidebar_pages: "#16a085", // Teal
+    
+    // Panchanga Tab
+    panchanga_columns: "#2980b9", // Blue
+    maasa: "#8e44ad", // Purple
+    vaara: "#d35400", // Orange
+    tithi: "#27ae60", // Green
+    nakshatra: "#2c3e50", // Dark Slate
+    yoga: "#e74c3c", // Red
+    karana: "#7f8c8d", // Gray
+    tarabalam: "#f39c12", // Gold
+
+    // Muhurtha Tab
+    muhurtha_ui_columns: "#2980b9", // Blue
+    active_doshas: "#c0392b", // Crimson
+    active_panchakas: "#e67e22", // Pumpkin
+    export_columns: "#27ae60", // Emerald Green
+  };
+
+  const hexToRGBA = (hex, alpha) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
   const renderCheckboxGroup = (key, title, list) => {
     let selected = prefs[key];
     if (selected === undefined) {
       selected = MASTER_LISTS[key] || [];
     }
+
+    const themeColor = SECTION_COLORS[key] || "#8e44ad";
+    const lightBg = hexToRGBA(themeColor, 0.05);
 
     const handleToggle = (val) => {
       setPrefs((prev) => {
@@ -1078,32 +1129,71 @@ export function SettingsPage({ logoUrl, onNavigate }) {
     };
 
     return (
-      <details className="settings-group" style={styles.details}>
-        <summary style={styles.summary}>{title}</summary>
+      <details className="settings-group" style={{ ...styles.details, borderTop: `4px solid ${themeColor}` }}>
+        <summary style={{ ...styles.summary, color: themeColor }}>{title}</summary>
         <div style={styles.checkboxGrid}>
-          {list.map((item) => (
-            <label
-              key={item}
-              style={styles.checkboxLabel}
-              className="checkbox-hover"
-            >
-              <input
-                type="checkbox"
-                checked={selected.includes(item)}
-                onChange={() => handleToggle(item)}
-                style={styles.checkbox}
-              />
-              <span
+          {list.map((item) => {
+            const isChecked = selected.includes(item);
+            return (
+              <div
+                key={item}
+                onClick={() => handleToggle(item)}
                 style={{
-                  fontSize: "14px",
-                  color: "#2c3e50",
-                  fontWeight: "600",
+                  ...styles.checkboxLabel,
+                  border: isChecked ? `1px solid ${themeColor}` : "1px solid #e9ecef",
+                  background: isChecked ? lightBg : "#ffffff",
+                  boxShadow: isChecked ? `0 2px 8px ${hexToRGBA(themeColor, 0.12)}` : "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "12px 14px",
+                  borderRadius: "10px",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  userSelect: "none"
                 }}
               >
-                {item.replace(/_/g, " ")}
-              </span>
-            </label>
-          ))}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "18px",
+                    height: "18px",
+                    borderRadius: "5px",
+                    border: isChecked ? `2px solid ${themeColor}` : "2px solid #bdc3c7",
+                    background: isChecked ? themeColor : "transparent",
+                    transition: "all 0.15s ease",
+                    flexShrink: 0,
+                  }}
+                >
+                  {isChecked && (
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#fff"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ width: "11px", height: "11px" }}
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                </div>
+                <span
+                  style={{
+                    fontSize: "13.5px",
+                    color: isChecked ? themeColor : "#2c3e50",
+                    fontWeight: isChecked ? "700" : "600",
+                    transition: "color 0.2s ease"
+                  }}
+                >
+                  {item.replace(/_/g, " ")}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </details>
     );
@@ -1194,9 +1284,24 @@ export function SettingsPage({ logoUrl, onNavigate }) {
           border-color: #cbd5e1 !important;
         }
         
-        details.settings-group > summary::-webkit-details-marker { display: none; }
-        details.settings-group > summary::before { content: '▶ '; font-size: 12px; display: inline-block; transition: 0.2s; margin-right: 8px; color: #8e44ad; }
-        details.settings-group[open] > summary::before { transform: rotate(90deg); }
+        details.settings-group > summary::-webkit-details-marker { display: none !important; }
+        details.settings-group > summary::-moz-list-bullet { display: none !important; }
+        details.settings-group > summary::marker { display: none !important; }
+        details.settings-group > summary {
+          list-style: none !important;
+          list-style-type: none !important;
+        }
+        details.settings-group > summary::before { 
+          content: '▸ '; 
+          font-size: 14px; 
+          display: inline-block; 
+          transition: transform 0.2s ease; 
+          margin-right: 8px; 
+          color: currentColor; 
+        }
+        details.settings-group[open] > summary::before { 
+          transform: rotate(90deg); 
+        }
         
         .btn-action {
           padding: 10px 18px !important;
@@ -1232,13 +1337,36 @@ export function SettingsPage({ logoUrl, onNavigate }) {
         }
         .new-horo-page details.settings-group > summary {
           font-size: 16px !important;
-          color: #8e44ad !important;
           font-weight: bold !important;
           cursor: pointer !important;
           outline: none !important;
           padding: 6px 0 !important;
           border-bottom: 1px dashed #eaecee !important;
           margin-bottom: 15px !important;
+        }
+        .settings-tab-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 20px;
+          width: 100%;
+          box-sizing: border-box;
+          align-items: start;
+        }
+        @media (min-width: 768px) {
+          .settings-tab-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        .settings-masonry {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+          width: 100%;
+          box-sizing: border-box;
+        }
+        .settings-masonry > * {
+          width: 100%;
+          box-sizing: border-box;
         }
       `}</style>
 
@@ -1291,284 +1419,221 @@ export function SettingsPage({ logoUrl, onNavigate }) {
         </div>
 
         {activeTab === "general" && (
-          <>
-            <div
-              className="form-panel"
-              style={{ marginBottom: "20px", position: "static" }}
-            >
-              <h2>Language</h2>
-              <p
-                style={{
-                  color: "#857869",
-                  fontSize: "0.9rem",
-                  marginBottom: "15px",
-                }}
-              >
-                Select your preferred language for the application interface.
-              </p>
-              <select
-                value={currentLanguage}
-                onChange={(e) => i18n.changeLanguage(e.target.value)}
-                style={{
-                  width: "100%",
-                  maxWidth: "300px",
-                }}
-              >
-                <option value="en">English</option>
-                <option value="te">Telugu</option>
-                <option value="kn">Kannada</option>
-              </select>
-            </div>
-
-            <div
-              className="form-panel"
-              style={{ marginBottom: "20px", position: "static" }}
-            >
-              <h2>Landing Page</h2>
-              <p
-                style={{
-                  color: "#857869",
-                  fontSize: "0.9rem",
-                  marginBottom: "15px",
-                }}
-              >
-                Select which page should open by default when you launch the
-                application.
-              </p>
-              <select
-                value={landingPage}
-                onChange={(e) => setLandingPage(e.target.value)}
-                style={{
-                  width: "100%",
-                  maxWidth: "300px",
-                }}
-              >
-                <option value="Home">{t("Home", "Home")}</option>
-                <option value="Me">{t("Me", "Me (My Profile)")}</option>
-                <option value="Sankalpa">{t("Sankalpa", "Sankalpa")}</option>
-                <option value="e-Jataka">{t("e-Jataka", "e-Jataka")}</option>
-                <option value="e-Match">{t("e-Match", "e-Match")}</option>
-                <option value="e-Panchanga">
-                  {t("e-Panchanga", "e-Panchanga")}
-                </option>
-                <option value="echakra">{t("Prashna", "e-Prashna")}</option>
-                <option value="e-Clock">{t("AstroClock", "e-Clock")}</option>
-                <option value="e-PATA">{t("e-PATA", "e-PATA")}</option>
-              </select>
-            </div>
-
-            <div
-              className="form-panel"
-              style={{ marginBottom: "20px", position: "static" }}
-            >
-              <h2>Rahu Calculation Mode</h2>
-              <p
-                style={{
-                  color: "#857869",
-                  fontSize: "0.9rem",
-                  marginBottom: "15px",
-                }}
-              >
-                {t("RahuModeDesc", "Select whether to use Mean Node (traditional/average) or True Node (precise/actual) for Rahu & Ketu calculations.")}
-              </p>
-              <select
-                value={rahuMode}
-                onChange={(e) => setRahuMode(e.target.value)}
-                style={{
-                  width: "100%",
-                  maxWidth: "300px",
-                }}
-              >
-                <option value="mean">{t("MeanRahuOption", "Mean Node (Recommended)")}</option>
-                <option value="true">{t("TrueRahuOption", "True Node")}</option>
-              </select>
-            </div>
-
-            <div
-              className="form-panel"
-              style={{ marginBottom: "20px", position: "static" }}
-            >
-              <h2>Chart Style</h2>
-              <p
-                style={{
-                  color: "#857869",
-                  fontSize: "0.9rem",
-                  marginBottom: "15px",
-                }}
-              >
-                Choose your preferred chart rendering style (South Indian or North Indian). This style will be applied globally across the application.
-              </p>
-              <select
-                value={chartStyle}
-                onChange={(e) => {
-                  setChartStyle(e.target.value);
-                }}
-                style={{
-                  width: "100%",
-                  maxWidth: "300px",
-                }}
-              >
-                <option value="south">South Indian Chart</option>
-                <option value="north">North Indian Chart</option>
-                <option value="east">East Indian Chart</option>
-              </select>
-            </div>
-
-            <div
-              className="form-panel"
-              style={{ marginBottom: "20px", position: "static" }}
-            >
-              <h2>Pages Visibility</h2>
-              <p
-                style={{
-                  color: "#857869",
-                  fontSize: "0.9rem",
-                  marginBottom: "15px",
-                }}
-              >
-                Select the pages you want to display in the sidebar menu.
-              </p>
-              {renderCheckboxGroup(
-                "sidebar_pages",
-                "Sidebar Menu Items",
-                MASTER_LISTS.sidebar_pages,
-              )}
-            </div>
-
-            <div className="form-panel" style={{ position: "static" }}>
-              <h2>General Settings (Default Location)</h2>
-              <p
-                style={{
-                  color: "#857869",
-                  fontSize: "0.9rem",
-                  marginBottom: "15px",
-                }}
-              >
-                Set a default location so you don't have to enter it every time
-                you generate a new horoscope.
-              </p>
-              <LocationAutocomplete
-                city={defaultLocation.city}
-                onLocationSelect={(locData) => {
-                  setDefaultLocation({
-                    ...defaultLocation,
-                    city: locData.city,
-                    latitude: locData.latitude,
-                    longitude: locData.longitude,
-                    timezone: locData.timezone,
-                  });
-                }}
-              />
-              <details
-                style={{
-                  marginTop: "15px",
-                  fontSize: "14px",
-                  background: "#fdfefe",
-                  padding: "15px",
-                  borderRadius: "8px",
-                  border: "1px solid #eee",
-                  marginBottom: "15px",
-                }}
-              >
-                <summary
+          <div className="settings-tab-grid">
+            {/* Left Column: Dropdowns & Default Location */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+              {/* App Preferences Card */}
+              <div className="form-panel" style={{ margin: 0, position: "static" }}>
+                <h2>⚙️ {t("appPreferencesTitle", "App Preferences")}</h2>
+                <div
                   style={{
-                    cursor: "pointer",
-                    color: "#3498db",
-                    fontWeight: "bold",
-                    outline: "none",
-                    listStyle: "none",
-                    marginBottom: "5px",
+                    display: "grid",
+                    gridTemplateColumns: "1fr",
+                    gap: "15px",
+                    marginTop: "10px"
                   }}
                 >
-                  Manual Coordinates (Lat / Lon / Tz)
-                </summary>
-                <div className="form-grid" style={{ marginTop: "10px" }}>
-                  <label>
-                    Latitude
-                    <input
-                      required
-                      inputMode="decimal"
-                      value={defaultLocation.latitude}
-                      onChange={(e) => updateField("latitude", e.target.value)}
-                    />
-                  </label>
-                  <label style={{ marginTop: "10px" }}>
-                    Longitude
-                    <input
-                      required
-                      inputMode="decimal"
-                      value={defaultLocation.longitude}
-                      onChange={(e) => updateField("longitude", e.target.value)}
-                    />
-                  </label>
+                  <div>
+                    <label style={{ fontWeight: "bold", fontSize: "14px", color: "#2c3e50", display: "block", marginBottom: "6px" }}>
+                      Language
+                    </label>
+                    <select
+                      value={currentLanguage}
+                      onChange={(e) => i18n.changeLanguage(e.target.value)}
+                    >
+                      <option value="en">English</option>
+                      <option value="te">Telugu</option>
+                      <option value="kn">Kannada</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ fontWeight: "bold", fontSize: "14px", color: "#2c3e50", display: "block", marginBottom: "6px" }}>
+                      Default Landing Page
+                    </label>
+                    <select
+                      value={landingPage}
+                      onChange={(e) => setLandingPage(e.target.value)}
+                    >
+                      <option value="Home">{t("Home", "Home")}</option>
+                      <option value="Me">{t("Me", "Me (My Profile)")}</option>
+                      <option value="Sankalpa">{t("Sankalpa", "Sankalpa")}</option>
+                      <option value="e-Jataka">{t("e-Jataka", "e-Jataka")}</option>
+                      <option value="e-Match">{t("e-Match", "e-Match")}</option>
+                      <option value="e-Panchanga">{t("e-Panchanga", "e-Panchanga")}</option>
+                      <option value="echakra">{t("Prashna", "e-Prashna")}</option>
+                      <option value="e-Clock">{t("AstroClock", "e-Clock")}</option>
+                      <option value="e-PATA">{t("e-PATA", "e-PATA")}</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ fontWeight: "bold", fontSize: "14px", color: "#2c3e50", display: "block", marginBottom: "6px" }}>
+                      Rahu Calculation Mode
+                    </label>
+                    <select
+                      value={rahuMode}
+                      onChange={(e) => setRahuMode(e.target.value)}
+                    >
+                      <option value="mean">{t("MeanRahuOption", "Mean Node (Recommended)")}</option>
+                      <option value="true">{t("TrueRahuOption", "True Node")}</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ fontWeight: "bold", fontSize: "14px", color: "#2c3e50", display: "block", marginBottom: "6px" }}>
+                      Chart Render Style
+                    </label>
+                    <select
+                      value={chartStyle}
+                      onChange={(e) => setChartStyle(e.target.value)}
+                    >
+                      <option value="south">South Indian Chart</option>
+                      <option value="north">North Indian Chart</option>
+                      <option value="east">East Indian Chart</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ fontWeight: "bold", fontSize: "14px", color: "#2c3e50", display: "block", marginBottom: "6px" }}>
+                      Default Ayanamsha Type
+                    </label>
+                    <select
+                      value={prefs.ayanamsha_type || "lahiri"}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setPrefs({ 
+                          ...prefs, 
+                          ayanamsha_type: val, 
+                          ayanamsha_val: val === "custom" ? (prefs.ayanamsha_val === "custom" ? "" : prefs.ayanamsha_val) : val 
+                        });
+                      }}
+                    >
+                      <option value="lahiri">Lahiri (Chitra Paksha)</option>
+                      <option value="raman">Raman</option>
+                      <option value="krishnamurti">Krishnamurti (KP)</option>
+                      <option value="yukteshwar">Sri Yukteshwar</option>
+                      <option value="true_citra">True Citra</option>
+                      <option value="fagan_bradley">Fagan/Bradley</option>
+                      <option value="custom">Custom (User Defined)</option>
+                    </select>
+
+                    {prefs.ayanamsha_type === "custom" && (
+                      <div style={{ marginTop: "10px" }}>
+                        <input
+                          type="number"
+                          step="any"
+                          value={prefs.ayanamsha_val !== "custom" ? prefs.ayanamsha_val : ""}
+                          onChange={(e) => setPrefs({ ...prefs, ayanamsha_val: e.target.value })}
+                          placeholder="Custom value in degrees (e.g. 24.5)"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <label style={{ marginTop: "10px", display: "block" }}>
-                  Timezone
-                  <input
-                    required
-                    inputMode="decimal"
-                    value={defaultLocation.timezone}
-                    onChange={(e) => updateField("timezone", e.target.value)}
-                  />
-                </label>
-              </details>
+              </div>
+
+              {/* Default Location Card */}
+              <div className="form-panel" style={{ margin: 0, position: "static" }}>
+                <h2>📍 {t("defaultLocationTitle", "Default Location")}</h2>
+                <p style={{ color: "#7f8c8d", fontSize: "0.85rem", margin: "0 0 15px 0" }}>
+                  Set a default location so you don't have to enter it every time you generate a new horoscope.
+                </p>
+                <LocationAutocomplete
+                  city={defaultLocation.city}
+                  onLocationSelect={(locData) => {
+                    setDefaultLocation({
+                      ...defaultLocation,
+                      city: locData.city,
+                      latitude: locData.latitude,
+                      longitude: locData.longitude,
+                      timezone: locData.timezone,
+                    });
+                  }}
+                />
+                <details
+                  style={{
+                    marginTop: "15px",
+                    fontSize: "14px",
+                    background: "#f8f9fa",
+                    padding: "15px",
+                    borderRadius: "10px",
+                    border: "1px solid #e9ecef",
+                  }}
+                >
+                  <summary
+                    style={{
+                      cursor: "pointer",
+                      color: "#2980b9",
+                      fontWeight: "bold",
+                      outline: "none",
+                      listStyle: "none",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    🛠️ Manual Coordinates (Lat / Lon / Tz)
+                  </summary>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "10px" }}>
+                    <label style={{ fontSize: "12px", color: "#636e72", fontWeight: "bold" }}>
+                      Latitude
+                      <input
+                        required
+                        inputMode="decimal"
+                        value={defaultLocation.latitude}
+                        onChange={(e) => updateField("latitude", e.target.value)}
+                        style={{ marginTop: "4px" }}
+                      />
+                    </label>
+                    <label style={{ fontSize: "12px", color: "#636e72", fontWeight: "bold" }}>
+                      Longitude
+                      <input
+                        required
+                        inputMode="decimal"
+                        value={defaultLocation.longitude}
+                        onChange={(e) => updateField("longitude", e.target.value)}
+                        style={{ marginTop: "4px" }}
+                      />
+                    </label>
+                  </div>
+                  <label style={{ fontSize: "12px", color: "#636e72", fontWeight: "bold", display: "block", marginTop: "10px" }}>
+                    Timezone
+                    <input
+                      required
+                      inputMode="decimal"
+                      value={defaultLocation.timezone}
+                      onChange={(e) => updateField("timezone", e.target.value)}
+                      style={{ marginTop: "4px" }}
+                    />
+                  </label>
+                </details>
+              </div>
             </div>
 
-            <div className="form-panel" style={{ position: "static", marginBottom: "20px" }}>
-              <h2>Ayanamsha</h2>
-              <p style={{ color: "#857869", fontSize: "0.9rem", marginBottom: "15px" }}>
-                Select the Ayanamsha to be used across all astrological calculations.
-              </p>
-              <select
-                value={prefs.ayanamsha_type || "lahiri"}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setPrefs({ 
-                    ...prefs, 
-                    ayanamsha_type: val, 
-                    ayanamsha_val: val === "custom" ? (prefs.ayanamsha_val === "custom" ? "" : prefs.ayanamsha_val) : val 
-                  });
-                }}
-                style={{ width: "100%", maxWidth: "300px" }}
-              >
-                <option value="lahiri">Lahiri (Chitra Paksha)</option>
-                <option value="raman">Raman</option>
-                <option value="krishnamurti">Krishnamurti (KP)</option>
-                <option value="yukteshwar">Sri Yukteshwar</option>
-                <option value="true_citra">True Citra</option>
-                <option value="fagan_bradley">Fagan/Bradley</option>
-                <option value="custom">Custom (User Defined)</option>
-              </select>
-
-              {prefs.ayanamsha_type === "custom" && (
-                <div style={{ marginTop: "15px" }}>
-                  <label style={{ display: "block", fontSize: "14px", fontWeight: "bold", color: "#2c3e50" }}>
-                    Custom Ayanamsha Value (Degrees):
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={prefs.ayanamsha_val !== "custom" ? prefs.ayanamsha_val : ""}
-                    onChange={(e) => setPrefs({ ...prefs, ayanamsha_val: e.target.value })}
-                    placeholder="e.g., 24.5"
-                    style={{ width: "100%", maxWidth: "300px", marginTop: "5px" }}
-                  />
-                </div>
+            {/* Right Column: Pages Visibility Checkboxes */}
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {renderCheckboxGroup(
+                "sidebar_pages",
+                "Visibility of Sidebar Pages",
+                MASTER_LISTS.sidebar_pages,
               )}
-            </div>
 
-            {/* General Settings Save button at the end of General Tab */}
-            <div style={{ display: "flex", justifyContent: "flex-start", marginTop: "10px", marginBottom: "20px" }}>
               <button
                 type="button"
                 className="btn-action btn-purple"
                 onClick={handleSaveSettings}
-                style={{ width: "fit-content" }}
+                style={{
+                  width: "100%",
+                  padding: "14px",
+                  marginTop: "20px",
+                  fontSize: "15px",
+                  justifyContent: "center",
+                  boxShadow: "0 4px 10px rgba(142,68,173,0.2)"
+                }}
               >
                 Save General Settings
               </button>
             </div>
-          </>
+          </div>
         )}
 
         {activeTab === "shudhi" && (
@@ -1576,7 +1641,7 @@ export function SettingsPage({ logoUrl, onNavigate }) {
             className="form-panel"
             style={{ padding: "30px", borderRadius: "16px" }}
           >
-            <h2 style={{ marginBottom: "15px", color: "#2c3e50" }}>
+            <h2 style={{ marginBottom: "10px", color: "#2c3e50" }}>
               Panchanga Shudhi Settings
             </h2>
             <p
@@ -1584,40 +1649,43 @@ export function SettingsPage({ logoUrl, onNavigate }) {
                 color: "#7f8c8d",
                 marginBottom: "25px",
                 lineHeight: "1.6",
+                margin: 0
               }}
             >
-              Select the elements you consider as <b>Good/Auspicious</b>. The
-              selected ones will be highlighted dynamically in the main
-              Panchanga search table.
+              Select the elements you consider as <b>Good/Auspicious</b>. The selected ones will be highlighted dynamically in the main Panchanga search table.
             </p>
-            {renderCheckboxGroup(
-              "panchanga_columns",
-              "Display Columns (Panchanga Table)",
-              MASTER_LISTS.panchanga_columns,
-            )}
-            {renderCheckboxGroup(
-              "maasa",
-              "Maasa (Lunar Month)",
-              MASTER_LISTS.maasa,
-            )}
-            {renderCheckboxGroup(
-              "vaara",
-              "Vaara (Weekday)",
-              MASTER_LISTS.vaara,
-            )}
-            {renderCheckboxGroup("tithi", "Tithi", MASTER_LISTS.tithi)}
-            {renderCheckboxGroup(
-              "nakshatra",
-              "Nakshatra",
-              MASTER_LISTS.nakshatra,
-            )}
-            {renderCheckboxGroup("yoga", "Yoga", MASTER_LISTS.yoga)}
-            {renderCheckboxGroup("karana", "Karana", MASTER_LISTS.karana)}
-            {renderCheckboxGroup(
-              "tarabalam",
-              "Tarabalam",
-              MASTER_LISTS.tarabalam,
-            )}
+
+            <div className="settings-masonry" style={{ marginTop: "20px" }}>
+              {renderCheckboxGroup(
+                "panchanga_columns",
+                "📊 Display Columns (Panchanga Table)",
+                MASTER_LISTS.panchanga_columns,
+              )}
+              {renderCheckboxGroup(
+                "maasa",
+                "🌙 Maasa (Lunar Month)",
+                MASTER_LISTS.maasa,
+              )}
+              {renderCheckboxGroup(
+                "vaara",
+                "📅 Vaara (Weekday)",
+                MASTER_LISTS.vaara,
+              )}
+              {renderCheckboxGroup("tithi", "☀️ Tithi", MASTER_LISTS.tithi)}
+              {renderCheckboxGroup(
+                "nakshatra",
+                "✨ Nakshatra",
+                MASTER_LISTS.nakshatra,
+              )}
+              {renderCheckboxGroup("yoga", "💎 Yoga", MASTER_LISTS.yoga)}
+              {renderCheckboxGroup("karana", "🌀 Karana", MASTER_LISTS.karana)}
+              {renderCheckboxGroup(
+                "tarabalam",
+                "🛡️ Tarabalam",
+                MASTER_LISTS.tarabalam,
+              )}
+            </div>
+
             <button
               type="button"
               className="btn-action btn-purple"
@@ -1625,8 +1693,10 @@ export function SettingsPage({ logoUrl, onNavigate }) {
               style={{
                 width: "100%",
                 padding: "16px",
-                marginTop: "15px",
+                marginTop: "25px",
                 fontSize: "16px",
+                justifyContent: "center",
+                boxShadow: "0 4px 10px rgba(142,68,173,0.2)"
               }}
             >
               Save Panchanga Shudhi
@@ -1639,7 +1709,7 @@ export function SettingsPage({ logoUrl, onNavigate }) {
             className="form-panel"
             style={{ padding: "30px", borderRadius: "16px" }}
           >
-            <h2 style={{ marginBottom: "15px", color: "#2c3e50" }}>
+            <h2 style={{ marginBottom: "10px", color: "#2c3e50" }}>
               Muhurtha Settings
             </h2>
             <p
@@ -1647,50 +1717,54 @@ export function SettingsPage({ logoUrl, onNavigate }) {
                 color: "#7f8c8d",
                 marginBottom: "25px",
                 lineHeight: "1.6",
+                margin: 0
               }}
             >
-              Customize columns for Display and Exporting the Muhurtha table,
-              and select the Mahadoshas to evaluate.
+              Customize columns for Display and Exporting the Muhurtha table, and select the Mahadoshas to evaluate.
             </p>
-            {renderCheckboxGroup(
-              "muhurtha_ui_columns",
-              "Display Columns (Muhurtha UI)",
-              MASTER_LISTS.muhurtha_ui_columns,
-            )}
-            {renderCheckboxGroup(
-              "active_doshas",
-              "Active Mahadoshas (21 Doshas)",
-              [
-                "Saptamastha Graha",
-                "Shashtashta Chandra",
-                "Sagraha Chandra Dosha",
-                "Bhrigu Shatka",
-                "Ashtamastha Kuja",
-                "Gandanta (Moon)",
-                "Sankranti Dosha",
-                "Asthangatha",
-                "Bad Panchakam",
-                "Krura Muhurtha",
-                "Dagdha Tithi Dosha",
-                "Grahanam (Eclipse)",
-                "Grahana Utpata Dosha",
-                "Rahu Kalam",
-                "Yamagandam",
-                "Varjyam",
-                "Durmuhurtham",
-                "Lagna Tyajyam",
-              ]
-            )}
-            {renderCheckboxGroup(
-              "active_panchakas",
-              "Active Bad Panchakas",
-              MASTER_LISTS.active_panchakas,
-            )}
-            {renderCheckboxGroup(
-              "export_columns",
-              "Export Columns (PDF/CSV)",
-              MASTER_LISTS.export_columns,
-            )}
+
+            <div className="settings-masonry" style={{ marginTop: "20px" }}>
+              {renderCheckboxGroup(
+                "muhurtha_ui_columns",
+                "📊 Display Columns (Muhurtha UI)",
+                MASTER_LISTS.muhurtha_ui_columns,
+              )}
+              {renderCheckboxGroup(
+                "active_doshas",
+                "⚠️ Active Mahadoshas (21 Doshas)",
+                [
+                  "Saptamastha Graha",
+                  "Shashtashta Chandra",
+                  "Sagraha Chandra Dosha",
+                  "Bhrigu Shatka",
+                  "Ashtamastha Kuja",
+                  "Gandanta (Moon)",
+                  "Sankranti Dosha",
+                  "Asthangatha",
+                  "Bad Panchakam",
+                  "Krura Muhurtha",
+                  "Dagdha Tithi Dosha",
+                  "Grahanam (Eclipse)",
+                  "Grahana Utpata Dosha",
+                  "Rahu Kalam",
+                  "Yamagandam",
+                  "Varjyam",
+                  "Durmuhurtham",
+                  "Lagna Tyajyam",
+                ]
+              )}
+              {renderCheckboxGroup(
+                "active_panchakas",
+                "⚡ Active Bad Panchakas",
+                MASTER_LISTS.active_panchakas,
+              )}
+              {renderCheckboxGroup(
+                "export_columns",
+                "📤 Export Columns (PDF/CSV)",
+                MASTER_LISTS.export_columns,
+              )}
+            </div>
+
             <button
               type="button"
               className="btn-action btn-purple"
@@ -1698,8 +1772,10 @@ export function SettingsPage({ logoUrl, onNavigate }) {
               style={{
                 width: "100%",
                 padding: "16px",
-                marginTop: "15px",
+                marginTop: "25px",
                 fontSize: "16px",
+                justifyContent: "center",
+                boxShadow: "0 4px 10px rgba(142,68,173,0.2)"
               }}
             >
               Save Muhurtha Settings
@@ -1712,533 +1788,530 @@ export function SettingsPage({ logoUrl, onNavigate }) {
             className="form-panel"
             style={{ padding: "30px", borderRadius: "16px", display: "flex", flexDirection: "column", gap: "10px" }}
           >
+            <style>{`
+              .backup-dashboard-layout {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 25px;
+                width: 100%;
+                box-sizing: border-box;
+                margin-top: 15px;
+              }
+              @media (min-width: 992px) {
+                .backup-dashboard-layout {
+                  grid-template-columns: 2fr 1.2fr;
+                }
+              }
+              .backup-modules-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 15px;
+              }
+              @media (min-width: 640px) {
+                .backup-modules-grid {
+                  grid-template-columns: repeat(2, 1fr);
+                }
+              }
+              .backup-card {
+                background: #ffffff;
+                border: 1px solid #eef2f5;
+                border-radius: 12px;
+                padding: 16px;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+                transition: all 0.2s ease-in-out;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+              }
+              .backup-card:hover {
+                box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+                transform: translateY(-2px);
+              }
+              .backup-card-title {
+                font-weight: 700;
+                color: #2c3e50;
+                font-size: 0.95rem;
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+              }
+              .backup-card-buttons {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                margin-top: 12px;
+              }
+              .backup-card-buttons .btn-action {
+                flex: 1;
+                min-width: 100px;
+                justify-content: center;
+                font-size: 0.8rem;
+                padding: 8px 12px;
+              }
+              .backup-right-column {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+              }
+              .settings-group-card {
+                background: #ffffff;
+                border: 1px solid #eef2f5;
+                border-radius: 16px;
+                padding: 20px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+              }
+              .settings-group-card h3 {
+                margin-top: 0;
+                margin-bottom: 12px;
+                font-size: 1.1rem;
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+              }
+            `}</style>
+
             <h2 style={{ marginBottom: "15px", color: "#2c3e50" }}>
               Backup & Restore
             </h2>
             <p
               style={{
                 color: "#7f8c8d",
-                marginBottom: "25px",
+                marginBottom: "15px",
                 lineHeight: "1.6",
+                margin: 0,
               }}
             >
-              Manage your application data by exporting backups and restoring
-              them across devices.
+              Manage your application data by exporting backups and restoring them across devices.
             </p>
 
-            <details
-              className="settings-group"
-              open
-              style={{
-                border: "1px solid #eaecee",
-                background: "#ffffff",
-              }}
-            >
-              <summary
-                style={{
-                  color: "#16a085",
-                  borderBottom: "1px dashed #eaecee",
-                }}
-              >
-                Individual Module Backups (Local)
-              </summary>
-              <div style={{ padding: "10px 0" }}>
-                <p
-                  style={{
-                    color: "#555",
-                    fontSize: "14px",
-                    marginTop: 0,
-                    marginBottom: "20px",
-                  }}
-                >
+            <div className="backup-dashboard-layout">
+              {/* Left Column: Individual Module Backups */}
+              <div className="settings-group-card" style={{ borderTop: "4px solid #16a085" }}>
+                <h3 style={{ color: "#16a085" }}>
+                  🧩 Individual Module Backups
+                </h3>
+                <p style={{ color: "#7f8c8d", fontSize: "0.85rem", marginTop: 0, marginBottom: "15px" }}>
                   Backup or restore specific modules independently.
                 </p>
 
-                <div
-                  style={{
-                    marginBottom: "20px",
-                    paddingBottom: "15px",
-                    borderBottom: "1px dashed #eaecee",
-                  }}
-                >
-                  <strong
-                    style={{
-                      color: "#2c3e50",
-                      display: "block",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    1. Saved Profiles (e-Jataka & e-Match)
-                  </strong>
-                  <div
-                    style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}
-                  >
-                    <button
-                      className="btn-action btn-blue"
-                      onClick={() =>
-                        handleBackupData(
-                          "vaiswanara_profiles",
-                          "ejataka_profiles",
-                        )
-                      }
-                    >
-                      📥 Backup Profiles
-                    </button>
-                    <button
-                      className="btn-action btn-orange"
-                      onClick={() => profilesFileRef.current.click()}
-                    >
-                      📤 Restore Profiles
-                    </button>
-                    <input
-                      type="file"
-                      ref={profilesFileRef}
-                      style={{ display: "none" }}
-                      accept=".json"
-                      onChange={(e) =>
-                        handleRestoreData(
-                          e,
-                          "vaiswanara_profiles",
-                          "Profiles restored successfully!",
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    marginBottom: "20px",
-                    paddingBottom: "15px",
-                    borderBottom: "1px dashed #eaecee",
-                  }}
-                >
-                  <strong
-                    style={{
-                      color: "#2c3e50",
-                      display: "block",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    2. Panchanga / Muhurtha Tables
-                  </strong>
-                  <div
-                    style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}
-                  >
-                    <button
-                      className="btn-action btn-blue"
-                      onClick={() =>
-                        handleBackupData(
-                          "panchanga_profiles",
-                          "muhurtha_tables",
-                        )
-                      }
-                    >
-                      📥 Backup Tables
-                    </button>
-                    <button
-                      className="btn-action btn-orange"
-                      onClick={() => panchangaFileRef.current.click()}
-                    >
-                      📤 Restore Tables
-                    </button>
-                    <input
-                      type="file"
-                      ref={panchangaFileRef}
-                      style={{ display: "none" }}
-                      accept=".json"
-                      onChange={(e) =>
-                        handleRestoreData(
-                          e,
-                          "panchanga_profiles",
-                          "Muhurtha tables restored successfully!",
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    marginBottom: "20px",
-                    paddingBottom: "15px",
-                    borderBottom: "1px dashed #eaecee",
-                  }}
-                >
-                  <strong
-                    style={{
-                      color: "#2c3e50",
-                      display: "block",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    3. Muhurtha Global Notes
-                  </strong>
-                  <div
-                    style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}
-                  >
-                    <button
-                      className="btn-action btn-blue"
-                      onClick={() =>
-                        handleBackupData(
-                          "muhurtha_global_notes",
-                          "muhurtha_notes",
-                        )
-                      }
-                    >
-                      📥 Backup Notes
-                    </button>
-                    <button
-                      className="btn-action btn-orange"
-                      onClick={() => notesFileRef.current.click()}
-                    >
-                      📤 Restore Notes
-                    </button>
-                    <input
-                      type="file"
-                      ref={notesFileRef}
-                      style={{ display: "none" }}
-                      accept=".json"
-                      onChange={(e) =>
-                        handleRestoreData(
-                          e,
-                          "muhurtha_global_notes",
-                          "Global Notes restored successfully!",
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <strong
-                    style={{
-                      color: "#2c3e50",
-                      display: "block",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    4. App Settings & Preferences
-                  </strong>
-                  <div
-                    style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}
-                  >
-                    <button
-                      className="btn-action btn-blue"
-                      onClick={() =>
-                        handleBackupData("eclock_prefs", "preference")
-                      }
-                    >
-                      📥 Backup Settings
-                    </button>
-                    <button
-                      className="btn-action btn-orange"
-                      onClick={() => prefsFileRef.current.click()}
-                    >
-                      📤 Restore Settings
-                    </button>
-                    <button
-                      className="btn-action btn-red"
-                      onClick={resetPreferences}
-                    >
-                      🔄 Reset to Defaults
-                    </button>
-                    <input
-                      type="file"
-                      ref={prefsFileRef}
-                      style={{ display: "none" }}
-                      accept=".json"
-                      onChange={(e) =>
-                        handleRestoreData(
-                          e,
-                          "eclock_prefs",
-                          "Settings restored successfully!",
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    marginTop: "20px",
-                    paddingTop: "15px",
-                    borderTop: "1px dashed #eaecee",
-                  }}
-                >
-                  <strong
-                    style={{
-                      color: "#2c3e50",
-                      display: "block",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    5. e-PATA Progress & Bookmarks
-                  </strong>
-                  <div
-                    style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}
-                  >
-                    <button
-                      className="btn-action btn-blue"
-                      onClick={() =>
-                        handleBackupData("epata", "epata")
-                      }
-                    >
-                      📥 Backup e-PATA
-                    </button>
-                    <button
-                      className="btn-action btn-orange"
-                      onClick={() => epataFileRef.current.click()}
-                    >
-                      📤 Restore e-PATA
-                    </button>
-                    <input
-                      type="file"
-                      ref={epataFileRef}
-                      style={{ display: "none" }}
-                      accept=".json"
-                      onChange={(e) =>
-                        handleRestoreData(
-                          e,
-                          "epata",
-                          "e-PATA progress restored successfully!",
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    marginTop: "20px",
-                    paddingTop: "15px",
-                    borderTop: "1px dashed #eaecee",
-                  }}
-                >
-                  <strong
-                    style={{
-                      color: "#2c3e50",
-                      display: "block",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    6. Reminders & Custom Events
-                  </strong>
-                  <div
-                    style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}
-                  >
-                    <button
-                      className="btn-action btn-blue"
-                      onClick={() =>
-                        handleBackupData("jyotisha_custom_events", "jyotisha_custom_events")
-                      }
-                    >
-                      📥 Backup Custom Events
-                    </button>
-                    <button
-                      className="btn-action btn-orange"
-                      onClick={() => customEventsFileRef.current.click()}
-                    >
-                      📤 Restore Custom Events
-                    </button>
-                    <input
-                      type="file"
-                      ref={customEventsFileRef}
-                      style={{ display: "none" }}
-                      accept=".json"
-                      onChange={(e) =>
-                        handleRestoreData(
-                          e,
-                          "jyotisha_custom_events",
-                          "Custom events restored successfully!",
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-            </details>
-
-            <details
-              className="settings-group"
-              open
-              style={{
-                border: "1px solid #eaecee",
-                background: "#ffffff",
-              }}
-            >
-              <summary
-                style={{
-                  color: "#8e44ad",
-                  borderBottom: "1px dashed #eaecee",
-                }}
-              >
-                Master Backup & Restore (Local)
-              </summary>
-              <p style={{ color: "#555", fontSize: "14px", marginTop: 0 }}>
-                Backup or restore everything at once: Settings, Profiles,
-                Tables, and Notes.
-              </p>
-              <div
-                style={{
-                  display: "flex",
-                  gap: "15px",
-                  flexWrap: "wrap",
-                  marginTop: "15px",
-                }}
-              >
-                <button
-                  className="btn-action btn-purple"
-                  onClick={handleMasterBackup}
-                  style={{ padding: "12px 20px", fontSize: "16px" }}
-                >
-                  📥 Master Backup
-                </button>
-                <button
-                  className="btn-action"
-                  style={{
-                    background: "#d35400",
-                    padding: "12px 20px",
-                    fontSize: "16px",
-                  }}
-                  onClick={() => masterFileRef.current.click()}
-                >
-                  📤 Master Restore
-                </button>
-                <input
-                  type="file"
-                  ref={masterFileRef}
-                  style={{ display: "none" }}
-                  accept=".json"
-                  onChange={handleMasterRestore}
-                />
-              </div>
-            </details>
-
-            <details
-              className="settings-group"
-              open
-              style={{
-                border: "1px solid #eaecee",
-                background: "#ffffff",
-              }}
-            >
-              <summary
-                style={{
-                  color: "#2980b9",
-                  borderBottom: "1px dashed #eaecee",
-                }}
-              >
-                Cloud Sync (Google Drive)
-              </summary>
-              <div style={{ padding: "10px 0" }}>
-                <p
-                  style={{
-                    marginTop: 0,
-                    fontSize: "14px",
-                    color: "#555",
-                    marginBottom: "15px",
-                  }}
-                >
-                  Securely backup and restore <b>Saved Profiles and e-PATA Progress</b>{" "}
-                  directly to your Google Drive account.
-                </p>
-
-                {!gdriveConnected ? (
-                  <button
-                    className="btn-action"
-                    style={{
-                      background: "#4285f4",
-                      padding: "12px 20px",
-                      fontSize: "15px",
-                    }}
-                    onClick={handleGdriveLogin}
-                  >
-                    🔒 Sign in with Google
-                  </button>
-                ) : (
-                  <div>
-                    <div
-                      style={{
-                        background: "#fff",
-                        border: "1px solid #d6eaf8",
-                        padding: "15px",
-                        borderRadius: "8px",
-                        marginBottom: "15px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                        gap: "10px",
-                      }}
-                    >
-                      <div>
-                        <p
-                          style={{
-                            margin: "0 0 5px 0",
-                            fontSize: "14px",
-                            color: "#2c3e50",
-                          }}
-                        >
-                          Status:{" "}
-                          <strong style={{ color: "#27ae60" }}>
-                            Connected to Google Drive
-                          </strong>
-                        </p>
-                        <p
-                          style={{
-                            margin: 0,
-                            fontSize: "13px",
-                            color: "#7f8c8d",
-                          }}
-                        >
-                          Last Backup: <strong>{gdriveLastBackup}</strong>
-                        </p>
-                      </div>
-                      <button
-                        onClick={handleGdriveLogout}
-                        style={{
-                          background: "transparent",
-                          border: "1px solid #e74c3c",
-                          color: "#e74c3c",
-                          padding: "6px 12px",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        Sign Out
-                      </button>
+                <div className="backup-modules-grid">
+                  {/* Card 1: Saved Profiles */}
+                  <div className="backup-card">
+                    <div>
+                      <div className="backup-card-title">👥 Saved Profiles</div>
+                      <p style={{ margin: 0, fontSize: "0.8rem", color: "#7f8c8d" }}>
+                        Saved birth charts and matching profiles.
+                      </p>
                     </div>
-                    <div
-                      style={{ display: "flex", gap: "15px", flexWrap: "wrap" }}
-                    >
+                    <div className="backup-card-buttons">
                       <button
                         className="btn-action btn-blue"
-                        onClick={handleGdriveBackup}
-                        disabled={isGdriveLoading}
-                        style={{ padding: "12px 20px", fontSize: "15px" }}
+                        onClick={() =>
+                          handleBackupData(
+                            "vaiswanara_profiles",
+                            "ejataka_profiles",
+                          )
+                        }
                       >
-                        {isGdriveLoading
-                          ? "⏳ Processing..."
-                          : "📥 Backup Profiles & e-PATA to Drive"}
+                        📥 Backup
                       </button>
                       <button
                         className="btn-action btn-orange"
-                        onClick={handleGdriveRestore}
-                        disabled={isGdriveLoading}
-                        style={{ padding: "12px 20px", fontSize: "15px" }}
+                        onClick={() => profilesFileRef.current.click()}
                       >
-                        {isGdriveLoading
-                          ? "⏳ Processing..."
-                          : "📤 Restore Profiles & e-PATA from Drive"}
+                        📤 Restore
                       </button>
+                      <input
+                        type="file"
+                        ref={profilesFileRef}
+                        style={{ display: "none" }}
+                        accept=".json"
+                        onChange={(e) =>
+                          handleRestoreData(
+                            e,
+                            "vaiswanara_profiles",
+                            "Profiles restored successfully!",
+                          )
+                        }
+                      />
                     </div>
                   </div>
-                )}
+
+                  {/* Card 2: Tables */}
+                  <div className="backup-card">
+                    <div>
+                      <div className="backup-card-title">📅 Muhurtha Tables</div>
+                      <p style={{ margin: 0, fontSize: "0.8rem", color: "#7f8c8d" }}>
+                        Saved Panchanga & Muhurtha tables.
+                      </p>
+                    </div>
+                    <div className="backup-card-buttons">
+                      <button
+                        className="btn-action btn-blue"
+                        onClick={() =>
+                          handleBackupData(
+                            "panchanga_profiles",
+                            "muhurtha_tables",
+                          )
+                        }
+                      >
+                        📥 Backup
+                      </button>
+                      <button
+                        className="btn-action btn-orange"
+                        onClick={() => panchangaFileRef.current.click()}
+                      >
+                        📤 Restore
+                      </button>
+                      <input
+                        type="file"
+                        ref={panchangaFileRef}
+                        style={{ display: "none" }}
+                        accept=".json"
+                        onChange={(e) =>
+                          handleRestoreData(
+                            e,
+                            "panchanga_profiles",
+                            "Muhurtha tables restored successfully!",
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* Card 3: Notes */}
+                  <div className="backup-card" style={{ borderLeft: "3px solid #e74c3c" }}>
+                    <div>
+                      <div className="backup-card-title">📝 Global Notes</div>
+                      <p style={{ margin: 0, fontSize: "0.8rem", color: "#7f8c8d" }}>
+                        Custom notes and date reminders.
+                      </p>
+                    </div>
+                    <div className="backup-card-buttons">
+                      <button
+                        className="btn-action btn-blue"
+                        onClick={() =>
+                          handleBackupData(
+                            "muhurtha_global_notes",
+                            "muhurtha_notes",
+                          )
+                        }
+                      >
+                        📥 Backup
+                      </button>
+                      <button
+                        className="btn-action btn-orange"
+                        onClick={() => notesFileRef.current.click()}
+                      >
+                        📤 Restore
+                      </button>
+                      <button
+                        className="btn-action btn-red"
+                        onClick={handleClearGlobalNotes}
+                        style={{ flex: "1 1 100%" }}
+                      >
+                        🗑️ Clear Global Notes
+                      </button>
+                      <input
+                        type="file"
+                        ref={notesFileRef}
+                        style={{ display: "none" }}
+                        accept=".json"
+                        onChange={(e) =>
+                          handleRestoreData(
+                            e,
+                            "muhurtha_global_notes",
+                            "Global Notes restored successfully!",
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* Card 4: Preferences */}
+                  <div className="backup-card" style={{ borderLeft: "3px solid #8e44ad" }}>
+                    <div>
+                      <div className="backup-card-title">⚙️ App Settings</div>
+                      <p style={{ margin: 0, fontSize: "0.8rem", color: "#7f8c8d" }}>
+                        App preferences & location defaults.
+                      </p>
+                    </div>
+                    <div className="backup-card-buttons">
+                      <button
+                        className="btn-action btn-blue"
+                        onClick={() =>
+                          handleBackupData("eclock_prefs", "preference")
+                        }
+                      >
+                        📥 Backup
+                      </button>
+                      <button
+                        className="btn-action btn-orange"
+                        onClick={() => prefsFileRef.current.click()}
+                      >
+                        📤 Restore
+                      </button>
+                      <button
+                        className="btn-action btn-red"
+                        onClick={resetPreferences}
+                        style={{ flex: "1 1 100%" }}
+                      >
+                        🔄 Reset to Defaults
+                      </button>
+                      <input
+                        type="file"
+                        ref={prefsFileRef}
+                        style={{ display: "none" }}
+                        accept=".json"
+                        onChange={(e) =>
+                          handleRestoreData(
+                            e,
+                            "eclock_prefs",
+                            "Settings restored successfully!",
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* Card 5: e-PATA */}
+                  <div className="backup-card">
+                    <div>
+                      <div className="backup-card-title">🎧 e-PATA Progress</div>
+                      <p style={{ margin: 0, fontSize: "0.8rem", color: "#7f8c8d" }}>
+                        Audio bookmarks and listening logs.
+                      </p>
+                    </div>
+                    <div className="backup-card-buttons">
+                      <button
+                        className="btn-action btn-blue"
+                        onClick={() =>
+                          handleBackupData("epata", "epata")
+                        }
+                      >
+                        📥 Backup
+                      </button>
+                      <button
+                        className="btn-action btn-orange"
+                        onClick={() => epataFileRef.current.click()}
+                      >
+                        📤 Restore
+                      </button>
+                      <input
+                        type="file"
+                        ref={epataFileRef}
+                        style={{ display: "none" }}
+                        accept=".json"
+                        onChange={(e) =>
+                          handleRestoreData(
+                            e,
+                            "epata",
+                            "e-PATA progress restored successfully!",
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* Card 6: Custom Events */}
+                  <div className="backup-card">
+                    <div>
+                      <div className="backup-card-title">🔔 Custom Events</div>
+                      <p style={{ margin: 0, fontSize: "0.8rem", color: "#7f8c8d" }}>
+                        User-defined reminders & custom dates.
+                      </p>
+                    </div>
+                    <div className="backup-card-buttons">
+                      <button
+                        className="btn-action btn-blue"
+                        onClick={() =>
+                          handleBackupData(
+                            "jyotisha_custom_events",
+                            "jyotisha_custom_events",
+                          )
+                        }
+                      >
+                        📥 Backup
+                      </button>
+                      <button
+                        className="btn-action btn-orange"
+                        onClick={() => customEventsFileRef.current.click()}
+                      >
+                        📤 Restore
+                      </button>
+                      <input
+                        type="file"
+                        ref={customEventsFileRef}
+                        style={{ display: "none" }}
+                        accept=".json"
+                        onChange={(e) =>
+                          handleRestoreData(
+                            e,
+                            "jyotisha_custom_events",
+                            "Custom events restored successfully!",
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-            </details>
+
+              {/* Right Column: Master Actions & Cloud Backup */}
+              <div className="backup-right-column">
+                {/* Master Backup Card */}
+                <div className="settings-group-card" style={{ borderTop: "4px solid #8e44ad" }}>
+                  <h3 style={{ color: "#8e44ad" }}>
+                    🔮 Master Backup & Restore
+                  </h3>
+                  <p style={{ color: "#7f8c8d", fontSize: "0.85rem", marginTop: 0, marginBottom: "15px" }}>
+                    Backup or restore everything at once: Settings, Profiles, Tables, and Notes.
+                  </p>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <button
+                      className="btn-action btn-purple"
+                      onClick={handleMasterBackup}
+                      style={{ flex: 1, padding: "10px 15px", fontSize: "14px", justifyContent: "center" }}
+                    >
+                      📥 Master Backup
+                    </button>
+                    <button
+                      className="btn-action"
+                      style={{
+                        background: "#d35400",
+                        padding: "10px 15px",
+                        fontSize: "14px",
+                        color: "#fff",
+                        flex: 1,
+                        justifyContent: "center",
+                      }}
+                      onClick={() => masterFileRef.current.click()}
+                    >
+                      📤 Master Restore
+                    </button>
+                    <input
+                      type="file"
+                      ref={masterFileRef}
+                      style={{ display: "none" }}
+                      accept=".json"
+                      onChange={handleMasterRestore}
+                    />
+                  </div>
+                </div>
+
+                {/* Cloud Sync Card */}
+                <div className="settings-group-card" style={{ borderTop: "4px solid #2980b9" }}>
+                  <h3 style={{ color: "#2980b9" }}>
+                    ☁️ Cloud Sync (Google Drive)
+                  </h3>
+                  <p style={{ color: "#7f8c8d", fontSize: "0.85rem", marginTop: 0, marginBottom: "15px" }}>
+                    Securely backup and restore profiles and progress directly on your drive.
+                  </p>
+
+                  {!gdriveConnected ? (
+                    <button
+                      className="btn-action"
+                      style={{
+                        background: "#4285f4",
+                        padding: "12px 20px",
+                        fontSize: "15px",
+                        width: "100%",
+                        justifyContent: "center",
+                        color: "#fff",
+                      }}
+                      onClick={handleGdriveLogin}
+                    >
+                      🔒 Sign in with Google
+                    </button>
+                  ) : (
+                    <div>
+                      <div
+                        style={{
+                          background: "#f4f9fd",
+                          border: "1px solid #d6eaf8",
+                          padding: "12px",
+                          borderRadius: "8px",
+                          marginBottom: "12px",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                          gap: "8px",
+                        }}
+                      >
+                        <div>
+                          <p
+                            style={{
+                              margin: "0 0 4px 0",
+                              fontSize: "13px",
+                              color: "#2c3e50",
+                            }}
+                          >
+                            Status: <strong style={{ color: "#27ae60" }}>Connected</strong>
+                          </p>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: "12px",
+                              color: "#7f8c8d",
+                            }}
+                          >
+                            Last: <strong>{gdriveLastBackup}</strong>
+                          </p>
+                        </div>
+                        <button
+                          onClick={handleGdriveLogout}
+                          style={{
+                            background: "transparent",
+                            border: "1px solid #e74c3c",
+                            color: "#e74c3c",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontSize: "12px",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          Sign Out
+                        </button>
+                      </div>
+                      <div
+                        style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+                      >
+                        <button
+                          className="btn-action btn-blue"
+                          onClick={handleGdriveBackup}
+                          disabled={isGdriveLoading}
+                          style={{ padding: "10px 15px", fontSize: "13.5px", justifyContent: "center" }}
+                        >
+                          {isGdriveLoading
+                            ? "⏳ Processing..."
+                            : "📥 Drive Backup"}
+                        </button>
+                        <button
+                          className="btn-action btn-orange"
+                          onClick={handleGdriveRestore}
+                          disabled={isGdriveLoading}
+                          style={{ padding: "10px 15px", fontSize: "13.5px", justifyContent: "center" }}
+                        >
+                          {isGdriveLoading
+                            ? "⏳ Processing..."
+                            : "📤 Drive Restore"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </section>

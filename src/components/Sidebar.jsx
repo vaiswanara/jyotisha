@@ -36,7 +36,7 @@ export function Sidebar({ isOpen, logoUrl, onClose, activePage, onNavigate, prof
     { id: "Feedback", icon: "📝", label: t("Feedback", "Feedback") },
   ];
 
-  const mandatoryPages = ["Home", "Sankalpa", "Help", "e-Support", "Settings", "Feedback", "PrecisionTest", "e-Library"];
+  const mandatoryPages = ["Home", "Me", "e-Support", "Settings"];
 
   const menuItems = visiblePages
     ? allMenuItems.filter(

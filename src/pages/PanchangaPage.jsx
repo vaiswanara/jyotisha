@@ -161,8 +161,8 @@ function normalizeMuhurthaRow(row) {
   if (!row) return row;
   const norm = {};
   norm["Priority"] = row["Priority"] !== undefined && row["Priority"] !== null ? String(row["Priority"]) : "";
-  norm["Muhurtha_Notes"] = row["Muhurtha_Notes"] !== undefined && row["Muhurtha_Notes"] !== null 
-    ? String(row["Muhurtha_Notes"]) 
+  norm["Muhurtha_Notes"] = row["Muhurtha_Notes"] !== undefined && row["Muhurtha_Notes"] !== null
+    ? String(row["Muhurtha_Notes"])
     : (row["Muhurtha Notes"] !== undefined && row["Muhurtha Notes"] !== null ? String(row["Muhurtha Notes"]) : "");
   norm["Muhurtha Notes"] = norm["Muhurtha_Notes"];
 
@@ -229,7 +229,7 @@ function convertMuhurthaChartArrayToPlanets(chartArray) {
     Ra: "Rahu",
     Ke: "Ketu",
   };
-  
+
   if (!chartArray || !Array.isArray(chartArray)) return planetsObj;
 
   chartArray.forEach((rashiPlanets, rashiIndex) => {
@@ -384,12 +384,12 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
   const parseFlexDate = (dateStr) => {
     if (!dateStr) return null;
     const cleaned = dateStr.trim();
-    
+
     // Check if it matches YYYY-MM-DD
     if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) {
       return cleaned;
     }
-    
+
     // Try parsing DD-MM-YYYY or DD/MM/YYYY
     const dmyMatch = cleaned.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
     if (dmyMatch) {
@@ -402,7 +402,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
       }
       return `${year}-${month}-${day}`;
     }
-    
+
     // Fallback to standard JS Date parsing
     const parsed = new Date(cleaned);
     if (!isNaN(parsed.getTime())) {
@@ -411,7 +411,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
       const d = String(parsed.getDate()).padStart(2, '0');
       return `${y}-${m}-${d}`;
     }
-    
+
     return null;
   };
 
@@ -431,7 +431,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
         const headers = lines[0]
           .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
           .map((h) => h.replace(/^"|"$/g, "").trim().toLowerCase());
-        
+
         const dateIdx = headers.indexOf("date");
         const titleIdx = headers.indexOf("title");
         if (dateIdx === -1 || titleIdx === -1) {
@@ -444,7 +444,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
           const currentLine = lines[i]
             .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
             .map((v) => v.replace(/^"|"$/g, "").replace(/""/g, '"'));
-          
+
           const rawDate = currentLine[dateIdx];
           const rawTitle = currentLine[titleIdx];
           if (rawDate && rawTitle) {
@@ -519,10 +519,10 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
     reader.onload = (e) => {
       try {
         const parsed = JSON.parse(e.target.result);
-        const incomingEvents = Array.isArray(parsed) 
-          ? parsed 
+        const incomingEvents = Array.isArray(parsed)
+          ? parsed
           : (parsed.jyotisha_custom_events || parsed.data?.jyotisha_custom_events || []);
-        
+
         if (incomingEvents.length === 0) {
           alert("No valid custom events found in JSON.");
           return;
@@ -800,7 +800,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
       setOriginalData(JSON.parse(JSON.stringify(cachedData)));
       setIsPanShudhiActive(false);
       setSelectedRows(new Set());
-      return; 
+      return;
     }
 
     setIsLoading(true);
@@ -873,10 +873,10 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
       const res = await fetch(`${import.meta.env.BASE_URL}static/masa.json`);
       if (!res.ok) throw new Error("Failed to load masa.json");
       const allMonths = await res.json();
-      
+
       const selectedDate = formData.startDate || new Date().toISOString().split("T")[0];
       const chosen = new Date(selectedDate);
-      
+
       const futureMonths = allMonths.filter((m) => new Date(m.end) > chosen);
       const next12 = futureMonths.slice(0, 12).map((m) => ({
         masa: m.masa,
@@ -1560,6 +1560,8 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
     alert("Global Notes saved!");
   };
 
+
+
   const updateTableNotes = () => {
     if (!selectedProfileName) return;
     const gNotes = JSON.parse(
@@ -1691,7 +1693,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                   >
                     {rashiNum}
                   </text>
-                  
+
                   {rows.map((row, rowIdx) => {
                     let y = pos.planets.y;
                     if (rows.length === 2) {
@@ -1717,7 +1719,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                           const isCombust = planet.isC;
                           const color = isRetro ? "#2980b9" : isCombust ? "#c0392b" : "#2c3e50";
                           const weight = "800";
-                          
+
                           return (
                             <tspan
                               key={idx}
@@ -1973,646 +1975,646 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
           {activeTab === "search" && !isLoading && (
             <>
               <div className="form-panel" style={{ maxWidth: "100%", margin: "0 auto", padding: "15px", border: "none", boxShadow: "none" }}>
-              <h2>{t("ui.panchanga_search", "Panchanga Search")}</h2>
+                <h2>{t("ui.panchanga_search", "Panchanga Search")}</h2>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                  gap: "15px",
-                  marginBottom: "20px",
-                }}
-              >
-                <label
+                <div
                   style={{
-                    fontWeight: "bold",
-                    fontSize: "0.9rem",
-                    color: "#2d3436",
-                    display: "block",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                    gap: "15px",
+                    marginBottom: "20px",
                   }}
                 >
-                  Profile/Export Name:
-                  <input
-                    type="text"
-                    name="profileName"
-                    style={{ ...inputStyle, marginTop: "6px" }}
-                    value={formData.profileName}
-                    onChange={handleChange}
-                    placeholder="Enter profile name"
-                  />
-                </label>
-                <label
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: "0.9rem",
-                    color: "#2d3436",
-                    display: "block",
-                  }}
-                >
-                  Start Date:
-                  <input
-                    type="date"
-                    name="startDate"
-                    style={{ ...inputStyle, marginTop: "6px" }}
-                    value={formData.startDate}
-                    onChange={handleChange}
-                  />
-                </label>
-                <label
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: "0.9rem",
-                    color: "#2d3436",
-                    display: "block",
-                  }}
-                >
-                  Number of Days:
-                  <input
-                    type="number"
-                    name="days"
-                    style={{ ...inputStyle, marginTop: "6px" }}
-                    value={formData.days}
-                    onChange={handleChange}
-                    min="1"
-                    max="30"
-                  />
-                </label>
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                  gap: "20px",
-                }}
-              >
-                {/* Location Column */}
-                <div>
-                  <details
+                  <label
                     style={{
-                      fontSize: "14px",
-                      background: "#fdfefe",
-                      padding: "15px",
-                      borderRadius: "8px",
-                      border: "1px solid #eee",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                      fontWeight: "bold",
+                      fontSize: "0.9rem",
+                      color: "#2d3436",
+                      display: "block",
                     }}
                   >
-                    <summary
+                    Profile/Export Name:
+                    <input
+                      type="text"
+                      name="profileName"
+                      style={{ ...inputStyle, marginTop: "6px" }}
+                      value={formData.profileName}
+                      onChange={handleChange}
+                      placeholder="Enter profile name"
+                    />
+                  </label>
+                  <label
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "0.9rem",
+                      color: "#2d3436",
+                      display: "block",
+                    }}
+                  >
+                    Start Date:
+                    <input
+                      type="date"
+                      name="startDate"
+                      style={{ ...inputStyle, marginTop: "6px" }}
+                      value={formData.startDate}
+                      onChange={handleChange}
+                    />
+                  </label>
+                  <label
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "0.9rem",
+                      color: "#2d3436",
+                      display: "block",
+                    }}
+                  >
+                    Number of Days:
+                    <input
+                      type="number"
+                      name="days"
+                      style={{ ...inputStyle, marginTop: "6px" }}
+                      value={formData.days}
+                      onChange={handleChange}
+                      min="1"
+                      max="30"
+                    />
+                  </label>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                    gap: "20px",
+                  }}
+                >
+                  {/* Location Column */}
+                  <div>
+                    <details
                       style={{
-                        cursor: "pointer",
-                        color: "#2c3e50",
-                        fontWeight: "bold",
-                        fontSize: "14.5px",
-                        outline: "none",
-                        listStyle: "none",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px"
+                        fontSize: "14px",
+                        background: "#fdfefe",
+                        padding: "15px",
+                        borderRadius: "8px",
+                        border: "1px solid #eee",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
                       }}
                     >
-                      📍 Place ({formData.city || "Not Selected"})
-                    </summary>
-                    <div style={{ marginTop: "15px" }}>
-                      <LocationAutocomplete
-                        city={formData.city}
-                        onLocationSelect={(locData) => {
-                          setFormData((prev) => ({
-                            ...prev,
-                            city: locData.city,
-                            lat: locData.latitude,
-                            lon: locData.longitude,
-                            tz: locData.timezone,
-                          }));
-                        }}
-                      />
-                      <details
+                      <summary
                         style={{
-                          marginTop: "10px",
-                          fontSize: "14px",
-                          background: "#fdfefe",
-                          padding: "12px",
-                          borderRadius: "8px",
-                          border: "1px solid #eee",
+                          cursor: "pointer",
+                          color: "#2c3e50",
+                          fontWeight: "bold",
+                          fontSize: "14.5px",
+                          outline: "none",
+                          listStyle: "none",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px"
                         }}
                       >
-                        <summary
+                        📍 Place ({formData.city || "Not Selected"})
+                      </summary>
+                      <div style={{ marginTop: "15px" }}>
+                        <LocationAutocomplete
+                          city={formData.city}
+                          onLocationSelect={(locData) => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              city: locData.city,
+                              lat: locData.latitude,
+                              lon: locData.longitude,
+                              tz: locData.timezone,
+                            }));
+                          }}
+                        />
+                        <details
                           style={{
-                            cursor: "pointer",
-                            color: "#3498db",
-                            fontWeight: "bold",
-                            outline: "none",
-                            listStyle: "none",
+                            marginTop: "10px",
+                            fontSize: "14px",
+                            background: "#fdfefe",
+                            padding: "12px",
+                            borderRadius: "8px",
+                            border: "1px solid #eee",
                           }}
                         >
-                          Manual Coordinates (Lat / Lon / Tz)
-                        </summary>
+                          <summary
+                            style={{
+                              cursor: "pointer",
+                              color: "#3498db",
+                              fontWeight: "bold",
+                              outline: "none",
+                              listStyle: "none",
+                            }}
+                          >
+                            Manual Coordinates (Lat / Lon / Tz)
+                          </summary>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "10px",
+                              marginTop: "10px",
+                            }}
+                          >
+                            <label
+                              style={{
+                                flex: 1,
+                                fontSize: "0.85rem",
+                                color: "#636e72",
+                              }}
+                            >
+                              Lat:
+                              <input
+                                type="text"
+                                name="lat"
+                                style={{
+                                  ...inputStyle,
+                                  padding: "8px",
+                                  marginTop: "4px",
+                                }}
+                                value={formData.lat}
+                                onChange={handleChange}
+                              />
+                            </label>
+                            <label
+                              style={{
+                                flex: 1,
+                                fontSize: "0.85rem",
+                                color: "#636e72",
+                              }}
+                            >
+                              Lon:
+                              <input
+                                type="text"
+                                name="lon"
+                                style={{
+                                  ...inputStyle,
+                                  padding: "8px",
+                                  marginTop: "4px",
+                                }}
+                                value={formData.lon}
+                                onChange={handleChange}
+                              />
+                            </label>
+                            <label
+                              style={{
+                                flex: 1,
+                                fontSize: "0.85rem",
+                                color: "#636e72",
+                              }}
+                            >
+                              Tz:
+                              <input
+                                type="text"
+                                name="tz"
+                                style={{
+                                  ...inputStyle,
+                                  padding: "8px",
+                                  marginTop: "4px",
+                                }}
+                                value={formData.tz}
+                                onChange={handleChange}
+                              />
+                            </label>
+                          </div>
+                        </details>
+                      </div>
+                    </details>
+                  </div>
+
+                  {/* Tarabalam Column */}
+                  <div>
+                    <details
+                      style={{
+                        background: "#fffdf9",
+                        borderLeft: "4px solid #f39c12",
+                        padding: "18px",
+                        borderRadius: "8px",
+                        borderTop: "1px solid #fdf5e6",
+                        borderRight: "1px solid #fdf5e6",
+                        borderBottom: "1px solid #fdf5e6",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                      }}
+                    >
+                      <summary
+                        style={{
+                          fontWeight: "bold",
+                          color: "#2c3e50",
+                          fontSize: "0.95rem",
+                          cursor: "pointer",
+                          outline: "none",
+                          listStyle: "none",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px"
+                        }}
+                      >
+                        ✨ Tarabalam & Chandra Balam (Optional)
+                      </summary>
+
+                      <div style={{ marginTop: "15px" }}>
                         <div
                           style={{
                             display: "flex",
-                            gap: "10px",
-                            marginTop: "10px",
+                            alignItems: "center",
+                            gap: "12px",
+                            marginBottom: "15px",
                           }}
                         >
-                          <label
-                            style={{
-                              flex: 1,
-                              fontSize: "0.85rem",
-                              color: "#636e72",
-                            }}
-                          >
-                            Lat:
-                            <input
-                              type="text"
-                              name="lat"
-                              style={{
-                                ...inputStyle,
-                                padding: "8px",
-                                marginTop: "4px",
-                              }}
-                              value={formData.lat}
-                              onChange={handleChange}
-                            />
-                          </label>
-                          <label
-                            style={{
-                              flex: 1,
-                              fontSize: "0.85rem",
-                              color: "#636e72",
-                            }}
-                          >
-                            Lon:
-                            <input
-                              type="text"
-                              name="lon"
-                              style={{
-                                ...inputStyle,
-                                padding: "8px",
-                                marginTop: "4px",
-                              }}
-                              value={formData.lon}
-                              onChange={handleChange}
-                            />
-                          </label>
-                          <label
-                            style={{
-                              flex: 1,
-                              fontSize: "0.85rem",
-                              color: "#636e72",
-                            }}
-                          >
-                            Tz:
-                            <input
-                              type="text"
-                              name="tz"
-                              style={{
-                                ...inputStyle,
-                                padding: "8px",
-                                marginTop: "4px",
-                              }}
-                              value={formData.tz}
-                              onChange={handleChange}
-                            />
-                          </label>
-                        </div>
-                      </details>
-                    </div>
-                  </details>
-                </div>
-
-                {/* Tarabalam Column */}
-                <div>
-                  <details
-                    style={{
-                      background: "#fffdf9",
-                      borderLeft: "4px solid #f39c12",
-                      padding: "18px",
-                      borderRadius: "8px",
-                      borderTop: "1px solid #fdf5e6",
-                      borderRight: "1px solid #fdf5e6",
-                      borderBottom: "1px solid #fdf5e6",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-                    }}
-                  >
-                    <summary
-                      style={{
-                        fontWeight: "bold",
-                        color: "#2c3e50",
-                        fontSize: "0.95rem",
-                        cursor: "pointer",
-                        outline: "none",
-                        listStyle: "none",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px"
-                      }}
-                    >
-                      ✨ Tarabalam & Chandra Balam (Optional)
-                    </summary>
-
-                    <div style={{ marginTop: "15px" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                          marginBottom: "15px",
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          name="boyCheck"
-                          checked={formData.boyCheck}
-                          onChange={handleChange}
-                          style={{
-                            width: "18px",
-                            height: "18px",
-                            cursor: "pointer",
-                            accentColor: "#8e44ad",
-                          }}
-                        />
-                        <span
-                          style={{
-                            fontWeight: "bold",
-                            color: "#3498db",
-                            minWidth: "40px",
-                          }}
-                        >
-                          Boy
-                        </span>
-                        {formData.boyCheck && (
-                          <select
-                            name="boyNakshatra"
-                            style={{ ...inputStyle, flex: 1, padding: "8px" }}
-                            value={formData.boyNakshatra}
+                          <input
+                            type="checkbox"
+                            name="boyCheck"
+                            checked={formData.boyCheck}
                             onChange={handleChange}
+                            style={{
+                              width: "18px",
+                              height: "18px",
+                              cursor: "pointer",
+                              accentColor: "#8e44ad",
+                            }}
+                          />
+                          <span
+                            style={{
+                              fontWeight: "bold",
+                              color: "#3498db",
+                              minWidth: "40px",
+                            }}
                           >
-                            <option value="">-- Select Nakshatra --</option>
-                            {NAKSHATRAS.map((n) => (
-                              <option key={n} value={n}>
-                                {n}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                      </div>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          name="girlCheck"
-                          checked={formData.girlCheck}
-                          onChange={handleChange}
-                          style={{
-                            width: "18px",
-                            height: "18px",
-                            cursor: "pointer",
-                            accentColor: "#8e44ad",
-                          }}
-                        />
-                        <span
-                          style={{
-                            fontWeight: "bold",
-                            color: "#e74c3c",
-                            minWidth: "40px",
-                          }}
-                        >
-                          Girl
-                        </span>
-                        {formData.girlCheck && (
-                          <select
-                            name="girlNakshatra"
-                            style={{ ...inputStyle, flex: 1, padding: "8px" }}
-                            value={formData.girlNakshatra}
-                            onChange={handleChange}
-                          >
-                            <option value="">-- Select Nakshatra --</option>
-                            {NAKSHATRAS.map((n) => (
-                              <option key={n} value={n}>
-                                {n}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                      </div>
-                    </div>
-                  </details>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  gap: "15px",
-                  marginTop: "25px",
-                  flexWrap: "wrap",
-                }}
-              >
-                <button
-                  onClick={handleCalculate}
-                  style={{
-                    background: "#8e44ad",
-                    color: "#fff",
-                    border: "none",
-                    padding: "14px 24px",
-                    borderRadius: "8px",
-                    fontWeight: "bold",
-                    cursor: "pointer",
-                    flex: 2,
-                    fontSize: "1.05rem",
-                    transition: "0.2s",
-                    boxShadow: "0 4px 10px rgba(142,68,173,0.2)",
-                  }}
-                >
-                  ✨ Calculate Panchanga
-                </button>
-
-                <button
-                  onClick={fetchLunarMonths}
-                  style={{
-                    background: "#27ae60",
-                    color: "#fff",
-                    border: "none",
-                    padding: "14px 24px",
-                    borderRadius: "8px",
-                    fontWeight: "bold",
-                    cursor: "pointer",
-                    flex: 1,
-                    fontSize: "1.05rem",
-                    transition: "0.2s",
-                    boxShadow: "0 4px 10px rgba(39,174,96,0.2)",
-                  }}
-                >
-                  📅 Maasa
-                </button>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  marginTop: "20px",
-                  alignItems: "center",
-                  background: "#f8f9fa",
-                  padding: "15px",
-                  borderRadius: "8px",
-                  border: "1px solid #dcdde1",
-                  flexWrap: "wrap",
-                }}
-              >
-                <label style={{ fontWeight: "bold", color: "#2d3436" }}>
-                  Load Saved Table:
-                </label>
-                <select
-                  style={{ ...inputStyle, flex: 1, padding: "8px", minWidth: "200px" }}
-                  value={loadProfileName}
-                  onChange={(e) => setLoadProfileName(e.target.value)}
-                >
-                  <option value="">-- Select Saved Table --</option>
-                  {savedProfilesList.map((p) => (
-                    <option key={p} value={p}>
-                      {p}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  style={{ ...actionBtnStyle, background: "#2980b9" }}
-                  onClick={handleLoadPanchangaProfile}
-                >
-                  📂 Load Table
-                </button>
-              </div>
-
-              {resultData.length > 0 && (
-                <section
-                  className="table-panel"
-                  style={{ marginTop: "30px", animation: "fadeIn 0.5s" }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      flexWrap: "wrap",
-                      gap: "15px",
-                      padding: "15px 20px",
-                      borderBottom: "2px solid #eee",
-                      background: "#fdfefe",
-                    }}
-                  >
-                    <h3
-                      style={{
-                        margin: 0,
-                        fontSize: "1.15rem",
-                        color: "#2d3436",
-                      }}
-                    >
-                      Results ({resultData.length} days)
-                    </h3>
-                    <div
-                      style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}
-                    >
-                      <button
-                        style={{
-                          ...actionBtnStyle,
-                          background: isPanShudhiActive ? "#e67e22" : "#9b59b6",
-                        }}
-                        onClick={filterPanShudhi}
-                      >
-                        {isPanShudhiActive ? "👁️ Show All" : "✨ Pan Shudhi"}
-                      </button>
-                      <button
-                        style={{ ...actionBtnStyle, background: "#f39c12" }}
-                        onClick={handleRenameTable}
-                      >
-                        ✏️ Rename Table
-                      </button>
-                      <button
-                        style={{ ...actionBtnStyle, background: "#c0392b" }}
-                        onClick={() => {
-                          const profileName = formData.profileName.trim();
-                          if (!profileName)
-                            return alert(
-                              "Please enter a profile name to delete.",
-                            );
-                          const savedProfiles = JSON.parse(
-                            localStorage.getItem("panchanga_profiles") || "{}",
-                          );
-                          if (!savedProfiles[profileName]) {
-                            return alert(
-                              `Profile "${profileName}" does not exist.`,
-                            );
-                          }
-                          if (
-                            window.confirm(
-                              `Are you sure you want to delete profile "${profileName}"?`,
-                            )
-                          ) {
-                            delete savedProfiles[profileName];
-                            localStorage.setItem(
-                              "panchanga_profiles",
-                              JSON.stringify(savedProfiles),
-                            );
-                            setSavedProfilesList(Object.keys(savedProfiles));
-                            setResultData([]);
-                            alert(
-                              `Profile "${profileName}" deleted successfully!`,
-                            );
-                          }
-                        }}
-                      >
-                        🗑️ Delete Table
-                      </button>
-                      <button
-                        style={{ ...actionBtnStyle, background: "#8e44ad" }}
-                        onClick={saveSelectedDates}
-                      >
-                        💾 Save Table
-                      </button>
-                      <button
-                        style={{ ...actionBtnStyle, background: "#3498db" }}
-                        onClick={() => {
-                          const exportObj = {
-                            rows: resultData,
-                            location: {
-                              city: formData.city || "",
-                              lat: formData.lat || "",
-                              lon: formData.lon || "",
-                              tz: formData.tz || "",
-                            },
-                          };
-                          downloadFile(
-                            JSON.stringify(exportObj, null, 2),
-                            `${formData.profileName || "Panchanga"}.json`,
-                            "application/json",
-                          );
-                        }}
-                      >
-                        📥 Export JSON
-                      </button>
-                      <button
-                        style={{ ...actionBtnStyle, background: "#27ae60" }}
-                        onClick={exportPanchangaCSV}
-                      >
-                        📊 Export CSV
-                      </button>
-                      <button
-                        style={{ ...actionBtnStyle, background: "#2ecc71" }}
-                        onClick={() => searchCsvRef.current.click()}
-                      >
-                        📂 Import CSV
-                      </button>
-                      <input
-                        type="file"
-                        accept=".csv"
-                        ref={searchCsvRef}
-                        style={{ display: "none" }}
-                        onChange={(e) => handleImportCSV(e, "search")}
-                      />
-                    </div>
-                  </div>
-                  <div className="table-scroll" style={{ maxHeight: "450px", overflow: "auto" }}>
-                    <table>
-                      <thead>
-                        <tr>
-                          <th style={{ width: "40px", textAlign: "center" }}>
-                            <input
-                              type="checkbox"
-                              onChange={toggleSelectAll}
-                              checked={
-                                selectedRows.size === resultData.length &&
-                                resultData.length > 0
-                              }
-                              style={{
-                                width: "16px",
-                                height: "16px",
-                                cursor: "pointer",
-                              }}
-                            />
-                          </th>
-                          {visibleKeys.map((header, i) => (
-                            <th key={i} style={{ whiteSpace: "nowrap" }}>
-                              {header}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {resultData.map((row, rIndex) => {
-                          return (
-                            <tr
-                              key={rIndex}
-                              style={{
-                                background:
-                                  rIndex % 2 === 0 ? "#fff" : "#fcfcfc",
-                              }}
+                            Boy
+                          </span>
+                          {formData.boyCheck && (
+                            <select
+                              name="boyNakshatra"
+                              style={{ ...inputStyle, flex: 1, padding: "8px" }}
+                              value={formData.boyNakshatra}
+                              onChange={handleChange}
                             >
-                              <td style={{ textAlign: "center" }}>
-                                <input
-                                  type="checkbox"
-                                  checked={selectedRows.has(rIndex)}
-                                  onChange={() => toggleRowSelect(rIndex)}
-                                  style={{
-                                    width: "16px",
-                                    height: "16px",
-                                    cursor: "pointer",
-                                  }}
-                                />
-                              </td>
-                              {visibleKeys.map((k, cIndex) => {
-                                let dataKey = row.hasOwnProperty(k)
-                                  ? k
-                                  : k.replace(/ /g, "_");
-                                let goodKey = k.replace(/ /g, "_") + "_is_good";
-                                let isGood = row[goodKey] === true;
-                                let isBad =
-                                  (k === "Asthg" && row[dataKey] !== "-") ||
-                                  (k.includes("Chandra Balam") &&
-                                    row[dataKey] === "Ashtama");
-                                return (
-                                  <td
-                                    key={cIndex}
+                              <option value="">-- Select Nakshatra --</option>
+                              {NAKSHATRAS.map((n) => (
+                                <option key={n} value={n}>
+                                  {n}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            name="girlCheck"
+                            checked={formData.girlCheck}
+                            onChange={handleChange}
+                            style={{
+                              width: "18px",
+                              height: "18px",
+                              cursor: "pointer",
+                              accentColor: "#8e44ad",
+                            }}
+                          />
+                          <span
+                            style={{
+                              fontWeight: "bold",
+                              color: "#e74c3c",
+                              minWidth: "40px",
+                            }}
+                          >
+                            Girl
+                          </span>
+                          {formData.girlCheck && (
+                            <select
+                              name="girlNakshatra"
+                              style={{ ...inputStyle, flex: 1, padding: "8px" }}
+                              value={formData.girlNakshatra}
+                              onChange={handleChange}
+                            >
+                              <option value="">-- Select Nakshatra --</option>
+                              {NAKSHATRAS.map((n) => (
+                                <option key={n} value={n}>
+                                  {n}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
+                      </div>
+                    </details>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "15px",
+                    marginTop: "25px",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <button
+                    onClick={handleCalculate}
+                    style={{
+                      background: "#8e44ad",
+                      color: "#fff",
+                      border: "none",
+                      padding: "14px 24px",
+                      borderRadius: "8px",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      flex: 2,
+                      fontSize: "1.05rem",
+                      transition: "0.2s",
+                      boxShadow: "0 4px 10px rgba(142,68,173,0.2)",
+                    }}
+                  >
+                    ✨ Calculate Panchanga
+                  </button>
+
+                  <button
+                    onClick={fetchLunarMonths}
+                    style={{
+                      background: "#27ae60",
+                      color: "#fff",
+                      border: "none",
+                      padding: "14px 24px",
+                      borderRadius: "8px",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      flex: 1,
+                      fontSize: "1.05rem",
+                      transition: "0.2s",
+                      boxShadow: "0 4px 10px rgba(39,174,96,0.2)",
+                    }}
+                  >
+                    📅 Maasa
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    marginTop: "20px",
+                    alignItems: "center",
+                    background: "#f8f9fa",
+                    padding: "15px",
+                    borderRadius: "8px",
+                    border: "1px solid #dcdde1",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <label style={{ fontWeight: "bold", color: "#2d3436" }}>
+                    Load Saved Table:
+                  </label>
+                  <select
+                    style={{ ...inputStyle, flex: 1, padding: "8px", minWidth: "200px" }}
+                    value={loadProfileName}
+                    onChange={(e) => setLoadProfileName(e.target.value)}
+                  >
+                    <option value="">-- Select Saved Table --</option>
+                    {savedProfilesList.map((p) => (
+                      <option key={p} value={p}>
+                        {p}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    style={{ ...actionBtnStyle, background: "#2980b9" }}
+                    onClick={handleLoadPanchangaProfile}
+                  >
+                    📂 Load Table
+                  </button>
+                </div>
+
+                {resultData.length > 0 && (
+                  <section
+                    className="table-panel"
+                    style={{ marginTop: "30px", animation: "fadeIn 0.5s" }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: "15px",
+                        padding: "15px 20px",
+                        borderBottom: "2px solid #eee",
+                        background: "#fdfefe",
+                      }}
+                    >
+                      <h3
+                        style={{
+                          margin: 0,
+                          fontSize: "1.15rem",
+                          color: "#2d3436",
+                        }}
+                      >
+                        Results ({resultData.length} days)
+                      </h3>
+                      <div
+                        style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}
+                      >
+                        <button
+                          style={{
+                            ...actionBtnStyle,
+                            background: isPanShudhiActive ? "#e67e22" : "#9b59b6",
+                          }}
+                          onClick={filterPanShudhi}
+                        >
+                          {isPanShudhiActive ? "👁️ Show All" : "✨ Pan Shudhi"}
+                        </button>
+                        <button
+                          style={{ ...actionBtnStyle, background: "#f39c12" }}
+                          onClick={handleRenameTable}
+                        >
+                          ✏️ Rename Table
+                        </button>
+                        <button
+                          style={{ ...actionBtnStyle, background: "#c0392b" }}
+                          onClick={() => {
+                            const profileName = formData.profileName.trim();
+                            if (!profileName)
+                              return alert(
+                                "Please enter a profile name to delete.",
+                              );
+                            const savedProfiles = JSON.parse(
+                              localStorage.getItem("panchanga_profiles") || "{}",
+                            );
+                            if (!savedProfiles[profileName]) {
+                              return alert(
+                                `Profile "${profileName}" does not exist.`,
+                              );
+                            }
+                            if (
+                              window.confirm(
+                                `Are you sure you want to delete profile "${profileName}"?`,
+                              )
+                            ) {
+                              delete savedProfiles[profileName];
+                              localStorage.setItem(
+                                "panchanga_profiles",
+                                JSON.stringify(savedProfiles),
+                              );
+                              setSavedProfilesList(Object.keys(savedProfiles));
+                              setResultData([]);
+                              alert(
+                                `Profile "${profileName}" deleted successfully!`,
+                              );
+                            }
+                          }}
+                        >
+                          🗑️ Delete Table
+                        </button>
+                        <button
+                          style={{ ...actionBtnStyle, background: "#8e44ad" }}
+                          onClick={saveSelectedDates}
+                        >
+                          💾 Save Table
+                        </button>
+                        <button
+                          style={{ ...actionBtnStyle, background: "#3498db" }}
+                          onClick={() => {
+                            const exportObj = {
+                              rows: resultData,
+                              location: {
+                                city: formData.city || "",
+                                lat: formData.lat || "",
+                                lon: formData.lon || "",
+                                tz: formData.tz || "",
+                              },
+                            };
+                            downloadFile(
+                              JSON.stringify(exportObj, null, 2),
+                              `${formData.profileName || "Panchanga"}.json`,
+                              "application/json",
+                            );
+                          }}
+                        >
+                          📥 Export JSON
+                        </button>
+                        <button
+                          style={{ ...actionBtnStyle, background: "#27ae60" }}
+                          onClick={exportPanchangaCSV}
+                        >
+                          📊 Export CSV
+                        </button>
+                        <button
+                          style={{ ...actionBtnStyle, background: "#2ecc71" }}
+                          onClick={() => searchCsvRef.current.click()}
+                        >
+                          📂 Import CSV
+                        </button>
+                        <input
+                          type="file"
+                          accept=".csv"
+                          ref={searchCsvRef}
+                          style={{ display: "none" }}
+                          onChange={(e) => handleImportCSV(e, "search")}
+                        />
+                      </div>
+                    </div>
+                    <div className="table-scroll" style={{ maxHeight: "450px", overflow: "auto" }}>
+                      <table>
+                        <thead>
+                          <tr>
+                            <th style={{ width: "40px", textAlign: "center" }}>
+                              <input
+                                type="checkbox"
+                                onChange={toggleSelectAll}
+                                checked={
+                                  selectedRows.size === resultData.length &&
+                                  resultData.length > 0
+                                }
+                                style={{
+                                  width: "16px",
+                                  height: "16px",
+                                  cursor: "pointer",
+                                }}
+                              />
+                            </th>
+                            {visibleKeys.map((header, i) => (
+                              <th key={i} style={{ whiteSpace: "nowrap" }}>
+                                {header}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {resultData.map((row, rIndex) => {
+                            return (
+                              <tr
+                                key={rIndex}
+                                style={{
+                                  background:
+                                    rIndex % 2 === 0 ? "#fff" : "#fcfcfc",
+                                }}
+                              >
+                                <td style={{ textAlign: "center" }}>
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedRows.has(rIndex)}
+                                    onChange={() => toggleRowSelect(rIndex)}
                                     style={{
-                                      whiteSpace: "nowrap",
-                                      background: isGood
-                                        ? "#eafaf1"
-                                        : isBad
-                                          ? "#fdedec"
-                                          : "transparent",
-                                      color: isGood
-                                        ? "#1e8449"
-                                        : isBad
-                                          ? "#c0392b"
-                                          : "inherit",
-                                      fontWeight:
-                                        isGood || isBad ? "bold" : "normal",
+                                      width: "16px",
+                                      height: "16px",
+                                      cursor: "pointer",
                                     }}
-                                  >
-                                    {row[dataKey] !== undefined
-                                      ? row[dataKey]
-                                      : ""}
-                                  </td>
-                                );
-                              })}
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                  {/* Display location details below the generated table */}
-                  <div style={{ padding: "10px 20px", fontSize: "11px", color: "#7f8c8d", fontStyle: "italic", borderTop: "1px solid #eee", textAlign: "left" }}>
-                    Location: <strong>{formData.city || "N/A"}</strong> (Lat: {formData.lat || "N/A"}, Lon: {formData.lon || "N/A"}, TZ: {formData.tz || "N/A"})
-                  </div>
-                </section>
-              )}
-            </div>
+                                  />
+                                </td>
+                                {visibleKeys.map((k, cIndex) => {
+                                  let dataKey = row.hasOwnProperty(k)
+                                    ? k
+                                    : k.replace(/ /g, "_");
+                                  let goodKey = k.replace(/ /g, "_") + "_is_good";
+                                  let isGood = row[goodKey] === true;
+                                  let isBad =
+                                    (k === "Asthg" && row[dataKey] !== "-") ||
+                                    (k.includes("Chandra Balam") &&
+                                      row[dataKey] === "Ashtama");
+                                  return (
+                                    <td
+                                      key={cIndex}
+                                      style={{
+                                        whiteSpace: "nowrap",
+                                        background: isGood
+                                          ? "#eafaf1"
+                                          : isBad
+                                            ? "#fdedec"
+                                            : "transparent",
+                                        color: isGood
+                                          ? "#1e8449"
+                                          : isBad
+                                            ? "#c0392b"
+                                            : "inherit",
+                                        fontWeight:
+                                          isGood || isBad ? "bold" : "normal",
+                                      }}
+                                    >
+                                      {row[dataKey] !== undefined
+                                        ? row[dataKey]
+                                        : ""}
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                    {/* Display location details below the generated table */}
+                    <div style={{ padding: "10px 20px", fontSize: "11px", color: "#7f8c8d", fontStyle: "italic", borderTop: "1px solid #eee", textAlign: "left" }}>
+                      Location: <strong>{formData.city || "N/A"}</strong> (Lat: {formData.lat || "N/A"}, Lon: {formData.lon || "N/A"}, TZ: {formData.tz || "N/A"})
+                    </div>
+                  </section>
+                )}
+              </div>
             </>
           )}
 
@@ -2629,7 +2631,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
               }}
             >
               <h2>{t("ui.reminders_and_events", "Reminders & Custom Events")}</h2>
-              
+
               <div
                 style={{
                   background: "#fff",
@@ -2712,7 +2714,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                     {t("Event Name / Holiday:", "Event Name / Holiday:")}
                     <input
                       type="text"
-                      placeholder="e.g. Deepawali panduga"
+                      placeholder="e.g. Deepawali, Vijaya Dashami..."
                       value={newEventTitle}
                       onChange={(e) => setNewEventTitle(e.target.value)}
                       style={{ ...inputStyle, width: "100%", padding: "10px" }}
@@ -3076,32 +3078,32 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                     </button>
                   </div>
 
-                <details
+                  <details
                     className="table-panel"
-                  style={{ 
-                    marginBottom: "25px", 
-                    background: "#fff", 
-                    borderRadius: "12px", 
-                    border: "1px solid #dcdde1",
-                    overflow: "hidden" 
-                  }}
-                  open={isMuhurthaTableOpen}
-                  onToggle={(e) => setIsMuhurthaTableOpen(e.target.open)}
-                  >
-                  <summary
                     style={{
-                      padding: "16px 20px",
-                      borderBottom: "1px solid #eee",
-                      background: "#fdfefe",
-                      fontWeight: "bold",
-                      fontSize: "1.1rem",
-                      color: "#8e44ad",
-                      cursor: "pointer",
-                      outline: "none",
+                      marginBottom: "25px",
+                      background: "#fff",
+                      borderRadius: "12px",
+                      border: "1px solid #dcdde1",
+                      overflow: "hidden"
                     }}
+                    open={isMuhurthaTableOpen}
+                    onToggle={(e) => setIsMuhurthaTableOpen(e.target.open)}
                   >
-                    📋 {t("savedMuhurthaTable", "Saved Muhurtha Table")} ({muhurthaData.length} {t("rows", "rows")})
-                  </summary>
+                    <summary
+                      style={{
+                        padding: "16px 20px",
+                        borderBottom: "1px solid #eee",
+                        background: "#fdfefe",
+                        fontWeight: "bold",
+                        fontSize: "1.1rem",
+                        color: "#8e44ad",
+                        cursor: "pointer",
+                        outline: "none",
+                      }}
+                    >
+                      📋 {t("savedMuhurthaTable", "Saved Muhurtha Table")} ({muhurthaData.length} {t("rows", "rows")})
+                    </summary>
                     <div
                       style={{
                         display: "flex",
@@ -3140,7 +3142,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                             );
                             setMuhurthaDataAndRef(newData);
                             setMuhurthaSelectedRows(new Set());
-                            
+
                             const savedProfiles = JSON.parse(localStorage.getItem("panchanga_profiles") || "{}");
                             if (savedProfiles[selectedProfileName]) {
                               if (Array.isArray(savedProfiles[selectedProfileName])) savedProfiles[selectedProfileName] = newData;
@@ -3225,7 +3227,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                           onChange={(e) => handleImportCSV(e, "muhurtha")}
                         />
                       </div>
-                      
+
                       <div style={{ display: "flex", width: "100%" }}>
                         <input
                           type="text"
@@ -3246,7 +3248,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                         />
                       </div>
                     </div>
-                     <div className="table-scroll" style={{ maxHeight: "400px", overflow: "auto" }}>
+                    <div className="table-scroll" style={{ maxHeight: "400px", overflow: "auto" }}>
                       <table>
                         <thead>
                           <tr>
@@ -3255,7 +3257,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                 type="checkbox"
                                 checked={
                                   muhurthaSelectedRows.size ===
-                                    muhurthaData.length &&
+                                  muhurthaData.length &&
                                   muhurthaData.length > 0
                                 }
                                 onChange={(e) =>
@@ -3528,7 +3530,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                               boxSizing: "border-box",
                             }}
                           >
-                             <h4
+                            <h4
                               style={{ margin: "0 0 10px 0", color: "#2c3e50", fontSize: "19.2px" }}
                             >
                               Muhurtha Details
@@ -3633,12 +3635,12 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                               boxSizing: "border-box",
                             }}
                           >
-                             <h4
+                            <h4
                               style={{ margin: "0 0 10px 0", color: "#2c3e50", fontSize: "19.2px" }}
                             >
                               Inauspicious Timings
                             </h4>
-                             <p style={{ margin: "5px 0", fontSize: "16.8px" }}>
+                            <p style={{ margin: "5px 0", fontSize: "16.8px" }}>
                               <strong>Rahu Kalam:</strong>{" "}
                               <span style={{ color: "#e67e22" }}>
                                 {muhurthaChartData.rahu_kalam || "-"}
@@ -3732,37 +3734,6 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                 gap: "10px",
                               }}
                             >
-                              {customEvents.filter(ev => ev.date === chartDate).map((ev) => (
-                                <div
-                                  key={ev.id}
-                                  style={{
-                                    background: "#fff9e6",
-                                    color: "#d35400",
-                                    padding: "10px 15px",
-                                    borderRadius: "8px",
-                                    fontSize: "14px",
-                                    fontWeight: "bold",
-                                    border: "2px dashed #f39c12",
-                                    width: "100%",
-                                    boxSizing: "border-box",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "8px",
-                                    marginBottom: "10px",
-                                    animation: "pulseAlert 2s infinite alternate",
-                                  }}
-                                >
-                                  <style>{`
-                                    @keyframes pulseAlert {
-                                      from { border-color: #f39c12; box-shadow: 0 0 2px rgba(243, 156, 18, 0.2); }
-                                      to { border-color: #e67e22; box-shadow: 0 0 8px rgba(230, 126, 34, 0.4); }
-                                    }
-                                  `}</style>
-                                  <span>🔔 {t("Event Reminder:", "Event Reminder:")}</span>
-                                  <span style={{ textDecoration: "underline" }}>{ev.title}</span>
-                                </div>
-                              ))}
-
                               {(() => {
                                 const prefs = JSON.parse(
                                   localStorage.getItem("eclock_prefs") || "{}",
@@ -3813,6 +3784,84 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                     {d === "Shashtashta Chandra"
                                       ? "Ch in 6,8,12"
                                       : d}
+                                  </div>
+                                ));
+                              })()}
+                            </div>
+                          </div>
+
+                          <div
+                            style={{
+                              background: "#fff",
+                              padding: "20px",
+                              borderRadius: "12px",
+                              border: "1px solid #eaeaea",
+                              boxShadow: "0 4px 10px rgba(0,0,0,0.03)",
+                            }}
+                          >
+                            <h4
+                              style={{
+                                margin: "0 0 15px 0",
+                                color: "#8e44ad",
+                                fontSize: "1.1rem",
+                                borderBottom: "1px solid #eee",
+                                paddingBottom: "10px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px"
+                              }}
+                            >
+                              <span>🔔 {t("Event Reminder", "Event Reminder")}</span>
+                            </h4>
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "10px",
+                              }}
+                            >
+                              {(() => {
+                                const eventsToday = customEvents.filter(ev => ev.date === chartDate);
+                                if (eventsToday.length === 0) {
+                                  return (
+                                    <div
+                                      style={{
+                                        color: "#7f8c8d",
+                                        fontSize: "14px",
+                                        fontStyle: "italic",
+                                        padding: "10px 0",
+                                      }}
+                                    >
+                                      {t("No events for this date", "No events for this date.")}
+                                    </div>
+                                  );
+                                }
+                                return eventsToday.map((ev) => (
+                                  <div
+                                    key={ev.id}
+                                    style={{
+                                      background: "#fff9e6",
+                                      color: "#d35400",
+                                      padding: "10px 15px",
+                                      borderRadius: "8px",
+                                      fontSize: "14px",
+                                      fontWeight: "bold",
+                                      border: "2px dashed #f39c12",
+                                      width: "100%",
+                                      boxSizing: "border-box",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "8px",
+                                      animation: "pulseAlert 2s infinite alternate",
+                                    }}
+                                  >
+                                    <style>{`
+                                      @keyframes pulseAlert {
+                                        from { border-color: #f39c12; box-shadow: 0 0 2px rgba(243, 156, 18, 0.2); }
+                                        to { border-color: #e67e22; box-shadow: 0 0 8px rgba(230, 126, 34, 0.4); }
+                                      }
+                                    `}</style>
+                                    <span style={{ fontSize: "130%" }}>{ev.title}</span>
                                   </div>
                                 ));
                               })()}
@@ -4092,7 +4141,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                 &times;
               </button>
             </div>
-            
+
             <p style={{ fontSize: "14px", color: "#666", marginBottom: "15px" }}>
               The next 12 lunar months starting from the selected date:
             </p>

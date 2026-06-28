@@ -208,25 +208,22 @@ export function HomePage({
     }
   });
 
-  const [visibleMenus, setVisibleMenus] = useState(() => {
+  const [visiblePages, setVisiblePages] = useState(() => {
     try {
       const prefs = JSON.parse(localStorage.getItem("eclock_prefs") || "{}");
-      if (prefs.visible_menus) {
-        if (
-          !prefs.visible_menus.includes("echakra") &&
-          !localStorage.getItem("echakra_restored_v1")
-        ) {
-          prefs.visible_menus.push("echakra");
-          localStorage.setItem("eclock_prefs", JSON.stringify(prefs));
-          localStorage.setItem("echakra_restored_v1", "true");
-        }
-        return prefs.visible_menus;
-      }
+      return prefs.sidebar_pages || null;
     } catch (e) {
       console.error("Could not load preferences", e);
     }
-    return ["jataka", "match", "panchanga", "echakra", "clock", "epata"];
+    return null;
   });
+
+  const isPageVisible = (pageId) => {
+    const mandatoryPages = ["Home", "Me", "e-Support", "Settings"];
+    if (mandatoryPages.includes(pageId)) return true;
+    if (!visiblePages) return true;
+    return visiblePages.includes(pageId);
+  };
 
   const [tickerData, setTickerData] = useState(() => {
     try {
@@ -693,30 +690,34 @@ export function HomePage({
           )}
 
           <div className="grid-home">
-            <div
-              className="card-home"
-              style={{ borderTopColor: "#9b59b6" }}
-              onClick={() => onNavigate("Me")}
-            >
-              <div className="icon">👤</div>
-              <h2>{profileName || t("Me", "Me").replace(/\s*\(.*?\)/, "")}</h2>
-              <div className="desc">
-                {t(
-                  "desc_me_page",
-                  "View and manage your personal astrological profile.",
-                )}
+            {isPageVisible("Me") && (
+              <div
+                className="card-home"
+                style={{ borderTopColor: "#9b59b6" }}
+                onClick={() => onNavigate("Me")}
+              >
+                <div className="icon">👤</div>
+                <h2>{profileName || t("Me", "Me").replace(/\s*\(.*?\)/, "")}</h2>
+                <div className="desc">
+                  {t(
+                    "desc_me_page",
+                    "View and manage your personal astrological profile.",
+                  )}
+                </div>
               </div>
-            </div>
-            <div
-              className="card-home"
-              style={{ borderTopColor: "#f39c12" }}
-              onClick={() => onNavigate("Sankalpa")}
-            >
-              <div className="icon">☀️</div>
-              <h2>{copy.e_sankalpa}</h2>
-              <div className="desc">{copy.desc_quick_panchanga}</div>
-            </div>
-            {visibleMenus.includes("jataka") && (
+            )}
+            {isPageVisible("Sankalpa") && (
+              <div
+                className="card-home"
+                style={{ borderTopColor: "#f39c12" }}
+                onClick={() => onNavigate("Sankalpa")}
+              >
+                <div className="icon">☀️</div>
+                <h2>{copy.e_sankalpa}</h2>
+                <div className="desc">{copy.desc_quick_panchanga}</div>
+              </div>
+            )}
+            {isPageVisible("e-Jataka") && (
               <div
                 className="card-home"
                 style={{ borderTopColor: "#8e44ad" }}
@@ -727,7 +728,7 @@ export function HomePage({
                 <div className="desc">{copy.desc_jataka}</div>
               </div>
             )}
-            {visibleMenus.includes("match") && (
+            {isPageVisible("e-Match") && (
               <div
                 className="card-home"
                 style={{ borderTopColor: "#e74c3c" }}
@@ -738,7 +739,7 @@ export function HomePage({
                 <div className="desc">{copy.desc_match}</div>
               </div>
             )}
-            {visibleMenus.includes("panchanga") && (
+            {isPageVisible("e-Panchanga") && (
               <div
                 className="card-home"
                 style={{ borderTopColor: "#27ae60" }}
@@ -749,7 +750,7 @@ export function HomePage({
                 <div className="desc">{copy.desc_panchanga}</div>
               </div>
             )}
-            {visibleMenus.includes("echakra") && (
+            {isPageVisible("echakra") && (
               <div
                 className="card-home"
                 style={{ borderTopColor: "#f1c40f" }}
@@ -760,21 +761,23 @@ export function HomePage({
                 <div className="desc">{copy.desc_echakra}</div>
               </div>
             )}
-            <div
-              className="card-home"
-              style={{ borderTopColor: "#2980b9" }}
-              onClick={() => onNavigate("Profiles")}
-            >
-              <div className="icon">👥</div>
-              <h2>{t("profiles", "e-Profiles")}</h2>
-              <div className="desc">
-                {t(
-                  "manageProfilesDesc",
-                  "Manage your saved horoscopes, backup, and restore data here.",
-                )}
+            {isPageVisible("Profiles") && (
+              <div
+                className="card-home"
+                style={{ borderTopColor: "#2980b9" }}
+                onClick={() => onNavigate("Profiles")}
+              >
+                <div className="icon">👥</div>
+                <h2>{t("profiles", "e-Profiles")}</h2>
+                <div className="desc">
+                  {t(
+                    "manageProfilesDesc",
+                    "Manage your saved horoscopes, backup, and restore data here.",
+                  )}
+                </div>
               </div>
-            </div>
-            {visibleMenus.includes("clock") && (
+            )}
+            {isPageVisible("e-Clock") && (
               <div
                 className="card-home"
                 style={{ borderTopColor: "#f39c12" }}
@@ -785,8 +788,7 @@ export function HomePage({
                 <div className="desc">{copy.desc_clock}</div>
               </div>
             )}
-
-            {visibleMenus.includes("epata") && (
+            {isPageVisible("e-PATA") && (
               <div
                 className="card-home"
                 style={{ borderTopColor: "#2980b9" }}
@@ -797,17 +799,17 @@ export function HomePage({
                 <div className="desc">{copy.desc_epata}</div>
               </div>
             )}
-
-            <div
-              className="card-home"
-              style={{ borderTopColor: "#8e44ad" }}
-              onClick={() => onNavigate("e-Library")}
-            >
-              <div className="icon">📚</div>
-              <h2>{copy.e_library}</h2>
-              <div className="desc">{copy.desc_library}</div>
-            </div>
-
+            {isPageVisible("e-Library") && (
+              <div
+                className="card-home"
+                style={{ borderTopColor: "#8e44ad" }}
+                onClick={() => onNavigate("e-Library")}
+              >
+                <div className="icon">📚</div>
+                <h2>{copy.e_library}</h2>
+                <div className="desc">{copy.desc_library}</div>
+              </div>
+            )}
             <div
               className="card-home"
               style={{ borderTopColor: "#c0392b" }}
@@ -819,16 +821,17 @@ export function HomePage({
               <h2>{copy.youtube_channel}</h2>
               <div className="desc">{copy.desc_youtube}</div>
             </div>
-
-            <div
-              className="card-home"
-              style={{ borderTopColor: "#d35400" }}
-              onClick={() => onNavigate("e-Support")}
-            >
-              <div className="icon">&#129309;</div>
-              <h2>{copy.support}</h2>
-              <div className="desc">{copy.desc_support}</div>
-            </div>
+            {isPageVisible("e-Support") && (
+              <div
+                className="card-home"
+                style={{ borderTopColor: "#d35400" }}
+                onClick={() => onNavigate("e-Support")}
+              >
+                <div className="icon">&#129309;</div>
+                <h2>{copy.support}</h2>
+                <div className="desc">{copy.desc_support}</div>
+              </div>
+            )}
             <div
               className="card-home"
               style={{ borderTopColor: "#1abc9c" }}
@@ -847,33 +850,39 @@ export function HomePage({
               <h2>{copy.notifications}</h2>
               <div className="desc">{copy.desc_notifications}</div>
             </div>
-            <div
-              className="card-home"
-              style={{ borderTopColor: "#3498db" }}
-              onClick={() => onNavigate("Help")}
-            >
-              <div className="icon">📖</div>
-              <h2>{copy.help_guide}</h2>
-              <div className="desc">{copy.desc_help}</div>
-            </div>
-            <div
-              className="card-home"
-              style={{ borderTopColor: "#e67e22" }}
-              onClick={() => onNavigate("Feedback")}
-            >
-              <div className="icon">&#128221;</div>
-              <h2>{copy.feedback}</h2>
-              <div className="desc">{copy.desc_feedback}</div>
-            </div>
-            <div
-              className="card-home"
-              style={{ borderTopColor: "#34495e" }}
-              onClick={() => onNavigate("Settings")}
-            >
-              <div className="icon">&#9881;&#65039;</div>
-              <h2>{copy.settings}</h2>
-              <div className="desc">{copy.desc_settings}</div>
-            </div>
+            {isPageVisible("Help") && (
+              <div
+                className="card-home"
+                style={{ borderTopColor: "#3498db" }}
+                onClick={() => onNavigate("Help")}
+              >
+                <div className="icon">📖</div>
+                <h2>{copy.help_guide}</h2>
+                <div className="desc">{copy.desc_help}</div>
+              </div>
+            )}
+            {isPageVisible("Feedback") && (
+              <div
+                className="card-home"
+                style={{ borderTopColor: "#e67e22" }}
+                onClick={() => onNavigate("Feedback")}
+              >
+                <div className="icon">&#128221;</div>
+                <h2>{copy.feedback}</h2>
+                <div className="desc">{copy.desc_feedback}</div>
+              </div>
+            )}
+            {isPageVisible("Settings") && (
+              <div
+                className="card-home"
+                style={{ borderTopColor: "#34495e" }}
+                onClick={() => onNavigate("Settings")}
+              >
+                <div className="icon">&#9881;&#65039;</div>
+                <h2>{copy.settings}</h2>
+                <div className="desc">{copy.desc_settings}</div>
+              </div>
+            )}
             <div
               className="card-home"
               style={{ borderTopColor: "#7f8c8d" }}
