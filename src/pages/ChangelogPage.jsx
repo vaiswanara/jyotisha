@@ -24,6 +24,18 @@ export function ChangelogPage({ logoUrl }) {
       >
         <div className="form-panel" style={{ position: "static", padding: "30px", borderRadius: "12px" }}>
 
+          {/* 28-06-2026 */}
+          <div style={{ borderLeft: "4px solid #3498db", paddingLeft: "20px", marginBottom: "30px" }}>
+            <h2 style={{ color: "#2c3e50", margin: "0 0 8px 0", fontSize: "1.4rem" }}>28-06-2026</h2>
+            <ul style={{ marginTop: "15px", color: "#34495e", lineHeight: "1.8", fontSize: "1rem" }}>
+              <li><strong>Panchanga Page Layout Redesign:</strong> Redesigned the Panchanga page desktop layout, removing unnecessary margins and resizing the D1 chart by 20% (including planetary text).</li>
+              <li><strong>Reminders & Custom Events Tab:</strong> Implemented a separate "Add Events" tab between Muhurtha and Adhika Masa tabs to save custom events, holidays, or festivals.</li>
+              <li><strong>Advanced Reminder Settings:</strong> Added JSON/CSV export and import with flexible date format parsing, inline edit/update controls, and clear data buttons.</li>
+              <li><strong>Backup & Sync Integration:</strong> Integrated custom events into local individual backups, Master Backups, and Google Drive Sync on the Settings page.</li>
+              <li><strong>Dhanishtha Nakshatra Translation Fix:</strong> Added localizations for the spelling "Dhanishtha" across Telugu, Kannada, and English translation files to fix unlocalized displays in the Horoscope UI and generated PDF tables.</li>
+            </ul>
+          </div>
+
           {/* 27-06-2026 */}
           <div style={{ borderLeft: "4px solid #8e44ad", paddingLeft: "20px", marginBottom: "30px" }}>
             <h2 style={{ color: "#2c3e50", margin: "0 0 8px 0", fontSize: "1.4rem" }}>27-06-2026</h2>

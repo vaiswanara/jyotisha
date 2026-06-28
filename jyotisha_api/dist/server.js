@@ -2032,6 +2032,7 @@ app.all(apiPaths, async (req, res) => {
                 varjyams.push(`${formatTsLocal(vStart2, tz)} - ${formatTsLocal(vEnd2, tz)}`);
             const muhurthaInfo = {
                 current: mCurrent,
+                start: formatTsLocal(Math.floor(mBaseTs + mIndex * mMuhurthaDuration), tz),
                 end: formatTsLocal(mEndTime, tz),
                 is_good: !mBadMuhurthas.includes(mCurrent),
                 rahu_kalam: `${formatTsLocal(rahuStart, tz)} - ${formatTsLocal(rahuStart + Math.floor(mDayDuration * 0.125), tz)}`,
@@ -2085,6 +2086,7 @@ app.all(apiPaths, async (req, res) => {
                 pushkaramsha_time: pushkaraInfo.window,
                 mid_lagna_window: midWindow,
                 current_muhurtha: muhurthaInfo.current,
+                current_muhurtha_start: muhurthaInfo.start,
                 current_muhurtha_end: muhurthaInfo.end,
                 muhurtha_is_good: muhurthaInfo.is_good,
                 panchaka: panchaka.label,

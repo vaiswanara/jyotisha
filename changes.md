@@ -1,3 +1,10 @@
+28-06-2026
+- Panchanga Page Layout Redesign: Redesigned the Panchanga page desktop layout, removing unnecessary margins and resizing the D1 chart by 20% (including planetary text).
+- Reminders & Custom Events Tab: Implemented a separate "Add Events" tab between Muhurtha and Adhika Masa tabs to save custom events, holidays, or festivals.
+- Advanced Reminder Settings: Added JSON/CSV export and import with flexible date format parsing, inline edit/update controls, and clear data buttons.
+- Backup & Sync Integration: Integrated custom events into local individual backups, Master Backups, and Google Drive Sync on the Settings page.
+- Dhanishtha Nakshatra Translation Fix: Added localizations for the spelling "Dhanishtha" across Telugu, Kannada, and English translation files to fix unlocalized displays in the Horoscope UI and generated PDF tables.
+
 27-06-2026
 - updated eka-vimshathi doshas and calculations and displayed the filtered doshas in muhurtha section.
  

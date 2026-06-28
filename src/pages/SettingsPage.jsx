@@ -269,6 +269,7 @@ export function SettingsPage({ logoUrl, onNavigate }) {
   const prefsFileRef = useRef(null);
   const masterFileRef = useRef(null);
   const epataFileRef = useRef(null);
+  const customEventsFileRef = useRef(null);
 
   const [gdriveConnected, setGdriveConnected] = useState(false);
   const [gdriveLastBackup, setGdriveLastBackup] = useState("Checking...");
@@ -461,19 +462,22 @@ export function SettingsPage({ logoUrl, onNavigate }) {
     const epataProgressStr = localStorage.getItem("epata_progress");
     const epataBookmarksStr = localStorage.getItem("epata_bookmarks");
     const epataLastPlaylist = localStorage.getItem("epata_last_playlist") || "";
+    const customEventsStr = localStorage.getItem("jyotisha_custom_events");
 
     const profiles = profilesStr ? JSON.parse(profilesStr) : {};
     const epataProgress = epataProgressStr ? JSON.parse(epataProgressStr) : {};
     const epataBookmarks = epataBookmarksStr ? JSON.parse(epataBookmarksStr) : {};
+    const customEvents = customEventsStr ? JSON.parse(customEventsStr) : [];
 
     const hasProfiles = Object.keys(profiles).length > 0;
     const hasEpata =
       Object.keys(epataProgress).length > 0 ||
       Object.keys(epataBookmarks).length > 0 ||
       epataLastPlaylist !== "";
+    const hasCustomEvents = customEvents.length > 0;
 
-    if (!hasProfiles && !hasEpata) {
-      alert("No profiles or e-PATA data found to backup!");
+    if (!hasProfiles && !hasEpata && !hasCustomEvents) {
+      alert("No profiles, e-PATA data, or custom events found to backup!");
       return;
     }
 
@@ -486,6 +490,7 @@ export function SettingsPage({ logoUrl, onNavigate }) {
         epata_progress: epataProgress,
         epata_bookmarks: epataBookmarks,
         epata_last_playlist: epataLastPlaylist,
+        jyotisha_custom_events: customEvents,
       });
 
       const existingFile = await getBackupFileId();
@@ -595,6 +600,19 @@ export function SettingsPage({ logoUrl, onNavigate }) {
         if (parsedData.epata_last_playlist !== undefined) {
           localStorage.setItem("epata_last_playlist", parsedData.epata_last_playlist);
         }
+        if (parsedData.jyotisha_custom_events) {
+          const existingEvents = JSON.parse(
+            localStorage.getItem("jyotisha_custom_events") || "[]"
+          );
+          const incomingEvents = parsedData.jyotisha_custom_events || [];
+          const merged = [...existingEvents];
+          incomingEvents.forEach((pe) => {
+            if (!merged.some((ue) => ue.date === pe.date && ue.title.toLowerCase() === pe.title.toLowerCase())) {
+              merged.push(pe);
+            }
+          });
+          localStorage.setItem("jyotisha_custom_events", JSON.stringify(merged));
+        }
 
         alert("Drive Restore Successful! Profiles and e-PATA progress updated.");
       } else {
@@ -701,6 +719,22 @@ export function SettingsPage({ logoUrl, onNavigate }) {
     reader.onload = (e) => {
       try {
         const parsed = JSON.parse(e.target.result);
+        if (storageKey === "jyotisha_custom_events") {
+          const existingEvents = JSON.parse(
+            localStorage.getItem("jyotisha_custom_events") || "[]"
+          );
+          const incomingEvents = Array.isArray(parsed) ? parsed : (parsed.jyotisha_custom_events || []);
+          const merged = [...existingEvents];
+          incomingEvents.forEach((pe) => {
+            if (!merged.some((ue) => ue.date === pe.date && ue.title.toLowerCase() === pe.title.toLowerCase())) {
+              merged.push(pe);
+            }
+          });
+          localStorage.setItem("jyotisha_custom_events", JSON.stringify(merged));
+          alert(t("restoreSuccess", successMsg));
+          event.target.value = "";
+          return;
+        }
         if (storageKey === "epata") {
           if (parsed.epata_progress) {
             localStorage.setItem(
@@ -785,6 +819,7 @@ export function SettingsPage({ logoUrl, onNavigate }) {
       "epata_progress",
       "epata_bookmarks",
       "epata_last_playlist",
+      "jyotisha_custom_events",
     ];
     let masterData = {};
     let hasData = false;
@@ -857,6 +892,7 @@ export function SettingsPage({ logoUrl, onNavigate }) {
           "epata_progress",
           "epata_bookmarks",
           "epata_last_playlist",
+          "jyotisha_custom_events",
         ];
         keys.forEach((key) => {
           if (incomingData[key] !== undefined) {
@@ -869,6 +905,18 @@ export function SettingsPage({ logoUrl, onNavigate }) {
               localStorage.setItem(key, JSON.stringify(incomingData[key]));
             } else if (key === "epata_last_playlist") {
               localStorage.setItem(key, incomingData[key]);
+            } else if (key === "jyotisha_custom_events") {
+              const existingEvents = JSON.parse(
+                localStorage.getItem("jyotisha_custom_events") || "[]"
+              );
+              const incomingEvents = incomingData[key] || [];
+              const merged = [...existingEvents];
+              incomingEvents.forEach((pe) => {
+                if (!merged.some((ue) => ue.date === pe.date && ue.title.toLowerCase() === pe.title.toLowerCase())) {
+                  merged.push(pe);
+                }
+              });
+              localStorage.setItem(key, JSON.stringify(merged));
             } else {
               const existingData = JSON.parse(
                 localStorage.getItem(key) || "{}",
@@ -1954,6 +2002,55 @@ export function SettingsPage({ logoUrl, onNavigate }) {
                           e,
                           "epata",
                           "e-PATA progress restored successfully!",
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "20px",
+                    paddingTop: "15px",
+                    borderTop: "1px dashed #eaecee",
+                  }}
+                >
+                  <strong
+                    style={{
+                      color: "#2c3e50",
+                      display: "block",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    6. Reminders & Custom Events
+                  </strong>
+                  <div
+                    style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}
+                  >
+                    <button
+                      className="btn-action btn-blue"
+                      onClick={() =>
+                        handleBackupData("jyotisha_custom_events", "jyotisha_custom_events")
+                      }
+                    >
+                      📥 Backup Custom Events
+                    </button>
+                    <button
+                      className="btn-action btn-orange"
+                      onClick={() => customEventsFileRef.current.click()}
+                    >
+                      📤 Restore Custom Events
+                    </button>
+                    <input
+                      type="file"
+                      ref={customEventsFileRef}
+                      style={{ display: "none" }}
+                      accept=".json"
+                      onChange={(e) =>
+                        handleRestoreData(
+                          e,
+                          "jyotisha_custom_events",
+                          "Custom events restored successfully!",
                         )
                       }
                     />

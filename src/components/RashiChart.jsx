@@ -85,6 +85,8 @@ export function RashiChart({
   d9Footer = null,
   hideD1Settings = false,
   hideDivisionalSelector = false,
+  defaultShowDivisional = true,
+  d1Size = 320,
 }) {
   const { t } = useTranslation();
 
@@ -176,7 +178,7 @@ export function RashiChart({
         aria-label={`North Indian ${title}`}
         style={{
           width: "100%",
-          maxWidth: "320px",
+          maxWidth: isD1 ? `${d1Size}px` : "320px",
           aspectRatio: "1 / 1",
           margin: "0 auto",
           boxSizing: "border-box",
@@ -301,7 +303,7 @@ export function RashiChart({
         aria-label={`East Indian ${title}`}
         style={{
           width: "100%",
-          maxWidth: "320px",
+          maxWidth: isD1 ? `${d1Size}px` : "320px",
           aspectRatio: "1 / 1",
           margin: "0 auto",
           boxSizing: "border-box",
@@ -424,7 +426,7 @@ export function RashiChart({
           gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
           gridTemplateRows: "repeat(4, minmax(0, 1fr))",
           width: "100%",
-          maxWidth: "320px",
+          maxWidth: isD1 ? `${d1Size}px` : "320px",
           aspectRatio: "1 / 1",
           margin: "0 auto",
           border: "2px solid #8e44ad",
@@ -440,6 +442,7 @@ export function RashiChart({
             const planetList = getPlanetsForRashi(chartPlanets, rashiNumber);
             const pCount = planetList.length;
 
+            const scaleRatio = isD1 && d1Size ? d1Size / 320 : 1;
             let fSize = "clamp(13px, 4.5vw, 19px)";
             let gap = "4px";
             if (pCount === 4) {
@@ -451,6 +454,18 @@ export function RashiChart({
             } else if (pCount >= 6) {
               fSize = "clamp(9px, 2.5vw, 12px)";
               gap = "1px";
+            }
+
+            if (scaleRatio !== 1) {
+              if (pCount === 4) {
+                fSize = `clamp(${11.5 * scaleRatio}px, ${3.5 * scaleRatio}vw, ${16 * scaleRatio}px)`;
+              } else if (pCount === 5) {
+                fSize = `clamp(${10 * scaleRatio}px, ${3 * scaleRatio}vw, ${14 * scaleRatio}px)`;
+              } else if (pCount >= 6) {
+                fSize = `clamp(${9 * scaleRatio}px, ${2.5 * scaleRatio}vw, ${12 * scaleRatio}px)`;
+              } else {
+                fSize = `clamp(${13 * scaleRatio}px, ${4.5 * scaleRatio}vw, ${19 * scaleRatio}px)`;
+              }
             }
 
             return (
@@ -558,7 +573,7 @@ export function RashiChart({
         >
           <strong
             style={{
-              fontSize: "clamp(12px, 3.5vw, 17px)",
+              fontSize: isD1 && d1Size !== 320 ? `clamp(${12 * (d1Size/320)}px, ${3.5 * (d1Size/320)}vw, ${17 * (d1Size/320)}px)` : "clamp(12px, 3.5vw, 17px)",
               wordBreak: "break-word",
               overflowWrap: "break-word",
               whiteSpace: "normal",
@@ -570,7 +585,7 @@ export function RashiChart({
           </strong>
           <span
             style={{
-              fontSize: "clamp(9px, 2.5vw, 13px)",
+              fontSize: isD1 && d1Size !== 320 ? `clamp(${9 * (d1Size/320)}px, ${2.5 * (d1Size/320)}vw, ${13 * (d1Size/320)}px)` : "clamp(9px, 2.5vw, 13px)",
               wordBreak: "break-word",
               overflowWrap: "break-word",
               whiteSpace: "normal",
@@ -589,6 +604,11 @@ export function RashiChart({
   const [showMenu, setShowMenu] = useState(false);
   const [showD1Menu, setShowD1Menu] = useState(false);
   const [showD1Degrees, setShowD1Degrees] = useState(false);
+  const [showDivisional, setShowDivisional] = useState(defaultShowDivisional);
+
+  useEffect(() => {
+    setShowDivisional(defaultShowDivisional);
+  }, [defaultShowDivisional]);
 
   const divNameKeys = {
     D2: "Hora",
@@ -675,7 +695,7 @@ export function RashiChart({
         style={{
           flex: "1 1 280px",
           width: "100%",
-          maxWidth: "350px",
+          maxWidth: d1Size ? `${d1Size + 30}px` : "350px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -790,6 +810,38 @@ export function RashiChart({
                     />
                     <span>{t("Degrees", "Degrees")}</span>
                   </label>
+                  <label
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: "6px",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                      color: "#2c3e50",
+                      cursor: "pointer",
+                      userSelect: "none",
+                      whiteSpace: "nowrap",
+                      width: "auto",
+                      marginTop: "4px",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={showDivisional}
+                      onChange={(e) => setShowDivisional(e.target.checked)}
+                      style={{
+                        cursor: "pointer",
+                        accentColor: "#8e44ad",
+                        width: "15px",
+                        height: "15px",
+                        minHeight: "initial",
+                        display: "inline-block",
+                        margin: 0,
+                      }}
+                    />
+                    <span>{t("Divisional Chart", "Divisional Chart")}</span>
+                  </label>
 
                 </div>
               </>
@@ -801,159 +853,161 @@ export function RashiChart({
         {d1Footer}
       </div>
 
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "350px",
-          margin: "0 auto",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        {/* Controls Row */}
-        {!hideDivisionalSelector && (
-          <div
-            style={{
-              width: "100%",
-              maxWidth: "320px",
-              display: "flex",
-              justifyContent: "flex-end",
-              marginBottom: "2px",
-              position: "relative",
-            }}
-          >
-            {/* Gear Icon button */}
-            <button
+      {showDivisional && (
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "350px",
+            margin: "0 auto",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {/* Controls Row */}
+          {!hideDivisionalSelector && (
+            <div
               style={{
-                background: "transparent",
-                border: "none",
-                width: "36px",
-                height: "36px",
+                width: "100%",
+                maxWidth: "320px",
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                fontSize: "20px",
-                outline: "none",
-                transition: "all 0.2s ease",
-              }}
-              onClick={() => setShowMenu(!showMenu)}
-              title="Select Divisional Chart"
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "rotate(30deg)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "rotate(0deg)";
+                justifyContent: "flex-end",
+                marginBottom: "2px",
+                position: "relative",
               }}
             >
-              ⚙️
-            </button>
+              {/* Gear Icon button */}
+              <button
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  width: "36px",
+                  height: "36px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  fontSize: "20px",
+                  outline: "none",
+                  transition: "all 0.2s ease",
+                }}
+                onClick={() => setShowMenu(!showMenu)}
+                title="Select Divisional Chart"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "rotate(30deg)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "rotate(0deg)";
+                }}
+              >
+                ⚙️
+              </button>
 
-            {/* Dropdown Menu */}
-            {showMenu && (
-              <>
-                <div
-                  style={{
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    zIndex: 11,
-                  }}
-                  onClick={() => setShowMenu(false)}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "36px",
-                    right: "0px",
-                    background: "#ffffff",
-                    border: "1px solid #eaecee",
-                    borderRadius: "10px",
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
-                    padding: "6px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "4px",
-                    zIndex: 12,
-                    minWidth: "180px",
-                    maxHeight: "260px",
-                    overflowY: "auto",
-                    boxSizing: "border-box",
-                    animation: "fadeIn 0.15s ease-out",
-                  }}
-                >
-                  <style>{`
-                    @keyframes fadeIn {
-                      from { opacity: 0; transform: translateY(-8px); }
-                      to { opacity: 1; transform: translateY(0); }
-                    }
-                  `}</style>
-                  {["D2", "D3", "D4", "D7", "D9", "D10", "D12", "D16", "D20", "D24", "D27", "D30", "D60"].map((div) => (
-                    <button
-                      key={div}
-                      style={{
-                        background: activeDiv === div ? "#8e44ad" : "transparent",
-                        color: activeDiv === div ? "#ffffff" : "#2c3e50",
-                        border: "none",
-                        borderRadius: "6px",
-                        padding: "8px 12px",
-                        fontSize: "13px",
-                        fontWeight: "600",
-                        textAlign: "left",
-                        cursor: "pointer",
-                        width: "100%",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        transition: "all 0.2s",
-                      }}
-                      onClick={() => {
-                        setActiveDiv(div);
-                        setShowMenu(false);
-                      }}
-                      onMouseEnter={(e) => {
-                        if (activeDiv !== div) {
-                          e.currentTarget.style.background = "#f5e6ff";
-                          e.currentTarget.style.color = "#8e44ad";
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (activeDiv !== div) {
-                          e.currentTarget.style.background = "transparent";
-                          e.currentTarget.style.color = "#2c3e50";
-                        }
-                      }}
-                    >
-                      <span>{t(divNameKeys[div])}</span>
-                      <span style={{ fontSize: "11px", opacity: 0.8 }}>{div}</span>
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        )}
+              {/* Dropdown Menu */}
+              {showMenu && (
+                <>
+                  <div
+                    style={{
+                      position: "fixed",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      zIndex: 11,
+                    }}
+                    onClick={() => setShowMenu(false)}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "36px",
+                      right: "0px",
+                      background: "#ffffff",
+                      border: "1px solid #eaecee",
+                      borderRadius: "10px",
+                      boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+                      padding: "6px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "4px",
+                      zIndex: 12,
+                      minWidth: "180px",
+                      maxHeight: "260px",
+                      overflowY: "auto",
+                      boxSizing: "border-box",
+                      animation: "fadeIn 0.15s ease-out",
+                    }}
+                  >
+                    <style>{`
+                      @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(-8px); }
+                        to { opacity: 1; transform: translateY(0); }
+                      }
+                    `}</style>
+                    {["D2", "D3", "D4", "D7", "D9", "D10", "D12", "D16", "D20", "D24", "D27", "D30", "D60"].map((div) => (
+                      <button
+                        key={div}
+                        style={{
+                          background: activeDiv === div ? "#8e44ad" : "transparent",
+                          color: activeDiv === div ? "#ffffff" : "#2c3e50",
+                          border: "none",
+                          borderRadius: "6px",
+                          padding: "8px 12px",
+                          fontSize: "13px",
+                          fontWeight: "600",
+                          textAlign: "left",
+                          cursor: "pointer",
+                          width: "100%",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          transition: "all 0.2s",
+                        }}
+                        onClick={() => {
+                          setActiveDiv(div);
+                          setShowMenu(false);
+                        }}
+                        onMouseEnter={(e) => {
+                          if (activeDiv !== div) {
+                            e.currentTarget.style.background = "#f5e6ff";
+                            e.currentTarget.style.color = "#8e44ad";
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (activeDiv !== div) {
+                            e.currentTarget.style.background = "transparent";
+                            e.currentTarget.style.color = "#2c3e50";
+                          }
+                        }}
+                      >
+                        <span>{t(divNameKeys[div])}</span>
+                        <span style={{ fontSize: "11px", opacity: 0.8 }}>{div}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
-        {renderChart(activeChartData, activeTitle, activeSubtitle)}
+          {renderChart(activeChartData, activeTitle, activeSubtitle)}
 
-        {Object.keys(activeChartData).length === 0 && (
-          <div
-            style={{
-              textAlign: "center",
-              color: "#c0392b",
-              marginTop: "10px",
-              fontSize: "14px",
-              fontWeight: "bold",
-            }}
-          >
-            {t("divisionalChartUnavailable", "⚠️ Divisional chart data is not available. Please recalculate.")}
-          </div>
-        )}
-        {d9Footer}
-      </div>
+          {Object.keys(activeChartData).length === 0 && (
+            <div
+              style={{
+                textAlign: "center",
+                color: "#c0392b",
+                marginTop: "10px",
+                fontSize: "14px",
+                fontWeight: "bold",
+              }}
+            >
+              {t("divisionalChartUnavailable", "⚠️ Divisional chart data is not available. Please recalculate.")}
+            </div>
+          )}
+          {d9Footer}
+        </div>
+      )}
     </section>
   );
 }

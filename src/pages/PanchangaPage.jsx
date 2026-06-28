@@ -302,6 +302,278 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
     return localStorage.getItem("vaiswanara_chart_style") || "south";
   });
 
+  const [customEvents, setCustomEvents] = useState(() => {
+    return JSON.parse(localStorage.getItem("jyotisha_custom_events") || "[]");
+  });
+  const [newEventTitle, setNewEventTitle] = useState("");
+  const [newEventDate, setNewEventDate] = useState("");
+  const [editingEventId, setEditingEventId] = useState(null);
+  const customEventsCsvRef = useRef(null);
+
+  const handleAddCustomEvent = () => {
+    if (!newEventTitle.trim() || !newEventDate) return;
+    if (editingEventId) {
+      const updated = customEvents.map((ev) => {
+        if (ev.id === editingEventId) {
+          return { ...ev, date: newEventDate, title: newEventTitle.trim() };
+        }
+        return ev;
+      });
+      setCustomEvents(updated);
+      localStorage.setItem("jyotisha_custom_events", JSON.stringify(updated));
+      setEditingEventId(null);
+    } else {
+      const newEvent = {
+        id: Math.random().toString(36).substring(2, 9),
+        date: newEventDate,
+        title: newEventTitle.trim(),
+      };
+      const updated = [...customEvents, newEvent];
+      setCustomEvents(updated);
+      localStorage.setItem("jyotisha_custom_events", JSON.stringify(updated));
+    }
+    setNewEventTitle("");
+    setNewEventDate("");
+  };
+
+  const handleDeleteCustomEvent = (id) => {
+    const updated = customEvents.filter((ev) => ev.id !== id);
+    setCustomEvents(updated);
+    localStorage.setItem("jyotisha_custom_events", JSON.stringify(updated));
+    if (editingEventId === id) {
+      setEditingEventId(null);
+      setNewEventTitle("");
+      setNewEventDate("");
+    }
+  };
+
+  const startEditEvent = (ev) => {
+    setNewEventTitle(ev.title);
+    setNewEventDate(ev.date);
+    setEditingEventId(ev.id);
+  };
+
+  const handleCancelEdit = () => {
+    setNewEventTitle("");
+    setNewEventDate("");
+    setEditingEventId(null);
+  };
+
+  const exportCustomEventsCSV = () => {
+    if (customEvents.length === 0) {
+      alert("No events to export.");
+      return;
+    }
+    const csvRows = [
+      `"Date","Title"`
+    ];
+    customEvents.forEach((ev) => {
+      const row = [
+        `"${ev.date}"`,
+        `"${ev.title.replace(/"/g, '""')}"`
+      ];
+      csvRows.push(row.join(","));
+    });
+    downloadFile(
+      csvRows.join("\n"),
+      "jyotisha_custom_events.csv",
+      "text/csv"
+    );
+  };
+
+  const parseFlexDate = (dateStr) => {
+    if (!dateStr) return null;
+    const cleaned = dateStr.trim();
+    
+    // Check if it matches YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) {
+      return cleaned;
+    }
+    
+    // Try parsing DD-MM-YYYY or DD/MM/YYYY
+    const dmyMatch = cleaned.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+    if (dmyMatch) {
+      const day = dmyMatch[1].padStart(2, '0');
+      const month = dmyMatch[2].padStart(2, '0');
+      const year = dmyMatch[3];
+      if (parseInt(month, 10) > 12) {
+        // Treat as MM-DD-YYYY
+        return `${year}-${day}-${month}`;
+      }
+      return `${year}-${month}-${day}`;
+    }
+    
+    // Fallback to standard JS Date parsing
+    const parsed = new Date(cleaned);
+    if (!isNaN(parsed.getTime())) {
+      const y = parsed.getFullYear();
+      const m = String(parsed.getMonth() + 1).padStart(2, '0');
+      const d = String(parsed.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+    
+    return null;
+  };
+
+  const handleImportCustomEventsCSV = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target.result;
+      try {
+        const lines = text.split(/\r?\n/).filter((line) => line.trim() !== "");
+        if (lines.length < 2) {
+          alert("CSV file is empty or invalid.");
+          return;
+        }
+        const headers = lines[0]
+          .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+          .map((h) => h.replace(/^"|"$/g, "").trim().toLowerCase());
+        
+        const dateIdx = headers.indexOf("date");
+        const titleIdx = headers.indexOf("title");
+        if (dateIdx === -1 || titleIdx === -1) {
+          alert("CSV headers must include 'Date' and 'Title'.");
+          return;
+        }
+
+        const parsedEvents = [];
+        for (let i = 1; i < lines.length; i++) {
+          const currentLine = lines[i]
+            .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+            .map((v) => v.replace(/^"|"$/g, "").replace(/""/g, '"'));
+          
+          const rawDate = currentLine[dateIdx];
+          const rawTitle = currentLine[titleIdx];
+          if (rawDate && rawTitle) {
+            const formattedDate = parseFlexDate(rawDate);
+            if (formattedDate) {
+              parsedEvents.push({
+                id: Math.random().toString(36).substring(2, 9),
+                date: formattedDate,
+                title: rawTitle.trim()
+              });
+            }
+          }
+        }
+
+        if (parsedEvents.length === 0) {
+          alert("No valid events found to import.");
+          return;
+        }
+
+        const confirmMerge = window.confirm(
+          `Found ${parsedEvents.length} events.\n\nClick OK to MERGE with existing events.\nClick Cancel to REPLACE all existing events.`
+        );
+
+        let updated = [];
+        if (confirmMerge) {
+          updated = [...customEvents];
+          parsedEvents.forEach((pe) => {
+            if (!updated.some((ue) => ue.date === pe.date && ue.title.toLowerCase() === pe.title.toLowerCase())) {
+              updated.push(pe);
+            }
+          });
+        } else {
+          updated = parsedEvents;
+        }
+
+        setCustomEvents(updated);
+        localStorage.setItem("jyotisha_custom_events", JSON.stringify(updated));
+        alert("Events imported successfully!");
+      } catch (err) {
+        alert("Error parsing CSV: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = "";
+  };
+
+  const customEventsJsonRef = useRef(null);
+
+  const exportCustomEventsJSON = () => {
+    if (customEvents.length === 0) {
+      alert("No events to export.");
+      return;
+    }
+    const exportObj = {
+      type: "jyotisha_custom_events_backup",
+      version: "1.0",
+      exported: new Date().toISOString(),
+      jyotisha_custom_events: customEvents
+    };
+    downloadFile(
+      JSON.stringify(exportObj, null, 2),
+      `jyotisha_custom_events_${getLocalDateStr(5.5)}.json`,
+      "application/json"
+    );
+  };
+
+  const handleImportCustomEventsJSON = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        const incomingEvents = Array.isArray(parsed) 
+          ? parsed 
+          : (parsed.jyotisha_custom_events || parsed.data?.jyotisha_custom_events || []);
+        
+        if (incomingEvents.length === 0) {
+          alert("No valid custom events found in JSON.");
+          return;
+        }
+
+        const confirmMerge = window.confirm(
+          `Found ${incomingEvents.length} events.\n\nClick OK to MERGE with existing events.\nClick Cancel to REPLACE all existing events.`
+        );
+
+        let updated = [];
+        if (confirmMerge) {
+          updated = [...customEvents];
+          incomingEvents.forEach((pe) => {
+            if (pe.date && pe.title && !updated.some((ue) => ue.date === pe.date && ue.title.toLowerCase() === pe.title.toLowerCase())) {
+              updated.push({
+                id: pe.id || Math.random().toString(36).substring(2, 9),
+                date: pe.date,
+                title: pe.title.trim()
+              });
+            }
+          });
+        } else {
+          updated = incomingEvents.map((pe) => ({
+            id: pe.id || Math.random().toString(36).substring(2, 9),
+            date: pe.date,
+            title: pe.title.trim()
+          }));
+        }
+
+        setCustomEvents(updated);
+        localStorage.setItem("jyotisha_custom_events", JSON.stringify(updated));
+        alert("Events imported successfully!");
+      } catch (err) {
+        alert("Error parsing JSON: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = "";
+  };
+
+  const clearCustomEvents = () => {
+    if (window.confirm("Are you sure you want to DELETE ALL saved events? This action cannot be undone.")) {
+      setCustomEvents([]);
+      localStorage.removeItem("jyotisha_custom_events");
+      setEditingEventId(null);
+      setNewEventTitle("");
+      setNewEventDate("");
+      alert("All custom events deleted successfully.");
+    }
+  };
+
   useEffect(() => {
     const handleStyleChange = () => {
       setChartStyle(localStorage.getItem("vaiswanara_chart_style") || "south");
@@ -1578,7 +1850,33 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
   };
 
   return (
-    <main className="page">
+    <main className="page panchanga-page-layout">
+      <style>{`
+        /* డెస్క్‌టాప్ వ్యూ కొరకు కార్డ్స్ వెడల్పు మరియు మార్జిన్స్ సర్దుబాటు */
+        @media (min-width: 861px) {
+          .panchanga-page-layout {
+            padding: 0.5in !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+          }
+          .panchanga-page-layout .workspace {
+            padding: 0px !important;
+            padding-bottom: 40px !important;
+            margin: 0px !important;
+            max-width: 100% !important;
+          }
+          .panchanga-page-layout .results-area {
+            max-width: 100% !important;
+          }
+          .panchanga-page-layout .form-panel {
+            max-width: 100% !important;
+            padding: 20px !important;
+          }
+          .panchanga-page-layout .table-panel {
+            max-width: 100% !important;
+          }
+        }
+      `}</style>
       <section
         className="workspace"
         style={{
@@ -1596,7 +1894,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
+            gridTemplateColumns: "repeat(5, 1fr)",
             gap: "4px",
             marginBottom: "15px",
             width: "100%",
@@ -1622,6 +1920,16 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
             }}
           >
             {t("ui.muhurtha_analysis", "Muhurtha")}
+          </button>
+          <button
+            onClick={() => setActiveTab("add_events")}
+            style={{
+              ...tabStyle,
+              background: activeTab === "add_events" ? "#8e44ad" : "#f1f2f6",
+              color: activeTab === "add_events" ? "#fff" : "#2d3436",
+            }}
+          >
+            {t("Add Events", "Add Events")}
           </button>
           <button
             onClick={() => setActiveTab("adhika")}
@@ -1663,7 +1971,8 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
 
           {/* Panchanga Search Tab Content */}
           {activeTab === "search" && !isLoading && (
-            <div className="form-panel" style={{ maxWidth: "100%", margin: "0 auto", padding: "15px", border: "none", boxShadow: "none" }}>
+            <>
+              <div className="form-panel" style={{ maxWidth: "100%", margin: "0 auto", padding: "15px", border: "none", boxShadow: "none" }}>
               <h2>{t("ui.panchanga_search", "Panchanga Search")}</h2>
 
               <div
@@ -2304,6 +2613,263 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                 </section>
               )}
             </div>
+            </>
+          )}
+
+          {/* Add Events Tab Content */}
+          {activeTab === "add_events" && !isLoading && (
+            <div
+              className="form-panel"
+              style={{
+                maxWidth: "100%",
+                margin: "0 auto",
+                padding: "15px",
+                border: "none",
+                boxShadow: "none",
+              }}
+            >
+              <h2>{t("ui.reminders_and_events", "Reminders & Custom Events")}</h2>
+              
+              <div
+                style={{
+                  background: "#fff",
+                  border: "1px solid #dcdde1",
+                  borderRadius: "12px",
+                  padding: "25px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.04)",
+                  width: "100%",
+                  boxSizing: "border-box",
+                  marginTop: "20px",
+                }}
+              >
+                <p style={{ fontSize: "14px", color: "#7f8c8d", margin: "0 0 20px 0" }}>
+                  {t("eventReminderInstructions", "Save important custom events, festivals, or personal dates. These will display as warnings in the Muhurtha Doshas tab if your selected muhurtha date matches them.")}
+                </p>
+
+                {/* Import / Export Controls */}
+                <div style={{ display: "flex", gap: "10px", marginBottom: "20px", flexWrap: "wrap", alignItems: "center" }}>
+                  <button
+                    onClick={exportCustomEventsCSV}
+                    style={{ ...actionBtnStyle, background: "#27ae60" }}
+                  >
+                    📥 Export CSV
+                  </button>
+                  <button
+                    onClick={() => customEventsCsvRef.current.click()}
+                    style={{ ...actionBtnStyle, background: "#2ecc71" }}
+                  >
+                    📂 Import CSV
+                  </button>
+                  <input
+                    type="file"
+                    accept=".csv"
+                    ref={customEventsCsvRef}
+                    style={{ display: "none" }}
+                    onChange={handleImportCustomEventsCSV}
+                  />
+
+                  <button
+                    onClick={exportCustomEventsJSON}
+                    style={{ ...actionBtnStyle, background: "#8e44ad" }}
+                  >
+                    📥 Export JSON
+                  </button>
+                  <button
+                    onClick={() => customEventsJsonRef.current.click()}
+                    style={{ ...actionBtnStyle, background: "#3498db" }}
+                  >
+                    📂 Import JSON
+                  </button>
+                  <input
+                    type="file"
+                    accept=".json"
+                    ref={customEventsJsonRef}
+                    style={{ display: "none" }}
+                    onChange={handleImportCustomEventsJSON}
+                  />
+
+                  {customEvents.length > 0 && (
+                    <button
+                      onClick={clearCustomEvents}
+                      style={{ ...actionBtnStyle, background: "#c0392b", marginLeft: "auto" }}
+                    >
+                      🗑️ Delete All Events
+                    </button>
+                  )}
+                </div>
+
+                {/* Add Event Form */}
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "15px",
+                    flexWrap: "wrap",
+                    marginBottom: "20px",
+                    alignItems: "flex-end",
+                  }}
+                >
+                  <label style={{ flex: "2 1 250px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "14px", fontWeight: "bold", color: "#2d3436" }}>
+                    {t("Event Name / Holiday:", "Event Name / Holiday:")}
+                    <input
+                      type="text"
+                      placeholder="e.g. Deepawali panduga"
+                      value={newEventTitle}
+                      onChange={(e) => setNewEventTitle(e.target.value)}
+                      style={{ ...inputStyle, width: "100%", padding: "10px" }}
+                    />
+                  </label>
+                  <label style={{ flex: "1 1 180px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "14px", fontWeight: "bold", color: "#2d3436" }}>
+                    {t("Date:", "Date:")}
+                    <input
+                      type="date"
+                      value={newEventDate}
+                      onChange={(e) => setNewEventDate(e.target.value)}
+                      style={{ ...inputStyle, width: "100%", padding: "10px" }}
+                    />
+                  </label>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <button
+                      onClick={handleAddCustomEvent}
+                      style={{
+                        background: "#8e44ad",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "10px 20px",
+                        fontSize: "14px",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                        height: "40px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "#732d91")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "#8e44ad")}
+                    >
+                      {editingEventId ? `✏️ ${t("Update Event", "Update Event")}` : `➕ ${t("Add Event", "Add Event")}`}
+                    </button>
+                    {editingEventId && (
+                      <button
+                        onClick={handleCancelEdit}
+                        style={{
+                          background: "#7f8c8d",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "8px",
+                          padding: "10px 15px",
+                          fontSize: "14px",
+                          fontWeight: "bold",
+                          cursor: "pointer",
+                          height: "40px",
+                          transition: "all 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "#95a5a6")}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = "#7f8c8d")}
+                      >
+                        {t("Cancel", "Cancel")}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Events List */}
+                <div
+                  style={{
+                    border: "1px solid #eee",
+                    borderRadius: "8px",
+                    overflow: "hidden",
+                    background: "#fafafa",
+                  }}
+                >
+                  {customEvents.length === 0 ? (
+                    <div style={{ padding: "20px", textAlign: "center", color: "#7f8c8d", fontSize: "14px", fontStyle: "italic" }}>
+                      {t("noCustomEventsSaved", "No custom events saved yet. Use the form above to add reminders.")}
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                      {customEvents.map((ev, index) => (
+                        <div
+                          key={ev.id}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            padding: "12px 15px",
+                            borderBottom: index === customEvents.length - 1 ? "none" : "1px solid #eee",
+                            background: editingEventId === ev.id ? "#fcf9fe" : "#fff",
+                            borderLeft: editingEventId === ev.id ? "4px solid #8e44ad" : "none",
+                            transition: "background 0.2s ease",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (editingEventId !== ev.id) e.currentTarget.style.background = "#fafafa";
+                          }}
+                          onMouseLeave={(e) => {
+                            if (editingEventId !== ev.id) e.currentTarget.style.background = "#fff";
+                          }}
+                        >
+                          <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+                            <span
+                              style={{
+                                background: "#f5e6ff",
+                                color: "#8e44ad",
+                                padding: "4px 8px",
+                                borderRadius: "4px",
+                                fontSize: "12px",
+                                fontWeight: "bold",
+                                fontFamily: "monospace",
+                              }}
+                            >
+                              {ev.date}
+                            </span>
+                            <span style={{ fontWeight: "bold", fontSize: "14px", color: "#2c3e50" }}>
+                              {ev.title}
+                            </span>
+                          </div>
+                          <div style={{ display: "flex", gap: "12px" }}>
+                            <button
+                              onClick={() => startEditEvent(ev)}
+                              style={{
+                                background: "transparent",
+                                border: "none",
+                                color: "#3498db",
+                                cursor: "pointer",
+                                fontSize: "16px",
+                                padding: "4px",
+                                transition: "transform 0.2s ease",
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.2)")}
+                              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+                              title="Edit Event"
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCustomEvent(ev.id)}
+                              style={{
+                                background: "transparent",
+                                border: "none",
+                                color: "#e74c3c",
+                                cursor: "pointer",
+                                fontSize: "16px",
+                                padding: "4px",
+                                transition: "transform 0.2s ease",
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.2)")}
+                              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+                              title="Delete Event"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           )}
           {/* Muhurtha Analysis Tab */}
           {activeTab === "muhurtha" && !isLoading && (
@@ -2911,14 +3477,16 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                             flexDirection: "column",
                             gap: "20px",
                             alignItems: "center",
-                            flex: "0 0 320px",
+                            flex: "0 0 384px",
                           }}
                         >
                           <RashiChart
                             planets={convertMuhurthaChartArrayToPlanets(muhurthaChartData.chart)}
                             navamsa={convertMuhurthaChartArrayToPlanets(muhurthaChartData.chart_d9)}
-                            hideD1Settings={true}
-                            hideDivisionalSelector={true}
+                            hideD1Settings={false}
+                            hideDivisionalSelector={false}
+                            defaultShowDivisional={false}
+                            d1Size={384}
                             d1Footer={
                               selectedProfileLocation ? (
                                 <div style={{ textAlign: "center", fontSize: "11px", color: "#7f8c8d", marginTop: "10px" }}>
@@ -2940,9 +3508,9 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
 
                         <div
                           style={{
-                            flex: "1 1 280px",
-                            minWidth: "280px",
-                            maxWidth: "400px",
+                            flex: "1 1 336px",
+                            minWidth: "336px",
+                            maxWidth: "480px",
                             display: "flex",
                             flexDirection: "column",
                             gap: "16px",
@@ -2959,11 +3527,11 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                             }}
                           >
                              <h4
-                              style={{ margin: "0 0 10px 0", color: "#2c3e50" }}
+                              style={{ margin: "0 0 10px 0", color: "#2c3e50", fontSize: "19.2px" }}
                             >
                               Muhurtha Details
                             </h4>
-                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                            <p style={{ margin: "5px 0", fontSize: "16.8px" }}>
                               <strong>Lagna Pos:</strong>{" "}
                               <span
                                 style={{ color: "#c0392b", fontWeight: "bold" }}
@@ -2973,7 +3541,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                               </span>
                             </p>
                             {muhurthaChartData.lagna_name && (
-                              <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                              <p style={{ margin: "5px 0", fontSize: "16.8px" }}>
                                 <strong>{t("lagna_span", "Lagna Span")}:</strong>{" "}
                                 <span style={{ color: "#e67e22", fontWeight: "bold" }}>
                                   {muhurthaChartData.lagna_start} - {muhurthaChartData.lagna_end}
@@ -2984,14 +3552,14 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                             <div style={{ height: "8px" }} />
 
                             {muhurthaChartData.mid_lagna_window && (
-                              <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                              <p style={{ margin: "5px 0", fontSize: "16.8px" }}>
                                 <strong>{muhurthaChartData.lagna_name || "Lagna"} Lagna:</strong>{" "}
                                 <span style={{ color: "#27ae60", fontWeight: "bold" }}>
                                   {muhurthaChartData.mid_lagna_window}
                                 </span>
                               </p>
                             )}
-                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                            <p style={{ margin: "5px 0", fontSize: "16.8px" }}>
                               <strong>Muhurtha:</strong>{" "}
                               <span
                                 style={{
@@ -3008,7 +3576,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                 )
                               </span>
                             </p>
-                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                            <p style={{ margin: "5px 0", fontSize: "16.8px" }}>
                               <strong>Pushkaraamsha:</strong>{" "}
                               <span style={{ color: "#8e44ad", fontWeight: "bold" }}>
                                 {muhurthaChartData.pushkaramsha_time}
@@ -3017,7 +3585,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
 
                             <div style={{ height: "8px" }} />
 
-                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                            <p style={{ margin: "5px 0", fontSize: "16.8px" }}>
                               <strong>Pushkara:</strong>{" "}
                               <span
                                 style={{
@@ -3031,14 +3599,14 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                               </span>
                             </p>
                             {muhurthaChartData.lagna_tyajyam && (
-                              <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                              <p style={{ margin: "5px 0", fontSize: "16.8px" }}>
                                 <strong>Lagna Tyajyamu:</strong>{" "}
                                 <span style={{ color: "#c0392b", fontWeight: "bold" }}>
                                   {muhurthaChartData.lagna_tyajyam}
                                 </span>
                               </p>
                             )}
-                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                            <p style={{ margin: "5px 0", fontSize: "16.8px" }}>
                               <strong>Panchakam:</strong>{" "}
                               <span
                                 style={{
@@ -3064,11 +3632,11 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                             }}
                           >
                              <h4
-                              style={{ margin: "0 0 10px 0", color: "#2c3e50" }}
+                              style={{ margin: "0 0 10px 0", color: "#2c3e50", fontSize: "19.2px" }}
                             >
                               Inauspicious Timings
                             </h4>
-                             <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                             <p style={{ margin: "5px 0", fontSize: "16.8px" }}>
                               <strong>Rahu Kalam:</strong>{" "}
                               <span style={{ color: "#e67e22" }}>
                                 {muhurthaChartData.rahu_kalam || "-"}
@@ -3077,7 +3645,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
 
                             <div style={{ height: "8px" }} />
 
-                            <p style={{ margin: "5px 0", fontSize: "14px" }}>
+                            <p style={{ margin: "5px 0", fontSize: "16.8px" }}>
                               <strong>Yamagandam:</strong>{" "}
                               <span style={{ color: "#e67e22" }}>
                                 {muhurthaChartData.yamagandam || "-"}
@@ -3086,7 +3654,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
 
                             <div style={{ height: "8px" }} />
 
-                            <div style={{ margin: "8px 0", fontSize: "14px" }}>
+                            <div style={{ margin: "8px 0", fontSize: "16.8px" }}>
                               <strong>Varjyam:</strong>
                               <div style={{ color: "#c0392b", marginTop: "2px", fontWeight: "bold" }}>
                                 {renderIntervalList(muhurthaChartData.varjyam)}
@@ -3095,7 +3663,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
 
                             <div style={{ height: "8px" }} />
 
-                            <div style={{ margin: "8px 0", fontSize: "14px" }}>
+                            <div style={{ margin: "8px 0", fontSize: "16.8px" }}>
                               <strong>Durmuhurtham:</strong>
                               <div style={{ color: "#d35400", marginTop: "2px", fontWeight: "bold" }}>
                                 {renderIntervalList(muhurthaChartData.durmuhurtham)}
@@ -3162,6 +3730,37 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
                                 gap: "10px",
                               }}
                             >
+                              {customEvents.filter(ev => ev.date === chartDate).map((ev) => (
+                                <div
+                                  key={ev.id}
+                                  style={{
+                                    background: "#fff9e6",
+                                    color: "#d35400",
+                                    padding: "10px 15px",
+                                    borderRadius: "8px",
+                                    fontSize: "14px",
+                                    fontWeight: "bold",
+                                    border: "2px dashed #f39c12",
+                                    width: "100%",
+                                    boxSizing: "border-box",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                    marginBottom: "10px",
+                                    animation: "pulseAlert 2s infinite alternate",
+                                  }}
+                                >
+                                  <style>{`
+                                    @keyframes pulseAlert {
+                                      from { border-color: #f39c12; box-shadow: 0 0 2px rgba(243, 156, 18, 0.2); }
+                                      to { border-color: #e67e22; box-shadow: 0 0 8px rgba(230, 126, 34, 0.4); }
+                                    }
+                                  `}</style>
+                                  <span>🔔 {t("Event Reminder:", "Event Reminder:")}</span>
+                                  <span style={{ textDecoration: "underline" }}>{ev.title}</span>
+                                </div>
+                              ))}
+
                               {(() => {
                                 const prefs = JSON.parse(
                                   localStorage.getItem("eclock_prefs") || "{}",
