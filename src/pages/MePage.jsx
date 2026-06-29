@@ -3,8 +3,7 @@ import { useTranslation } from "react-i18next";
 import {
   fetchBirthChart,
   API_URL,
-  API_TOKEN,
-  saveUserData
+  API_TOKEN
 } from "../services/astrologyApi.js";
 import { LocationAutocomplete } from "../components/LocationAutocomplete.jsx";
 import { getLocalDateStr } from "../utils/formatters.js";
@@ -230,7 +229,11 @@ export function MePage({ onNavigate }) {
     latitude: "",
     longitude: "",
     timezone: "5.5",
+    gender: "male",
   });
+  const [popupTab, setPopupTab] = useState("input");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [savedProfiles, setSavedProfiles] = useState({});
 
   // Load Profile on Mount
   useEffect(() => {
@@ -240,6 +243,10 @@ export function MePage({ onNavigate }) {
     if (savedProfile) {
       setMeProfile(savedProfile);
     }
+    const storedProfiles = JSON.parse(
+      localStorage.getItem("vaiswanara_profiles") || "{}",
+    );
+    setSavedProfiles(storedProfiles);
   }, []);
 
   // Fetch Today's Data and Natal Chart whenever Profile, Selected Date or Time changes
@@ -362,6 +369,10 @@ export function MePage({ onNavigate }) {
   }, [meProfile, selectedDate, selectedTime]);
 
   const handleSaveProfile = () => {
+    if (!editFormData.name) {
+      alert(t("enterNameSaveAlert", "Please enter a name to save the profile."));
+      return;
+    }
     if (!editFormData.dob || !editFormData.tob) {
       alert(t("fillDobTobAlert", "Please fill in Date of Birth and Time of Birth!"));
       return;
@@ -373,6 +384,33 @@ export function MePage({ onNavigate }) {
       longitude: editFormData.longitude || 77.5946,
       timezone: editFormData.timezone || 5.5,
       city: editFormData.city || "Bengaluru, Karnataka, India",
+      gender: editFormData.gender || "male",
+    };
+
+    const saved = JSON.parse(localStorage.getItem("vaiswanara_profiles") || "{}");
+    const updated = {
+      ...saved,
+      [editFormData.name]: finalProfile,
+    };
+    localStorage.setItem("vaiswanara_profiles", JSON.stringify(updated));
+    setSavedProfiles(updated);
+    setPopupTab("profiles");
+    alert(t("profileSavedMsg", `Profile "${editFormData.name}" saved!`));
+  };
+
+  const handleApplyProfile = () => {
+    if (!editFormData.dob || !editFormData.tob) {
+      alert(t("fillDobTobAlert", "Please fill in Date of Birth and Time of Birth!"));
+      return;
+    }
+
+    const finalProfile = {
+      ...editFormData,
+      latitude: editFormData.latitude || 12.9716,
+      longitude: editFormData.longitude || 77.5946,
+      timezone: editFormData.timezone || 5.5,
+      city: editFormData.city || "Bengaluru, Karnataka, India",
+      gender: editFormData.gender || "male",
     };
 
     localStorage.setItem("me_page_profile", JSON.stringify(finalProfile));
@@ -380,35 +418,6 @@ export function MePage({ onNavigate }) {
     setShowProfilePopup(false);
     setIsProfileMenuOpen(false);
     window.dispatchEvent(new Event("vaiswanara_profile_updated"));
-
-    // Background Sync Data to users_data.json
-    try {
-      let deviceId = localStorage.getItem("vaiswanara_device_id");
-      if (!deviceId) {
-        deviceId = crypto.randomUUID
-          ? crypto.randomUUID()
-          : "dev-" + Date.now();
-        localStorage.setItem("vaiswanara_device_id", deviceId);
-      }
-      const userInfo = {
-        name: finalProfile.name.trim() || t("Me", "My Profile"),
-        dob: finalProfile.dob,
-        tob: finalProfile.tob,
-        city: finalProfile.city,
-        deviceId: deviceId,
-        timestamp: new Date().toISOString(),
-      };
-
-      fetch(`${import.meta.env.BASE_URL}static/preferences.json`)
-        .then((r) => r.json())
-        .then((prefs) => {
-          if (prefs.enable_local_sync !== false) {
-                // Direct ga Node JS API కి డేటా పంపుతున్నాం
-                saveUserData(userInfo);
-          }
-        })
-        .catch((e) => console.error(e));
-    } catch (err) {}
   };
 
   const handleDeleteProfile = () => {
@@ -417,11 +426,41 @@ export function MePage({ onNavigate }) {
     ) {
       localStorage.removeItem("me_page_profile");
       setMeProfile(null);
-      setTodayPanchanga(null);
       setNatalChart(null);
       setTransitChart(null);
       setIsProfileMenuOpen(false);
       window.dispatchEvent(new Event("vaiswanara_profile_updated"));
+    }
+  };
+
+  const handleProfileSelect = (name) => {
+    const profile = savedProfiles[name];
+    if (profile) {
+      setEditFormData({
+        name: name,
+        dob: profile.dob,
+        tob: profile.tob,
+        city: profile.city,
+        latitude: profile.latitude,
+        longitude: profile.longitude,
+        timezone: profile.timezone,
+        gender: profile.gender || "male",
+      });
+      setPopupTab("input");
+    }
+  };
+
+  const handleProfileDelete = (name, e) => {
+    e.stopPropagation();
+    if (
+      window.confirm(
+        t("confirmDeleteSavedProfile", `Are you sure you want to delete the profile "${name}"?`)
+      )
+    ) {
+      const updated = { ...savedProfiles };
+      delete updated[name];
+      setSavedProfiles(updated);
+      localStorage.setItem("vaiswanara_profiles", JSON.stringify(updated));
     }
   };
 
@@ -776,20 +815,7 @@ export function MePage({ onNavigate }) {
             <div style={{ position: "relative" }}>
               <button
                 onClick={() => {
-                  if (meProfile) {
-                    setIsProfileMenuOpen(!isProfileMenuOpen);
-                  } else {
-                    setEditFormData({
-                      name: "",
-                      dob: "",
-                      tob: "",
-                      city: "",
-                      latitude: "",
-                      longitude: "",
-                      timezone: "5.5",
-                    });
-                    setShowProfilePopup(true);
-                  }
+                  setIsProfileMenuOpen(!isProfileMenuOpen);
                 }}
                 style={{
                   background: "#f1f2f6",
@@ -839,14 +865,24 @@ export function MePage({ onNavigate }) {
                   >
                     <div
                       onClick={() => {
-                        setEditFormData(meProfile);
+                        setEditFormData({
+                          name: "",
+                          dob: "",
+                          tob: "",
+                          city: "",
+                          latitude: "",
+                          longitude: "",
+                          timezone: "5.5",
+                          gender: "male",
+                        });
+                        setPopupTab("input");
                         setIsProfileMenuOpen(false);
                         setShowProfilePopup(true);
                       }}
                       style={{
                         padding: "10px",
                         cursor: "pointer",
-                        color: "#2980b9",
+                        color: "#2ecc71",
                         fontWeight: "bold",
                         borderRadius: "8px",
                         display: "flex",
@@ -854,21 +890,25 @@ export function MePage({ onNavigate }) {
                         alignItems: "center",
                       }}
                       onMouseOver={(e) =>
-                        (e.currentTarget.style.background = "#ebf5fb")
+                        (e.currentTarget.style.background = "#eafaf1")
                       }
                       onMouseOut={(e) =>
                         (e.currentTarget.style.background = "transparent")
                       }
                     >
-                      ✏️ {t("editProfile", "Edit Profile")}
+                      ➕ {t("Add", "Add")}
                     </div>
 
                     <div
-                      onClick={handleDeleteProfile}
+                      onClick={() => {
+                        setPopupTab("profiles");
+                        setIsProfileMenuOpen(false);
+                        setShowProfilePopup(true);
+                      }}
                       style={{
                         padding: "10px",
                         cursor: "pointer",
-                        color: "#e74c3c",
+                        color: "#9b59b6",
                         fontWeight: "bold",
                         borderRadius: "8px",
                         display: "flex",
@@ -877,14 +917,69 @@ export function MePage({ onNavigate }) {
                         marginTop: "5px",
                       }}
                       onMouseOver={(e) =>
-                        (e.currentTarget.style.background = "#fdedec")
+                        (e.currentTarget.style.background = "#f5eef8")
                       }
                       onMouseOut={(e) =>
                         (e.currentTarget.style.background = "transparent")
                       }
                     >
-                      🗑️ {t("deleteProfile", "Delete Profile")}
+                      👥 {t("Switch", "Switch")}
                     </div>
+
+                    {meProfile && (
+                      <>
+                        <div
+                          onClick={() => {
+                            setEditFormData(meProfile);
+                            setPopupTab("input");
+                            setIsProfileMenuOpen(false);
+                            setShowProfilePopup(true);
+                          }}
+                          style={{
+                            padding: "10px",
+                            cursor: "pointer",
+                            color: "#2980b9",
+                            fontWeight: "bold",
+                            borderRadius: "8px",
+                            display: "flex",
+                            gap: "10px",
+                            alignItems: "center",
+                            marginTop: "5px",
+                          }}
+                          onMouseOver={(e) =>
+                            (e.currentTarget.style.background = "#ebf5fb")
+                          }
+                          onMouseOut={(e) =>
+                            (e.currentTarget.style.background = "transparent")
+                          }
+                        >
+                          ✏️ {t("Edit", "Edit")}
+                        </div>
+
+                        <div
+                          onClick={handleDeleteProfile}
+                          style={{
+                            padding: "10px",
+                            cursor: "pointer",
+                            color: "#e74c3c",
+                            fontWeight: "bold",
+                            borderRadius: "8px",
+                            display: "flex",
+                            gap: "10px",
+                            alignItems: "center",
+                            marginTop: "5px",
+                          }}
+                          onMouseOver={(e) =>
+                            (e.currentTarget.style.background = "#fdedec")
+                          }
+                          onMouseOut={(e) =>
+                            (e.currentTarget.style.background = "transparent")
+                          }
+                        >
+                          🗑️ {t("Clear", "Clear")}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </>
               )}
@@ -1181,45 +1276,43 @@ export function MePage({ onNavigate }) {
               )}
             </div>
 
-            {/* Note about Sankalpam moved */}
+            {/* Profile Management Quick Guide */}
             <div
               style={{
                 marginTop: "20px",
-                padding: "15px",
-                background: "#fcf3cf",
-                borderLeft: "5px solid #f39c12",
+                padding: "20px",
+                background: "#f8f9fa",
+                borderLeft: "5px solid #8e44ad",
                 borderRadius: "8px",
-                textAlign: "center",
-                fontSize: "14px",
-                color: "#7e5109",
+                fontSize: "14.5px",
+                color: "#2c3e50",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "10px",
                 width: "100%",
                 boxSizing: "border-box",
+                lineHeight: "1.6",
+                textAlign: "left",
               }}
             >
-              <span>
-                ℹ️ {t("sankalpaMovedNote", "Nitya Sankalpam has been moved to a separate page for a cleaner dashboard.")}
-              </span>
-              <button
-                onClick={() => onNavigate("Sankalpa")}
-                style={{
-                  background: "#e67e22",
-                  color: "#fff",
-                  border: "none",
-                  padding: "8px 16px",
-                  borderRadius: "20px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  fontSize: "13px",
-                  boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-                }}
-              >
-                {t("clickToViewSankalpa", "Click here to view")}
-              </button>
+              <h3 style={{ margin: "0 0 12px 0", color: "#8e44ad", fontSize: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+                ⚙️ {t("dashboardProfileGuideTitle", "Dashboard Profile Guide")}
+              </h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div>
+                  <strong>➕ {t("Add", "Add")}:</strong> {t("addProfileGuideDesc", "Create and save a new birth chart profile in your browser's local database.")}
+                </div>
+                <div>
+                  <strong>👥 {t("Switch", "Switch")}:</strong> {t("switchProfileGuideDesc", "Switch the dashboard to show details of another saved profile.")}
+                </div>
+                <div>
+                  <strong>✏️ {t("Edit", "Edit")}:</strong> {t("editProfileGuideDesc", "Modify the birth chart details of the current dashboard profile.")}
+                </div>
+                <div>
+                  <strong>🗑️ {t("Clear", "Clear")}:</strong> {t("clearDashboardGuideDesc", "Remove the profile details from the dashboard (your saved profile list remains safe).")}
+                </div>
+              </div>
+              <div style={{ borderTop: "1px dashed #dcdde1", marginTop: "15px", paddingTop: "12px", fontSize: "13px", color: "#7f8c8d", display: "flex", alignItems: "center", gap: "6px" }}>
+                💾 <span>{t("exportProfilesGuideNote", "Tip: You can export your saved profiles as a JSON backup or import them from the Settings or Profiles page to ensure you never lose your data.")}</span>
+              </div>
             </div>
           </>
         )}
@@ -1287,164 +1380,493 @@ export function MePage({ onNavigate }) {
                 color: "#8e44ad",
                 borderBottom: "2px solid #eee",
                 paddingBottom: "10px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
               }}
             >
-              {meProfile ? `✏️ ${t("editMyProfile", "Edit My Profile")}` : `👤 ${t("setupMyProfilePopup", "Setup My Profile")}`}
+              <span>✏️ {t("changeProfileDetails", "Change Profile Details")}</span>
+              <span
+                style={{
+                  cursor: "pointer",
+                  background: "#f8f9fa",
+                  padding: "4px 8px",
+                  borderRadius: "50%",
+                  fontSize: "14px",
+                }}
+                onClick={() => setShowProfilePopup(false)}
+              >
+                ❌
+              </span>
             </h3>
 
+            {/* Tabs Navigation */}
             <div
               style={{
                 display: "flex",
-                flexDirection: "column",
-                gap: "15px",
-                marginTop: "15px",
+                borderBottom: "1px solid #eaecee",
+                marginBottom: "15px",
               }}
             >
-              <label
+              <button
+                className={`popup-tab ${popupTab === "input" ? "active" : ""}`}
+                onClick={() => setPopupTab("input")}
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "5px",
-                  fontSize: "14px",
+                  padding: "10px 15px",
+                  border: "none",
+                  background: "none",
+                  borderBottom: popupTab === "input" ? "2px solid #8e44ad" : "none",
+                  color: popupTab === "input" ? "#8e44ad" : "#7f8c8d",
                   fontWeight: "bold",
-                  color: "#2c3e50",
+                  cursor: "pointer",
                 }}
               >
-                {t("nameOptional", "Name (Optional):")}
-                <input
-                  type="text"
-                  value={editFormData.name}
-                  onChange={(e) =>
-                    setEditFormData({ ...editFormData, name: e.target.value })
-                  }
-                  placeholder={t("yourNamePlaceholder", "Your Name")}
-                  style={{
-                    padding: "10px",
-                    borderRadius: "6px",
-                    border: "1px solid #ccc",
-                    fontSize: "15px",
-                    outline: "none",
-                  }}
-                />
-              </label>
+                {t("manualEntry", "Manual Entry")}
+              </button>
+              <button
+                className={`popup-tab ${popupTab === "profiles" ? "active" : ""}`}
+                onClick={() => setPopupTab("profiles")}
+                style={{
+                  padding: "10px 15px",
+                  border: "none",
+                  background: "none",
+                  borderBottom: popupTab === "profiles" ? "2px solid #8e44ad" : "none",
+                  color: popupTab === "profiles" ? "#8e44ad" : "#7f8c8d",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                }}
+              >
+                {t("savedProfiles", "Saved Profiles")}
+              </button>
+            </div>
 
-              <div style={{ display: "flex", gap: "15px" }}>
-                <label
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "5px",
-                    fontSize: "14px",
-                    fontWeight: "bold",
-                    color: "#2c3e50",
-                    flex: 1,
-                  }}
-                >
-                  {t("dateOfBirth", "Date of Birth")}:
-                  <input
-                    type="date"
-                    value={editFormData.dob}
-                    onChange={(e) =>
-                      setEditFormData({ ...editFormData, dob: e.target.value })
-                    }
-                    style={{
-                      padding: "10px",
-                      borderRadius: "6px",
-                      border: "1px solid #ccc",
-                      fontSize: "15px",
-                      outline: "none",
-                    }}
-                    required
-                  />
-                </label>
-                <label
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "5px",
-                    fontSize: "14px",
-                    fontWeight: "bold",
-                    color: "#2c3e50",
-                    flex: 1,
-                  }}
-                >
-                  {t("timeOfBirth", "Time of Birth")}:
-                  <input
-                    type="time"
-                    value={editFormData.tob}
-                    onChange={(e) =>
-                      setEditFormData({ ...editFormData, tob: e.target.value })
-                    }
-                    style={{
-                      padding: "10px",
-                      borderRadius: "6px",
-                      border: "1px solid #ccc",
-                      fontSize: "15px",
-                      outline: "none",
-                    }}
-                    required
-                  />
-                </label>
-              </div>
-
-              <LocationAutocomplete
-                city={editFormData.city}
-                onLocationSelect={(loc) =>
-                  setEditFormData({
-                    ...editFormData,
-                    city: loc.city,
-                    latitude: loc.latitude,
-                    longitude: loc.longitude,
-                    timezone: loc.timezone,
-                  })
-                }
-              />
-
+            {popupTab === "input" && (
               <div
                 style={{
                   display: "flex",
+                  flexDirection: "column",
                   gap: "15px",
                   marginTop: "15px",
-                  borderTop: "1px solid #eee",
-                  paddingTop: "20px",
                 }}
               >
-                <button
-                  onClick={handleSaveProfile}
+                <div style={{ display: "flex", gap: "15px" }}>
+                  <label
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "5px",
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                      color: "#2c3e50",
+                      flex: 2,
+                    }}
+                  >
+                    {t("name", "Name")}:
+                    <input
+                      type="text"
+                      value={editFormData.name || ""}
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, name: e.target.value })
+                      }
+                      placeholder={t("yourNamePlaceholder", "Your Name")}
+                      style={{
+                        padding: "10px",
+                        borderRadius: "6px",
+                        border: "1px solid #ccc",
+                        fontSize: "15px",
+                        outline: "none",
+                        width: "100%",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                  </label>
+                  <label
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "5px",
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                      color: "#2c3e50",
+                      flex: 1,
+                    }}
+                  >
+                    {t("gender", "Gender")}:
+                    <select
+                      value={editFormData.gender || "male"}
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, gender: e.target.value })
+                      }
+                      style={{
+                        padding: "10px",
+                        borderRadius: "6px",
+                        border: "1px solid #ccc",
+                        fontSize: "15px",
+                        outline: "none",
+                        height: "41px",
+                        width: "100%",
+                        boxSizing: "border-box",
+                      }}
+                    >
+                      <option value="male">{t("male", "Male")}</option>
+                      <option value="female">{t("female", "Female")}</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div style={{ display: "flex", gap: "15px" }}>
+                  <label
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "5px",
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                      color: "#2c3e50",
+                      flex: 1,
+                    }}
+                  >
+                    {t("dateOfBirth", "Date of Birth")}:
+                    <input
+                      type="date"
+                      value={editFormData.dob || ""}
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, dob: e.target.value })
+                      }
+                      style={{
+                        padding: "10px",
+                        borderRadius: "6px",
+                        border: "1px solid #ccc",
+                        fontSize: "15px",
+                        outline: "none",
+                        width: "100%",
+                        boxSizing: "border-box",
+                      }}
+                      required
+                    />
+                  </label>
+                  <label
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "5px",
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                      color: "#2c3e50",
+                      flex: 1,
+                    }}
+                  >
+                    {t("timeOfBirth", "Time of Birth")}:
+                    <input
+                      type="time"
+                      value={editFormData.tob || ""}
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, tob: e.target.value })
+                      }
+                      style={{
+                        padding: "10px",
+                        borderRadius: "6px",
+                        border: "1px solid #ccc",
+                        fontSize: "15px",
+                        outline: "none",
+                        width: "100%",
+                        boxSizing: "border-box",
+                      }}
+                      required
+                    />
+                  </label>
+                </div>
+
+                <LocationAutocomplete
+                  city={editFormData.city || ""}
+                  onLocationSelect={(loc) =>
+                    setEditFormData({
+                      ...editFormData,
+                      city: loc.city,
+                      latitude: loc.latitude,
+                      longitude: loc.longitude,
+                      timezone: loc.timezone,
+                    })
+                  }
+                />
+
+                <details
                   style={{
-                    flex: 1,
-                    background: "#27ae60",
-                    color: "#fff",
-                    padding: "12px",
-                    borderRadius: "8px",
-                    border: "none",
-                    fontWeight: "bold",
-                    fontSize: "16px",
-                    cursor: "pointer",
-                    boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+                    marginTop: "-5px",
+                    fontSize: "13px",
+                    background: "#f9f9f9",
+                    padding: "10px",
+                    borderRadius: "6px",
+                    border: "1px solid #eee",
                   }}
                 >
-                  {t("saveProfile", "Save Profile")}
-                </button>
-                <button
-                  onClick={() => setShowProfilePopup(false)}
+                  <summary
+                    style={{
+                      cursor: "pointer",
+                      color: "#3498db",
+                      fontWeight: "bold",
+                      outline: "none",
+                      listStyle: "none",
+                    }}
+                  >
+                    {t("manualCoordinates", "Manual Coordinates (Lat / Lon / Tz)")}
+                  </summary>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      marginTop: "10px",
+                    }}
+                  >
+                    <label style={{ flex: 1, fontSize: "0.85rem", color: "#636e72" }}>
+                      Lat:
+                      <input
+                        type="text"
+                        style={{
+                          width: "100%",
+                          padding: "8px",
+                          marginTop: "4px",
+                          borderRadius: "6px",
+                          border: "1px solid #ccc",
+                          fontSize: "0.95rem",
+                          boxSizing: "border-box",
+                        }}
+                        value={editFormData.latitude || ""}
+                        onChange={(e) =>
+                          setEditFormData({ ...editFormData, latitude: e.target.value })
+                        }
+                      />
+                    </label>
+                    <label style={{ flex: 1, fontSize: "0.85rem", color: "#636e72" }}>
+                      Lon:
+                      <input
+                        type="text"
+                        style={{
+                          width: "100%",
+                          padding: "8px",
+                          marginTop: "4px",
+                          borderRadius: "6px",
+                          border: "1px solid #ccc",
+                          fontSize: "0.95rem",
+                          boxSizing: "border-box",
+                        }}
+                        value={editFormData.longitude || ""}
+                        onChange={(e) =>
+                          setEditFormData({ ...editFormData, longitude: e.target.value })
+                        }
+                      />
+                    </label>
+                    <label style={{ flex: 1, fontSize: "0.85rem", color: "#636e72" }}>
+                      Tz:
+                      <input
+                        type="text"
+                        style={{
+                          width: "100%",
+                          padding: "8px",
+                          marginTop: "4px",
+                          borderRadius: "6px",
+                          border: "1px solid #ccc",
+                          fontSize: "0.95rem",
+                          boxSizing: "border-box",
+                        }}
+                        value={editFormData.timezone || ""}
+                        onChange={(e) =>
+                          setEditFormData({ ...editFormData, timezone: e.target.value })
+                        }
+                      />
+                    </label>
+                  </div>
+                </details>
+
+                <div
                   style={{
-                    flex: 1,
-                    background: "#e74c3c",
-                    color: "#fff",
-                    padding: "12px",
-                    borderRadius: "8px",
-                    border: "none",
-                    fontWeight: "bold",
-                    fontSize: "16px",
-                    cursor: "pointer",
-                    boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+                    display: "flex",
+                    gap: "15px",
+                    marginTop: "15px",
+                    borderTop: "1px solid #eee",
+                    paddingTop: "20px",
                   }}
                 >
-                  {t("cancel", "Cancel")}
-                </button>
+                  <button
+                    onClick={handleSaveProfile}
+                    style={{
+                      flex: 1,
+                      background: "#27ae60",
+                      color: "#fff",
+                      padding: "12px",
+                      borderRadius: "8px",
+                      border: "none",
+                      fontWeight: "bold",
+                      fontSize: "16px",
+                      cursor: "pointer",
+                      boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    {t("saveProfileBtn", "Save Profile")}
+                  </button>
+                  <button
+                    onClick={handleApplyProfile}
+                    style={{
+                      flex: 1,
+                      background: "linear-gradient(135deg, #8e44ad, #9b59b6)",
+                      color: "#fff",
+                      padding: "12px",
+                      borderRadius: "8px",
+                      border: "none",
+                      fontWeight: "bold",
+                      fontSize: "16px",
+                      cursor: "pointer",
+                      boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    {t("applyBtn", "Apply")}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
+
+            {popupTab === "profiles" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "15px" }}>
+                <input
+                  type="text"
+                  placeholder={t("searchProfiles", "Search profiles...")}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    border: "1px solid #8e44ad",
+                    borderRadius: "8px",
+                    fontSize: "14px",
+                    outline: "none",
+                    background: "#fdfefe",
+                    boxSizing: "border-box",
+                  }}
+                />
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px",
+                    maxHeight: "300px",
+                    overflowY: "auto",
+                    padding: "5px 0",
+                  }}
+                >
+                  {Object.keys(savedProfiles).filter((name) => {
+                    const q = searchQuery.trim().toLowerCase();
+                    return q === "" ||
+                      name.toLowerCase().includes(q) ||
+                      (savedProfiles[name].city || "").toLowerCase().includes(q);
+                  }).length === 0 ? (
+                    <p
+                      style={{
+                        textAlign: "center",
+                        color: "#7f8c8d",
+                        padding: "20px 0",
+                        fontSize: "14px",
+                      }}
+                    >
+                      {t("noSavedProfilesFound", "No saved profiles found.")}
+                    </p>
+                  ) : (
+                    Object.keys(savedProfiles)
+                      .filter((name) => {
+                        const q = searchQuery.trim().toLowerCase();
+                        return q === "" ||
+                          name.toLowerCase().includes(q) ||
+                          (savedProfiles[name].city || "").toLowerCase().includes(q);
+                      })
+                      .map((name) => (
+                        <div
+                          key={name}
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            padding: "10px",
+                            border: "1px solid #eee",
+                            borderRadius: "8px",
+                            background: "#fdfefe",
+                            boxSizing: "border-box",
+                            gap: "10px",
+                          }}
+                        >
+                          <div
+                            onClick={() => handleProfileSelect(name)}
+                            style={{ flex: 1, cursor: "pointer", textAlign: "left" }}
+                          >
+                            <strong style={{ color: "#2c3e50", fontSize: "14px", display: "block", marginBottom: "3px" }}>
+                              {name}
+                            </strong>
+                            <div
+                              style={{
+                                fontSize: "12px",
+                                color: "#7f8c8d",
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "2px",
+                              }}
+                            >
+                              <span>📅 {savedProfiles[name].dob ? savedProfiles[name].dob.split('-').reverse().join('-') : ''}</span>
+                              <span>⏰ {savedProfiles[name].tob || ''}</span>
+                              <span>📍 {savedProfiles[name].city ? savedProfiles[name].city.split(',')[0].trim() : ''}</span>
+                            </div>
+                          </div>
+                          <div style={{ display: "flex", gap: "6px" }}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleProfileSelect(name);
+                              }}
+                              title={t("edit", "Edit")}
+                              style={{
+                                background: "#ebf5fb",
+                                border: "1px solid #3498db",
+                                color: "#3498db",
+                                borderRadius: "50%",
+                                width: "32px",
+                                height: "32px",
+                                cursor: "pointer",
+                                fontSize: "14px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                padding: 0,
+                                minHeight: "auto",
+                              }}
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              onClick={(e) => handleProfileDelete(name, e)}
+                              title={t("delete", "Delete")}
+                              style={{
+                                background: "#fdedec",
+                                border: "1px solid #e74c3c",
+                                color: "#e74c3c",
+                                borderRadius: "50%",
+                                width: "32px",
+                                height: "32px",
+                                cursor: "pointer",
+                                fontSize: "14px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                padding: 0,
+                                minHeight: "auto",
+                              }}
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

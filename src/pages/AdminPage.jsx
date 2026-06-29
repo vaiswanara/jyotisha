@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { API_URL, API_TOKEN, getLessons, saveLessons, saveSubscribers, saveUsers, getLibrary, saveLibrary, getTicker, saveTicker } from "../services/astrologyApi.js";
+import { API_URL, API_TOKEN, getLessons, saveLessons, saveSubscribers, getLibrary, saveLibrary, getTicker, saveTicker } from "../services/astrologyApi.js";
 export function AdminPage({ onNavigate }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [password, setPassword] = useState("");
-  const [adminData, setAdminData] = useState({ subscribers: [], users: [] });
-  const [enableUserSync, setEnableUserSync] = useState(false);
+  const [adminData, setAdminData] = useState({ subscribers: [] });
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null); // { type: 'success' | 'error', text: '' }
@@ -182,9 +181,7 @@ export function AdminPage({ onNavigate }) {
       if (data.status === "success") {
         setAdminData({
           subscribers: data.subscribers || [],
-          users: data.users || [],
         });
-        setEnableUserSync(data.enableUserSync === true);
         setIsLoggedIn(true);
         sessionStorage.setItem("admin_pwd", pwd);
         setMessage(null);
@@ -209,7 +206,7 @@ export function AdminPage({ onNavigate }) {
     sessionStorage.removeItem("admin_pwd");
     setIsLoggedIn(false);
     setPassword("");
-    setAdminData({ subscribers: [], users: [] });
+    setAdminData({ subscribers: [] });
     setLessons([]);
     setLibrary([]);
     setTickerList([]);
@@ -219,46 +216,7 @@ export function AdminPage({ onNavigate }) {
     setLoadingTicker(false);
   };
 
-  const handleToggleSync = async () => {
-    const newState = !enableUserSync;
-    const confirmMessage = newState
-      ? "Are you sure you want to ENABLE user data sync to the server?\n(యూజర్ డేటా సేవింగ్ ఆన్ చేయాలా?)"
-      : "Are you sure you want to DISABLE user data sync to the server?\n(యూజర్ డేటా సేవింగ్ ఆఫ్ చేయాలా?)";
 
-    if (!window.confirm(confirmMessage)) return;
-
-    setLoading(true);
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-token": API_TOKEN,
-          "x-admin-password": password,
-        },
-        body: JSON.stringify({
-          endpoint: "save_sync_settings",
-          enableUserSync: newState,
-        }),
-      });
-      const data = await res.json();
-      if (data && data.status === "success") {
-        setEnableUserSync(data.enableUserSync);
-        setMessage({
-          type: "success",
-          text: `User data sync successfully ${data.enableUserSync ? "enabled (ఆన్ చేయబడింది)" : "disabled (ఆఫ్ చేయబడింది)"}!`,
-        });
-      } else {
-        setMessage({
-          type: "error",
-          text: data?.error || "Failed to save sync settings.",
-        });
-      }
-    } catch (err) {
-      setMessage({ type: "error", text: "❌ Connection Error." });
-    }
-    setLoading(false);
-  };
 
   const handleSendAlert = async (e) => {
     e.preventDefault();
@@ -599,46 +557,7 @@ export function AdminPage({ onNavigate }) {
     });
   };
 
-  const handleImportUsersFile = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const text = event.target.result;
-        const imported = JSON.parse(text);
-        const list = Array.isArray(imported) ? imported : (imported.users || []);
-        if (!Array.isArray(list)) {
-          throw new Error("Invalid JSON format. Expected an array of users.");
-        }
-
-        if (!window.confirm(`Are you sure you want to import ${list.length} users? This will replace current users.`)) return;
-
-        setLoading(true);
-        const res = await saveUsers(list, password);
-        if (res && res.status === "success") {
-          setAdminData(prev => ({ ...prev, users: list }));
-          setMessage({ type: "success", text: `✅ Successfully imported ${list.length} users!` });
-        } else {
-          setMessage({ type: "error", text: res?.error || "Failed to save imported users." });
-        }
-      } catch (err) {
-        setMessage({ type: "error", text: `❌ Import failed: ${err.message}` });
-      }
-      setLoading(false);
-      e.target.value = "";
-    };
-    reader.readAsText(file);
-  };
-
-  const handleDeleteUsers = () => {
-    setDeletePrompt({
-      isOpen: true,
-      type: "users",
-      passwordInput: "",
-    });
-  };
 
   const handleConfirmDelete = async () => {
     if (deletePrompt.passwordInput !== password) {
@@ -658,14 +577,6 @@ export function AdminPage({ onNavigate }) {
           setMessage({ type: "success", text: "✅ Successfully deleted all subscribers!" });
         } else {
           setMessage({ type: "error", text: res?.error || "Failed to delete subscribers." });
-        }
-      } else if (type === "users") {
-        const res = await saveUsers([], password);
-        if (res && res.status === "success") {
-          setAdminData(prev => ({ ...prev, users: [] }));
-          setMessage({ type: "success", text: "✅ Successfully deleted all users!" });
-        } else {
-          setMessage({ type: "error", text: res?.error || "Failed to delete users." });
         }
       }
     } catch (err) {
@@ -2106,161 +2017,7 @@ export function AdminPage({ onNavigate }) {
           </div>
         </details>
 
-        {/* Users Section */}
-        <details className="admin-card">
-          <summary>
-            <span>👤 Users Data Management</span>
-            <span
-              style={{
-                background: "#e9ecef",
-                padding: "4px 10px",
-                borderRadius: "20px",
-                fontSize: "12px",
-              }}
-            >
-              Total: {adminData.users.length}
-            </span>
-          </summary>
-          <div className="admin-card-body">
-            {/* Sync Control Toggle Section */}
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              background: enableUserSync ? "#eafaf1" : "#fdedec",
-              padding: "16px 20px",
-              borderRadius: "8px",
-              border: `1px solid ${enableUserSync ? "#27ae60" : "#e74c3c"}`,
-              marginBottom: "20px",
-            }}>
-              <div>
-                <strong style={{ color: enableUserSync ? "#27ae60" : "#c0392b", fontSize: "15.5px" }}>
-                  User Data Sync: {enableUserSync ? "ENABLED (ఆన్ చేయబడింది)" : "DISABLED (ఆఫ్ చేయబడింది)"}
-                </strong>
-                <div style={{ fontSize: "12.5px", color: "#555", marginTop: "5px", lineHeight: "1.4" }}>
-                  When disabled, users' birth details entered on Me Dashboard or charts will NOT be saved to the server. (ఆఫ్ లో ఉన్నప్పుడు యూజర్ వివరాలు సర్వర్‌లో సేవ్ అవ్వవు).
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={handleToggleSync}
-                className={`admin-btn ${enableUserSync ? "admin-btn-danger" : "admin-btn-success"}`}
-                style={{ padding: "10px 18px", fontSize: "13.5px", whiteSpace: "nowrap", flexShrink: 0 }}
-              >
-                {enableUserSync ? "🚫 Disable Sync" : "✅ Enable Sync"}
-              </button>
-            </div>
 
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "20px" }}>
-              <button
-                onClick={() =>
-                  exportJSON(
-                    adminData.users,
-                    `users_data_${new Date().toISOString().split("T")[0]}.json`,
-                  )
-                }
-                className="admin-btn admin-btn-success"
-                style={{ padding: "10px 20px" }}
-              >
-                📤 Export Users JSON
-              </button>
-              <button
-                onClick={() => document.getElementById("users-import-file").click()}
-                className="admin-btn"
-                style={{ padding: "10px 20px", background: "#f39c12" }}
-              >
-                📥 Import JSON
-              </button>
-              <input
-                id="users-import-file"
-                type="file"
-                accept=".json"
-                onChange={handleImportUsersFile}
-                style={{ display: "none" }}
-              />
-              {adminData.users.length > 0 && (
-                <button
-                  onClick={handleDeleteUsers}
-                  className="admin-btn admin-btn-danger"
-                  style={{ padding: "10px 20px" }}
-                >
-                  🗑️ Delete All
-                </button>
-              )}
-            </div>
-
-            {adminData.users.length > 0 ? (
-              <div
-                className="admin-table-wrapper"
-                style={{ maxHeight: "500px" }}
-              >
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Name & City</th>
-                      <th>Birth Details</th>
-                      <th>Updated On</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[...adminData.users].reverse().map((u, i) => (
-                      <tr key={i}>
-                        <td>
-                          <div
-                            style={{
-                              fontWeight: "bold",
-                              color: "#8e44ad",
-                              fontSize: "15px",
-                            }}
-                          >
-                            {u.name || "Unknown"}
-                          </div>
-                          <div
-                            style={{
-                              fontSize: "12px",
-                              color: "#7f8c8d",
-                              marginTop: "4px",
-                            }}
-                          >
-                            {u.city || "-"}
-                          </div>
-                        </td>
-                        <td style={{ whiteSpace: "nowrap" }}>
-                          <div style={{ color: "#2c3e50", fontWeight: "bold" }}>
-                            {u.dob || "-"}
-                          </div>
-                          <div
-                            style={{
-                              fontSize: "13px",
-                              color: "#e67e22",
-                              marginTop: "4px",
-                              fontWeight: "600",
-                            }}
-                          >
-                            {u.tob || "-"}
-                          </div>
-                        </td>
-                        <td
-                          style={{
-                            whiteSpace: "nowrap",
-                            color: "#7f8c8d",
-                            fontSize: "13px",
-                          }}
-                        >
-                          {u.timestamp
-                            ? new Date(u.timestamp).toLocaleString()
-                            : "-"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p style={{ color: "#7f8c8d" }}>No users found yet.</p>
-            )}
-          </div>
-        </details>
       </div>
 
       {/* Delete Confirmation Password Modal */}

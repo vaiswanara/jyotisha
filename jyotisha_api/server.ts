@@ -128,16 +128,7 @@ setInterval(() => {
   }
 }, CACHE_TTL_SECONDS * 1000).unref(); // గంటకు ఒకసారి క్లీనప్, ప్రాసెస్ దీనికోసం ఆగదు
 
-const isSyncEnabled = (): boolean => {
-  const settingsFile = path.join(process.cwd(), "sync_settings.json");
-  if (fs.existsSync(settingsFile)) {
-    try {
-      const data = JSON.parse(fs.readFileSync(settingsFile, "utf-8"));
-      return data.enableUserSync === true;
-    } catch (e) { }
-  }
-  return false;
-};
+
 
 // భద్రత కోసం API Token Verification
 const API_SECRET_TOKEN = process.env.API_SECRET_TOKEN || "";
@@ -2713,73 +2704,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
           chart: { planets: gPlanets, navamsa_d9: gNavamsa },
         },
       });
-    } else if (endpoint === "save_user") {
-      if (!isSyncEnabled()) {
-        return res.json({
-          status: "success",
-          message: "User data sync is disabled",
-        });
-      }
-      const usersFile = path.join(process.cwd(), "users_data.json");
 
-      // ఫైల్ సైజు 10MB దాటితే ఆపడం (భద్రత కోసం)
-      if (fs.existsSync(usersFile)) {
-        const stats = fs.statSync(usersFile);
-        if (stats.size > 10 * 1024 * 1024) {
-          return res
-            .status(507)
-            .json({ status: "error", message: "Storage limit reached" });
-        }
-      }
-
-      // XSS ఎటాక్స్ నివారించడానికి డేటాని క్లీన్ చేయడం
-      const cleanData = {
-        name: String(input.name || "Unknown").substring(0, 100),
-        dob: String(input.dob || "").substring(0, 20),
-        tob: String(input.tob || "").substring(0, 20),
-        city: String(input.city || "").substring(0, 100),
-        deviceId: String(input.deviceId || "").substring(0, 100),
-        timestamp: String(input.timestamp || new Date().toISOString()),
-      };
-
-      let existingData = [];
-      if (fs.existsSync(usersFile)) {
-        try {
-          existingData = JSON.parse(fs.readFileSync(usersFile, "utf-8"));
-          if (!Array.isArray(existingData)) existingData = [];
-        } catch (e) {
-          existingData = [];
-        }
-      }
-
-      let isUpdated = false;
-      if (cleanData.deviceId) {
-        for (let i = 0; i < existingData.length; i++) {
-          if (existingData[i].deviceId === cleanData.deviceId) {
-            existingData[i] = cleanData;
-            isUpdated = true;
-            break;
-          }
-        }
-      }
-
-      if (!isUpdated) {
-        existingData.push(cleanData);
-      }
-
-      try {
-        // ఒకేసారి ఇద్దరు సేవ్ చేసినా ప్రాబ్లమ్ లేకుండా Sync వాడాం
-        fs.writeFileSync(usersFile, JSON.stringify(existingData, null, 2));
-        res.setHeader("X-Cache", "BYPASS"); // ఈ రిక్వెస్ట్ ని కాష్ చేయకూడదు
-        return res.json({
-          status: "success",
-          message: "User data saved successfully",
-        });
-      } catch (e) {
-        return res
-          .status(500)
-          .json({ status: "error", message: "Failed to write to file" });
-      }
     } else if (endpoint === "push_subscribe") {
       const subFile = path.join(process.cwd(), "subscribers.json");
       const { sub_endpoint, keys, action } = input;
@@ -3063,31 +2988,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         }
       }
       return res.status(400).json({ error: "Invalid subscribers data format" });
-    } else if (endpoint === "save_users") {
-      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
-        return res
-          .status(403)
-          .json({ error: "Forbidden: Invalid Admin Password" });
-      }
 
-      const { users } = input;
-      if (Array.isArray(users)) {
-        if (!isSyncEnabled() && users.length > 0) {
-          return res.status(400).json({
-            error: "Cannot import users while user data sync is disabled. (యూజర్ డేటా సింక్ ఆఫ్‌లో ఉన్నప్పుడు ఇంపోర్ట్ చేయలేరు.)",
-          });
-        }
-        const usersFile = path.join(process.cwd(), "users_data.json");
-        try {
-          fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
-          res.setHeader("X-Cache", "BYPASS");
-          return res.json({ status: "success", message: "Users saved successfully" });
-        } catch (e: any) {
-          return res.status(500).json({ error: "Failed to write users: " + e.message });
-        }
-      }
     } else if (endpoint === "eclipses") {
       const lat = parseFloat(String(input.latitude || input.lat || 12.9716));
       const lon = parseFloat(String(input.longitude || input.lon || 77.5946));
@@ -3146,39 +3047,14 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
       };
 
       const subscribers = readJson("subscribers.json") || {};
-      const users = readJson("users_data.json") || [];
-      const enableUserSync = isSyncEnabled();
 
       res.setHeader("X-Cache", "BYPASS");
       return res.json({
         status: "success",
         subscribers: Object.values(subscribers),
-        users,
-        enableUserSync,
+        users: [],
+        enableUserSync: false,
       });
-    } else if (endpoint === "save_sync_settings") {
-      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
-        return res
-          .status(403)
-          .json({ error: "Forbidden: Invalid Admin Password" });
-      }
-
-      const settingsFile = path.join(process.cwd(), "sync_settings.json");
-      const data = {
-        enableUserSync: input.enableUserSync === true,
-      };
-      try {
-        fs.writeFileSync(settingsFile, JSON.stringify(data, null, 2));
-        res.setHeader("X-Cache", "BYPASS");
-        return res.json({
-          status: "success",
-          enableUserSync: data.enableUserSync,
-        });
-      } catch (e: any) {
-        return res.status(500).json({ error: "Failed to write sync settings: " + e.message });
-      }
     }
 
     return res.status(400).json({ error: "Unknown endpoint" });

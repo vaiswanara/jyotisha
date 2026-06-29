@@ -24,6 +24,16 @@ export function ChangelogPage({ logoUrl }) {
       >
         <div className="form-panel" style={{ position: "static", padding: "30px", borderRadius: "12px" }}>
 
+          {/* 29-06-2026 */}
+          <div style={{ borderLeft: "4px solid #8e44ad", paddingLeft: "20px", marginBottom: "30px" }}>
+            <h2 style={{ color: "#2c3e50", margin: "0 0 8px 0", fontSize: "1.4rem" }}>29-06-2026</h2>
+            <ul style={{ marginTop: "15px", color: "#34495e", lineHeight: "1.8", fontSize: "1rem" }}>
+              <li><strong>Dashboard Profile Management Upgrade:</strong> Upgraded the profile management on the Me Dashboard to support the same saved profiles list as the other pages.</li>
+              <li><strong>Interactive Profile Dropdown:</strong> Shortened and simplified the dashboard profile menu options to ➕ <strong>Add</strong>, 👥 <strong>Switch</strong>, ✏️ <strong>Edit</strong>, and 🗑️ <strong>Clear</strong> for a cleaner dropdown layout.</li>
+              <li><strong>Quick Profile Actions:</strong> Users can now add new local profiles, switch between existing saved profiles in the local database, edit active profile details, or clear dashboard selections directly.</li>
+            </ul>
+          </div>
+
           {/* 28-06-2026 */}
           <div style={{ borderLeft: "4px solid #3498db", paddingLeft: "20px", marginBottom: "30px" }}>
             <h2 style={{ color: "#2c3e50", margin: "0 0 8px 0", fontSize: "1.4rem" }}>28-06-2026</h2>

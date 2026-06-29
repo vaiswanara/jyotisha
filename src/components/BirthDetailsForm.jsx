@@ -1,6 +1,5 @@
 import { LocationAutocomplete } from "./LocationAutocomplete.jsx";
 import { useTranslation } from "react-i18next";
-import { saveUserData } from "../services/astrologyApi.js";
 
 export function BirthDetailsForm({
   formData,
@@ -28,22 +27,6 @@ export function BirthDetailsForm({
   }
 
   function handleSubmit(event) {
-    // యూజర్‌ని గుర్తించడానికి డివైస్ ఐడీ లేకపోతే క్రియేట్ చేయడం
-    let deviceId = localStorage.getItem("vaiswanara_device_id");
-    if (!deviceId) {
-      deviceId = "dev_" + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem("vaiswanara_device_id", deviceId);
-    }
-
-    // Node.js API కి డేటా సైలెంట్ గా పంపడం
-    saveUserData({
-      name: formData.name || "Unknown",
-      dob: formData.dob,
-      tob: formData.tob,
-      city: formData.city || "",
-      deviceId: deviceId,
-    });
-
     if (onSubmit) onSubmit(event);
   }
 

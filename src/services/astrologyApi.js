@@ -48,20 +48,7 @@ export async function fetchBirthChart(formData) {
   return data;
 }
 
-export async function saveUserData(userData) {
-  const response = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-token": API_TOKEN,
-    },
-    body: JSON.stringify({
-      endpoint: "save_user",
-      ...userData,
-    }),
-  });
-  return response.json().catch(() => null);
-}
+
 
 export async function getLessons() {
   const params = new URLSearchParams({
@@ -164,21 +151,7 @@ export async function saveSubscribers(subscribers, adminPassword) {
   return response.json().catch(() => null);
 }
 
-export async function saveUsers(users, adminPassword) {
-  const response = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-token": API_TOKEN,
-      "x-admin-password": adminPassword,
-    },
-    body: JSON.stringify({
-      endpoint: "save_users",
-      users,
-    }),
-  });
-  return response.json().catch(() => null);
-}
+
 
 export async function fetchPrecisionTest(formData) {
   const prefs = JSON.parse(localStorage.getItem("eclock_prefs") || "{}");
