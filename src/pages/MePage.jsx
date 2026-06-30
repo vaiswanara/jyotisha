@@ -8,6 +8,33 @@ import {
 import { LocationAutocomplete } from "../components/LocationAutocomplete.jsx";
 import { getLocalDateStr } from "../utils/formatters.js";
 
+const formatTimeValue = (val, type = "danger") => {
+  if (!val) {
+    return (
+      <div className="panchanga-value-container">
+        <span className={`timing-badge ${type}`}>--:--</span>
+      </div>
+    );
+  }
+  const badgeClass = `timing-badge ${type}`;
+  if (val.includes(",")) {
+    return (
+      <div className="panchanga-value-container">
+        {val.split(", ").map((part, index) => (
+          <span key={index} className={badgeClass}>
+            {part}
+          </span>
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div className="panchanga-value-container">
+      <span className={badgeClass}>{val}</span>
+    </div>
+  );
+};
+
 
 const NAKSHATRAS = [
   "Ashwini",
@@ -173,6 +200,9 @@ export function MePage({ onNavigate }) {
   const [natalChart, setNatalChart] = useState(null);
   const [jupiterTransits, setJupiterTransits] = useState([]);
   const [saturnTransits, setSaturnTransits] = useState([]);
+  const [isPanchangaExpanded, setIsPanchangaExpanded] = useState(true);
+  const [isTimingsExpanded, setIsTimingsExpanded] = useState(true);
+  const [isBalamsExpanded, setIsBalamsExpanded] = useState(true);
 
   // Fetch transits on mount
   useEffect(() => {
@@ -281,7 +311,7 @@ export function MePage({ onNavigate }) {
 
         // Cache Keys (SWR pattern for background syncing)
         const natalCacheKey = `me_natal_${profile.dob}_${profile.tob || "12:00"}_${natalLat}_${natalLon}_${ayanamsha}`;
-        const transitCacheKey = `me_transit_v3_${selectedDate}_${selectedTime}_${transitLat}_${transitLon}_${ayanamsha}`;
+        const transitCacheKey = `me_transit_v5_${selectedDate}_${selectedTime}_${transitLat}_${transitLon}_${ayanamsha}`;
 
         let natal = null;
         let transit = null;
@@ -292,13 +322,13 @@ export function MePage({ onNavigate }) {
           if (cachedNatal && cachedNatal.planets) {
             natal = cachedNatal;
           }
-        } catch (e) {}
+        } catch (e) { }
         try {
           const cachedTransit = JSON.parse(localStorage.getItem(transitCacheKey));
           if (cachedTransit && cachedTransit.planets && cachedTransit.meta && cachedTransit.meta.sunrise) {
             transit = cachedTransit;
           }
-        } catch (e) {}
+        } catch (e) { }
 
         // Instantly display cached data if available
         if (natal) setNatalChart(natal);
@@ -306,7 +336,7 @@ export function MePage({ onNavigate }) {
 
         // 2. Background Revalidation (Parallel for speed)
         const needsNatal = !natal;
-        const needsTransit = !transit;
+        const needsTransit = !transit || !transit.panchanga?.gulika_kalam;
 
         if (needsNatal || needsTransit) {
           setIsSyncing(true);
@@ -474,8 +504,12 @@ export function MePage({ onNavigate }) {
       .replace("Shukla ", "")
       .replace("Krishna ", "")
       .trim();
-    if (cleanTithi === "Pratipada" || cleanTithi === "Prathama") cleanTithi = "Pratipath";
-    
+    if (cleanTithi === "Pratipada" || cleanTithi === "Pratipath") cleanTithi = "Prathama";
+    if (cleanTithi === "Dwadashi") cleanTithi = "Dvadashi";
+    if (cleanTithi === "Shasthi") cleanTithi = "Shashthi";
+    if (cleanTithi === "Pournami" || cleanTithi === "Pournima") cleanTithi = "Purnima";
+    if (cleanTithi === "Amavasai") cleanTithi = "Amavasya";
+
     const isKrishna = pakshaStr?.includes("Krishna") || tithiStr.includes("K.");
     const paksha = isKrishna ? "Krishna" : "Shukla";
     return `${t(paksha)}-${t(cleanTithi, cleanTithi)}`;
@@ -703,31 +737,6 @@ export function MePage({ onNavigate }) {
   const guruBalam = getGuruBalam();
   const shaniBalam = getShaniBalam();
 
-  const cardStyle = (isGood) => {
-    let background = "#eafaf1";
-    let borderLeftColor = "#27ae60";
-
-    if (isGood === "medium") {
-      background = "#fef9e7";
-      borderLeftColor = "#f39c12";
-    } else if (!isGood) {
-      background = "#fdedec";
-      borderLeftColor = "#e74c3c";
-    }
-
-    return {
-      background,
-      borderLeft: `5px solid ${borderLeftColor}`,
-      padding: "15px",
-      borderRadius: "8px",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-      display: "flex",
-      flexDirection: "column",
-      gap: "5px",
-      height: "100%",
-      boxSizing: "border-box",
-    };
-  };
 
   return (
     <main className="page">
@@ -1097,56 +1106,305 @@ export function MePage({ onNavigate }) {
               </button>
             </div>
 
-            {/* Single Line Panchanga Banner */}
+            {/* Split Panchanga and Timings Cards */}
             {transitChart && transitChart.panchanga && (
               <>
-                <div
-                  style={{
-                    background: "linear-gradient(135deg, #8e44ad, #3498db)",
-                    color: "white",
-                    padding: "15px",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-                    textAlign: "center",
-                    fontWeight: "bold",
-                    maxWidth: "800px",
-                    margin: "0 auto",
-                    width: "100%",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "clamp(14px, 3vw, 17px)",
-                      opacity: 0.95,
-                      lineHeight: "1.5",
-                    }}
-                  >
-                    {parseAndLocalizeTithiRealtime(transitChart.panchanga.tithi, transitChart.panchanga.paksha) || t("tithi", "Tithi")} •{" "}
-                    {transitChart.panchanga.vaara || transitChart.panchanga.vara ? `${(SANSKRIT_VAARAS[lang] || SANSKRIT_VAARAS.en)[transitChart.panchanga.vaara || transitChart.panchanga.vara] || (transitChart.panchanga.vaara || transitChart.panchanga.vara)} • ` : ""}
-                    {t(normalizeNakshatraForTranslation(transitChart.panchanga.moon_nakshatra || transitChart.planets?.Moon?.nakshatra))}{" "}
-                    • {t(transitChart.panchanga.yoga)} • {t(transitChart.panchanga.karana)}
+                <div className="panchanga-container-grid">
+                  {/* Card 1: Panchanga Card */}
+                  <div className="panchanga-info-card" style={{ alignSelf: isPanchangaExpanded ? undefined : "start" }}>
+                    <h3
+                      onClick={() => setIsPanchangaExpanded(!isPanchangaExpanded)}
+                      style={{
+                        cursor: "pointer",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "100%",
+                        userSelect: "none",
+                        borderBottom: isPanchangaExpanded ? undefined : "none",
+                        paddingBottom: isPanchangaExpanded ? undefined : "0px",
+                      }}
+                      className="panchanga-card-header"
+                    >
+                      <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        📅 {t("panchangaCardTitle", "Panchanga Details")}
+                      </span>
+                      <span
+                        style={{
+                          transform: isPanchangaExpanded ? "rotate(0deg)" : "rotate(180deg)",
+                          transition: "transform 0.3s ease",
+                          display: "inline-block",
+                          fontSize: "14px",
+                        }}
+                      >
+                        ▲
+                      </span>
+                    </h3>
+                    {isPanchangaExpanded && (
+                      <div className="panchanga-list">
+                        <div className="panchanga-item">
+                          <span className="panchanga-label">{t("tithi", "Tithi")}:</span>
+                          <span className="panchanga-value">
+                            {parseAndLocalizeTithiRealtime(transitChart.panchanga.tithi, transitChart.panchanga.paksha) || t("tithi", "Tithi")}
+                          </span>
+                        </div>
+                        <div className="panchanga-item">
+                          <span className="panchanga-label">{t("vaaramu", "Vaara")}:</span>
+                          <span className="panchanga-value">
+                            {transitChart.panchanga.vaara || transitChart.panchanga.vara ? ((SANSKRIT_VAARAS[lang] || SANSKRIT_VAARAS.en)[transitChart.panchanga.vaara || transitChart.panchanga.vara] || (transitChart.panchanga.vaara || transitChart.panchanga.vara)) : ""}
+                          </span>
+                        </div>
+                        <div className="panchanga-item">
+                          <span className="panchanga-label">{t("nakshatramu", "Nakshatram")}:</span>
+                          <span className="panchanga-value">
+                            {t(normalizeNakshatraForTranslation(transitChart.panchanga.moon_nakshatra || transitChart.planets?.Moon?.nakshatra))}
+                          </span>
+                        </div>
+                        <div className="panchanga-item">
+                          <span className="panchanga-label">{t("yogamu", "Yogam")}:</span>
+                          <span className="panchanga-value">
+                            {t(transitChart.panchanga.yoga)}
+                          </span>
+                        </div>
+                        <div className="panchanga-item">
+                          <span className="panchanga-label">{t("karanamu", "Karanam")}:</span>
+                          <span className="panchanga-value">
+                            {t(transitChart.panchanga.karana)}
+                          </span>
+                        </div>
+                        <div className="panchanga-item">
+                          <span className="panchanga-label">{t("SunriseLabel", "Sunrise")}:</span>
+                          <span className="panchanga-value" style={{ color: "#27ae60" }}>
+                            {transitChart.meta?.sunrise || "--:--"}
+                          </span>
+                        </div>
+                        <div className="panchanga-item">
+                          <span className="panchanga-label">{t("SunsetLabel", "Sunset")}:</span>
+                          <span className="panchanga-value" style={{ color: "#e67e22" }}>
+                            {transitChart.meta?.sunset || "--:--"}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div
-                    style={{
-                      fontSize: "0.85rem",
-                      opacity: 0.9,
-                      marginTop: "4px",
-                    }}
-                  >
-                    🌅 {t("SunriseLabel", "Sunrise")}: {transitChart.meta?.sunrise || "--:--"}
+
+                  {/* Card 2: Timings Card */}
+                  <div className="panchanga-info-card timings" style={{ alignSelf: isTimingsExpanded ? undefined : "start" }}>
+                    <h3
+                      onClick={() => setIsTimingsExpanded(!isTimingsExpanded)}
+                      style={{
+                        cursor: "pointer",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "100%",
+                        userSelect: "none",
+                        borderBottom: isTimingsExpanded ? undefined : "none",
+                        paddingBottom: isTimingsExpanded ? undefined : "0px",
+                      }}
+                      className="panchanga-card-header"
+                    >
+                      <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        ⏰ {t("timingsCardTitle", "Inauspicious Times")}
+                      </span>
+                      <span
+                        style={{
+                          transform: isTimingsExpanded ? "rotate(0deg)" : "rotate(180deg)",
+                          transition: "transform 0.3s ease",
+                          display: "inline-block",
+                          fontSize: "14px",
+                        }}
+                      >
+                        ▲
+                      </span>
+                    </h3>
+                    {isTimingsExpanded && (
+                      <div className="panchanga-list">
+                        <div className="panchanga-item">
+                          <span className="panchanga-label">{t("rahuKalam", "Rahu Kalam")}:</span>
+                          <span className="panchanga-value" style={{ color: "#c0392b" }}>
+                            {transitChart.panchanga?.rahu_kalam || "--:--"}
+                          </span>
+                        </div>
+                        <div className="panchanga-item">
+                          <span className="panchanga-label">{t("yamagandam", "Yamagandam")}:</span>
+                          <span className="panchanga-value" style={{ color: "#c0392b" }}>
+                            {transitChart.panchanga?.yamagandam || "--:--"}
+                          </span>
+                        </div>
+                        <div className="panchanga-item">
+                          <span className="panchanga-label">{t("gulikaKalam", "Gulika Kalam")}:</span>
+                          <span className="panchanga-value" style={{ color: "#c0392b" }}>
+                            {transitChart.panchanga?.gulika_kalam || "--:--"}
+                          </span>
+                        </div>
+                        <div className="panchanga-item">
+                          <span className="panchanga-label">{t("varjyam", "Varjyam")}:</span>
+                          <span className="panchanga-value" style={{ color: "#c0392b" }}>
+                            {transitChart.panchanga?.varjyam || "--:--"}
+                          </span>
+                        </div>
+                        <div
+                          className="panchanga-item"
+                          style={
+                            transitChart.panchanga?.durmuhurtham &&
+                              (transitChart.panchanga.durmuhurtham.includes(",") ||
+                                transitChart.panchanga.durmuhurtham.length > 15)
+                              ? { display: "flex", flexDirection: "column", alignItems: "stretch", gap: "4px" }
+                              : undefined
+                          }
+                        >
+                          <span className="panchanga-label">{t("durmuhurtham", "Durmuhurtham")}:</span>
+                          <span
+                            className="panchanga-value"
+                            style={{
+                              color: "#c0392b",
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems:
+                                transitChart.panchanga?.durmuhurtham &&
+                                  (transitChart.panchanga.durmuhurtham.includes(",") ||
+                                    transitChart.panchanga.durmuhurtham.length > 15)
+                                  ? "flex-end"
+                                  : "initial",
+                              gap: "2px",
+                            }}
+                          >
+                            {transitChart.panchanga?.durmuhurtham
+                              ? transitChart.panchanga.durmuhurtham.split(/,\s*/).map((item, idx) => (
+                                <span key={idx}>{item}</span>
+                              ))
+                              : "--:--"}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div
-                    style={{
-                      fontSize: "0.8rem",
-                      opacity: 0.8,
-                      marginTop: "2px",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    {t("calculatedAtRealtime", "(Calculated at Realtime)")}
+
+                  {/* Card 3: Balams & Strengths Card */}
+                  <div className="panchanga-info-card" style={{ alignSelf: isBalamsExpanded ? undefined : "start" }}>
+                    <h3
+                      onClick={() => setIsBalamsExpanded(!isBalamsExpanded)}
+                      style={{
+                        cursor: "pointer",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "100%",
+                        userSelect: "none",
+                        borderBottom: isBalamsExpanded ? undefined : "none",
+                        paddingBottom: isBalamsExpanded ? undefined : "0px",
+                      }}
+                      className="panchanga-card-header"
+                    >
+                      <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        💪 {t("jyotishaCardTitle", "Strength")}
+                      </span>
+                      <span
+                        style={{
+                          transform: isBalamsExpanded ? "rotate(0deg)" : "rotate(180deg)",
+                          transition: "transform 0.3s ease",
+                          display: "inline-block",
+                          fontSize: "14px",
+                        }}
+                      >
+                        ▲
+                      </span>
+                    </h3>
+                    {isBalamsExpanded && (
+                      <div className="panchanga-list">
+                        {/* Tarabalam */}
+                        {tarabalam && (
+                          <div className="panchanga-item" style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: "4px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span className="panchanga-label">⭐ {t("tarabalamCard", "Tarabalam")}:</span>
+                              <span className="panchanga-value" style={{ color: tarabalam.isGood ? "#27ae60" : "#c0392b" }}>
+                                {tarabalam.name}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: "13px", color: "#7f8c8d", textAlign: "right" }}>
+                              {tarabalam.desc}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Chandra Balam */}
+                        {chandraBalam && (
+                          <div className="panchanga-item" style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: "4px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span className="panchanga-label">🌙 {t("chandraBalamCard", "Chandra Balam")}:</span>
+                              <span className="panchanga-value" style={{ color: chandraBalam.isGood ? "#27ae60" : "#c0392b" }}>
+                                {chandraBalam.name}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: "13px", color: "#7f8c8d", textAlign: "right" }}>
+                              {chandraBalam.desc}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Guru Balam */}
+                        {guruBalam && (
+                          <div className="panchanga-item" style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: "4px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span className="panchanga-label">🟡 {t("guruBalamCard", "Guru Balam")}:</span>
+                              <span className="panchanga-value" style={{ color: guruBalam.isGood ? "#27ae60" : "#c0392b" }}>
+                                {guruBalam.name}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: "13px", color: "#7f8c8d", textAlign: "right" }}>
+                              {guruBalam.desc}
+                            </div>
+                            {(guruBalam.transitInfo || guruBalam.nextStableInfo) && (
+                              <div style={{ display: "flex", flexDirection: "column", gap: "2px", alignItems: "flex-end", marginTop: "2px", borderTop: "1px dashed rgba(0, 0, 0, 0.04)", paddingTop: "4px" }}>
+                                {guruBalam.transitInfo && (
+                                  <div style={{ fontSize: "12px", fontWeight: "bold", color: "#8e44ad", textAlign: "right" }}>
+                                    {guruBalam.transitInfo}
+                                  </div>
+                                )}
+                                {guruBalam.nextStableInfo && (
+                                  <div style={{ fontSize: "12px", fontWeight: "bold", color: "#8e44ad", textAlign: "right" }}>
+                                    {guruBalam.nextStableInfo}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Shani Balam */}
+                        {shaniBalam && (
+                          <div className="panchanga-item" style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: "4px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span className="panchanga-label">🪐 {t("shaniBalamCard", "Shani Balam")}:</span>
+                              <span className="panchanga-value" style={{ color: shaniBalam.isGood === "medium" ? "#e67e22" : shaniBalam.isGood ? "#27ae60" : "#c0392b" }}>
+                                {shaniBalam.name}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: "13px", color: "#7f8c8d", textAlign: "right" }}>
+                              {shaniBalam.desc}
+                            </div>
+                            {(shaniBalam.transitInfo || shaniBalam.nextStableInfo) && (
+                              <div style={{ display: "flex", flexDirection: "column", gap: "2px", alignItems: "flex-end", marginTop: "2px", borderTop: "1px dashed rgba(0, 0, 0, 0.04)", paddingTop: "4px" }}>
+                                {shaniBalam.transitInfo && (
+                                  <div style={{ fontSize: "12px", fontWeight: "bold", color: "#8e44ad", textAlign: "right" }}>
+                                    {shaniBalam.transitInfo}
+                                  </div>
+                                )}
+                                {shaniBalam.nextStableInfo && (
+                                  <div style={{ fontSize: "12px", fontWeight: "bold", color: "#8e44ad", textAlign: "right" }}>
+                                    {shaniBalam.nextStableInfo}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
+
                 <div
                   style={{
                     fontSize: "0.75rem",
@@ -1154,7 +1412,7 @@ export function MePage({ onNavigate }) {
                     textAlign: "center",
                     marginTop: "6px",
                     fontStyle: "italic",
-                    maxWidth: "800px",
+                    maxWidth: "1000px",
                     margin: "6px auto 0 auto",
                     width: "100%",
                   }}
@@ -1163,118 +1421,6 @@ export function MePage({ onNavigate }) {
                 </div>
               </>
             )}
-
-            {/* Balams Grid */}
-            <div className="balams-grid">
-              {/* Tarabalam Card */}
-              {tarabalam && (
-                <div style={cardStyle(tarabalam.isGood)}>
-                  <h3 style={{ margin: 0, color: "#2c3e50", fontSize: "14px" }}>
-                    ⭐ {t("tarabalamCard", "Tarabalam")}
-                  </h3>
-                  <div
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: "bold",
-                      color: tarabalam.isGood ? "#27ae60" : "#c0392b",
-                    }}
-                  >
-                    {tarabalam.name}
-                  </div>
-                  <div style={{ fontSize: "11px", color: "#7f8c8d" }}>
-                    {tarabalam.desc}
-                  </div>
-                </div>
-              )}
-
-              {/* Chandra Balam Card */}
-              {chandraBalam && (
-                <div style={cardStyle(chandraBalam.isGood)}>
-                  <h3 style={{ margin: 0, color: "#2c3e50", fontSize: "14px" }}>
-                    🌙 {t("chandraBalamCard", "Chandra Balam")}
-                  </h3>
-                  <div
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: "bold",
-                      color: chandraBalam.isGood ? "#27ae60" : "#c0392b",
-                    }}
-                  >
-                    {chandraBalam.name}
-                  </div>
-                  <div style={{ fontSize: "11px", color: "#7f8c8d" }}>
-                    {chandraBalam.desc}
-                  </div>
-                </div>
-              )}
-
-              {/* Guru Balam Card */}
-              {guruBalam && (
-                <div style={cardStyle(guruBalam.isGood)}>
-                  <h3 style={{ margin: 0, color: "#2c3e50", fontSize: "14px" }}>
-                    🟡 {t("guruBalamCard", "Guru Balam")}
-                  </h3>
-                  <div
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: "bold",
-                      color: guruBalam.isGood ? "#27ae60" : "#c0392b",
-                    }}
-                  >
-                    {guruBalam.name}
-                  </div>
-                  <div style={{ fontSize: "11px", color: "#7f8c8d" }}>
-                    {guruBalam.desc}
-                  </div>
-                  {guruBalam.transitInfo && (
-                    <div style={{ fontSize: "11px", color: "#8e44ad", fontWeight: "bold", marginTop: "4px" }}>
-                      {guruBalam.transitInfo}
-                    </div>
-                  )}
-                  {guruBalam.nextStableInfo && (
-                    <div style={{ fontSize: "11px", color: "#8e44ad", fontWeight: "bold", marginTop: "4px" }}>
-                      {guruBalam.nextStableInfo}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Shani Balam Card */}
-              {shaniBalam && (
-                <div style={cardStyle(shaniBalam.isGood)}>
-                  <h3 style={{ margin: 0, color: "#2c3e50", fontSize: "14px" }}>
-                    🪐 {t("shaniBalamCard", "Shani Balam")}
-                  </h3>
-                  <div
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: "bold",
-                      color:
-                        shaniBalam.isGood === "medium"
-                          ? "#e67e22"
-                          : shaniBalam.isGood
-                          ? "#27ae60"
-                          : "#c0392b",
-                    }}
-                  >
-                    {shaniBalam.name}
-                  </div>
-                  <div style={{ fontSize: "11px", color: "#7f8c8d" }}>
-                    {shaniBalam.desc}
-                  </div>
-                  {shaniBalam.transitInfo && (
-                    <div style={{ fontSize: "11px", color: "#8e44ad", fontWeight: "bold", marginTop: "4px" }}>
-                      {shaniBalam.transitInfo}
-                    </div>
-                  )}
-                  {shaniBalam.nextStableInfo && (
-                    <div style={{ fontSize: "11px", color: "#8e44ad", fontWeight: "bold", marginTop: "4px" }}>
-                      {shaniBalam.nextStableInfo}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
 
             {/* Profile Management Quick Guide */}
             <div

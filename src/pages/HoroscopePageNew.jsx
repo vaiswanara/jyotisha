@@ -27,7 +27,18 @@ function getCurrentTime() {
 }
 
 function formatPanchanga(panchanga = {}, t) {
-  const keyMap = { Makha: "Magha", Garija: "Gara", Garaja: "Gara" };
+  const keyMap = {
+    Makha: "Magha",
+    Garija: "Gara",
+    Garaja: "Gara",
+    Pratipada: "Prathama",
+    Pratipath: "Prathama",
+    Dwadashi: "Dvadashi",
+    Shasthi: "Shashthi",
+    Pournami: "Purnima",
+    Pournima: "Purnima",
+    Amavasai: "Amavasya",
+  };
 
   const formatTithi = (tithi) => {
     if (!tithi) return null;
@@ -1301,28 +1312,33 @@ export function HoroscopePageNew({ logoUrl, onNavigate }) {
       
       <!-- PAGE 1: CHARTS & BIRTH DETAILS -->
       <div class="pdf-page">
-        <div class="header" style="padding-bottom: 10px; margin-bottom: 15px;">
-          ${logoUrl ? `<img src="${logoUrl}" alt="Logo" style="height: 50px; margin-bottom: 5px;">` : ""}
-          <h1 style="font-size: 18pt;">${t("personalHoroscope", "Personal Horoscope")}</h1>
+        <div class="header" style="padding-bottom: 8px; margin-bottom: 12px;">
+          ${logoUrl ? `<img src="${logoUrl}" alt="Logo" style="height: 48px; margin-bottom: 4px;">` : ""}
+          <h1 style="font-size: 18pt;">${formData.name?.trim() ? formData.name.trim() : t("Horoscope", "Horoscope")}</h1>
           <h2 style="font-size: 13pt; margin: 2px 0;">${t("natalChart", "Natal Chart")}</h2>
         </div>
-        
-        <div style="text-align: center; margin-bottom: 20px; font-size: 12pt; color: #2d3436;">
-          <div style="font-weight: bold; margin-bottom: 6px;">
-            ${formData.dob ? formData.dob.split('-').reverse().join('-') : '-'} &nbsp;&nbsp;&nbsp; ${formData.tob} &nbsp;&nbsp;&nbsp; ${formData.city ? formData.city.split(',')[0].trim() : '-'}
-          </div>
-          <div style="font-size: 11pt; color: #34495e;">
-            ${formatPanchanga(chartData.panchanga, t)}
-          </div>
-          ${chartData.meta?.ayanamsha_name ? `<div style="font-size: 10pt; color: #7f8c8d; margin-top: 5px;"><strong>Ayanamsha:</strong> ${chartData.meta.ayanamsha_name} (${chartData.meta.ayanamsha}°)</div>` : ""}
+
+        <div style="text-align: center; font-style: italic; font-size: 10pt; color: #4a5568; margin-bottom: 12px; font-family: 'Noto Sans', 'Poppins', sans-serif; line-height: 1.5; font-weight: 500;">
+          ${t("shlokaLine1", "जननी जन्मसौख्यानां वर्धिनी कुलसम्पदाम् ।")}<br/>
+          ${t("shlokaLine2", "पदवी पूर्वपुण्यानां लिख्यते जन्मपत्रिका ॥")}
         </div>
         
-        <div class="charts-row" style="margin-bottom: 25px; gap: 20px;">
+        <div style="text-align: center; margin-bottom: 15px; font-size: 11.5pt; color: #2d3436;">
+          <div style="font-weight: bold; margin-bottom: 4px;">
+            ${formData.dob ? formData.dob.split('-').reverse().join('-') : '-'} &nbsp;&nbsp;&nbsp; ${formData.tob} &nbsp;&nbsp;&nbsp; ${formData.city ? formData.city.split(',')[0].trim() : '-'}
+          </div>
+          <div style="font-size: 10.5pt; color: #34495e;">
+            ${formatPanchanga(chartData.panchanga, t)}
+          </div>
+          ${chartData.meta?.ayanamsha_name ? `<div style="font-size: 9.5pt; color: #7f8c8d; margin-top: 4px;"><strong>Ayanamsha:</strong> ${chartData.meta.ayanamsha_name} (${chartData.meta.ayanamsha}°)</div>` : ""}
+        </div>
+        
+        <div class="charts-row" style="margin-bottom: 18px; gap: 20px;">
           <div class="chart-col">${d1Svg}</div>
           <div class="chart-col">${d9Svg}</div>
         </div>
 
-        <h2 style="color:#2d3436; border-bottom:1.5px solid #2d3436; padding-bottom:5px; margin-bottom:10px; font-size:12pt; text-transform:uppercase; text-align: center;">${t("grahaPositions", "Graha Positions")}</h2>
+        <h2 style="color:#2d3436; border-bottom:1.5px solid #2d3436; padding-bottom:4px; margin-bottom:8px; font-size:11.5pt; text-transform:uppercase; text-align: center;">${t("grahaPositions", "Graha Positions")}</h2>
         <table class="pdf-table">
           <thead>
             <tr>

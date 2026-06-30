@@ -41,6 +41,25 @@ window.addEventListener("unhandledrejection", (event) => {
   } catch (e) {}
 })();
 
+// Initialize Google Analytics if VITE_GA_ID is set
+const gaId = import.meta.env.VITE_GA_ID;
+if (gaId) {
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+  document.head.appendChild(script);
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () {
+    window.dataLayer.push(arguments);
+  };
+  window.gtag("js", new Date());
+
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone || document.referrer.includes("android-app://");
+  window.gtag("config", gaId, {
+    app_mode: isStandalone ? "standalone" : "browser",
+  });
+}
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { API_URL, API_TOKEN, getLessons, saveLessons, saveSubscribers, getLibrary, saveLibrary, getTicker, saveTicker } from "../services/astrologyApi.js";
+import { API_URL, API_TOKEN, getLessons, saveLessons, saveSubscribers, getLibrary, saveLibrary, getTicker, saveTicker, getInAppMessages, saveInAppMessage } from "../services/astrologyApi.js";
 export function AdminPage({ onNavigate }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [password, setPassword] = useState("");
@@ -50,6 +50,24 @@ export function AdminPage({ onNavigate }) {
     createdDate: new Date().toISOString().split("T")[0],
     isVisibility: true,
   });
+
+  // In-App Messages Form State
+  const [inAppMessages, setInAppMessages] = useState([]);
+  const [inAppFormId, setInAppFormId] = useState("");
+  const [deliveryChannels, setDeliveryChannels] = useState({ inApp: true, push: false });
+  const [inAppDates, setInAppDates] = useState({
+    startDate: new Date().toISOString().split("T")[0],
+    endDate: (() => {
+      const d = new Date();
+      d.setDate(d.getDate() + 7);
+      return d.toISOString().split("T")[0];
+    })(),
+    isActive: true,
+  });
+  const [isEditingInApp, setIsEditingInApp] = useState(false);
+  const [loadingInApp, setLoadingInApp] = useState(false);
+  const [forceRefresh, setForceRefresh] = useState(false);
+  const [hasActionLink, setHasActionLink] = useState(false);
 
   const [deletePrompt, setDeletePrompt] = useState({
     isOpen: false,
@@ -156,6 +174,29 @@ export function AdminPage({ onNavigate }) {
     }
   };
 
+  const fetchInAppMessagesList = async () => {
+    try {
+      const data = await getInAppMessages();
+      if (Array.isArray(data)) {
+        setInAppMessages(data);
+      } else {
+        throw new Error("No in-app messages from API");
+      }
+    } catch (err) {
+      console.warn("API in-app messages fetch failed, falling back to static", err);
+      try {
+        const res = await fetch(`${import.meta.env.BASE_URL}static/in_app_messages.json?_t=${Date.now()}`);
+        if (!res.ok) throw new Error("Static in-app messages not found");
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setInAppMessages(data);
+        }
+      } catch (staticErr) {
+        console.error("Static in-app messages fallback failed", staticErr);
+      }
+    }
+  };
+
   const fetchAdminData = async (pwd) => {
     setLoading(true);
     try {
@@ -188,6 +229,11 @@ export function AdminPage({ onNavigate }) {
         await fetchLessonsList();
         await fetchLibraryList();
         await fetchTickerList();
+        if (data.inAppMessages) {
+          setInAppMessages(data.inAppMessages);
+        } else {
+          await fetchInAppMessagesList();
+        }
       } else {
         setMessage({ type: "error", text: "❌ Error loading data." });
       }
@@ -214,53 +260,180 @@ export function AdminPage({ onNavigate }) {
     setTickerUpdatesText("");
     setIsEditingTicker(false);
     setLoadingTicker(false);
+    setInAppMessages([]);
+    setInAppFormId("");
+    setDeliveryChannels({ inApp: true, push: false });
+    setInAppDates({
+      startDate: new Date().toISOString().split("T")[0],
+      endDate: (() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 7);
+        return d.toISOString().split("T")[0];
+      })(),
+      isActive: true,
+    });
+    setIsEditingInApp(false);
+    setLoadingInApp(false);
+    setForceRefresh(false);
+    setHasActionLink(false);
   };
 
-
-
-  const handleSendAlert = async (e) => {
+  const handleCombinedSubmit = async (e) => {
     e.preventDefault();
     if (!alertForm.title || !alertForm.body) {
       setMessage({ type: "error", text: "Title and Body are required!" });
       return;
     }
 
+    if (!deliveryChannels.inApp && !deliveryChannels.push) {
+      setMessage({ type: "error", text: "Please select at least one delivery channel (In-App or Push)!" });
+      return;
+    }
+
     setLoading(true);
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-token": API_TOKEN,
-          "x-admin-password": password,
-        },
-        body: JSON.stringify({
-          endpoint: "send_alert",
-          ...alertForm,
-        }),
-      });
-      const data = await res.json();
-      if (data.status === "success" || data.status === "queued") {
-        setMessage({
-          type: "success",
-          text: `✅ ${data.message || "Alert queued successfully!"}`,
+    let successMessageParts = [];
+    let isError = false;
+
+    const targetUrl = hasActionLink ? alertForm.url.trim() : "";
+
+    // 1. Send Push Notification if selected
+    if (deliveryChannels.push) {
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-token": API_TOKEN,
+            "x-admin-password": password,
+          },
+          body: JSON.stringify({
+            endpoint: "send_alert",
+            title: alertForm.title,
+            body: alertForm.body,
+            url: targetUrl,
+            is_important: false, // In-app handles inbox sync, so push notification doesn't need to double-save
+            force_refresh: forceRefresh,
+          }),
         });
+        const data = await res.json();
+        if (data.status === "success" || data.status === "queued") {
+          successMessageParts.push("Push notification broadcasted successfully");
+        } else {
+          isError = true;
+          setMessage({ type: "error", text: `Push notification failed: ${data.error || "unknown"}` });
+        }
+      } catch (err) {
+        isError = true;
+        setMessage({ type: "error", text: "❌ Failed to send push notification." });
+      }
+    }
+
+    // 2. Save In-App Message if selected (or editing)
+    if (deliveryChannels.inApp && !isError) {
+      setLoadingInApp(true);
+      const messageId = inAppFormId || `inapp_${Date.now()}`;
+      const newMsg = {
+        id: messageId,
+        title: alertForm.title.trim(),
+        body: alertForm.body.trim(),
+        url: targetUrl,
+        startDate: inAppDates.startDate,
+        endDate: inAppDates.endDate,
+        isActive: inAppDates.isActive,
+        forceRefresh: forceRefresh,
+      };
+
+      let updatedMsgs = [];
+      if (isEditingInApp) {
+        updatedMsgs = inAppMessages.map((m) => (m.id === inAppFormId ? newMsg : m));
+      } else {
+        updatedMsgs = [newMsg, ...inAppMessages];
+      }
+
+      try {
+        const res = await saveInAppMessage(updatedMsgs, password);
+        if (res && res.status === "success") {
+          setInAppMessages(updatedMsgs);
+          successMessageParts.push("In-App message saved successfully");
+          
+          setIsEditingInApp(false);
+          setInAppFormId("");
+          setInAppDates({
+            startDate: new Date().toISOString().split("T")[0],
+            endDate: (() => {
+              const d = new Date();
+              d.setDate(d.getDate() + 7);
+              return d.toISOString().split("T")[0];
+            })(),
+            isActive: true,
+          });
+          setForceRefresh(false);
+          setHasActionLink(false);
+        } else {
+          isError = true;
+          setMessage({ type: "error", text: res?.error || "Failed to save In-App message." });
+        }
+      } catch (err) {
+        isError = true;
+        setMessage({ type: "error", text: "❌ Failed to save In-App message." });
+      }
+      setLoadingInApp(false);
+    }
+
+    if (!isError) {
+      setMessage({ type: "success", text: `✅ ${successMessageParts.join(" & ")}!` });
+      if (!isEditingInApp) {
         setAlertForm({
           title: "",
           body: "",
           url: import.meta.env.BASE_URL,
           is_important: false,
         });
-      } else {
-        setMessage({
-          type: "error",
-          text: data.error || "Failed to send alert.",
-        });
+        setDeliveryChannels({ inApp: true, push: false });
+        setForceRefresh(false);
+        setHasActionLink(false);
       }
-    } catch (err) {
-      setMessage({ type: "error", text: "❌ Failed to send alert." });
     }
     setLoading(false);
+  };
+
+  const handleEditCombined = (msg) => {
+    setIsEditingInApp(true);
+    setInAppFormId(msg.id);
+    setAlertForm({
+      title: msg.title || "",
+      body: msg.body || "",
+      url: msg.url || "",
+      is_important: false,
+    });
+    setDeliveryChannels({ inApp: true, push: false });
+    setInAppDates({
+      startDate: msg.startDate || new Date().toISOString().split("T")[0],
+      endDate: msg.endDate || new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0],
+      isActive: msg.isActive !== undefined ? msg.isActive : true,
+    });
+    setForceRefresh(msg.forceRefresh || false);
+    const hasLink = msg.url && msg.url.trim() !== "" && msg.url.trim() !== "/" && msg.url.trim() !== import.meta.env.BASE_URL;
+    setHasActionLink(!!hasLink);
+  };
+
+  const handleDeleteInApp = async (msgId) => {
+    if (!window.confirm("Are you sure you want to delete this in-app message?")) return;
+
+    const updatedMsgs = inAppMessages.filter((m) => m.id !== msgId);
+    setLoadingInApp(true);
+    try {
+      const res = await saveInAppMessage(updatedMsgs, password);
+      if (res && res.status === "success") {
+        setInAppMessages(updatedMsgs);
+        setMessage({ type: "success", text: "✅ In-App message deleted successfully!" });
+      } else {
+        setMessage({ type: "error", text: res?.error || "Failed to delete message." });
+      }
+    } catch (err) {
+      setMessage({ type: "error", text: "❌ Failed to delete message." });
+    }
+    setLoadingInApp(false);
   };
 
   const handleSaveLesson = async (e) => {
@@ -1095,15 +1268,25 @@ export function AdminPage({ onNavigate }) {
           </div>
         )}
 
-        {/* Push Notifications Section */}
+        {/* Combined Message & Alert Management Section */}
         <details className="admin-card" open>
           <summary>
-            <span>🔔 Push Notifications (Alerts)</span>
+            <span>📣 Message & Alert Management</span>
+            <span
+              style={{
+                background: "#e9ecef",
+                padding: "4px 10px",
+                borderRadius: "20px",
+                fontSize: "12px",
+              }}
+            >
+              In-App: {inAppMessages.length}
+            </span>
           </summary>
           <div className="admin-card-body">
-            <form onSubmit={handleSendAlert}>
+            <form onSubmit={handleCombinedSubmit}>
               <div style={{ marginBottom: "20px" }}>
-                <label className="admin-label">Notification Title</label>
+                <label className="admin-label">Message Title</label>
                 <input
                   type="text"
                   className="admin-input"
@@ -1111,7 +1294,7 @@ export function AdminPage({ onNavigate }) {
                   onChange={(e) =>
                     setAlertForm({ ...alertForm, title: e.target.value })
                   }
-                  placeholder="Ex: New App Update Available!"
+                  placeholder="Ex: Summer Special Class Announcement"
                   required
                 />
               </div>
@@ -1124,73 +1307,286 @@ export function AdminPage({ onNavigate }) {
                   onChange={(e) =>
                     setAlertForm({ ...alertForm, body: e.target.value })
                   }
-                  placeholder="Ex: Check out the newly added Muhurtha features in the app..."
+                  placeholder="Ex: Detailed notes, rules, schedules etc..."
                   required
                 ></textarea>
               </div>
               <div style={{ marginBottom: "20px" }}>
-                <label className="admin-label">Target URL (Optional)</label>
-                <input
-                  type="text"
-                  className="admin-input"
-                  value={alertForm.url}
-                  onChange={(e) =>
-                    setAlertForm({ ...alertForm, url: e.target.value })
-                  }
-                />
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                  <input
+                    type="checkbox"
+                    id="has_action_link"
+                    checked={hasActionLink}
+                    onChange={(e) => setHasActionLink(e.target.checked)}
+                    style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                  />
+                  <label htmlFor="has_action_link" style={{ margin: 0, cursor: "pointer", fontWeight: "600", fontSize: "14px", color: "#2c3e50" }}>
+                    🔗 Add Action Link / Target URL
+                  </label>
+                </div>
+                {hasActionLink && (
+                  <input
+                    type="text"
+                    className="admin-input"
+                    value={alertForm.url}
+                    onChange={(e) =>
+                      setAlertForm({ ...alertForm, url: e.target.value })
+                    }
+                    placeholder="Ex: https://..."
+                    required={hasActionLink}
+                  />
+                )}
               </div>
+
+              {/* Delivery Channels */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "15px", marginBottom: "20px", background: "#f8f9fa", padding: "15px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: "200px" }}>
+                  <input
+                    type="checkbox"
+                    id="send_as_inapp"
+                    checked={deliveryChannels.inApp}
+                    onChange={(e) =>
+                      setDeliveryChannels({ ...deliveryChannels, inApp: e.target.checked })
+                    }
+                    style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                  />
+                  <label htmlFor="send_as_inapp" style={{ margin: 0, cursor: "pointer", fontWeight: "600", fontSize: "14px", color: "#2c3e50" }}>
+                    📱 Send as In-App Message
+                  </label>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: "200px" }}>
+                  <input
+                    type="checkbox"
+                    id="send_as_push"
+                    checked={deliveryChannels.push}
+                    onChange={(e) =>
+                      setDeliveryChannels({ ...deliveryChannels, push: e.target.checked })
+                    }
+                    style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                  />
+                  <label htmlFor="send_as_push" style={{ margin: 0, cursor: "pointer", fontWeight: "600", fontSize: "14px", color: "#2c3e50" }}>
+                    🔔 Send as Push Notification too
+                  </label>
+                </div>
+              </div>
+
+              {/* Behavior Settings */}
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: "12px",
-                  background: "#fff9f2",
+                  background: "#fff5f5",
                   padding: "15px",
                   borderRadius: "8px",
-                  border: "1px solid #fdebd0",
-                  marginBottom: "25px",
+                  border: "1px solid #fed7d7",
+                  marginBottom: "20px",
                 }}
               >
                 <input
                   type="checkbox"
-                  id="is_important"
-                  checked={alertForm.is_important}
-                  onChange={(e) =>
-                    setAlertForm({
-                      ...alertForm,
-                      is_important: e.target.checked,
-                    })
-                  }
+                  id="force_refresh"
+                  checked={forceRefresh}
+                  onChange={(e) => setForceRefresh(e.target.checked)}
                   style={{
-                    width: "20px",
-                    height: "20px",
-                    accentColor: "#d35400",
+                    width: "18px",
+                    height: "18px",
+                    accentColor: "#e53e3e",
                     margin: 0,
                     cursor: "pointer",
                   }}
                 />
                 <label
-                  htmlFor="is_important"
+                  htmlFor="force_refresh"
                   style={{
                     margin: 0,
                     cursor: "pointer",
-                    color: "#d35400",
+                    color: "#c53030",
                     fontWeight: "600",
-                    fontSize: "14.5px",
+                    fontSize: "14px",
                   }}
                 >
-                  📌 Mark as Important (Save to Inbox)
+                  ⚡ Perform Hard Refresh on Dismiss (forces reload to fetch new code/fix blank screens)
                 </label>
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="admin-btn"
-                style={{ width: "100%" }}
-              >
-                {loading ? "Sending..." : "🚀 Send Alert Now"}
-              </button>
+
+              {/* In-App message configurations (only relevant if In-App checked) */}
+              {deliveryChannels.inApp && (
+                <div style={{ background: "#f0f6ff", padding: "20px 15px", borderRadius: "8px", border: "1px solid #d4e6f1", marginBottom: "25px" }}>
+                  <h4 style={{ margin: "0 0 15px 0", color: "#2980b9", fontSize: "14.5px" }}>In-App Message Settings</h4>
+                  <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
+                    <div style={{ flex: 1 }}>
+                      <label className="admin-label" style={{ color: "#2c3e50" }}>Start Date</label>
+                      <input
+                        type="date"
+                        className="admin-input"
+                        value={inAppDates.startDate}
+                        onChange={(e) =>
+                          setInAppDates({ ...inAppDates, startDate: e.target.value })
+                        }
+                        required={deliveryChannels.inApp}
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label className="admin-label" style={{ color: "#2c3e50" }}>End Date</label>
+                      <input
+                        type="date"
+                        className="admin-input"
+                        value={inAppDates.endDate}
+                        onChange={(e) =>
+                          setInAppDates({ ...inAppDates, endDate: e.target.value })
+                        }
+                        required={deliveryChannels.inApp}
+                      />
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <input
+                      type="checkbox"
+                      id="in_app_active_combined"
+                      checked={inAppDates.isActive}
+                      onChange={(e) =>
+                        setInAppDates({ ...inAppDates, isActive: e.target.checked })
+                      }
+                      style={{ width: "18px", height: "18px", cursor: "pointer", accentColor: "#2980b9" }}
+                    />
+                    <label htmlFor="in_app_active_combined" style={{ margin: 0, cursor: "pointer", fontWeight: "600", fontSize: "13.5px", color: "#2980b9" }}>
+                      🚀 Set In-App Message as Active (visible immediately if today is within dates)
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  type="submit"
+                  disabled={loading || loadingInApp}
+                  className="admin-btn"
+                  style={{ flex: 1 }}
+                >
+                  {loading || loadingInApp ? "Processing..." : isEditingInApp ? "💾 Save Changes" : "🚀 Send / Publish Message"}
+                </button>
+                {isEditingInApp && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditingInApp(false);
+                      setAlertForm({
+                        title: "",
+                        body: "",
+                        url: import.meta.env.BASE_URL,
+                        is_important: false,
+                      });
+                      setDeliveryChannels({ inApp: true, push: false });
+                      setInAppFormId("");
+                      setInAppDates({
+                        startDate: new Date().toISOString().split("T")[0],
+                        endDate: (() => {
+                          const d = new Date();
+                          d.setDate(d.getDate() + 7);
+                          return d.toISOString().split("T")[0];
+                        })(),
+                        isActive: true,
+                      });
+                    }}
+                    className="admin-btn"
+                    style={{
+                      background: "#e74c3c",
+                      color: "#fff",
+                      border: "none",
+                      padding: "10px 15px",
+                      borderRadius: "6px",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      width: "auto"
+                    }}
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
             </form>
+
+            {/* List of Messages */}
+            <div style={{ marginTop: "30px" }}>
+              <h3 style={{ color: "#34495e", fontSize: "16px", marginBottom: "15px" }}>Current In-App Messages</h3>
+              {inAppMessages.length === 0 ? (
+                <p style={{ color: "#7f8c8d", fontSize: "14px", fontStyle: "italic" }}>No in-app messages created yet.</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                  {inAppMessages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      style={{
+                        padding: "15px",
+                        border: "1px solid #ddd",
+                        borderRadius: "8px",
+                        background: msg.isActive ? "#fcf8f2" : "#f8f9fa",
+                        opacity: msg.isActive ? 1 : 0.7,
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
+                        <div>
+                          <span
+                            style={{
+                              background: msg.isActive ? "#e67e22" : "#7f8c8d",
+                              color: "#fff",
+                              padding: "2px 8px",
+                              borderRadius: "4px",
+                              fontSize: "11px",
+                              fontWeight: "bold",
+                              marginRight: "8px",
+                            }}
+                          >
+                            {msg.isActive ? "ACTIVE" : "INACTIVE"}
+                          </span>
+                          <span style={{ fontSize: "12px", color: "#7f8c8d" }}>
+                            📅 {msg.startDate} to {msg.endDate}
+                          </span>
+                        </div>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <button
+                            onClick={() => handleEditCombined(msg)}
+                            style={{
+                              background: "#3498db",
+                              color: "#fff",
+                              border: "none",
+                              padding: "4px 8px",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                              fontSize: "12px",
+                            }}
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteInApp(msg.id)}
+                            style={{
+                              background: "#e74c3c",
+                              color: "#fff",
+                              border: "none",
+                              padding: "4px 8px",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                              fontSize: "12px",
+                            }}
+                          >
+                            🗑️ Delete
+                          </button>
+                        </div>
+                      </div>
+                      <h4 style={{ margin: "5px 0", color: "#2c3e50" }}>{msg.title}</h4>
+                      <p style={{ margin: 0, fontSize: "13.5px", color: "#555", whiteSpace: "pre-wrap" }}>{msg.body}</p>
+                      {msg.url && (
+                        <div style={{ marginTop: "8px", fontSize: "12px" }}>
+                          🔗 Link: <a href={msg.url} target="_blank" rel="noreferrer" style={{ color: "#8e44ad" }}>{msg.url}</a>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </details>
 

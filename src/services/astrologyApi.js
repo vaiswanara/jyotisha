@@ -134,6 +134,30 @@ export async function saveTicker(ticker, adminPassword) {
   return response.json().catch(() => null);
 }
 
+export async function getInAppMessages() {
+  const params = new URLSearchParams({
+    endpoint: "get_in_app_messages",
+    _t: Date.now().toString(),
+  });
+  const response = await fetch(`${API_URL}?${params.toString()}`, {
+    headers: { Accept: "application/json", "x-api-token": API_TOKEN },
+  });
+  return response.json().catch(() => null);
+}
+
+export async function saveInAppMessage(messages, adminPassword) {
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-token": API_TOKEN,
+      "x-admin-password": adminPassword,
+    },
+    body: JSON.stringify({ endpoint: "save_in_app_message", messages }),
+  });
+  return response.json().catch(() => null);
+}
+
 
 export async function saveSubscribers(subscribers, adminPassword) {
   const response = await fetch(API_URL, {

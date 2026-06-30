@@ -1,10 +1,10 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 const logoUrl = `${import.meta.env.BASE_URL}logo.png`;
 import { Sidebar } from "./components/Sidebar.jsx";
 import { BottomNav } from "./components/BottomNav.jsx";
 import { useTranslation } from "react-i18next";
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { API_URL, API_TOKEN } from "./services/astrologyApi.js";
+import { API_URL, API_TOKEN, getInAppMessages } from "./services/astrologyApi.js";
 
 // Dynamic Imports for Pages (To split code and improve load speed)
 const HomePage = lazy(() =>
@@ -335,7 +335,7 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
 
-  // Scroll to top on page navigation
+  // Scroll to top on page navigation and log pageview to Google Analytics
   useEffect(() => {
     window.scrollTo(0, 0);
     const workspaces = document.querySelectorAll(
@@ -344,6 +344,16 @@ export default function App() {
     workspaces.forEach((el) => {
       el.scrollTop = 0;
     });
+
+    // Track Virtual Pageview in GA4
+    const gaId = import.meta.env.VITE_GA_ID;
+    if (gaId && window.gtag) {
+      window.gtag("event", "page_view", {
+        page_title: activePage,
+        page_location: window.location.href,
+        page_path: `/${activePage.toLowerCase()}`,
+      });
+    }
   }, [activePage]);
 
   // PWA Install Prompt State
@@ -363,6 +373,85 @@ export default function App() {
   const [pushLoading, setPushLoading] = useState(false);
   const [pushPopup, setPushPopup] = useState(null);
 
+  // In-App Message States
+  const [inAppQueue, setInAppQueue] = useState([]);
+  const [currentInApp, setCurrentInApp] = useState(null);
+
+  // Helper to show next in-app message in queue
+  const showNextInApp = (queue) => {
+    if (queue.length > 0) {
+      const next = queue[0];
+      setCurrentInApp(next);
+      setInAppQueue(queue.slice(1));
+    } else {
+      setCurrentInApp(null);
+    }
+  };
+
+  const hasValidUrl = (url) => {
+    if (!url) return false;
+    const trimmed = url.trim();
+    return trimmed !== "";
+  };
+
+  const performHardRefresh = () => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+        window.location.reload();
+      }).catch(() => {
+        window.location.reload();
+      });
+    } else {
+      window.location.reload();
+    }
+  };
+
+  const handleDismissInApp = (msg, actionType) => {
+    // 1. Add to seen list in localStorage
+    const seenIdsStr = localStorage.getItem("seen_in_app_messages") || "[]";
+    let seenIds = [];
+    try {
+      seenIds = JSON.parse(seenIdsStr);
+    } catch (e) {
+      seenIds = [];
+    }
+    if (!seenIds.includes(msg.id)) {
+      seenIds.push(msg.id);
+      localStorage.setItem("seen_in_app_messages", JSON.stringify(seenIds));
+    }
+
+    // 2. Mark as read in inbox (horo_messages)
+    const localInboxStr = localStorage.getItem("horo_messages") || "[]";
+    try {
+      const localInbox = JSON.parse(localInboxStr);
+      const updatedInbox = localInbox.map((m) => {
+        if (m.id === msg.id) {
+          return { ...m, read: true };
+        }
+        return m;
+      });
+      localStorage.setItem("horo_messages", JSON.stringify(updatedInbox));
+      window.dispatchEvent(new Event("horo_messages_updated"));
+    } catch (e) {}
+
+    // 3. Navigate if actionType is link
+    if (actionType === "link" && msg.url) {
+      navigateToTargetUrl(msg.url);
+    }
+
+    // 4. Force Hard Refresh if required
+    if (msg.forceRefresh) {
+      performHardRefresh();
+      return;
+    }
+
+    // 5. Show next message in queue
+    showNextInApp(inAppQueue);
+  };
+
   // Unread మెసేజెస్ ఎన్ని ఉన్నాయో స్టోర్ చేయడానికి
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -377,7 +466,169 @@ export default function App() {
     window.addEventListener("horo_messages_updated", updateUnreadCount);
     return () =>
       window.removeEventListener("horo_messages_updated", updateUnreadCount);
-  }, [pushPopup]);
+  }, [pushPopup, currentInApp]);
+
+  const lastInAppFetchRef = useRef(0);
+
+  const fetchInAppWithThrottle = async (force = false) => {
+    const now = Date.now();
+    if (!force && now - lastInAppFetchRef.current < 2000) { // 2 seconds throttle
+      return;
+    }
+    lastInAppFetchRef.current = now;
+
+    try {
+      const data = await getInAppMessages();
+      if (!Array.isArray(data)) return;
+
+      // 1. Filter messages by Date Range and Active status
+      const todayStr = new Date().toISOString().split("T")[0];
+      const activeMessages = data.filter((msg) => {
+        return msg.isActive && msg.startDate <= todayStr && msg.endDate >= todayStr;
+      });
+
+      if (activeMessages.length === 0) return;
+
+      // 2. Sync with local inbox (horo_messages)
+      const localInboxStr = localStorage.getItem("horo_messages") || "[]";
+      let localInbox = [];
+      try {
+        localInbox = JSON.parse(localInboxStr);
+      } catch (e) {
+        localInbox = [];
+      }
+
+      let inboxModified = false;
+      activeMessages.forEach((msg) => {
+        if (!localInbox.some((m) => m.id === msg.id)) {
+          // Add as new unread message at the start
+          localInbox.unshift({
+            id: msg.id,
+            title: msg.title,
+            body: msg.body,
+            targetUrl: msg.url || "",
+            date: Date.now(),
+            read: false,
+            archived: false,
+            isInApp: true,
+          });
+          inboxModified = true;
+        }
+      });
+
+      if (inboxModified) {
+        localStorage.setItem("horo_messages", JSON.stringify(localInbox));
+        window.dispatchEvent(new Event("horo_messages_updated"));
+      }
+
+      // 3. Find unseen messages for popups
+      const seenIdsStr = localStorage.getItem("seen_in_app_messages") || "[]";
+      let seenIds = [];
+      try {
+        seenIds = JSON.parse(seenIdsStr);
+      } catch (e) {
+        seenIds = [];
+      }
+
+      const unseenMessages = activeMessages.filter((msg) => !seenIds.includes(msg.id));
+      if (unseenMessages.length > 0) {
+        setCurrentInApp((current) => {
+          if (!current) {
+            setInAppQueue(unseenMessages.slice(1));
+            return unseenMessages[0];
+          } else {
+            setInAppQueue((prevQueue) => {
+              const combined = [...prevQueue];
+              unseenMessages.forEach((um) => {
+                if (current.id !== um.id && !combined.some((q) => q.id === um.id)) {
+                  combined.push(um);
+                }
+              });
+              return combined;
+            });
+            return current;
+          }
+        });
+      }
+    } catch (err) {
+      console.warn("Failed to fetch in-app messages:", err);
+      // Static fallback
+      try {
+        const res = await fetch(`${import.meta.env.BASE_URL}static/in_app_messages.json?_t=${Date.now()}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            const todayStr = new Date().toISOString().split("T")[0];
+            const activeMessages = data.filter(msg => msg.isActive && msg.startDate <= todayStr && msg.endDate >= todayStr);
+            if (activeMessages.length > 0) {
+              const localInboxStr = localStorage.getItem("horo_messages") || "[]";
+              let localInbox = JSON.parse(localInboxStr);
+              let inboxModified = false;
+              activeMessages.forEach((msg) => {
+                if (!localInbox.some((m) => m.id === msg.id)) {
+                  localInbox.unshift({
+                    id: msg.id,
+                    title: msg.title,
+                    body: msg.body,
+                    targetUrl: msg.url || "",
+                    date: Date.now(),
+                    read: false,
+                    archived: false,
+                    isInApp: true,
+                  });
+                  inboxModified = true;
+                }
+              });
+              if (inboxModified) {
+                localStorage.setItem("horo_messages", JSON.stringify(localInbox));
+                window.dispatchEvent(new Event("horo_messages_updated"));
+              }
+              const seenIdsStr = localStorage.getItem("seen_in_app_messages") || "[]";
+              const seenIds = JSON.parse(seenIdsStr);
+              const unseenMessages = activeMessages.filter(msg => !seenIds.includes(msg.id));
+              if (unseenMessages.length > 0) {
+                setCurrentInApp((current) => {
+                  if (!current) {
+                    setInAppQueue(unseenMessages.slice(1));
+                    return unseenMessages[0];
+                  } else {
+                    setInAppQueue((prevQueue) => {
+                      const combined = [...prevQueue];
+                      unseenMessages.forEach((um) => {
+                        if (current.id !== um.id && !combined.some((q) => q.id === um.id)) {
+                          combined.push(um);
+                        }
+                      });
+                      return combined;
+                    });
+                    return current;
+                  }
+                });
+              }
+            }
+          }
+        }
+      } catch (staticErr) {
+        console.error("Static fallback fetch failed:", staticErr);
+      }
+    }
+  };
+
+  // Fetch when activePage changes (throttled to avoid spamming)
+  useEffect(() => {
+    fetchInAppWithThrottle();
+  }, [activePage]);
+
+  // Fetch when app comes to foreground (visibility change)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fetchInAppWithThrottle(true); // force fetch when resuming app
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, []);
 
   useEffect(() => {
     // చెక్: యూజర్ ఇప్పటికే నోటిఫికేషన్స్ సబ్‌స్క్రైబ్ చేసుకున్నారా?
@@ -483,6 +734,7 @@ export default function App() {
       const pushBody = params.get("push_body");
       const targetUrl = params.get("target_url");
       const pushImportant = params.get("push_important");
+      const pushForceRefresh = params.get("push_force_refresh") === "1";
       const pushId = params.get("push_id") || Date.now().toString();
 
       if (pushTitle || pushBody) {
@@ -501,6 +753,7 @@ export default function App() {
                 date: Date.now(),
                 read: false,
                 archived: false,
+                forceRefresh: pushForceRefresh,
               });
               localStorage.setItem(
                 "horo_messages",
@@ -514,7 +767,7 @@ export default function App() {
           }
         }
 
-        setPushPopup({ title: pushTitle, body: pushBody, targetUrl });
+        setPushPopup({ title: pushTitle, body: pushBody, targetUrl, forceRefresh: pushForceRefresh });
       }
     } catch (e) {
       console.error("Error handling incoming notification URL:", e);
@@ -553,6 +806,7 @@ export default function App() {
       params.has("push_body") ||
       params.has("push_important") ||
       params.has("push_id") ||
+      params.has("push_force_refresh") ||
       params.has("target_url")
     ) {
       params.delete("push_title");
@@ -560,6 +814,7 @@ export default function App() {
       params.delete("target_url");
       params.delete("push_important");
       params.delete("push_id");
+      params.delete("push_force_refresh");
       const newSearch = params.toString();
       const newUrl =
         window.location.pathname + (newSearch ? "?" + newSearch : "");
@@ -667,6 +922,15 @@ export default function App() {
     const handleAppInstalled = () => {
       setIsInstallable(false); // ఇన్‌స్టాల్ అయ్యాక బటన్ దాచేయడానికి
       setDeferredPrompt(null);
+
+      // Track successful PWA installation
+      const gaId = import.meta.env.VITE_GA_ID;
+      if (gaId && window.gtag) {
+        window.gtag("event", "pwa_install", {
+          method: "PWA",
+          status: "success"
+        });
+      }
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -687,6 +951,12 @@ export default function App() {
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === "accepted") {
         setIsInstallable(false); // యూజర్ యాక్సెప్ట్ చేస్తే బటన్ దాచేస్తాం
+        
+        // Track install prompt acceptance
+        const gaId = import.meta.env.VITE_GA_ID;
+        if (gaId && window.gtag) {
+          window.gtag("event", "pwa_install_accepted");
+        }
       }
       setDeferredPrompt(null);
     }
@@ -1272,8 +1542,12 @@ export default function App() {
             <button
               onClick={() => {
                 const url = pushPopup.targetUrl;
+                const needRefresh = pushPopup.forceRefresh;
                 setPushPopup(null);
                 navigateToTargetUrl(url);
+                if (needRefresh) {
+                  performHardRefresh();
+                }
               }}
               style={{
                 background: "linear-gradient(135deg, #8e44ad, #732d91)",
@@ -1291,6 +1565,138 @@ export default function App() {
             >
               OK, Got it!
             </button>
+          </div>
+        </div>
+      )}
+      {/* In-App Message Popup Modal */}
+      {currentInApp && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.65)",
+            zIndex: 10000,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: "20px",
+            backdropFilter: "blur(5px)",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: "20px",
+              padding: "30px 25px 25px 25px",
+              maxWidth: "450px",
+              width: "100%",
+              maxHeight: "80vh",
+              display: "flex",
+              flexDirection: "column",
+              boxShadow: "0 15px 35px rgba(0,0,0,0.35)",
+              boxSizing: "border-box",
+            }}
+          >
+            {/* Header Icon */}
+            <div style={{ textAlign: "center", marginBottom: "15px", flexShrink: 0 }}>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "70px",
+                  height: "70px",
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, #f39c12, #e67e22)",
+                  boxShadow: "0 5px 15px rgba(230, 126, 34, 0.3)",
+                fontSize: "35px",
+                color: "#fff",
+              }}
+            >
+              🔔
+            </div>
+            </div>
+
+            {/* Scrollable Content Container */}
+            <div
+              style={{
+                overflowY: "auto",
+                flex: 1,
+                marginBottom: "25px",
+                paddingRight: "8px",
+                textAlign: "center",
+              }}
+            >
+              <h2
+                style={{
+                  color: "#2c3e50",
+                  marginTop: 0,
+                  marginBottom: "15px",
+                  fontSize: "22px",
+                  fontWeight: "700",
+                  lineHeight: "1.3",
+                }}
+              >
+                {currentInApp.title}
+              </h2>
+              <p
+                style={{
+                  fontSize: "15.5px",
+                  color: "#555",
+                  lineHeight: "1.6",
+                  margin: 0,
+                  whiteSpace: "pre-wrap",
+                  textAlign: "left",
+                }}
+              >
+                {currentInApp.body}
+              </p>
+            </div>
+
+            {/* Actions Button Panel */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", flexShrink: 0 }}>
+              {hasValidUrl(currentInApp.url) && (
+                <button
+                  onClick={() => handleDismissInApp(currentInApp, "link")}
+                  style={{
+                    background: "linear-gradient(135deg, #8e44ad, #732d91)",
+                    color: "#fff",
+                    border: "none",
+                    padding: "12px 20px",
+                    borderRadius: "10px",
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    width: "100%",
+                    boxShadow: "0 4px 15px rgba(142, 68, 173, 0.3)",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  🔗 Open Link & View
+                </button>
+              )}
+              <button
+                onClick={() => handleDismissInApp(currentInApp, "ok")}
+                style={{
+                  background: "#f1f2f6",
+                  color: "#2c3e50",
+                  border: "none",
+                  padding: "12px 20px",
+                  borderRadius: "10px",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  width: "100%",
+                  transition: "all 0.2s",
+                }}
+              >
+                OK, Got it!
+              </button>
+            </div>
           </div>
         </div>
       )}

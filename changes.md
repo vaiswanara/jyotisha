@@ -1,3 +1,8 @@
+29-06-2026
+- added gulika ka;am in the me page.
+- MePage re-designed.
+- Profile Saving updated (added Switch profile option too)
+
 28-06-2026
 - Panchanga Page Layout Redesign: Redesigned the Panchanga page desktop layout, removing unnecessary margins and resizing the D1 chart by 20% (including planetary text).
 - Reminders & Custom Events Tab: Implemented a separate "Add Events" tab between Muhurtha and Adhika Masa tabs to save custom events, holidays, or festivals.

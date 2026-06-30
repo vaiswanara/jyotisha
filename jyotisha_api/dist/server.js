@@ -140,17 +140,6 @@ setInterval(() => {
         }
     }
 }, CACHE_TTL_SECONDS * 1000).unref(); // గంటకు ఒకసారి క్లీనప్, ప్రాసెస్ దీనికోసం ఆగదు
-const isSyncEnabled = () => {
-    const settingsFile = path_1.default.join(process.cwd(), "sync_settings.json");
-    if (fs_1.default.existsSync(settingsFile)) {
-        try {
-            const data = JSON.parse(fs_1.default.readFileSync(settingsFile, "utf-8"));
-            return data.enableUserSync === true;
-        }
-        catch (e) { }
-    }
-    return false;
-};
 // భద్రత కోసం API Token Verification
 const API_SECRET_TOKEN = process.env.API_SECRET_TOKEN || "";
 // cPanel హెల్త్ చెక్ కోసం (దీనికి టోకెన్ అవసరం లేదు, cPanel కి ఎర్రర్ రాకుండా ఉండటానికి)
@@ -991,8 +980,74 @@ app.all(apiPaths, async (req, res) => {
             const ashtakavarga = VedicAstroEngine_1.VedicAstroEngine.calcAshtakavarga(planets, lagnaRashi);
             const dateUtc = Date.UTC(b.year, b.month - 1, b.day, b.hour, b.minute, b.second);
             const timestamp = Math.floor(dateUtc / 1000) - b.tz * 3600;
-            const { sunrise: sunriseTs } = getPreciseSunriseSunset(timestamp, b.lat, b.lon, b.tz);
+            const { sunrise: sunriseTs, sunset: sunsetTs } = getPreciseSunriseSunset(timestamp, b.lat, b.lon, b.tz);
             const sunriseStr = formatTsLocal(sunriseTs, b.tz);
+            // Calculate inauspicious times (Rahu Kalam, Yamagandam, Varjyam, Durmuhurtham)
+            const mDayDuration = Math.max(1, (sunsetTs || (sunriseTs + 43200)) - sunriseTs);
+            let mVaaraNum = new Date((timestamp + b.tz * 3600) * 1000).getUTCDay();
+            if (timestamp < sunriseTs) {
+                mVaaraNum = (mVaaraNum - 1 + 7) % 7;
+            }
+            const rahuRatios = [0.875, 0.125, 0.75, 0.5, 0.625, 0.375, 0.25];
+            const yamaRatios = [0.5, 0.375, 0.25, 0.125, 0.875, 0.75, 0.625];
+            const gulikaRatios = [0.75, 0.625, 0.5, 0.375, 0.25, 0.125, 0.0];
+            const rahuStart = sunriseTs + Math.floor(mDayDuration * rahuRatios[mVaaraNum]);
+            const rahuEnd = rahuStart + Math.floor(mDayDuration * 0.125);
+            const yamaStart = sunriseTs + Math.floor(mDayDuration * yamaRatios[mVaaraNum]);
+            const yamaEnd = yamaStart + Math.floor(mDayDuration * 0.125);
+            const gulikaStart = sunriseTs + Math.floor(mDayDuration * gulikaRatios[mVaaraNum]);
+            const gulikaEnd = gulikaStart + Math.floor(mDayDuration * 0.125);
+            const durmuhurthams = {
+                0: [13],
+                1: [8, 11],
+                2: [3, 10],
+                3: [5],
+                4: [8],
+                5: [3, 8],
+                6: [1],
+            };
+            const durTimes = [];
+            for (const mdIdx of durmuhurthams[mVaaraNum] || []) {
+                const mStart = sunriseTs + Math.floor(mDayDuration * (mdIdx / 15.0));
+                const mEnd = sunriseTs + Math.floor(mDayDuration * ((mdIdx + 1) / 15.0));
+                durTimes.push(`${formatTsLocal(mStart, b.tz)} - ${formatTsLocal(mEnd, b.tz)}`);
+            }
+            const varjyamGhatis = [
+                50, 24, 30, 40, 14, 21, 30, 20, 32, 30, 20, 18, 21, 20, 14, 14, 10, 14,
+                56, 24, 20, 10, 10, 18, 16, 24, 30,
+            ];
+            const mMoonLon = planets[constants_1.Planet.Moon]?.longitude || 0;
+            const mMoonSpeed = planets[constants_1.Planet.Moon]?.speed || 13.176;
+            const mSpeedSafe = Math.max(0.1, mMoonSpeed);
+            const mNakLen = 360.0 / 27.0;
+            const mNakIndex = Math.floor(mMoonLon / mNakLen);
+            const mDegPassed = mMoonLon % mNakLen;
+            let mNakStartTs1 = timestamp - Math.floor((mDegPassed / mSpeedSafe) * 86400);
+            mNakStartTs1 = findExactTime(mNakStartTs1, "nakshatra", mNakIndex * mNakLen, b.lat, b.lon, b.tz, b.ayKey, true);
+            const vStart1 = mNakStartTs1 + Math.floor(varjyamGhatis[mNakIndex] * 1440);
+            const vEnd1 = vStart1 + 5760;
+            const mNakIndex2 = (mNakIndex + 1) % 27;
+            let mnEndTs = timestamp + Math.floor(((mNakLen - mDegPassed) / mSpeedSafe) * 86400);
+            mnEndTs = findExactTime(mnEndTs, "nakshatra", (mNakIndex + 1) * mNakLen, b.lat, b.lon, b.tz, b.ayKey, true);
+            const vStart2 = mnEndTs + Math.floor(varjyamGhatis[mNakIndex2] * 1440);
+            const vEnd2 = vStart2 + 5760;
+            const varjyams = [];
+            const windowStart = sunriseTs - 3600;
+            const windowEnd = sunriseTs + 86400 + 3600;
+            if (vEnd1 > windowStart && vStart1 < windowEnd) {
+                varjyams.push(`${formatTsLocal(vStart1, b.tz)} - ${formatTsLocal(vEnd1, b.tz)}`);
+            }
+            if (vEnd2 > windowStart && vStart2 < windowEnd) {
+                varjyams.push(`${formatTsLocal(vStart2, b.tz)} - ${formatTsLocal(vEnd2, b.tz)}`);
+            }
+            const extendedPanchanga = {
+                ...panchanga,
+                rahu_kalam: `${formatTsLocal(rahuStart, b.tz)} - ${formatTsLocal(rahuEnd, b.tz)}`,
+                yamagandam: `${formatTsLocal(yamaStart, b.tz)} - ${formatTsLocal(yamaEnd, b.tz)}`,
+                gulika_kalam: `${formatTsLocal(gulikaStart, b.tz)} - ${formatTsLocal(gulikaEnd, b.tz)}`,
+                durmuhurtham: durTimes.length ? durTimes.join(", ") : "-",
+                varjyam: varjyams.length ? varjyams.join(", ") : "-",
+            };
             return jsonAndCache({
                 meta: {
                     dob: b.dob,
@@ -1003,6 +1058,7 @@ app.all(apiPaths, async (req, res) => {
                     ayanamsha: Number(engine.getAyanamsha().toFixed(6)),
                     ayanamsha_name: engine.getAyanamshaName(),
                     sunrise: sunriseStr,
+                    sunset: formatTsLocal(sunsetTs, b.tz),
                     engine: engine.isUsingSwetest()
                         ? "swetest (Swiss Ephemeris)"
                         : "Math fallback",
@@ -1023,7 +1079,7 @@ app.all(apiPaths, async (req, res) => {
                 d30,
                 d60,
                 dashas,
-                panchanga,
+                panchanga: extendedPanchanga,
                 shadabala,
                 ashtakavarga,
             });
@@ -1150,6 +1206,97 @@ app.all(apiPaths, async (req, res) => {
             const precKaranaRem = 6.0 - (precDiff % 6.0);
             const precKEndApprox = targetLocalTs + Math.floor((precKaranaRem / precTSpeed) * 86400);
             const precKaranaEnd = findExactTime(precKEndApprox, "karana", (precKaranaIndex + 1) * 6.0, lat, lon, tz, ayKey, false);
+            // Calculate inauspicious times for Fallback
+            const fbSunriseTs = fbSunrise || targetLocalTs;
+            const fbSunsetTs = fbSunset || (fbSunriseTs + 43200);
+            const fbDayDuration = Math.max(1, fbSunsetTs - fbSunriseTs);
+            let fbVaaraNum = new Date((targetLocalTs + tz * 3600) * 1000).getUTCDay();
+            if (targetLocalTs < fbSunriseTs) {
+                fbVaaraNum = (fbVaaraNum - 1 + 7) % 7;
+            }
+            const rahuRatios = [0.875, 0.125, 0.75, 0.5, 0.625, 0.375, 0.25];
+            const yamaRatios = [0.5, 0.375, 0.25, 0.125, 0.875, 0.75, 0.625];
+            const fbRahuStart = fbSunriseTs + Math.floor(fbDayDuration * rahuRatios[fbVaaraNum]);
+            const fbRahuEnd = fbRahuStart + Math.floor(fbDayDuration * 0.125);
+            const fbYamaStart = fbSunriseTs + Math.floor(fbDayDuration * yamaRatios[fbVaaraNum]);
+            const fbYamaEnd = fbYamaStart + Math.floor(fbDayDuration * 0.125);
+            const durmuhurthams = {
+                0: [13],
+                1: [8, 11],
+                2: [3, 10],
+                3: [5],
+                4: [8],
+                5: [3, 8],
+                6: [1],
+            };
+            const fbDurTimes = [];
+            for (const mdIdx of durmuhurthams[fbVaaraNum] || []) {
+                const mStart = fbSunriseTs + Math.floor(fbDayDuration * (mdIdx / 15.0));
+                const mEnd = fbSunriseTs + Math.floor(fbDayDuration * ((mdIdx + 1) / 15.0));
+                fbDurTimes.push(`${formatTsLocal(mStart, tz)} - ${formatTsLocal(mEnd, tz)}`);
+            }
+            const fbSpeedSafe = Math.max(0.1, fbMoonSpeed);
+            const fbDegPassed = fbMoonLon % nakLen;
+            let fbNakStartTs1 = targetLocalTs - Math.floor((fbDegPassed / fbSpeedSafe) * 86400);
+            fbNakStartTs1 = findExactTime(fbNakStartTs1, "nakshatra", fbNakIndex * nakLen, lat, lon, tz, ayKey, true);
+            const varjyamGhatis = [
+                50, 24, 30, 40, 14, 21, 30, 20, 32, 30, 20, 18, 21, 20, 14, 14, 10, 14,
+                56, 24, 20, 10, 10, 18, 16, 24, 30,
+            ];
+            const fbVStart1 = fbNakStartTs1 + Math.floor(varjyamGhatis[fbNakIndex] * 1440);
+            const fbVEnd1 = fbVStart1 + 5760;
+            const fbNakIndex2 = (fbNakIndex + 1) % 27;
+            let fbNEndTs = targetLocalTs + Math.floor(((nakLen - fbDegPassed) / fbSpeedSafe) * 86400);
+            fbNEndTs = findExactTime(fbNEndTs, "nakshatra", (fbNakIndex + 1) * nakLen, lat, lon, tz, ayKey, true);
+            const fbVStart2 = fbNEndTs + Math.floor(varjyamGhatis[fbNakIndex2] * 1440);
+            const fbVEnd2 = fbVStart2 + 5760;
+            const fbVarjyams = [];
+            const fbWindowStart = fbSunriseTs - 3600;
+            const fbWindowEnd = fbSunriseTs + 86400 + 3600;
+            if (fbVEnd1 > fbWindowStart && fbVStart1 < fbWindowEnd) {
+                fbVarjyams.push(`${formatTsLocal(fbVStart1, tz)} - ${formatTsLocal(fbVEnd1, tz)}`);
+            }
+            if (fbVEnd2 > fbWindowStart && fbVStart2 < fbWindowEnd) {
+                fbVarjyams.push(`${formatTsLocal(fbVStart2, tz)} - ${formatTsLocal(fbVEnd2, tz)}`);
+            }
+            // Calculate inauspicious times for Precise
+            const precSunriseTs = precSun.rise || fbSunriseTs;
+            const precSunsetTs = precSun.set || fbSunsetTs;
+            const precDayDuration = Math.max(1, precSunsetTs - precSunriseTs);
+            let precVaaraNum = new Date((targetLocalTs + tz * 3600) * 1000).getUTCDay();
+            if (targetLocalTs < precSunriseTs) {
+                precVaaraNum = (precVaaraNum - 1 + 7) % 7;
+            }
+            const precRahuStart = precSunriseTs + Math.floor(precDayDuration * rahuRatios[precVaaraNum]);
+            const precRahuEnd = precRahuStart + Math.floor(precDayDuration * 0.125);
+            const precYamaStart = precSunriseTs + Math.floor(precDayDuration * yamaRatios[precVaaraNum]);
+            const precYamaEnd = precYamaStart + Math.floor(precDayDuration * 0.125);
+            const precDurTimes = [];
+            for (const mdIdx of durmuhurthams[precVaaraNum] || []) {
+                const mStart = precSunriseTs + Math.floor(precDayDuration * (mdIdx / 15.0));
+                const mEnd = precSunriseTs + Math.floor(precDayDuration * ((mdIdx + 1) / 15.0));
+                precDurTimes.push(`${formatTsLocal(mStart, tz)} - ${formatTsLocal(mEnd, tz)}`);
+            }
+            const precSpeedSafe = Math.max(0.1, precMoonSpeed);
+            const precDegPassed = precMoonLon % nakLen;
+            let precNakStartTs1 = targetLocalTs - Math.floor((precDegPassed / precSpeedSafe) * 86400);
+            precNakStartTs1 = findExactTime(precNakStartTs1, "nakshatra", precNakIndex * nakLen, lat, lon, tz, ayKey, false);
+            const precVStart1 = precNakStartTs1 + Math.floor(varjyamGhatis[precNakIndex] * 1440);
+            const precVEnd1 = precVStart1 + 5760;
+            const precNakIndex2 = (precNakIndex + 1) % 27;
+            let precNEndTs = targetLocalTs + Math.floor(((nakLen - precDegPassed) / precSpeedSafe) * 86400);
+            precNEndTs = findExactTime(precNEndTs, "nakshatra", (precNakIndex + 1) * nakLen, lat, lon, tz, ayKey, false);
+            const precVStart2 = precNEndTs + Math.floor(varjyamGhatis[precNakIndex2] * 1440);
+            const precVEnd2 = precVStart2 + 5760;
+            const precVarjyams = [];
+            const precWindowStart = precSunriseTs - 3600;
+            const precWindowEnd = precSunriseTs + 86400 + 3600;
+            if (precVEnd1 > precWindowStart && precVStart1 < precWindowEnd) {
+                precVarjyams.push(`${formatTsLocal(precVStart1, tz)} - ${formatTsLocal(precVEnd1, tz)}`);
+            }
+            if (precVEnd2 > precWindowStart && precVStart2 < precWindowEnd) {
+                precVarjyams.push(`${formatTsLocal(precVStart2, tz)} - ${formatTsLocal(precVEnd2, tz)}`);
+            }
             return jsonAndCache({
                 meta: {
                     dob,
@@ -1192,6 +1339,10 @@ app.all(apiPaths, async (req, res) => {
                         paksha: fbPanchanga.paksha,
                         ayanamsha: fbEngine.getAyanamsha(),
                         ayanamsha_name: fbEngine.getAyanamshaName(),
+                        rahu_kalam: `${formatTsLocal(fbRahuStart, tz)} - ${formatTsLocal(fbRahuEnd, tz)}`,
+                        yamagandam: `${formatTsLocal(fbYamaStart, tz)} - ${formatTsLocal(fbYamaEnd, tz)}`,
+                        durmuhurtham: fbDurTimes.length ? fbDurTimes.join(", ") : "-",
+                        varjyam: fbVarjyams.length ? fbVarjyams.join(", ") : "-",
                     },
                     precise: {
                         tithi: precPanchanga.tithi,
@@ -1207,6 +1358,10 @@ app.all(apiPaths, async (req, res) => {
                         paksha: precPanchanga.paksha,
                         ayanamsha: precEngine.getAyanamsha(),
                         ayanamsha_name: precEngine.getAyanamshaName(),
+                        rahu_kalam: `${formatTsLocal(precRahuStart, tz)} - ${formatTsLocal(precRahuEnd, tz)}`,
+                        yamagandam: `${formatTsLocal(precYamaStart, tz)} - ${formatTsLocal(precYamaEnd, tz)}`,
+                        durmuhurtham: precDurTimes.length ? precDurTimes.join(", ") : "-",
+                        varjyam: precVarjyams.length ? precVarjyams.join(", ") : "-",
                     },
                 },
             });
@@ -1516,8 +1671,10 @@ app.all(apiPaths, async (req, res) => {
                 const dayDur = sunsetTs - sunriseTs;
                 const rahuRatios = [0.875, 0.125, 0.75, 0.5, 0.625, 0.375, 0.25];
                 const yamaRatios = [0.5, 0.375, 0.25, 0.125, 0.875, 0.75, 0.625];
+                const gulikaRatios = [0.75, 0.625, 0.5, 0.375, 0.25, 0.125, 0.0];
                 const rkStartTs = sunriseTs + Math.floor(dayDur * rahuRatios[vaaraNum]);
                 const ygStartTs = sunriseTs + Math.floor(dayDur * yamaRatios[vaaraNum]);
+                const gkStartTs = sunriseTs + Math.floor(dayDur * gulikaRatios[vaaraNum]);
                 const durmuhurthams = {
                     0: [13],
                     1: [8, 11],
@@ -1575,6 +1732,7 @@ app.all(apiPaths, async (req, res) => {
                     Karana_is_good: true,
                     "Rahu Kalam": `${formatTsLocal(rkStartTs, tz)} - ${formatTsLocal(rkStartTs + Math.floor(dayDur * 0.125), tz)}`,
                     Yamagandam: `${formatTsLocal(ygStartTs, tz)} - ${formatTsLocal(ygStartTs + Math.floor(dayDur * 0.125), tz)}`,
+                    "Gulika Kalam": `${formatTsLocal(gkStartTs, tz)} - ${formatTsLocal(gkStartTs + Math.floor(dayDur * 0.125), tz)}`,
                     Durmuhurtham: durTimes.length ? durTimes.join(", ") : "-",
                     Varjyam: varjyams.length ? varjyams.join(", ") : "-",
                 };
@@ -1987,8 +2145,10 @@ app.all(apiPaths, async (req, res) => {
             const mDayDuration = Math.max(1, mSunsetTs - mSunriseTs);
             const rahuRatios = [0.875, 0.125, 0.75, 0.5, 0.625, 0.375, 0.25];
             const yamaRatios = [0.5, 0.375, 0.25, 0.125, 0.875, 0.75, 0.625];
+            const gulikaRatios = [0.75, 0.625, 0.5, 0.375, 0.25, 0.125, 0.0];
             const rahuStart = mSunriseTs + Math.floor(mDayDuration * rahuRatios[mVaaraNum]);
             const yamaStart = mSunriseTs + Math.floor(mDayDuration * yamaRatios[mVaaraNum]);
+            const gulikaStart = mSunriseTs + Math.floor(mDayDuration * gulikaRatios[mVaaraNum]);
             const durmuhurthams = {
                 0: [13],
                 1: [8, 11],
@@ -2037,6 +2197,7 @@ app.all(apiPaths, async (req, res) => {
                 is_good: !mBadMuhurthas.includes(mCurrent),
                 rahu_kalam: `${formatTsLocal(rahuStart, tz)} - ${formatTsLocal(rahuStart + Math.floor(mDayDuration * 0.125), tz)}`,
                 yamagandam: `${formatTsLocal(yamaStart, tz)} - ${formatTsLocal(yamaStart + Math.floor(mDayDuration * 0.125), tz)}`,
+                gulika_kalam: `${formatTsLocal(gulikaStart, tz)} - ${formatTsLocal(gulikaStart + Math.floor(mDayDuration * 0.125), tz)}`,
                 durmuhurtham: durTimes.length ? durTimes.join(", ") : "-",
                 varjyam: varjyams.length ? varjyams.join(", ") : "-",
             };
@@ -2093,6 +2254,7 @@ app.all(apiPaths, async (req, res) => {
                 panchaka_is_good: panchaka.is_good,
                 rahu_kalam: muhurthaInfo.rahu_kalam,
                 yamagandam: muhurthaInfo.yamagandam,
+                gulika_kalam: muhurthaInfo.gulika_kalam,
                 durmuhurtham: muhurthaInfo.durmuhurtham,
                 varjyam: muhurthaInfo.varjyam,
                 lagna_tyajyam: lagnaTyajyamStr,
@@ -2141,71 +2303,6 @@ app.all(apiPaths, async (req, res) => {
                     chart: { planets: gPlanets, navamsa_d9: gNavamsa },
                 },
             });
-        }
-        else if (endpoint === "save_user") {
-            if (!isSyncEnabled()) {
-                return res.json({
-                    status: "success",
-                    message: "User data sync is disabled",
-                });
-            }
-            const usersFile = path_1.default.join(process.cwd(), "users_data.json");
-            // ఫైల్ సైజు 10MB దాటితే ఆపడం (భద్రత కోసం)
-            if (fs_1.default.existsSync(usersFile)) {
-                const stats = fs_1.default.statSync(usersFile);
-                if (stats.size > 10 * 1024 * 1024) {
-                    return res
-                        .status(507)
-                        .json({ status: "error", message: "Storage limit reached" });
-                }
-            }
-            // XSS ఎటాక్స్ నివారించడానికి డేటాని క్లీన్ చేయడం
-            const cleanData = {
-                name: String(input.name || "Unknown").substring(0, 100),
-                dob: String(input.dob || "").substring(0, 20),
-                tob: String(input.tob || "").substring(0, 20),
-                city: String(input.city || "").substring(0, 100),
-                deviceId: String(input.deviceId || "").substring(0, 100),
-                timestamp: String(input.timestamp || new Date().toISOString()),
-            };
-            let existingData = [];
-            if (fs_1.default.existsSync(usersFile)) {
-                try {
-                    existingData = JSON.parse(fs_1.default.readFileSync(usersFile, "utf-8"));
-                    if (!Array.isArray(existingData))
-                        existingData = [];
-                }
-                catch (e) {
-                    existingData = [];
-                }
-            }
-            let isUpdated = false;
-            if (cleanData.deviceId) {
-                for (let i = 0; i < existingData.length; i++) {
-                    if (existingData[i].deviceId === cleanData.deviceId) {
-                        existingData[i] = cleanData;
-                        isUpdated = true;
-                        break;
-                    }
-                }
-            }
-            if (!isUpdated) {
-                existingData.push(cleanData);
-            }
-            try {
-                // ఒకేసారి ఇద్దరు సేవ్ చేసినా ప్రాబ్లమ్ లేకుండా Sync వాడాం
-                fs_1.default.writeFileSync(usersFile, JSON.stringify(existingData, null, 2));
-                res.setHeader("X-Cache", "BYPASS"); // ఈ రిక్వెస్ట్ ని కాష్ చేయకూడదు
-                return res.json({
-                    status: "success",
-                    message: "User data saved successfully",
-                });
-            }
-            catch (e) {
-                return res
-                    .status(500)
-                    .json({ status: "error", message: "Failed to write to file" });
-            }
         }
         else if (endpoint === "push_subscribe") {
             const subFile = path_1.default.join(process.cwd(), "subscribers.json");
@@ -2498,32 +2595,6 @@ app.all(apiPaths, async (req, res) => {
             }
             return res.status(400).json({ error: "Invalid subscribers data format" });
         }
-        else if (endpoint === "save_users") {
-            const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-            const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-            if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
-                return res
-                    .status(403)
-                    .json({ error: "Forbidden: Invalid Admin Password" });
-            }
-            const { users } = input;
-            if (Array.isArray(users)) {
-                if (!isSyncEnabled() && users.length > 0) {
-                    return res.status(400).json({
-                        error: "Cannot import users while user data sync is disabled. (యూజర్ డేటా సింక్ ఆఫ్‌లో ఉన్నప్పుడు ఇంపోర్ట్ చేయలేరు.)",
-                    });
-                }
-                const usersFile = path_1.default.join(process.cwd(), "users_data.json");
-                try {
-                    fs_1.default.writeFileSync(usersFile, JSON.stringify(users, null, 2));
-                    res.setHeader("X-Cache", "BYPASS");
-                    return res.json({ status: "success", message: "Users saved successfully" });
-                }
-                catch (e) {
-                    return res.status(500).json({ error: "Failed to write users: " + e.message });
-                }
-            }
-        }
         else if (endpoint === "eclipses") {
             const lat = parseFloat(String(input.latitude || input.lat || 12.9716));
             const lon = parseFloat(String(input.longitude || input.lon || 77.5946));
@@ -2576,39 +2647,13 @@ app.all(apiPaths, async (req, res) => {
                 return null;
             };
             const subscribers = readJson("subscribers.json") || {};
-            const users = readJson("users_data.json") || [];
-            const enableUserSync = isSyncEnabled();
             res.setHeader("X-Cache", "BYPASS");
             return res.json({
                 status: "success",
                 subscribers: Object.values(subscribers),
-                users,
-                enableUserSync,
+                users: [],
+                enableUserSync: false,
             });
-        }
-        else if (endpoint === "save_sync_settings") {
-            const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-            const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-            if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
-                return res
-                    .status(403)
-                    .json({ error: "Forbidden: Invalid Admin Password" });
-            }
-            const settingsFile = path_1.default.join(process.cwd(), "sync_settings.json");
-            const data = {
-                enableUserSync: input.enableUserSync === true,
-            };
-            try {
-                fs_1.default.writeFileSync(settingsFile, JSON.stringify(data, null, 2));
-                res.setHeader("X-Cache", "BYPASS");
-                return res.json({
-                    status: "success",
-                    enableUserSync: data.enableUserSync,
-                });
-            }
-            catch (e) {
-                return res.status(500).json({ error: "Failed to write sync settings: " + e.message });
-            }
         }
         return res.status(400).json({ error: "Unknown endpoint" });
     }

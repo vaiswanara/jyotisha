@@ -58,6 +58,8 @@ const CONTENT = {
     e_library: "e-Library",
     desc_library:
       "Access digital PDF library for Vedic scriptures, spiritual, and educational resources.",
+    exit_btn: "Reset App",
+    exit_confirm: "Are you sure you want to reset cache, unregister service workers, and reload the app?",
   },
   te: {
     app_title: "e-జ్యోతిషం",
@@ -114,6 +116,8 @@ const CONTENT = {
     e_library: "ఈ-లైబ్రరీ",
     desc_library:
       "వైదిక, శాస్త్ర, ఆధ్యాత్మిక మరియు విద్యా గ్రంథాల డిజిటల్ లైబ్రరీని సందర్శించండి.",
+    exit_btn: "రీసెట్ యాప్",
+    exit_confirm: "మీరు నిజంగానే యాప్ కాష్ క్లియర్ చేసి, రీసెట్ చేసి మళ్లీ లోడ్ చేయాలనుకుంటున్నారా?",
   },
   kn: {
     app_title: "e-ಜ್ಯೋತಿಷ",
@@ -170,6 +174,8 @@ const CONTENT = {
     e_library: "ಇ-ಲೈಬ್ರರಿ",
     desc_library:
       "ವೈದಿಕ, ಧರ್ಮಶಾಸ್ತ್ರ ಮತ್ತು ಶೈಕ್ಷಣಿಕ ಪುಸ್ತಕಗಳ ಡಿಜಿಟಲ್ ಲೈಬ್ರರಿ ವೀಕ್ಷಿಸಿ.",
+    exit_btn: "ರಿಸೆಟ್ ಆ್ಯಪ್",
+    exit_confirm: "ನೀವು ನಿಜವಾಗಿಯೂ ಆ್ಯಪ್ ಕ್ಯಾಶ್ ಕ್ಲಿಯರ್ ಮಾಡಿ, ರಿಸೆಟ್ ಮಾಡಿ ಮತ್ತೆ ಲೋಡ್ ಮಾಡಲು ಬಯಸುವಿರಾ?",
   },
 };
 
@@ -207,6 +213,28 @@ export function HomePage({
       return "";
     }
   });
+
+  const handleExitApp = () => {
+    if (window.confirm(copy.exit_confirm || "Do you want to reset and reload the app?")) {
+      if ("caches" in window) {
+        caches.keys().then((names) => {
+          names.forEach((name) => caches.delete(name));
+        });
+      }
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (let registration of registrations) {
+            registration.unregister();
+          }
+          window.location.reload();
+        }).catch(() => {
+          window.location.reload();
+        });
+      } else {
+        window.location.reload();
+      }
+    }
+  };
 
   const [visiblePages, setVisiblePages] = useState(() => {
     try {
@@ -638,6 +666,41 @@ export function HomePage({
           </span>
         </button>
       )}
+      {/* Manual Reset & Close Button */}
+      <button
+        className="mobile-exit-btn"
+        onClick={handleExitApp}
+        title={copy.exit_btn}
+        style={{
+          position: "absolute",
+          top: "calc(env(safe-area-inset-top, 0px) + 20px)",
+          right: !pushEnabled ? "80px" : "20px", // Put it left of bell button if bell is visible, else top-right
+          background: "none",
+          border: "none",
+          color: "#27ae60",
+          fontSize: "22px",
+          width: "52px",
+          height: "auto",
+          minHeight: "52px",
+          borderRadius: "14px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          gap: "2px",
+          cursor: "pointer",
+          zIndex: 10,
+          padding: "6px 4px",
+          boxShadow: "none",
+        }}
+      >
+        <span style={{ display: "inline-block" }}>
+          ♻️
+        </span>
+        <span style={{ fontSize: "8px", fontWeight: 700, lineHeight: 1, opacity: 0.85, letterSpacing: "0.2px", whiteSpace: "nowrap", color: "#1e824c" }}>
+          {copy.exit_btn}
+        </span>
+      </button>
 
       <div className="content-container">
         <div className="home-wrapper">
@@ -886,14 +949,7 @@ export function HomePage({
             <div
               className="card-home"
               style={{ borderTopColor: "#7f8c8d" }}
-              onClick={() => {
-                if ("caches" in window) {
-                  caches.keys().then((names) => {
-                    names.forEach((name) => caches.delete(name));
-                  });
-                }
-                window.location.reload();
-              }}
+              onClick={handleExitApp}
             >
               <div className="icon">&#128260;</div>
               <h2>{copy.hard_refresh}</h2>
