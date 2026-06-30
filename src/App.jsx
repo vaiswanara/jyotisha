@@ -1093,7 +1093,7 @@ export default function App() {
           </div>
         }
       >
-        <ErrorBoundary onNavigate={setActivePage} key={activePage}>
+        <ErrorBoundary onNavigate={setActivePage} logoUrl={logoUrl} key={activePage}>
           {activePage === "Home" && (
           <HomePage
             logoUrl={logoUrl}

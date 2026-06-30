@@ -45,37 +45,39 @@ export class ErrorBoundary extends React.Component {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: "24px",
+            gap: "20px",
             fontFamily: "inherit"
           }}
         >
-          <div
-            style={{
-              width: "70px",
-              height: "70px",
-              borderRadius: "50%",
-              background: "rgba(138, 59, 36, 0.08)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "36px",
-              color: "#8a3b24"
-            }}
-          >
-            ⚠️
-          </div>
+          {this.props.logoUrl && (
+            <img
+              src={this.props.logoUrl}
+              alt="Jyotisha Logo"
+              style={{
+                width: "64px",
+                height: "64px",
+                borderRadius: "12px",
+                boxShadow: "0 4px 12px rgba(63, 43, 24, 0.1)",
+                marginBottom: "4px"
+              }}
+            />
+          )}
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
             <h2
               style={{
                 margin: 0,
                 color: "#2d2419",
                 fontSize: "1.35rem",
                 fontWeight: "800",
-                letterSpacing: "0.2px"
+                letterSpacing: "0.2px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px"
               }}
             >
-              Something went wrong
+              ⚠️ Something went wrong
             </h2>
             <p
               style={{
@@ -93,7 +95,7 @@ export class ErrorBoundary extends React.Component {
             style={{
               width: "100%",
               background: "#fffdfb",
-              border: "1px solid rgba(138, 59, 36, 0.1)",
+              border: "1px solid rgba(138, 59, 36, 0.15)",
               borderRadius: "8px",
               padding: "12px 16px",
               boxSizing: "border-box",
@@ -117,14 +119,17 @@ export class ErrorBoundary extends React.Component {
                   margin: "12px 0 0 0",
                   fontSize: "0.8rem",
                   color: "#6b6255",
-                  overflowX: "auto",
+                  overflowY: "auto",
+                  maxHeight: "180px",
                   fontFamily: "monospace",
                   whiteSpace: "pre-wrap",
                   wordBreak: "break-all",
-                  lineHeight: "1.5"
+                  lineHeight: "1.5",
+                  paddingRight: "4px"
                 }}
               >
                 {this.state.error && this.state.error.toString()}
+                {"\n\n"}
                 {this.state.errorInfo && this.state.errorInfo.componentStack}
               </pre>
             </details>
