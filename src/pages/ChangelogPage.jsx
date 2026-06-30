@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { HoroscopeHeader } from "../components/HoroscopeHeader.jsx";
 
 export function ChangelogPage({ logoUrl }) {
-  throw new Error("Simulated rendering error for testing the new Error Boundary UI!");
   const { t } = useTranslation();
 
   const changelogData = [
