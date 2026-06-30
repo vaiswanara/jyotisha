@@ -1154,7 +1154,7 @@ export function AdminPage({ onNavigate }) {
         )}
 
         {/* Combined Message & Alert Management Section */}
-        <details className="admin-card" open>
+        <details className="admin-card">
           <summary>
             <span>📣 Message & Alert Management</span>
             <span
