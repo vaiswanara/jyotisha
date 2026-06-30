@@ -2337,7 +2337,7 @@ app.all(apiPaths, async (req, res) => {
                     .status(403)
                     .json({ error: "Forbidden: Invalid Admin Password" });
             }
-            const { title, body, url, is_important } = input;
+            const { title, body, url, is_important, force_refresh } = input;
             const subFile = path_1.default.join(process.cwd(), "subscribers.json");
             if (!fs_1.default.existsSync(subFile))
                 return res.json({ error: "No subscribers found." });
@@ -2345,7 +2345,7 @@ app.all(apiPaths, async (req, res) => {
             const pushId = Date.now().toString();
             const appBasePath = (process.env.APP_BASE_PATH || "/test/").replace(/\/$/, "");
             const targetUrl = url || `${appBasePath}/`;
-            const finalUrl = `${appBasePath}/?push_id=${pushId}&push_title=${encodeURIComponent(String(title))}&push_body=${encodeURIComponent(String(body))}${is_important ? "&push_important=1" : ""}&target_url=${encodeURIComponent(targetUrl)}`;
+            const finalUrl = `${appBasePath}/?push_id=${pushId}&push_title=${encodeURIComponent(String(title))}&push_body=${encodeURIComponent(String(body))}${is_important ? "&push_important=1" : ""}${force_refresh ? "&push_force_refresh=1" : ""}&target_url=${encodeURIComponent(targetUrl)}`;
             const payload = JSON.stringify({ title, body, url: finalUrl });
             const subsArray = Object.values(subscribers);
             res.setHeader("X-Cache", "BYPASS");
@@ -2567,6 +2567,71 @@ app.all(apiPaths, async (req, res) => {
                 return res.status(500).json({ error: "Failed to write ticker: " + e.message });
             }
         }
+        else if (endpoint === "get_in_app_messages") {
+            const msgFile = path_1.default.join(process.cwd(), "in_app_messages.json");
+            if (!fs_1.default.existsSync(msgFile)) {
+                const publicMsg = path_1.default.join(process.cwd(), "..", "public", "static", "in_app_messages.json");
+                if (fs_1.default.existsSync(publicMsg)) {
+                    try {
+                        const data = fs_1.default.readFileSync(publicMsg, "utf-8");
+                        fs_1.default.writeFileSync(msgFile, data);
+                        return res.json(JSON.parse(data));
+                    }
+                    catch (e) { }
+                }
+                const srcMsg = path_1.default.join(process.cwd(), "..", "src", "data", "in_app_messages.json");
+                if (fs_1.default.existsSync(srcMsg)) {
+                    try {
+                        const data = fs_1.default.readFileSync(srcMsg, "utf-8");
+                        fs_1.default.writeFileSync(msgFile, data);
+                        return res.json(JSON.parse(data));
+                    }
+                    catch (e) { }
+                }
+                return res.json([]);
+            }
+            try {
+                const data = fs_1.default.readFileSync(msgFile, "utf-8");
+                return res.json(JSON.parse(data));
+            }
+            catch (e) {
+                return res.status(500).json({ error: "Failed to read in-app messages file" });
+            }
+        }
+        else if (endpoint === "save_in_app_message") {
+            const adminPwd = req.headers["x-admin-password"] || input.admin_password;
+            const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
+            if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+                return res.status(403).json({ error: "Forbidden: Invalid Admin Password" });
+            }
+            const { messages } = input;
+            if (!Array.isArray(messages)) {
+                return res.status(400).json({ error: "Invalid messages data format" });
+            }
+            const msgFile = path_1.default.join(process.cwd(), "in_app_messages.json");
+            try {
+                fs_1.default.writeFileSync(msgFile, JSON.stringify(messages, null, 2));
+                const publicMsg = path_1.default.join(process.cwd(), "..", "public", "static", "in_app_messages.json");
+                if (fs_1.default.existsSync(path_1.default.dirname(publicMsg))) {
+                    try {
+                        fs_1.default.writeFileSync(publicMsg, JSON.stringify(messages, null, 2));
+                    }
+                    catch (e) { }
+                }
+                const srcMsg = path_1.default.join(process.cwd(), "..", "src", "data", "in_app_messages.json");
+                if (fs_1.default.existsSync(path_1.default.dirname(srcMsg))) {
+                    try {
+                        fs_1.default.writeFileSync(srcMsg, JSON.stringify(messages, null, 2));
+                    }
+                    catch (e) { }
+                }
+                res.setHeader("X-Cache", "BYPASS");
+                return res.json({ status: "success", message: "In-App messages saved successfully" });
+            }
+            catch (e) {
+                return res.status(500).json({ error: "Failed to write in-app messages: " + e.message });
+            }
+        }
         else if (endpoint === "save_subscribers") {
             const adminPwd = req.headers["x-admin-password"] || input.admin_password;
             const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
@@ -2647,10 +2712,12 @@ app.all(apiPaths, async (req, res) => {
                 return null;
             };
             const subscribers = readJson("subscribers.json") || {};
+            const inAppMessages = readJson("in_app_messages.json") || [];
             res.setHeader("X-Cache", "BYPASS");
             return res.json({
                 status: "success",
                 subscribers: Object.values(subscribers),
+                inAppMessages: inAppMessages,
                 users: [],
                 enableUserSync: false,
             });
