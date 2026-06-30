@@ -182,9 +182,6 @@ const CONTENT = {
 export function HomePage({
   logoUrl,
   onNavigate,
-  pushEnabled,
-  pushLoading,
-  onEnablePush,
   needRefresh,
   updateServiceWorker,
   isInstallable,
@@ -630,42 +627,6 @@ export function HomePage({
         </button>
       )}
 
-      {!pushEnabled && (
-        <button
-          className="mobile-bell-btn"
-          onClick={onEnablePush}
-          disabled={pushLoading}
-          title={t("enableAlerts", "Enable Alerts")}
-          style={{
-            position: "absolute",
-            top: "calc(env(safe-area-inset-top, 0px) + 20px)",
-            right: "20px",
-            background: "none",
-            border: "none",
-            color: "#f1c40f",
-            fontSize: "22px",
-            width: "52px",
-            height: "auto",
-            minHeight: "52px",
-            borderRadius: "14px",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "column",
-            gap: "2px",
-            cursor: pushLoading ? "wait" : "pointer",
-            zIndex: 10,
-            padding: "6px 4px",
-            boxShadow: "none",
-          }}
-        >
-          <span style={{ display: "inline-block", animation: pushLoading ? "none" : "bell-shake 2s infinite ease-in-out" }}>
-            🔔
-          </span>
-          <span style={{ fontSize: "8px", fontWeight: 700, lineHeight: 1, opacity: 0.85, letterSpacing: "0.2px", whiteSpace: "nowrap", color: "#8a5a00" }}>
-            {t("alertsLabel", "Alerts")}
-          </span>
-        </button>
-      )}
       {/* Manual Reset & Close Button */}
       <button
         className="mobile-exit-btn"
@@ -674,7 +635,7 @@ export function HomePage({
         style={{
           position: "absolute",
           top: "calc(env(safe-area-inset-top, 0px) + 20px)",
-          right: !pushEnabled ? "80px" : "20px", // Put it left of bell button if bell is visible, else top-right
+          right: "20px",
           background: "none",
           border: "none",
           color: "#27ae60",

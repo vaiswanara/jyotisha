@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { API_URL, API_TOKEN, getLessons, saveLessons, saveSubscribers, getLibrary, saveLibrary, getTicker, saveTicker, getInAppMessages, saveInAppMessage } from "../services/astrologyApi.js";
+import { API_URL, API_TOKEN, getLessons, saveLessons, getLibrary, saveLibrary, getTicker, saveTicker, getInAppMessages, saveInAppMessage } from "../services/astrologyApi.js";
 export function AdminPage({ onNavigate }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [password, setPassword] = useState("");
-  const [adminData, setAdminData] = useState({ subscribers: [] });
+  const [adminData, setAdminData] = useState({});
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null); // { type: 'success' | 'error', text: '' }
@@ -54,7 +54,7 @@ export function AdminPage({ onNavigate }) {
   // In-App Messages Form State
   const [inAppMessages, setInAppMessages] = useState([]);
   const [inAppFormId, setInAppFormId] = useState("");
-  const [deliveryChannels, setDeliveryChannels] = useState({ inApp: true, push: false });
+
   const [inAppDates, setInAppDates] = useState({
     startDate: new Date().toISOString().split("T")[0],
     endDate: (() => {
@@ -69,11 +69,7 @@ export function AdminPage({ onNavigate }) {
   const [forceRefresh, setForceRefresh] = useState(false);
   const [hasActionLink, setHasActionLink] = useState(false);
 
-  const [deletePrompt, setDeletePrompt] = useState({
-    isOpen: false,
-    type: "", // "subscribers" or "users"
-    passwordInput: "",
-  });
+
 
   useEffect(() => {
     const savedPwd = sessionStorage.getItem("admin_pwd");
@@ -220,9 +216,7 @@ export function AdminPage({ onNavigate }) {
 
       const data = await res.json();
       if (data.status === "success") {
-        setAdminData({
-          subscribers: data.subscribers || [],
-        });
+        setAdminData({});
         setIsLoggedIn(true);
         sessionStorage.setItem("admin_pwd", pwd);
         setMessage(null);
@@ -252,7 +246,7 @@ export function AdminPage({ onNavigate }) {
     sessionStorage.removeItem("admin_pwd");
     setIsLoggedIn(false);
     setPassword("");
-    setAdminData({ subscribers: [] });
+    setAdminData({});
     setLessons([]);
     setLibrary([]);
     setTickerList([]);
@@ -262,7 +256,6 @@ export function AdminPage({ onNavigate }) {
     setLoadingTicker(false);
     setInAppMessages([]);
     setInAppFormId("");
-    setDeliveryChannels({ inApp: true, push: false });
     setInAppDates({
       startDate: new Date().toISOString().split("T")[0],
       endDate: (() => {
@@ -285,100 +278,61 @@ export function AdminPage({ onNavigate }) {
       return;
     }
 
-    if (!deliveryChannels.inApp && !deliveryChannels.push) {
-      setMessage({ type: "error", text: "Please select at least one delivery channel (In-App or Push)!" });
-      return;
-    }
-
     setLoading(true);
     let successMessageParts = [];
     let isError = false;
 
     const targetUrl = hasActionLink ? alertForm.url.trim() : "";
 
-    // 1. Send Push Notification if selected
-    if (deliveryChannels.push) {
-      try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-token": API_TOKEN,
-            "x-admin-password": password,
-          },
-          body: JSON.stringify({
-            endpoint: "send_alert",
-            title: alertForm.title,
-            body: alertForm.body,
-            url: targetUrl,
-            is_important: false, // In-app handles inbox sync, so push notification doesn't need to double-save
-            force_refresh: forceRefresh,
-          }),
+    // Save In-App Message
+    setLoadingInApp(true);
+    const messageId = inAppFormId || `inapp_${Date.now()}`;
+    const newMsg = {
+      id: messageId,
+      title: alertForm.title.trim(),
+      body: alertForm.body.trim(),
+      url: targetUrl,
+      startDate: inAppDates.startDate,
+      endDate: inAppDates.endDate,
+      isActive: inAppDates.isActive,
+      forceRefresh: forceRefresh,
+    };
+
+    let updatedMsgs = [];
+    if (isEditingInApp) {
+      updatedMsgs = inAppMessages.map((m) => (m.id === inAppFormId ? newMsg : m));
+    } else {
+      updatedMsgs = [newMsg, ...inAppMessages];
+    }
+
+    try {
+      const res = await saveInAppMessage(updatedMsgs, password);
+      if (res && res.status === "success") {
+        setInAppMessages(updatedMsgs);
+        successMessageParts.push("In-App message saved successfully");
+        
+        setIsEditingInApp(false);
+        setInAppFormId("");
+        setInAppDates({
+          startDate: new Date().toISOString().split("T")[0],
+          endDate: (() => {
+            const d = new Date();
+            d.setDate(d.getDate() + 7);
+            return d.toISOString().split("T")[0];
+          })(),
+          isActive: true,
         });
-        const data = await res.json();
-        if (data.status === "success" || data.status === "queued") {
-          successMessageParts.push("Push notification broadcasted successfully");
-        } else {
-          isError = true;
-          setMessage({ type: "error", text: `Push notification failed: ${data.error || "unknown"}` });
-        }
-      } catch (err) {
-        isError = true;
-        setMessage({ type: "error", text: "❌ Failed to send push notification." });
-      }
-    }
-
-    // 2. Save In-App Message if selected (or editing)
-    if (deliveryChannels.inApp && !isError) {
-      setLoadingInApp(true);
-      const messageId = inAppFormId || `inapp_${Date.now()}`;
-      const newMsg = {
-        id: messageId,
-        title: alertForm.title.trim(),
-        body: alertForm.body.trim(),
-        url: targetUrl,
-        startDate: inAppDates.startDate,
-        endDate: inAppDates.endDate,
-        isActive: inAppDates.isActive,
-        forceRefresh: forceRefresh,
-      };
-
-      let updatedMsgs = [];
-      if (isEditingInApp) {
-        updatedMsgs = inAppMessages.map((m) => (m.id === inAppFormId ? newMsg : m));
+        setForceRefresh(false);
+        setHasActionLink(false);
       } else {
-        updatedMsgs = [newMsg, ...inAppMessages];
-      }
-
-      try {
-        const res = await saveInAppMessage(updatedMsgs, password);
-        if (res && res.status === "success") {
-          setInAppMessages(updatedMsgs);
-          successMessageParts.push("In-App message saved successfully");
-          
-          setIsEditingInApp(false);
-          setInAppFormId("");
-          setInAppDates({
-            startDate: new Date().toISOString().split("T")[0],
-            endDate: (() => {
-              const d = new Date();
-              d.setDate(d.getDate() + 7);
-              return d.toISOString().split("T")[0];
-            })(),
-            isActive: true,
-          });
-          setForceRefresh(false);
-          setHasActionLink(false);
-        } else {
-          isError = true;
-          setMessage({ type: "error", text: res?.error || "Failed to save In-App message." });
-        }
-      } catch (err) {
         isError = true;
-        setMessage({ type: "error", text: "❌ Failed to save In-App message." });
+        setMessage({ type: "error", text: res?.error || "Failed to save In-App message." });
       }
-      setLoadingInApp(false);
+    } catch (err) {
+      isError = true;
+      setMessage({ type: "error", text: "❌ Failed to save In-App message." });
     }
+    setLoadingInApp(false);
 
     if (!isError) {
       setMessage({ type: "success", text: `✅ ${successMessageParts.join(" & ")}!` });
@@ -389,7 +343,6 @@ export function AdminPage({ onNavigate }) {
           url: import.meta.env.BASE_URL,
           is_important: false,
         });
-        setDeliveryChannels({ inApp: true, push: false });
         setForceRefresh(false);
         setHasActionLink(false);
       }
@@ -406,7 +359,6 @@ export function AdminPage({ onNavigate }) {
       url: msg.url || "",
       is_important: false,
     });
-    setDeliveryChannels({ inApp: true, push: false });
     setInAppDates({
       startDate: msg.startDate || new Date().toISOString().split("T")[0],
       endDate: msg.endDate || new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0],
@@ -689,74 +641,7 @@ export function AdminPage({ onNavigate }) {
     reader.readAsText(file);
   };
 
-  const handleImportSubscribersFile = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const text = event.target.result;
-        const imported = JSON.parse(text);
-        const list = Array.isArray(imported) ? imported : (imported.subscribers || []);
-        if (!Array.isArray(list)) {
-          throw new Error("Invalid JSON format. Expected an array of subscribers.");
-        }
-
-        if (!window.confirm(`Are you sure you want to import ${list.length} subscribers? This will replace current subscribers.`)) return;
-
-        setLoading(true);
-        const res = await saveSubscribers(list, password);
-        if (res && res.status === "success") {
-          setAdminData(prev => ({ ...prev, subscribers: list }));
-          setMessage({ type: "success", text: `✅ Successfully imported ${list.length} subscribers!` });
-        } else {
-          setMessage({ type: "error", text: res?.error || "Failed to save imported subscribers." });
-        }
-      } catch (err) {
-        setMessage({ type: "error", text: `❌ Import failed: ${err.message}` });
-      }
-      setLoading(false);
-      e.target.value = "";
-    };
-    reader.readAsText(file);
-  };
-
-  const handleDeleteSubscribers = () => {
-    setDeletePrompt({
-      isOpen: true,
-      type: "subscribers",
-      passwordInput: "",
-    });
-  };
-
-
-
-  const handleConfirmDelete = async () => {
-    if (deletePrompt.passwordInput !== password) {
-      alert("❌ Incorrect Admin Password!");
-      return;
-    }
-
-    const type = deletePrompt.type;
-    setDeletePrompt({ isOpen: false, type: "", passwordInput: "" });
-
-    setLoading(true);
-    try {
-      if (type === "subscribers") {
-        const res = await saveSubscribers([], password);
-        if (res && res.status === "success") {
-          setAdminData(prev => ({ ...prev, subscribers: [] }));
-          setMessage({ type: "success", text: "✅ Successfully deleted all subscribers!" });
-        } else {
-          setMessage({ type: "error", text: res?.error || "Failed to delete subscribers." });
-        }
-      }
-    } catch (err) {
-      setMessage({ type: "error", text: `❌ Failed to delete ${type}.` });
-    }
-    setLoading(false);
-  };
 
   // ─── e-Library Handlers ────────────────────────────────────────────────────
 
@@ -1338,38 +1223,6 @@ export function AdminPage({ onNavigate }) {
                 )}
               </div>
 
-              {/* Delivery Channels */}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "15px", marginBottom: "20px", background: "#f8f9fa", padding: "15px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: "200px" }}>
-                  <input
-                    type="checkbox"
-                    id="send_as_inapp"
-                    checked={deliveryChannels.inApp}
-                    onChange={(e) =>
-                      setDeliveryChannels({ ...deliveryChannels, inApp: e.target.checked })
-                    }
-                    style={{ width: "18px", height: "18px", cursor: "pointer" }}
-                  />
-                  <label htmlFor="send_as_inapp" style={{ margin: 0, cursor: "pointer", fontWeight: "600", fontSize: "14px", color: "#2c3e50" }}>
-                    📱 Send as In-App Message
-                  </label>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: "200px" }}>
-                  <input
-                    type="checkbox"
-                    id="send_as_push"
-                    checked={deliveryChannels.push}
-                    onChange={(e) =>
-                      setDeliveryChannels({ ...deliveryChannels, push: e.target.checked })
-                    }
-                    style={{ width: "18px", height: "18px", cursor: "pointer" }}
-                  />
-                  <label htmlFor="send_as_push" style={{ margin: 0, cursor: "pointer", fontWeight: "600", fontSize: "14px", color: "#2c3e50" }}>
-                    🔔 Send as Push Notification too
-                  </label>
-                </div>
-              </div>
-
               {/* Behavior Settings */}
               <div
                 style={{
@@ -1410,52 +1263,50 @@ export function AdminPage({ onNavigate }) {
                 </label>
               </div>
 
-              {/* In-App message configurations (only relevant if In-App checked) */}
-              {deliveryChannels.inApp && (
-                <div style={{ background: "#f0f6ff", padding: "20px 15px", borderRadius: "8px", border: "1px solid #d4e6f1", marginBottom: "25px" }}>
-                  <h4 style={{ margin: "0 0 15px 0", color: "#2980b9", fontSize: "14.5px" }}>In-App Message Settings</h4>
-                  <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
-                    <div style={{ flex: 1 }}>
-                      <label className="admin-label" style={{ color: "#2c3e50" }}>Start Date</label>
-                      <input
-                        type="date"
-                        className="admin-input"
-                        value={inAppDates.startDate}
-                        onChange={(e) =>
-                          setInAppDates({ ...inAppDates, startDate: e.target.value })
-                        }
-                        required={deliveryChannels.inApp}
-                      />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <label className="admin-label" style={{ color: "#2c3e50" }}>End Date</label>
-                      <input
-                        type="date"
-                        className="admin-input"
-                        value={inAppDates.endDate}
-                        onChange={(e) =>
-                          setInAppDates({ ...inAppDates, endDate: e.target.value })
-                        }
-                        required={deliveryChannels.inApp}
-                      />
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              {/* In-App message configurations */}
+              <div style={{ background: "#f0f6ff", padding: "20px 15px", borderRadius: "8px", border: "1px solid #d4e6f1", marginBottom: "25px" }}>
+                <h4 style={{ margin: "0 0 15px 0", color: "#2980b9", fontSize: "14.5px" }}>In-App Message Settings</h4>
+                <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
+                  <div style={{ flex: 1 }}>
+                    <label className="admin-label" style={{ color: "#2c3e50" }}>Start Date</label>
                     <input
-                      type="checkbox"
-                      id="in_app_active_combined"
-                      checked={inAppDates.isActive}
+                      type="date"
+                      className="admin-input"
+                      value={inAppDates.startDate}
                       onChange={(e) =>
-                        setInAppDates({ ...inAppDates, isActive: e.target.checked })
+                        setInAppDates({ ...inAppDates, startDate: e.target.value })
                       }
-                      style={{ width: "18px", height: "18px", cursor: "pointer", accentColor: "#2980b9" }}
+                      required={true}
                     />
-                    <label htmlFor="in_app_active_combined" style={{ margin: 0, cursor: "pointer", fontWeight: "600", fontSize: "13.5px", color: "#2980b9" }}>
-                      🚀 Set In-App Message as Active (visible immediately if today is within dates)
-                    </label>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label className="admin-label" style={{ color: "#2c3e50" }}>End Date</label>
+                    <input
+                      type="date"
+                      className="admin-input"
+                      value={inAppDates.endDate}
+                      onChange={(e) =>
+                        setInAppDates({ ...inAppDates, endDate: e.target.value })
+                      }
+                      required={true}
+                    />
                   </div>
                 </div>
-              )}
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <input
+                    type="checkbox"
+                    id="in_app_active_combined"
+                    checked={inAppDates.isActive}
+                    onChange={(e) =>
+                      setInAppDates({ ...inAppDates, isActive: e.target.checked })
+                    }
+                    style={{ width: "18px", height: "18px", cursor: "pointer", accentColor: "#2980b9" }}
+                  />
+                  <label htmlFor="in_app_active_combined" style={{ margin: 0, cursor: "pointer", fontWeight: "600", fontSize: "13.5px", color: "#2980b9" }}>
+                    🚀 Set In-App Message as Active (visible immediately if today is within dates)
+                  </label>
+                </div>
+              </div>
 
               <div style={{ display: "flex", gap: "10px" }}>
                 <button
@@ -2320,179 +2171,7 @@ export function AdminPage({ onNavigate }) {
           </div>
         </details>
 
-        {/* Subscribers Section */}
-        <details className="admin-card">
-          <summary>
-            <span>👥 Subscribers Management</span>
-            <span
-              style={{
-                background: "#e9ecef",
-                padding: "4px 10px",
-                borderRadius: "20px",
-                fontSize: "12px",
-              }}
-            >
-              Total: {adminData.subscribers.length}
-            </span>
-          </summary>
-          <div className="admin-card-body">
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "20px" }}>
-              <button
-                onClick={() =>
-                  exportJSON(
-                    adminData.subscribers,
-                    `subscribers_${new Date().toISOString().split("T")[0]}.json`,
-                  )
-                }
-                className="admin-btn admin-btn-success"
-                style={{ padding: "10px 20px" }}
-              >
-                📤 Export JSON
-              </button>
-              <button
-                onClick={() => document.getElementById("subscribers-import-file").click()}
-                className="admin-btn"
-                style={{ padding: "10px 20px", background: "#f39c12" }}
-              >
-                📥 Import JSON
-              </button>
-              <input
-                id="subscribers-import-file"
-                type="file"
-                accept=".json"
-                onChange={handleImportSubscribersFile}
-                style={{ display: "none" }}
-              />
-              {adminData.subscribers.length > 0 && (
-                <button
-                  onClick={handleDeleteSubscribers}
-                  className="admin-btn admin-btn-danger"
-                  style={{ padding: "10px 20px" }}
-                >
-                  🗑️ Delete All
-                </button>
-              )}
-            </div>
-
-            {adminData.subscribers.length > 0 ? (
-              <div className="admin-table-wrapper">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th style={{ width: "60px" }}>#</th>
-                      <th style={{ width: "200px" }}>Date</th>
-                      <th>Endpoint</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[...adminData.subscribers].reverse().map((sub, i) => (
-                      <tr key={i}>
-                        <td>{i + 1}</td>
-                        <td style={{ whiteSpace: "nowrap" }}>
-                          {sub.timestamp
-                            ? new Date(sub.timestamp).toLocaleString()
-                            : "Unknown"}
-                        </td>
-                        <td
-                          style={{
-                            color: "#7f8c8d",
-                            wordBreak: "break-all",
-                            fontSize: "13px",
-                          }}
-                        >
-                          {sub.endpoint.substring(0, 50)}...
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p style={{ color: "#7f8c8d" }}>No subscribers found yet.</p>
-            )}
-          </div>
-        </details>
-
-
       </div>
-
-      {/* Delete Confirmation Password Modal */}
-      {deletePrompt.isOpen && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.6)",
-            zIndex: 99999,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "20px",
-            backdropFilter: "blur(4px)",
-            fontFamily: "'Inter', sans-serif",
-          }}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "12px",
-              padding: "30px 24px",
-              maxWidth: "400px",
-              width: "100%",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
-              border: "1px solid #e9ecef",
-            }}
-          >
-            <h3 style={{ marginTop: 0, color: "#e74c3c", display: "flex", alignItems: "center", gap: "8px", fontSize: "1.3rem" }}>
-              ⚠️ Confirm Deletion
-            </h3>
-            <p style={{ color: "#555", fontSize: "14.5px", lineHeight: "1.5", marginBottom: "20px" }}>
-              Are you sure you want to delete all <strong>{deletePrompt.type}</strong>? This action cannot be undone. Please enter your Admin Password:
-            </p>
-            <input
-              type="password"
-              placeholder="Enter Admin Password"
-              value={deletePrompt.passwordInput}
-              onChange={(e) => setDeletePrompt({ ...deletePrompt, passwordInput: e.target.value })}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleConfirmDelete();
-                }
-              }}
-              style={{
-                width: "100%",
-                padding: "12px 14px",
-                border: "1px solid #ced4da",
-                borderRadius: "6px",
-                fontSize: "15px",
-                marginBottom: "25px",
-                boxSizing: "border-box",
-                outline: "none",
-              }}
-              autoFocus
-            />
-            <div style={{ display: "flex", gap: "12px" }}>
-              <button
-                onClick={handleConfirmDelete}
-                className="admin-btn admin-btn-danger"
-                style={{ flex: 1, padding: "12px" }}
-              >
-                Confirm Delete
-              </button>
-              <button
-                onClick={() => setDeletePrompt({ isOpen: false, type: "", passwordInput: "" })}
-                className="admin-btn"
-                style={{ flex: 1, padding: "12px", background: "#7f8c8d" }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

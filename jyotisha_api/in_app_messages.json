@@ -1,8 +1,8 @@
 [
   {
-    "id": "inapp_1782803656249",
-    "title": "hyy",
-    "body": "kk",
+    "id": "inapp_1782832223009",
+    "title": "Srikanth",
+    "body": "Test",
     "url": "/",
     "startDate": "2026-06-30",
     "endDate": "2026-07-07",
@@ -10,112 +10,13 @@
     "forceRefresh": true
   },
   {
-    "id": "inapp_1782803637293",
-    "title": "66",
-    "body": "22",
-    "url": "/jyotisha/?page=Admin",
-    "startDate": "2026-06-30",
-    "endDate": "2026-07-07",
-    "isActive": true,
-    "forceRefresh": false
-  },
-  {
-    "id": "inapp_1782803610383",
-    "title": "555",
-    "body": "666",
-    "url": "/",
-    "startDate": "2026-06-30",
-    "endDate": "2026-07-07",
-    "isActive": true,
-    "forceRefresh": false
-  },
-  {
-    "id": "inapp_1782803581002",
-    "title": "jg",
-    "body": "jkghkjg",
-    "url": "/",
-    "startDate": "2026-06-30",
-    "endDate": "2026-07-07",
-    "isActive": true,
-    "forceRefresh": false
-  },
-  {
-    "id": "inapp_1782803540122",
-    "title": "gty",
-    "body": "ll",
-    "url": "",
-    "startDate": "2026-06-30",
-    "endDate": "2026-07-07",
-    "isActive": true,
-    "forceRefresh": false
-  },
-  {
-    "id": "inapp_1782803463579",
-    "title": "with url",
-    "body": "test",
-    "url": "/",
-    "startDate": "2026-06-30",
-    "endDate": "2026-07-07",
-    "isActive": true,
-    "forceRefresh": false
-  },
-  {
-    "id": "inapp_1782803421203",
-    "title": "UPDATE",
-    "body": "no url",
-    "url": "",
-    "startDate": "2026-06-30",
-    "endDate": "2026-07-07",
-    "isActive": true,
-    "forceRefresh": true
-  },
-  {
-    "id": "inapp_1782803154572",
-    "title": "NOte2",
-    "body": "New Reset button added",
-    "url": "/",
-    "startDate": "2026-06-30",
-    "endDate": "2026-07-07",
-    "isActive": true,
-    "forceRefresh": false
-  },
-  {
-    "id": "inapp_1782803097278",
-    "title": "NOte",
-    "body": "New Reset button added",
-    "url": "/",
-    "startDate": "2026-06-30",
-    "endDate": "2026-07-07",
-    "isActive": true,
-    "forceRefresh": false
-  },
-  {
-    "id": "inapp_1782802871723",
+    "id": "inapp_1782831764733",
     "title": "Test",
     "body": "test",
-    "url": "/",
+    "url": "",
     "startDate": "2026-06-30",
     "endDate": "2026-07-07",
     "isActive": true,
     "forceRefresh": true
-  },
-  {
-    "id": "inapp_1782801795586",
-    "title": "Hard Refresh Test",
-    "body": "dfasdfa",
-    "url": "/",
-    "startDate": "2026-06-30",
-    "endDate": "2026-07-07",
-    "isActive": true,
-    "forceRefresh": true
-  },
-  {
-    "id": "inapp_1782801394575",
-    "title": "Bhavana",
-    "body": "seraddf",
-    "url": "/jyotisha/?page=e-Clock",
-    "startDate": "2026-06-30",
-    "endDate": "2026-07-07",
-    "isActive": true
   }
 ]

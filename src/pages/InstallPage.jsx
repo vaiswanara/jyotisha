@@ -8,9 +8,6 @@ export function InstallPage({
   isIosEligible,
   onInstallClick,
   onNavigate,
-  pushEnabled,
-  pushLoading,
-  onEnablePush,
 }) {
   const { t } = useTranslation();
 
@@ -349,68 +346,7 @@ export function InstallPage({
           </div>
         </div>
 
-        {/* Daily Alerts Card */}
-        <div
-          style={{
-            maxWidth: "1000px",
-            margin: "30px auto 0",
-            padding: "0 15px",
-          }}
-        >
-          <div
-            className="install-card"
-            style={{
-              textAlign: "center",
-              alignItems: "center",
-              padding: "35px 20px",
-            }}
-          >
-            <h2 style={{ color: "#8e44ad", marginBottom: "15px" }}>
-              {t("dailyAlertsTitle", "Daily Alerts (Push Notifications)")}
-            </h2>
-            <p
-              style={{
-                color: "#7f8c8d",
-                fontSize: "1.1rem",
-                marginBottom: "25px",
-              }}
-            >
-              {t(
-                "dailyAlertsDesc",
-                "Enable daily notifications for Panchanga and important astrological alerts directly to your device.",
-              )}
-            </p>
-            <button
-              type="button"
-              onClick={onEnablePush}
-              disabled={pushLoading}
-              style={{
-                background: pushEnabled ? "#e74c3c" : "#8e44ad",
-                color: "#fff",
-                border: "none",
-                padding: "12px 24px",
-                borderRadius: "8px",
-                fontSize: "1.1rem",
-                fontWeight: "bold",
-                cursor: pushLoading ? "not-allowed" : "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-                opacity: pushLoading ? 0.7 : 1,
-              }}
-            >
-              <span style={{ fontSize: "1.2rem" }}>
-                {pushEnabled ? "🔕" : "🔔"}
-              </span>
-              {pushLoading
-                ? t("pleaseWait", "Please wait...")
-                : pushEnabled
-                  ? t("disableAlerts", "Disable Alerts")
-                  : t("enableAlerts", "Enable Daily Alerts")}
-            </button>
-          </div>
-        </div>
+
       </section>
 
       <footer

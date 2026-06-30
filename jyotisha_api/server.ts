@@ -6,7 +6,6 @@ import crypto from "crypto";
 import rateLimit from "express-rate-limit";
 import fs from "fs";
 import path from "path";
-import webpush from "web-push";
 import { VedicAstroEngine } from "./engine/VedicAstroEngine";
 import { Planet } from "./engine/constants";
 
@@ -32,12 +31,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// VAPID Keys for Web Push Notifications (పాత generate_keys.php లోనివి)
-webpush.setVapidDetails(
-  "mailto:vaiswanara@gmail.com",
-  "BBHl1damc8zA6nXsJXiyVFLRMeJnLbSa9xVjE4SsJJDHxAmlCtyozMquuvZZGyClgzJ5sIs5sYkyxkszRRf1zFs",
-  "Ivw-HxJE6pNmsrsrfsk8OcukKHDN8HPvfRn2-MN9Smc",
-);
+
 
 // బేస్ రూట్స్ (లోకల్ మరియు cPanel కి సపోర్ట్ చేయడానికి)
 const healthPaths = ["/", "/jyotisha_api", "/jyotisha_node_api", "/node"];
@@ -2910,89 +2904,6 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         },
       });
 
-    } else if (endpoint === "push_subscribe") {
-      const subFile = path.join(process.cwd(), "subscribers.json");
-      const { sub_endpoint, keys, action } = input;
-
-      let subscribers: any = {};
-      if (fs.existsSync(subFile)) {
-        try {
-          subscribers = JSON.parse(fs.readFileSync(subFile, "utf-8"));
-        } catch (e) { }
-      }
-
-      if (action === "subscribe" && sub_endpoint && keys) {
-        subscribers[sub_endpoint] = {
-          endpoint: sub_endpoint,
-          keys,
-          timestamp: Date.now(),
-        };
-      } else if (action === "unsubscribe" && sub_endpoint) {
-        delete subscribers[sub_endpoint];
-      }
-
-      fs.writeFileSync(subFile, JSON.stringify(subscribers, null, 2));
-      res.setHeader("X-Cache", "BYPASS");
-      return res.json({ status: "success" });
-    } else if (endpoint === "send_alert") {
-      // అడ్మిన్ పాస్‌వర్డ్ ఉంటేనే మెసేజ్ పంపాలి (లేకపోతే హ్యాకర్లు స్పామ్ చేస్తారు)
-      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
-        return res
-          .status(403)
-          .json({ error: "Forbidden: Invalid Admin Password" });
-      }
-
-      const { title, body, url, is_important, force_refresh } = input;
-      const subFile = path.join(process.cwd(), "subscribers.json");
-
-      if (!fs.existsSync(subFile))
-        return res.json({ error: "No subscribers found." });
-      const subscribers = JSON.parse(fs.readFileSync(subFile, "utf-8"));
-
-      const pushId = Date.now().toString();
-      const appBasePath = (process.env.APP_BASE_PATH || "/test/").replace(/\/$/, "");
-      const targetUrl = url || `${appBasePath}/`;
-      const finalUrl = `${appBasePath}/?push_id=${pushId}&push_title=${encodeURIComponent(String(title))}&push_body=${encodeURIComponent(String(body))}${is_important ? "&push_important=1" : ""}${force_refresh ? "&push_force_refresh=1" : ""}&target_url=${encodeURIComponent(targetUrl)}`;
-
-      const payload = JSON.stringify({ title, body, url: finalUrl });
-      const subsArray = Object.values(subscribers);
-
-      res.setHeader("X-Cache", "BYPASS");
-      res.json({
-        status: "queued",
-        message: `Notifications are being sent in the background to ${subsArray.length} users.`,
-      });
-
-      // బ్యాక్‌గ్రౌండ్ ప్రాసెస్ (Background Chunking): ఏపీఐ హ్యాంగ్ అవ్వకుండా ఉండటానికి
-      (async () => {
-        const chunkSize = 50; // ఒకేసారి 50 మందికి పంపుతాము
-        let isModified = false;
-
-        for (let i = 0; i < subsArray.length; i += chunkSize) {
-          const chunk = subsArray.slice(i, i + chunkSize);
-          const promises = chunk.map((sub: any) => {
-            return webpush.sendNotification(sub, payload).catch((err) => {
-              if (err.statusCode === 410 || err.statusCode === 404) {
-                delete subscribers[sub.endpoint];
-                isModified = true; // సబ్‌స్క్రిప్షన్ ఎక్స్‌పైర్ అయితే ఫ్లాగ్ సెట్ చేయడం
-              }
-            });
-          });
-
-          await Promise.all(promises);
-
-          // Google/Apple ఫైర్‌వాల్ బ్లాక్ చేయకుండా ప్రతి 50 మెసేజ్‌లకి 1 సెకను గ్యాప్
-          if (i + chunkSize < subsArray.length) {
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
-        }
-
-        if (isModified) {
-          fs.writeFileSync(subFile, JSON.stringify(subscribers, null, 2));
-        }
-      })();
     } else if (endpoint === "get_lessons") {
       const lessonsFile = path.join(process.cwd(), "lessons.json");
       if (!fs.existsSync(lessonsFile)) {
@@ -3160,6 +3071,10 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         if (fs.existsSync(path.dirname(srcTicker))) {
           try { fs.writeFileSync(srcTicker, JSON.stringify(ticker, null, 2)); } catch (e) { }
         }
+        const distTicker = path.join(process.cwd(), "..", "dist", "static", "ticker.json");
+        if (fs.existsSync(path.dirname(distTicker))) {
+          try { fs.writeFileSync(distTicker, JSON.stringify(ticker, null, 2)); } catch (e) { }
+        }
         res.setHeader("X-Cache", "BYPASS");
         return res.json({ status: "success", message: "Ticker saved successfully" });
       } catch (e: any) {
@@ -3213,40 +3128,15 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         if (fs.existsSync(path.dirname(srcMsg))) {
           try { fs.writeFileSync(srcMsg, JSON.stringify(messages, null, 2)); } catch (e) { }
         }
+        const distMsg = path.join(process.cwd(), "..", "dist", "static", "in_app_messages.json");
+        if (fs.existsSync(path.dirname(distMsg))) {
+          try { fs.writeFileSync(distMsg, JSON.stringify(messages, null, 2)); } catch (e) { }
+        }
         res.setHeader("X-Cache", "BYPASS");
         return res.json({ status: "success", message: "In-App messages saved successfully" });
       } catch (e: any) {
         return res.status(500).json({ error: "Failed to write in-app messages: " + e.message });
       }
-    } else if (endpoint === "save_subscribers") {
-
-      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
-        return res
-          .status(403)
-          .json({ error: "Forbidden: Invalid Admin Password" });
-      }
-
-      const { subscribers } = input;
-      if (Array.isArray(subscribers)) {
-        const subFile = path.join(process.cwd(), "subscribers.json");
-        const subMap: Record<string, any> = {};
-        for (const sub of subscribers) {
-          if (sub && sub.endpoint) {
-            subMap[sub.endpoint] = sub;
-          }
-        }
-        try {
-          fs.writeFileSync(subFile, JSON.stringify(subMap, null, 2));
-          res.setHeader("X-Cache", "BYPASS");
-          return res.json({ status: "success", message: "Subscribers saved successfully" });
-        } catch (e: any) {
-          return res.status(500).json({ error: "Failed to write subscribers: " + e.message });
-        }
-      }
-      return res.status(400).json({ error: "Invalid subscribers data format" });
-
     } else if (endpoint === "eclipses") {
       const lat = parseFloat(String(input.latitude || input.lat || 12.9716));
       const lon = parseFloat(String(input.longitude || input.lon || 77.5946));
@@ -3304,13 +3194,11 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         return null;
       };
 
-      const subscribers = readJson("subscribers.json") || {};
       const inAppMessages = readJson("in_app_messages.json") || [];
 
       res.setHeader("X-Cache", "BYPASS");
       return res.json({
         status: "success",
-        subscribers: Object.values(subscribers),
         inAppMessages: inAppMessages,
         users: [],
         enableUserSync: false,

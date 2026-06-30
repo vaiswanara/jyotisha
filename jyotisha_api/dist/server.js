@@ -44,7 +44,6 @@ const crypto_1 = __importDefault(require("crypto"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
-const web_push_1 = __importDefault(require("web-push"));
 const VedicAstroEngine_1 = require("./engine/VedicAstroEngine");
 const constants_1 = require("./engine/constants");
 const serverStartTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
@@ -62,8 +61,6 @@ app.use((req, res, next) => {
     }
     next();
 });
-// VAPID Keys for Web Push Notifications (పాత generate_keys.php లోనివి)
-web_push_1.default.setVapidDetails("mailto:vaiswanara@gmail.com", "BBHl1damc8zA6nXsJXiyVFLRMeJnLbSa9xVjE4SsJJDHxAmlCtyozMquuvZZGyClgzJ5sIs5sYkyxkszRRf1zFs", "Ivw-HxJE6pNmsrsrfsk8OcukKHDN8HPvfRn2-MN9Smc");
 // బేస్ రూట్స్ (లోకల్ మరియు cPanel కి సపోర్ట్ చేయడానికి)
 const healthPaths = ["/", "/jyotisha_api", "/jyotisha_node_api", "/node"];
 const apiPaths = [
@@ -2304,80 +2301,6 @@ app.all(apiPaths, async (req, res) => {
                 },
             });
         }
-        else if (endpoint === "push_subscribe") {
-            const subFile = path_1.default.join(process.cwd(), "subscribers.json");
-            const { sub_endpoint, keys, action } = input;
-            let subscribers = {};
-            if (fs_1.default.existsSync(subFile)) {
-                try {
-                    subscribers = JSON.parse(fs_1.default.readFileSync(subFile, "utf-8"));
-                }
-                catch (e) { }
-            }
-            if (action === "subscribe" && sub_endpoint && keys) {
-                subscribers[sub_endpoint] = {
-                    endpoint: sub_endpoint,
-                    keys,
-                    timestamp: Date.now(),
-                };
-            }
-            else if (action === "unsubscribe" && sub_endpoint) {
-                delete subscribers[sub_endpoint];
-            }
-            fs_1.default.writeFileSync(subFile, JSON.stringify(subscribers, null, 2));
-            res.setHeader("X-Cache", "BYPASS");
-            return res.json({ status: "success" });
-        }
-        else if (endpoint === "send_alert") {
-            // అడ్మిన్ పాస్‌వర్డ్ ఉంటేనే మెసేజ్ పంపాలి (లేకపోతే హ్యాకర్లు స్పామ్ చేస్తారు)
-            const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-            const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-            if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
-                return res
-                    .status(403)
-                    .json({ error: "Forbidden: Invalid Admin Password" });
-            }
-            const { title, body, url, is_important, force_refresh } = input;
-            const subFile = path_1.default.join(process.cwd(), "subscribers.json");
-            if (!fs_1.default.existsSync(subFile))
-                return res.json({ error: "No subscribers found." });
-            const subscribers = JSON.parse(fs_1.default.readFileSync(subFile, "utf-8"));
-            const pushId = Date.now().toString();
-            const appBasePath = (process.env.APP_BASE_PATH || "/test/").replace(/\/$/, "");
-            const targetUrl = url || `${appBasePath}/`;
-            const finalUrl = `${appBasePath}/?push_id=${pushId}&push_title=${encodeURIComponent(String(title))}&push_body=${encodeURIComponent(String(body))}${is_important ? "&push_important=1" : ""}${force_refresh ? "&push_force_refresh=1" : ""}&target_url=${encodeURIComponent(targetUrl)}`;
-            const payload = JSON.stringify({ title, body, url: finalUrl });
-            const subsArray = Object.values(subscribers);
-            res.setHeader("X-Cache", "BYPASS");
-            res.json({
-                status: "queued",
-                message: `Notifications are being sent in the background to ${subsArray.length} users.`,
-            });
-            // బ్యాక్‌గ్రౌండ్ ప్రాసెస్ (Background Chunking): ఏపీఐ హ్యాంగ్ అవ్వకుండా ఉండటానికి
-            (async () => {
-                const chunkSize = 50; // ఒకేసారి 50 మందికి పంపుతాము
-                let isModified = false;
-                for (let i = 0; i < subsArray.length; i += chunkSize) {
-                    const chunk = subsArray.slice(i, i + chunkSize);
-                    const promises = chunk.map((sub) => {
-                        return web_push_1.default.sendNotification(sub, payload).catch((err) => {
-                            if (err.statusCode === 410 || err.statusCode === 404) {
-                                delete subscribers[sub.endpoint];
-                                isModified = true; // సబ్‌స్క్రిప్షన్ ఎక్స్‌పైర్ అయితే ఫ్లాగ్ సెట్ చేయడం
-                            }
-                        });
-                    });
-                    await Promise.all(promises);
-                    // Google/Apple ఫైర్‌వాల్ బ్లాక్ చేయకుండా ప్రతి 50 మెసేజ్‌లకి 1 సెకను గ్యాప్
-                    if (i + chunkSize < subsArray.length) {
-                        await new Promise((resolve) => setTimeout(resolve, 1000));
-                    }
-                }
-                if (isModified) {
-                    fs_1.default.writeFileSync(subFile, JSON.stringify(subscribers, null, 2));
-                }
-            })();
-        }
         else if (endpoint === "get_lessons") {
             const lessonsFile = path_1.default.join(process.cwd(), "lessons.json");
             if (!fs_1.default.existsSync(lessonsFile)) {
@@ -2560,6 +2483,13 @@ app.all(apiPaths, async (req, res) => {
                     }
                     catch (e) { }
                 }
+                const distTicker = path_1.default.join(process.cwd(), "..", "dist", "static", "ticker.json");
+                if (fs_1.default.existsSync(path_1.default.dirname(distTicker))) {
+                    try {
+                        fs_1.default.writeFileSync(distTicker, JSON.stringify(ticker, null, 2));
+                    }
+                    catch (e) { }
+                }
                 res.setHeader("X-Cache", "BYPASS");
                 return res.json({ status: "success", message: "Ticker saved successfully" });
             }
@@ -2625,40 +2555,19 @@ app.all(apiPaths, async (req, res) => {
                     }
                     catch (e) { }
                 }
+                const distMsg = path_1.default.join(process.cwd(), "..", "dist", "static", "in_app_messages.json");
+                if (fs_1.default.existsSync(path_1.default.dirname(distMsg))) {
+                    try {
+                        fs_1.default.writeFileSync(distMsg, JSON.stringify(messages, null, 2));
+                    }
+                    catch (e) { }
+                }
                 res.setHeader("X-Cache", "BYPASS");
                 return res.json({ status: "success", message: "In-App messages saved successfully" });
             }
             catch (e) {
                 return res.status(500).json({ error: "Failed to write in-app messages: " + e.message });
             }
-        }
-        else if (endpoint === "save_subscribers") {
-            const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-            const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-            if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
-                return res
-                    .status(403)
-                    .json({ error: "Forbidden: Invalid Admin Password" });
-            }
-            const { subscribers } = input;
-            if (Array.isArray(subscribers)) {
-                const subFile = path_1.default.join(process.cwd(), "subscribers.json");
-                const subMap = {};
-                for (const sub of subscribers) {
-                    if (sub && sub.endpoint) {
-                        subMap[sub.endpoint] = sub;
-                    }
-                }
-                try {
-                    fs_1.default.writeFileSync(subFile, JSON.stringify(subMap, null, 2));
-                    res.setHeader("X-Cache", "BYPASS");
-                    return res.json({ status: "success", message: "Subscribers saved successfully" });
-                }
-                catch (e) {
-                    return res.status(500).json({ error: "Failed to write subscribers: " + e.message });
-                }
-            }
-            return res.status(400).json({ error: "Invalid subscribers data format" });
         }
         else if (endpoint === "eclipses") {
             const lat = parseFloat(String(input.latitude || input.lat || 12.9716));
@@ -2711,12 +2620,10 @@ app.all(apiPaths, async (req, res) => {
                 }
                 return null;
             };
-            const subscribers = readJson("subscribers.json") || {};
             const inAppMessages = readJson("in_app_messages.json") || [];
             res.setHeader("X-Cache", "BYPASS");
             return res.json({
                 status: "success",
-                subscribers: Object.values(subscribers),
                 inAppMessages: inAppMessages,
                 users: [],
                 enableUserSync: false,

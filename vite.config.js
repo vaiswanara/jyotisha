@@ -27,7 +27,6 @@ export default defineConfig(({ mode }) => {
         globIgnores: ["**/ticker.json"],
         cleanupOutdatedCaches: true,
         navigateFallbackDenylist: [/jataka_api/], // API మరియు Admin ఫైల్స్‌ను అడ్డుకోకుండా బైపాస్ చేయడానికి
-        importScripts: ["push-sw.js"],
       },
       manifest: {
         name: "e-JYOTISHA",

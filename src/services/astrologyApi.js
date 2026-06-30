@@ -159,22 +159,6 @@ export async function saveInAppMessage(messages, adminPassword) {
 }
 
 
-export async function saveSubscribers(subscribers, adminPassword) {
-  const response = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-token": API_TOKEN,
-      "x-admin-password": adminPassword,
-    },
-    body: JSON.stringify({
-      endpoint: "save_subscribers",
-      subscribers,
-    }),
-  });
-  return response.json().catch(() => null);
-}
-
 
 
 export async function fetchPrecisionTest(formData) {

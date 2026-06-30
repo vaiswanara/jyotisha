@@ -80,24 +80,6 @@ const ELibraryPage = lazy(() =>
   import("./pages/ELibraryPage.jsx").then((m) => ({ default: m.ELibraryPage })),
 );
 
-// VAPID Public Key
-const VAPID_PUBLIC_KEY =
-  "BBHl1damc8zA6nXsJXiyVFLRMeJnLbSa9xVjE4SsJJDHxAmlCtyozMquuvZZGyClgzJ5sIs5sYkyxkszRRf1zFs";
-
-// బ్రౌజర్ కి అర్థమయ్యేలా కీ ని మార్చే ఫంక్షన్
-function urlBase64ToUint8Array(base64String) {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding)
-    .replace(/\-/g, "+")
-    .replace(/_/g, "/");
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
-
 // Helper functions for custom toast styling and icon categorization
 function getToastIcon(type) {
   switch (type) {
@@ -360,19 +342,6 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isIosEligible, setIsIosEligible] = useState(false);
-  const [pushEnabled, setPushEnabled] = useState(() => {
-    // పర్మిషన్ ముందే ఇచ్చినా, లేదా బ్లాక్ (denied) చేసినా బెల్ ని హైడ్ చేయాలి
-    if (typeof window !== "undefined" && "Notification" in window) {
-      return (
-        Notification.permission === "granted" ||
-        Notification.permission === "denied"
-      );
-    }
-    return true; // సపోర్ట్ లేకపోతే హైడ్ చేయాలి
-  });
-  const [pushLoading, setPushLoading] = useState(false);
-  const [pushPopup, setPushPopup] = useState(null);
-
   // In-App Message States
   const [inAppQueue, setInAppQueue] = useState([]);
   const [currentInApp, setCurrentInApp] = useState(null);
@@ -466,7 +435,7 @@ export default function App() {
     window.addEventListener("horo_messages_updated", updateUnreadCount);
     return () =>
       window.removeEventListener("horo_messages_updated", updateUnreadCount);
-  }, [pushPopup, currentInApp]);
+  }, [currentInApp]);
 
   const lastInAppFetchRef = useRef(0);
 
@@ -630,37 +599,7 @@ export default function App() {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, []);
 
-  useEffect(() => {
-    // చెక్: యూజర్ ఇప్పటికే నోటిఫికేషన్స్ సబ్‌స్క్రైబ్ చేసుకున్నారా?
-    if ("serviceWorker" in navigator && "PushManager" in window) {
-      if (Notification.permission === "granted") {
-        navigator.serviceWorker.ready.then((reg) => {
-          reg.pushManager.getSubscription().then((sub) => {
-            setPushEnabled(!!sub);
 
-            // సర్వర్‌తో సింక్ చేయడానికి (ఒకవేళ సర్వర్‌లో subscribers.json ఫైల్ డిలీట్ అయితే కవర్ చేయడానికి)
-            if (sub) {
-              fetch(API_URL, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "x-api-token": API_TOKEN,
-                },
-                body: JSON.stringify({
-                  endpoint: "push_subscribe",
-                  sub_endpoint: sub.endpoint,
-                  keys: sub.toJSON().keys,
-                  action: "subscribe",
-                }),
-              }).catch((e) => console.error("Background sync failed:", e));
-            }
-          });
-        });
-      } else if (Notification.permission === "default") {
-        setPushEnabled(false); // పర్మిషన్ అడగాల్సి ఉంటే కచ్చితంగా బెల్ చూపించాలి
-      }
-    }
-  }, []);
 
   // URL parameter ని బట్టి activePage ని నార్మలైజ్ చేసే ఫంక్షన్
   const getNormalizedPageName = (targetPage) => {
@@ -724,116 +663,7 @@ export default function App() {
     }
   };
 
-  // నోటిఫికేషన్ ద్వారా వచ్చిన సందేశాన్ని హ్యాండిల్ చేయడం
-  const handleIncomingNotification = (notificationUrl) => {
-    try {
-      const urlObj = new URL(notificationUrl, window.location.origin);
-      const params = urlObj.searchParams;
 
-      const pushTitle = params.get("push_title");
-      const pushBody = params.get("push_body");
-      const targetUrl = params.get("target_url");
-      const pushImportant = params.get("push_important");
-      const pushForceRefresh = params.get("push_force_refresh") === "1";
-      const pushId = params.get("push_id") || Date.now().toString();
-
-      if (pushTitle || pushBody) {
-        // Important అయితే LocalStorage లో సేవ్ చేయడం
-        if (pushImportant === "1") {
-          try {
-            const existingMessages = JSON.parse(
-              localStorage.getItem("horo_messages") || "[]",
-            );
-            if (!existingMessages.find((m) => m.id === pushId)) {
-              existingMessages.unshift({
-                id: pushId,
-                title: pushTitle,
-                body: pushBody,
-                targetUrl: targetUrl,
-                date: Date.now(),
-                read: false,
-                archived: false,
-                forceRefresh: pushForceRefresh,
-              });
-              localStorage.setItem(
-                "horo_messages",
-                JSON.stringify(existingMessages),
-              );
-              // కొత్త మెసేజ్ రాగానే కౌంట్ అప్‌డేట్ అవ్వడానికి ఈవెంట్ ని పంపుతాం
-              window.dispatchEvent(new Event("horo_messages_updated"));
-            }
-          } catch (e) {
-            console.error("Failed to save message in foreground", e);
-          }
-        }
-
-        setPushPopup({ title: pushTitle, body: pushBody, targetUrl, forceRefresh: pushForceRefresh });
-      }
-    } catch (e) {
-      console.error("Error handling incoming notification URL:", e);
-    }
-  };
-
-  useEffect(() => {
-    // మొదటిసారి యాప్ లోడ్ అయినప్పుడు URL పారామీటర్స్ చెక్ చేయడం
-    handleIncomingNotification(window.location.href);
-
-    // iOS లో క్లీన్ URL తో ఓపెన్ అయినప్పుడు, Cache Storage నుండి డేటా చెక్ చేయడం
-    if ("caches" in window) {
-      caches.open("pending-push-clicks").then((cache) => {
-        cache.match("/latest-click").then((response) => {
-          if (response) {
-            response
-              .json()
-              .then((data) => {
-                // రీసెంట్ గా జరిగిన క్లిక్ అయితేనే (లాస్ట్ 5 నిమిషాలలో) ప్రాసెస్ చేస్తాం
-                if (Date.now() - data.timestamp < 300000) {
-                  handleIncomingNotification(data.url);
-                }
-              })
-              .catch((err) => console.error("Cache read error:", err));
-            // చెక్ చేసిన తర్వాత క్యాచ్ ఎంట్రీని తొలగిస్తాము
-            cache.delete("/latest-click");
-          }
-        });
-      });
-    }
-
-    // క్లీన్-అప్: URL లోని పుష్ నోటిఫికేషన్ పారామీటర్స్ ని తొలగిస్తాము
-    const params = new URLSearchParams(window.location.search);
-    if (
-      params.has("push_title") ||
-      params.has("push_body") ||
-      params.has("push_important") ||
-      params.has("push_id") ||
-      params.has("push_force_refresh") ||
-      params.has("target_url")
-    ) {
-      params.delete("push_title");
-      params.delete("push_body");
-      params.delete("target_url");
-      params.delete("push_important");
-      params.delete("push_id");
-      params.delete("push_force_refresh");
-      const newSearch = params.toString();
-      const newUrl =
-        window.location.pathname + (newSearch ? "?" + newSearch : "");
-      window.history.replaceState({}, "", newUrl);
-    }
-  }, []);
-
-  // Service Worker నుండి Broadcast Channel ద్వారా వచ్చే సందేశాల కోసం Listener
-  useEffect(() => {
-    const channel = new BroadcastChannel("push-notification-channel");
-    channel.onmessage = (event) => {
-      if (event.data && event.data.type === "PUSH_NOTIFICATION_CLICK") {
-        handleIncomingNotification(event.data.url);
-      }
-    };
-    return () => {
-      channel.close();
-    };
-  }, []);
 
   useEffect(() => {
     // మొదటిసారి యాప్ లోడ్ అయినప్పుడు డీఫాల్ట్ సెట్టింగ్స్ ని సెట్ చేయడం
@@ -972,113 +802,7 @@ export default function App() {
     return `${import.meta.env.BASE_URL}${filename}`;
   };
 
-  const handlePushEnable = async () => {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-      alert("Push notifications are not supported in this browser.");
-      return;
-    }
 
-    // --- 1. Request Permission IMMEDIATELY (Before any await) ---
-    // This satisfies browser's strict requirement for user-interaction context.
-    if (!pushEnabled) {
-      try {
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") {
-          alert(t("permissionDenied", "Notification permission denied!"));
-          return;
-        }
-      } catch (err) {
-        console.error("Permission request failed", err);
-        alert("Notification permission request failed.");
-        return;
-      }
-    }
-
-    setPushLoading(true);
-    try {
-      // Service Worker ఉందో లేదో ముందే చెక్ చేయడం (లేకపోతే హ్యాంగ్ అవ్వకుండా ఆపడం)
-      let reg = await navigator.serviceWorker.getRegistration();
-      if (!reg) {
-        alert(
-          "Service Worker is not registered! Please ensure you are on HTTPS and reload the app.",
-        );
-        setPushLoading(false);
-        return;
-      }
-      reg = await navigator.serviceWorker.ready;
-
-      if (pushEnabled) {
-        // --- UNSUBSCRIBE LOGIC (Disable Alerts) ---
-        const sub = await reg.pushManager.getSubscription();
-        if (sub) {
-          try {
-            await fetch(API_URL, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-api-token": API_TOKEN,
-              },
-              body: JSON.stringify({
-                endpoint: "push_subscribe",
-                sub_endpoint: sub.endpoint,
-                action: "unsubscribe",
-              }),
-            });
-          } catch (e) {
-            console.error("Server unsubscribe failed", e);
-          }
-          await sub.unsubscribe();
-        }
-        setPushEnabled(false);
-        alert(t("alertsDisabled", "Daily alerts disabled."));
-      } else {
-        // --- SUBSCRIBE LOGIC (Enable Alerts) ---
-        // Notification permission is already granted above!
-        let sub = await reg.pushManager.getSubscription();
-        if (!sub) {
-          sub = await reg.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-          });
-        }
-
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-token": API_TOKEN,
-          },
-          body: JSON.stringify({
-            endpoint: "push_subscribe",
-            sub_endpoint: sub.endpoint,
-            keys: sub.toJSON().keys,
-            action: "subscribe",
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Server error: ${response.status}`);
-        }
-
-        const responseData = await response.json();
-        if (responseData.status === "error") {
-          throw new Error("Server: " + responseData.message);
-        }
-
-        setPushEnabled(true);
-        alert(
-          t(
-            "alertsEnabled",
-            "Subscribed successfully! You will now receive daily alerts.",
-          ),
-        );
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Push setup failed: " + err.message);
-    }
-    setPushLoading(false);
-  };
 
   return (
     <div className="app-shell">
@@ -1350,28 +1074,6 @@ export default function App() {
               </span>
             )}
           </button>
-          {!pushEnabled && (
-            <button
-              onClick={handlePushEnable}
-              disabled={pushLoading}
-              title={t("enableAlerts", "Enable Alerts")}
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "#f1c40f",
-                fontSize: "29px",
-                cursor: pushLoading ? "wait" : "pointer",
-                padding: 0,
-                margin: 0,
-                display: "flex",
-                alignItems: "center",
-                animation: pushLoading ? "none" : "bell-shake 2s infinite",
-                opacity: pushLoading ? 0.5 : 1,
-              }}
-            >
-              🔔
-            </button>
-          )}
         </div>
       </header>
 
@@ -1394,9 +1096,6 @@ export default function App() {
           <HomePage
             logoUrl={logoUrl}
             onNavigate={setActivePage}
-            pushEnabled={pushEnabled}
-            pushLoading={pushLoading}
-            onEnablePush={handlePushEnable}
             needRefresh={needRefresh}
             updateServiceWorker={updateServiceWorker}
             isInstallable={isInstallable}
@@ -1433,9 +1132,6 @@ export default function App() {
             isIosEligible={isIosEligible}
             onInstallClick={handleInstallClick}
             onNavigate={setActivePage}
-            pushEnabled={pushEnabled}
-            pushLoading={pushLoading}
-            onEnablePush={handlePushEnable}
           />
         )}
 
@@ -1452,8 +1148,6 @@ export default function App() {
           <MessagesPage
             logoUrl={logoUrl}
             onNavigate={setActivePage}
-            pushEnabled={pushEnabled}
-            onEnablePush={handlePushEnable}
           />
         )}
         {activePage === "changelog" && <ChangelogPage logoUrl={logoUrl} />}
@@ -1482,92 +1176,7 @@ export default function App() {
         profileName={profileFirstName}
       />
 
-      {/* Push Notification Popup Modal */}
-      {pushPopup && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.6)",
-            zIndex: 9999,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "20px",
-            backdropFilter: "blur(4px)",
-          }}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "25px 20px",
-              maxWidth: "400px",
-              width: "100%",
-              maxHeight: "85vh",
-              display: "flex",
-              flexDirection: "column",
-              textAlign: "center",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-              boxSizing: "border-box",
-            }}
-          >
-            <div style={{ overflowY: "auto", flex: 1, marginBottom: "20px", paddingRight: "5px" }}>
-              <div style={{ fontSize: "40px", marginBottom: "10px" }}>🔔</div>
-              <h2
-                style={{
-                  color: "#8e44ad",
-                  marginTop: 0,
-                  marginBottom: "15px",
-                  fontSize: "22px",
-                }}
-              >
-                {pushPopup.title || "Message"}
-              </h2>
-              <p
-                style={{
-                  fontSize: "16px",
-                  color: "#34495e",
-                  lineHeight: "1.6",
-                  margin: 0,
-                  whiteSpace: "pre-wrap",
-                }}
-              >
-                {pushPopup.body}
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                const url = pushPopup.targetUrl;
-                const needRefresh = pushPopup.forceRefresh;
-                setPushPopup(null);
-                navigateToTargetUrl(url);
-                if (needRefresh) {
-                  performHardRefresh();
-                }
-              }}
-              style={{
-                background: "linear-gradient(135deg, #8e44ad, #732d91)",
-                color: "#fff",
-                border: "none",
-                padding: "12px 30px",
-                borderRadius: "8px",
-                fontSize: "16px",
-                fontWeight: "bold",
-                cursor: "pointer",
-                width: "100%",
-                boxShadow: "0 4px 15px rgba(142, 68, 173, 0.3)",
-                flexShrink: 0,
-              }}
-            >
-              OK, Got it!
-            </button>
-          </div>
-        </div>
-      )}
+
       {/* In-App Message Popup Modal */}
       {currentInApp && (
         <div

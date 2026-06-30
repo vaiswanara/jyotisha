@@ -5,8 +5,6 @@ import { HoroscopeHeader } from "../components/HoroscopeHeader.jsx";
 export function MessagesPage({
   logoUrl,
   onNavigate,
-  pushEnabled,
-  onEnablePush,
 }) {
   const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
@@ -73,60 +71,7 @@ export function MessagesPage({
           className="form-panel"
           style={{ position: "static", padding: "15px" }}
         >
-          {/* సబ్‌స్క్రైబ్ చేసుకోని యూజర్ల కోసం అలర్ట్ బ్యానర్ */}
-          {pushEnabled === false && (
-            <div
-              style={{
-                background: "#fdf2e9",
-                border: "1px dashed #e67e22",
-                padding: "15px",
-                borderRadius: "8px",
-                marginBottom: "20px",
-                textAlign: "center",
-              }}
-            >
-              <h3
-                style={{
-                  margin: "0 0 10px 0",
-                  color: "#d35400",
-                  fontSize: "1.1rem",
-                }}
-              >
-                🔔 {t("enableAlertsPrompt", "Get Important Messages!")}
-              </h3>
-              <p
-                style={{
-                  margin: "0 0 15px 0",
-                  color: "#7f8c8d",
-                  fontSize: "0.95rem",
-                  lineHeight: "1.5",
-                }}
-              >
-                {t(
-                  "enableAlertsDesc",
-                  "You haven't enabled notifications yet. Enable them to receive App updates, Class Schedules, Important URLs, Notes, and other alerts directly in this inbox.",
-                )}
-              </p>
-              <button
-                onClick={onEnablePush}
-                style={{
-                  background: "#8e44ad",
-                  color: "#fff",
-                  border: "none",
-                  padding: "10px 20px",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                🔔 {t("enableAlerts", "Enable Alerts")}
-              </button>
-            </div>
-          )}
+
 
           {/* Filters & Actions Header */}
           <div
