@@ -58,7 +58,7 @@ const CONTENT = {
     e_library: "e-Library",
     desc_library:
       "Access digital PDF library for Vedic scriptures, spiritual, and educational resources.",
-    exit_btn: "Reset App",
+    exit_btn: "Refresh",
     exit_confirm: "Are you sure you want to reset cache, unregister service workers, and reload the app?",
   },
   te: {
@@ -116,7 +116,7 @@ const CONTENT = {
     e_library: "ఈ-లైబ్రరీ",
     desc_library:
       "వైదిక, శాస్త్ర, ఆధ్యాత్మిక మరియు విద్యా గ్రంథాల డిజిటల్ లైబ్రరీని సందర్శించండి.",
-    exit_btn: "రీసెట్ యాప్",
+    exit_btn: "రిఫ్రెష్",
     exit_confirm: "మీరు నిజంగానే యాప్ కాష్ క్లియర్ చేసి, రీసెట్ చేసి మళ్లీ లోడ్ చేయాలనుకుంటున్నారా?",
   },
   kn: {
@@ -174,7 +174,7 @@ const CONTENT = {
     e_library: "ಇ-ಲೈಬ್ರರಿ",
     desc_library:
       "ವೈದಿಕ, ಧರ್ಮಶಾಸ್ತ್ರ ಮತ್ತು ಶೈಕ್ಷಣಿಕ ಪುಸ್ತಕಗಳ ಡಿಜಿಟಲ್ ಲೈಬ್ರರಿ ವೀಕ್ಷಿಸಿ.",
-    exit_btn: "ರಿಸೆಟ್ ಆ್ಯಪ್",
+    exit_btn: "ರಿಫ್ರೆಶ್",
     exit_confirm: "ನೀವು ನಿಜವಾಗಿಯೂ ಆ್ಯಪ್ ಕ್ಯಾಶ್ ಕ್ಲಿಯರ್ ಮಾಡಿ, ರಿಸೆಟ್ ಮಾಡಿ ಮತ್ತೆ ಲೋಡ್ ಮಾಡಲು ಬಯಸುವಿರಾ?",
   },
 };
