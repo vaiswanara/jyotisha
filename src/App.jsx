@@ -4,6 +4,7 @@ import { Sidebar } from "./components/Sidebar.jsx";
 import { BottomNav } from "./components/BottomNav.jsx";
 import { useTranslation } from "react-i18next";
 import { useRegisterSW } from "virtual:pwa-register/react";
+import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
 import { API_URL, API_TOKEN, getInAppMessages } from "./services/astrologyApi.js";
 
 // Dynamic Imports for Pages (To split code and improve load speed)
@@ -1092,7 +1093,8 @@ export default function App() {
           </div>
         }
       >
-        {activePage === "Home" && (
+        <ErrorBoundary onNavigate={setActivePage} key={activePage}>
+          {activePage === "Home" && (
           <HomePage
             logoUrl={logoUrl}
             onNavigate={setActivePage}
@@ -1168,6 +1170,7 @@ export default function App() {
         {activePage === "e-Library" && (
           <ELibraryPage logoUrl={logoUrl} />
         )}
+        </ErrorBoundary>
       </Suspense>
 
       <BottomNav
