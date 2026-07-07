@@ -833,18 +833,20 @@ const VARA_SANKALPA = {
   Saturday: "Sthira",
 };
 
-export default function Sankalpa({ onNavigate, transitChart, hideTitle = false }) {
+export default function Sankalpa({ onNavigate, transitChart, hideTitle = false, overrideLang = null }) {
   const [sankalpaData, setSankalpaData] = useState("");
   const [apiData, setApiData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [adhikaMaasaList, setAdhikaMaasaList] = useState([]);
+  const [lunarMonthsList, setLunarMonthsList] = useState([]);
   const { t, i18n } = useTranslation();
 
-  const lang = i18n.language?.split("-")[0] || "te";
+  const lang = overrideLang || i18n.language?.split("-")[0] || "te";
 
   useEffect(() => {
     fetchAdhikaMaasa();
+    fetchLunarMonths();
   }, []);
 
   useEffect(() => {
@@ -883,6 +885,37 @@ export default function Sankalpa({ onNavigate, transitChart, hideTitle = false }
       }
     } catch (e) {
       console.warn("Failed to load Adhika Maasa JSON", e);
+    }
+  };
+
+  const fetchLunarMonths = async () => {
+    try {
+      const baseUrl = import.meta.env.BASE_URL;
+
+      const fetchJsonSafely = async (url) => {
+        try {
+          const r = await fetch(url);
+          const t = await r.text();
+          return JSON.parse(t);
+        } catch (e) {
+          return null;
+        }
+      };
+
+      let data = await fetchJsonSafely(
+        `${baseUrl}static/masa.json`,
+      );
+      if (!data) {
+        data = await fetchJsonSafely(
+          `${baseUrl}jataka/static/masa.json`,
+        );
+      }
+      if (data) {
+        const arr = Array.isArray(data) ? data : data.events || data.data || [];
+        setLunarMonthsList(arr);
+      }
+    } catch (e) {
+      console.warn("Failed to load masa.json", e);
     }
   };
 
@@ -1106,52 +1139,70 @@ export default function Sankalpa({ onNavigate, transitChart, hideTitle = false }
       const currentChartTime = parseDateTimeToDate(dob, tob, tz);
 
       let maasaClean = "";
-      const activeAdhikaData = adhikaMaasaList.find((item) => {
-        const start = getAdhikaDateBound(item, false);
-        const end = getAdhikaDateBound(item, true);
-        if (!start || !end) return false;
-        return currentChartTime >= start && currentChartTime <= end;
-      });
+      let matchedMasa = null;
 
-      if (activeAdhikaData) {
-        let mName =
-          activeAdhikaData.maasa_name ||
-          activeAdhikaData.masa_name ||
-          activeAdhikaData.maasa;
-        if (mName && (mName.includes("Adhika") || mName.includes("Nija"))) {
-          maasaClean = mName;
-        } else {
-          let prefix = "";
-          if (activeAdhikaData.type === "Adhika") prefix = "Adhika ";
-          else if (activeAdhikaData.type === "Nija") prefix = "Nija ";
-          maasaClean = prefix + (mName || "Unknown");
-        }
+      if (lunarMonthsList && lunarMonthsList.length > 0) {
+        matchedMasa = lunarMonthsList.find((item) => {
+          const startStr = item.start || item.Start_Date;
+          const endStr = item.end || item.End_Date;
+          if (!startStr || !endStr) return false;
+          const start = new Date(startStr);
+          const end = new Date(endStr);
+          if (isNaN(start.getTime()) || isNaN(end.getTime())) return false;
+          return currentChartTime >= start && currentChartTime < end;
+        });
+      }
+
+      if (matchedMasa) {
+        maasaClean = matchedMasa.masa || matchedMasa.Masa_Name || "";
       } else {
-        const maasaCalc = getMaasa(sunLon, moonLon, sunSpeed, moonSpeed);
-        const baseMaasa = (p.maasa || maasaCalc)
-          .replace("Adhika ", "")
-          .replace("Nija ", "")
-          .trim();
-
-        const recentAdhikaData = adhikaMaasaList.find((item) => {
+        const activeAdhikaData = adhikaMaasaList.find((item) => {
+          const start = getAdhikaDateBound(item, false);
           const end = getAdhikaDateBound(item, true);
-          if (!end) return false;
+          if (!start || !end) return false;
+          return currentChartTime >= start && currentChartTime <= end;
+        });
 
-          let itemMasaName = (item.maasa_name || item.masa_name || item.maasa || "")
+        if (activeAdhikaData) {
+          let mName =
+            activeAdhikaData.maasa_name ||
+            activeAdhikaData.masa_name ||
+            activeAdhikaData.maasa;
+          if (mName && (mName.includes("Adhika") || mName.includes("Nija"))) {
+            maasaClean = mName;
+          } else {
+            let prefix = "";
+            if (activeAdhikaData.type === "Adhika") prefix = "Adhika ";
+            else if (activeAdhikaData.type === "Nija") prefix = "Nija ";
+            maasaClean = prefix + (mName || "Unknown");
+          }
+        } else {
+          const maasaCalc = getMaasa(sunLon, moonLon, sunSpeed, moonSpeed);
+          const baseMaasa = (p.maasa || maasaCalc)
             .replace("Adhika ", "")
             .replace("Nija ", "")
             .trim();
 
-          const diffTime = currentChartTime.getTime() - end.getTime();
-          const diffDays = diffTime / (1000 * 60 * 60 * 24);
+          const recentAdhikaData = adhikaMaasaList.find((item) => {
+            const end = getAdhikaDateBound(item, true);
+            if (!end) return false;
 
-          return itemMasaName === baseMaasa && diffDays >= 0 && diffDays <= 30;
-        });
+            let itemMasaName = (item.maasa_name || item.masa_name || item.maasa || "")
+              .replace("Adhika ", "")
+              .replace("Nija ", "")
+              .trim();
 
-        if (recentAdhikaData) {
-          maasaClean = "Nija " + baseMaasa;
-        } else {
-          maasaClean = baseMaasa;
+            const diffTime = currentChartTime.getTime() - end.getTime();
+            const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+            return itemMasaName === baseMaasa && diffDays >= 0 && diffDays <= 30;
+          });
+
+          if (recentAdhikaData) {
+            maasaClean = "Nija " + baseMaasa;
+          } else {
+            maasaClean = baseMaasa;
+          }
         }
       }
 
@@ -1225,7 +1276,7 @@ export default function Sankalpa({ onNavigate, transitChart, hideTitle = false }
     } catch (e) {
       console.error(e);
     }
-  }, [apiData, lang, adhikaMaasaList]);
+  }, [apiData, lang, adhikaMaasaList, lunarMonthsList]);
 
   const fontMap = {
     en: "'Crimson Pro', serif",

@@ -1,3 +1,6 @@
+07-07-2026
+- Fixed Sankalpa page lunar month name bug: Integrated `masa.json` lookup in `Sankalpa.jsx` to correctly identify lunar months (e.g. Nija Jyeshtha showing as Ashadha on 07-07-2026 due to linear approximation speed errors) with graceful fallback to standard calculation for dates outside the range.
+
 29-06-2026
 - added gulika ka;am in the me page.
 - MePage re-designed.

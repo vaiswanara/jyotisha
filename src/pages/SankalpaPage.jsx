@@ -5,9 +5,18 @@ import Sankalpa from "../components/Sankalpa.jsx";
 import { getLocalDateStr } from "../utils/formatters.js";
 
 export function SankalpaPage({ onNavigate }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [transitChart, setTransitChart] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [sankalpaLang, setSankalpaLang] = useState(() => {
+    return localStorage.getItem("sankalpa_preferred_lang") || null;
+  });
+
+  const handleLangChange = (l) => {
+    setSankalpaLang(l);
+    localStorage.setItem("sankalpa_preferred_lang", l);
+  };
+
   const [selectedDate, setSelectedDate] = useState(() => {
     const defLoc = JSON.parse(
       localStorage.getItem("vaiswanara_default_location") || "null"
@@ -222,9 +231,37 @@ export function SankalpaPage({ onNavigate }) {
             marginTop: "0px",
             width: "100%",
             display: "flex",
-            justifyContent: "center",
+            flexDirection: "column",
+            alignItems: "center",
           }}
         >
+          {/* Language Selection Tabs for Sankalpa */}
+          <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "15px" }}>
+            {[{code: 'en', label: 'English'}, {code: 'kn', label: 'ಕನ್ನಡ'}, {code: 'te', label: 'తెలుగు'}].map(l => {
+              const currentLang = i18n.language ? i18n.language.split("-")[0] : "te";
+              const isActive = sankalpaLang === l.code || (!sankalpaLang && currentLang === l.code);
+              return (
+                <button
+                  key={l.code}
+                  onClick={() => handleLangChange(l.code)}
+                  style={{
+                    padding: "6px 16px",
+                    borderRadius: "20px",
+                    border: "1px solid #d35400",
+                    background: isActive ? "#d35400" : "transparent",
+                    color: isActive ? "#fff" : "#d35400",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                    fontSize: "0.9rem",
+                    transition: "all 0.3s ease"
+                  }}
+                >
+                  {l.label}
+                </button>
+              );
+            })}
+          </div>
+
           <div style={{ width: "100%", maxWidth: "1000px" }}>
             {isLoading ? (
               <div style={{ textAlign: "center", padding: "50px 0", color: "#d35400", fontWeight: "bold" }}>
@@ -244,7 +281,7 @@ export function SankalpaPage({ onNavigate }) {
                   >
                     🌅 {t("SunriseLabel", "Sunrise")}: {transitChart.meta?.sunrise || "--:--"}
                   </div>
-                  <Sankalpa onNavigate={onNavigate} transitChart={transitChart} hideTitle={true} />
+                  <Sankalpa onNavigate={onNavigate} transitChart={transitChart} hideTitle={true} overrideLang={sankalpaLang} />
                 </>
               )
             )}
