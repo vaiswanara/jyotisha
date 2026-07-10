@@ -2,13 +2,13 @@ export const NAKSHATRAS = [
   { n: 1, name: "Ashwini", gana: "Deva", nadi: "Aadi", yoni: "Horse" },
   { n: 2, name: "Bharani", gana: "Manushya", nadi: "Madhya", yoni: "Elephant" },
   { n: 3, name: "Krittika", gana: "Rakshasa", nadi: "Antya", yoni: "Sheep" },
-  { n: 4, name: "Rohini", gana: "Manushya", nadi: "Aadi", yoni: "Serpent" },
+  { n: 4, name: "Rohini", gana: "Manushya", nadi: "Antya", yoni: "Serpent" },
   { n: 5, name: "Mrigashira", gana: "Deva", nadi: "Madhya", yoni: "Serpent" },
-  { n: 6, name: "Arudra", gana: "Manushya", nadi: "Antya", yoni: "Dog" },
+  { n: 6, name: "Arudra", gana: "Manushya", nadi: "Aadi", yoni: "Dog" },
   { n: 7, name: "Punarvasu", gana: "Deva", nadi: "Aadi", yoni: "Cat" },
   { n: 8, name: "Pushya", gana: "Deva", nadi: "Madhya", yoni: "Sheep" },
   { n: 9, name: "Ashlesha", gana: "Rakshasa", nadi: "Antya", yoni: "Cat" },
-  { n: 10, name: "Magha", gana: "Rakshasa", nadi: "Aadi", yoni: "Rat" },
+  { n: 10, name: "Magha", gana: "Rakshasa", nadi: "Antya", yoni: "Rat" },
   {
     n: 11,
     name: "Purva Phalguni",
@@ -20,15 +20,15 @@ export const NAKSHATRAS = [
     n: 12,
     name: "Uttara Phalguni",
     gana: "Manushya",
-    nadi: "Antya",
+    nadi: "Aadi",
     yoni: "Cow",
   },
   { n: 13, name: "Hasta", gana: "Deva", nadi: "Aadi", yoni: "Buffalo" },
   { n: 14, name: "Chitra", gana: "Rakshasa", nadi: "Madhya", yoni: "Tiger" },
   { n: 15, name: "Swati", gana: "Deva", nadi: "Antya", yoni: "Buffalo" },
-  { n: 16, name: "Vishakha", gana: "Rakshasa", nadi: "Aadi", yoni: "Tiger" },
+  { n: 16, name: "Vishakha", gana: "Rakshasa", nadi: "Antya", yoni: "Tiger" },
   { n: 17, name: "Anuradha", gana: "Deva", nadi: "Madhya", yoni: "Deer" },
-  { n: 18, name: "Jyeshtha", gana: "Rakshasa", nadi: "Antya", yoni: "Deer" },
+  { n: 18, name: "Jyeshtha", gana: "Rakshasa", nadi: "Aadi", yoni: "Deer" },
   { n: 19, name: "Mula", gana: "Rakshasa", nadi: "Aadi", yoni: "Dog" },
   {
     n: 20,
@@ -44,13 +44,13 @@ export const NAKSHATRAS = [
     nadi: "Antya",
     yoni: "Mongoose",
   },
-  { n: 22, name: "Shravana", gana: "Deva", nadi: "Aadi", yoni: "Monkey" },
+  { n: 22, name: "Shravana", gana: "Deva", nadi: "Antya", yoni: "Monkey" },
   { n: 23, name: "Dhanishta", gana: "Rakshasa", nadi: "Madhya", yoni: "Lion" },
   {
     n: 24,
     name: "Shatabhisha",
     gana: "Rakshasa",
-    nadi: "Antya",
+    nadi: "Aadi",
     yoni: "Horse",
   },
   {
@@ -227,14 +227,12 @@ function getRashi(nakNum, pada) {
 }
 
 function getAmshaNadi(nak, pada) {
-  const idx = NAKSHATRAS.findIndex(
-    (n) => n.name.toLowerCase() === nak.toLowerCase(),
-  );
-  if (idx === -1) return null;
-  const group = idx % 3;
-  if (group === 0) return ["Aadi", "Madhya", "Antya", "Antya"][pada - 1];
-  if (group === 1) return ["Madhya", "Aadi", "Aadi", "Madhya"][pada - 1];
-  if (group === 2) return ["Antya", "Antya", "Madhya", "Aadi"][pada - 1];
+  const nMeta = normalizeNakshatra(nak);
+  if (!nMeta) return null;
+  const nadi = nMeta.nadi;
+  if (nadi === "Aadi") return ["Aadi", "Madhya", "Antya", "Antya"][pada - 1];
+  if (nadi === "Madhya") return ["Madhya", "Aadi", "Aadi", "Madhya"][pada - 1];
+  if (nadi === "Antya") return ["Antya", "Antya", "Madhya", "Aadi"][pada - 1];
   return null;
 }
 
@@ -419,12 +417,10 @@ export function calculateAshtakuta(apiData, t) {
         (distFwd === a && distBwd === b) || (distFwd === b && distBwd === a),
     );
   let bhakootScore = bRashi === gRashi || !isBadBhakoot ? 7 : 0;
-  if (isBadBhakoot && (bLord === gLord || maitriScore >= 4)) {
-    const lordName = bLord === gLord ? (sanskritPlanets[bLord] || bLord) : `${sanskritPlanets[bLord] || bLord} & ${sanskritPlanets[gLord] || gLord}`;
+  if (isBadBhakoot) {
     exceptions.push(
-      `<strong>Bhakoot Dosha Cancellation:</strong> Cancelled because sign lords (${lordName}) are friendly or identical.`,
+      `<strong>Bhakoot Dosha:</strong> Active because they have a ${distFwd}/${distBwd} Rashi relationship.`,
     );
-    bhakootScore = 7;
   }
   kutas.push({
     name: "Bhakoot",
@@ -451,29 +447,17 @@ export function calculateAshtakuta(apiData, t) {
         exceptions.push(
           `<strong>Amsha Nadi:</strong> Boy and Girl share ${bMeta.nadi} Nadi, but their Pada-based Amsha Nadis are different (${bAmsha} vs ${gAmsha}).`,
         );
+      } else {
+        exceptions.push(
+          `<strong>Nadi Dosha:</strong> Active because they have the same Janma Nadi (${bMeta.nadi}) and the same Pada-based Amsha Nadi (${bAmsha}).`,
+        );
       }
     }
     
-    // Cancellation rules
     if (bMeta.n === gMeta.n && boyPada === girlPada) {
       exceptions.push(
         `<strong>Same Nakshatra & Pada:</strong> Both share the same Nakshatra (${t ? t(bMeta.name) : bMeta.name}) and Pada (${boyPada}), meaning they share the same Nadi energy. Nadi Dosha cancellation is not applicable here, and a detailed chart match by an experienced astrologer is recommended.`,
       );
-    } else if (bMeta.n === gMeta.n && boyPada !== girlPada) {
-      exceptions.push(
-        `<strong>Nadi Dosha Cancellation:</strong> Cancelled because they share the same Nakshatra (${t ? t(bMeta.name) : bMeta.name}) but have different quarters (Padas).`,
-      );
-      nadiScore = 8;
-    } else if (bRashi !== gRashi && bLord === gLord) {
-      exceptions.push(
-        `<strong>Nadi Dosha Cancellation:</strong> Cancelled because they have different Rashis but identical Rashi lords (${sanskritPlanets[bLord] || bLord}).`,
-      );
-      nadiScore = 8;
-    } else if (bRashi !== gRashi && maitriScore >= 4) {
-      exceptions.push(
-        `<strong>Nadi Dosha Cancellation:</strong> Cancelled because they have different Rashis and their Rashi lords (${sanskritPlanets[bLord] || bLord} and ${sanskritPlanets[gLord] || gLord}) are friendly.`,
-      );
-      nadiScore = 8;
     }
   }
   kutas.push({

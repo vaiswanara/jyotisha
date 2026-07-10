@@ -1878,6 +1878,15 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
             max-width: 100% !important;
           }
         }
+
+        /* టేబుల్ హెడర్ స్క్రోల్ కాకుండా స్థిరంగా (sticky) ఉంచడానికి */
+        .panchanga-page-layout .table-scroll th {
+          position: sticky;
+          top: 0;
+          z-index: 10;
+          background-color: #ffffff; /* స్క్రోలింగ్ డేటా వెనుక కనిపించకుండా వైట్ బ్యాక్‌గ్రౌండ్ */
+          box-shadow: inset 0 -1px 0 #eadfce; /* బార్డర్ లైన్ స్పష్టంగా కనిపించడానికి */
+        }
       `}</style>
       <section
         className="workspace"

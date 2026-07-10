@@ -145,6 +145,17 @@ app.use(apiPaths, (req, res, next) => {
   next();
 });
 
+// అడ్మిన్ పాస్‌వర్డ్ వెరిఫికేషన్ హెల్పర్ (SHA-256)
+function verifyAdminPassword(inputPwd?: any, headerPwd?: any): boolean {
+  const adminPwd = headerPwd || inputPwd;
+  const REAL_ADMIN_PWD_HASH = process.env.ADMIN_PASSWORD_HASH;
+  if (!REAL_ADMIN_PWD_HASH || !adminPwd || typeof adminPwd !== "string") {
+    return false;
+  }
+  const hashedInput = crypto.createHash("sha256").update(adminPwd).digest("hex");
+  return hashedInput === REAL_ADMIN_PWD_HASH;
+}
+
 // --- MUHURTHA & PANCHANGA HELPER FUNCTIONS ---
 function findExactTime(
   approxTs: number,
@@ -2925,9 +2936,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         return res.status(500).json({ error: "Failed to read lessons file" });
       }
     } else if (endpoint === "save_lessons") {
-      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+      if (!verifyAdminPassword(input.admin_password, req.headers["x-admin-password"])) {
         return res
           .status(403)
           .json({ error: "Forbidden: Invalid Admin Password" });
@@ -2985,9 +2994,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         return res.status(500).json({ error: "Failed to read library file" });
       }
     } else if (endpoint === "save_library") {
-      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+      if (!verifyAdminPassword(input.admin_password, req.headers["x-admin-password"])) {
         return res
           .status(403)
           .json({ error: "Forbidden: Invalid Admin Password" });
@@ -3051,9 +3058,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         return res.status(500).json({ error: "Failed to read ticker file" });
       }
     } else if (endpoint === "save_ticker") {
-      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+      if (!verifyAdminPassword(input.admin_password, req.headers["x-admin-password"])) {
         return res.status(403).json({ error: "Forbidden: Invalid Admin Password" });
       }
       const { ticker } = input;
@@ -3108,9 +3113,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
         return res.status(500).json({ error: "Failed to read in-app messages file" });
       }
     } else if (endpoint === "save_in_app_message") {
-      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+      if (!verifyAdminPassword(input.admin_password, req.headers["x-admin-password"])) {
         return res.status(403).json({ error: "Forbidden: Invalid Admin Password" });
       }
       const { messages } = input;
@@ -3176,9 +3179,7 @@ app.all(apiPaths, async (req: Request, res: Response): Promise<any> => {
       });
     } else if (endpoint === "admin_get_all") {
       // అడ్మిన్ ప్యానెల్ లో డేటా చూపించడానికి కొత్త ఎండ్‌పాయింట్
-      const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-      const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-      if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+      if (!verifyAdminPassword(input.admin_password, req.headers["x-admin-password"])) {
         return res
           .status(403)
           .json({ error: "Forbidden: Invalid Admin Password" });

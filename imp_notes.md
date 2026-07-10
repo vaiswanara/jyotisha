@@ -43,3 +43,7 @@ Admin Dashboard (అడ్మిన్ ప్యానెల్)	page=Admin	http
 ఈ లింకుల ద్వారా ఏ పేజీనైనా బ్రౌజర్‌లో నేరుగా ఓపెన్ చేయవచ్చు.
 
 https://vaiswanara.com/jyotisha/?page=e-Library
+
+
+change port or run other instance
+npm run dev -- --port 5174

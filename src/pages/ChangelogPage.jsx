@@ -7,6 +7,20 @@ export function ChangelogPage({ logoUrl }) {
 
   const changelogData = [
     {
+      date: "07-07-2026",
+      color: "#2ecc71",
+      items: [
+        {
+          title: "Sankalpa Lunar Month Fix",
+          desc: "Integrated masa.json lookup in Sankalpa.jsx to correctly identify lunar months (e.g., Nija Jyeshtha showing as Ashadha due to linear approximation errors) with standard calculation fallback."
+        },
+        {
+          title: "Nadi & Bhakoot Compatibility Rules Fixes",
+          desc: "Corrected Nakshatra Nadi assignments in matchCalculator.js to use the standard Vedic snake-like cyclic pattern. Updated getAmshaNadi to lookup based on actual Nakshatra Nadi. Removed all fall-through cancellation logic to enforce 0 score for same Janma Nadi and bad Rashi relations (5/9, 6/8, 2/12)."
+        }
+      ]
+    },
+    {
       date: "29-06-2026",
       color: "#8e44ad",
       items: [

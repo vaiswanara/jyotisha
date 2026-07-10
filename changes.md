@@ -1,5 +1,8 @@
 07-07-2026
 - Fixed Sankalpa page lunar month name bug: Integrated `masa.json` lookup in `Sankalpa.jsx` to correctly identify lunar months (e.g. Nija Jyeshtha showing as Ashadha on 07-07-2026 due to linear approximation speed errors) with graceful fallback to standard calculation for dates outside the range.
+- Corrected Nadi and Bhakoot (Rashi Koota) compatibility calculations: Removed all fall-through cancellation logic for Nadi and Bhakoot to correctly assign 0 points when the same Janma Nadi (even with different Amsha Nadis) or bad Rashi relationships (5/9, 6/8, 2/12) are present.
+- Corrected Nakshatra Nadi assignments database in `matchCalculator.js` to use the standard Vedic astrology snake-like cyclic pattern (corrected Rohini, Arudra, Magha, Uttara Phalguni, Vishakha, Jyeshtha, Shravana, and Shatabhisha).
+- Refactored `getAmshaNadi` helper function to determine Amsha Nadi array dynamically using the Nakshatra's actual corrected Janma Nadi instead of assuming index modulo 3.
 
 29-06-2026
 - added gulika ka;am in the me page.
