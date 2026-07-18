@@ -12,6 +12,9 @@ const CONTENT = {
     e_match: "e-Match",
     desc_match:
       "Comprehensive Ashtakuta compatibility check, Doshas, and Navamsha evaluation for marriage.",
+    e_gotra_match: "Gotra (Beta)",
+    desc_gotra_match:
+      "Check Sagotra, Sapravara, and maternal gotra compatibility for marriage.",
     e_panchanga: "e-Panchanga",
     desc_panchanga:
       "Generate daily Panchangam, search for auspicious dates, and calculate precision Muhurthams.",
@@ -70,6 +73,9 @@ const CONTENT = {
     e_match: "ఈ-పొంతన",
     desc_match:
       "వివాహం కోసం సాంప్రదాయ అష్టకూట పొంతన, దోషాలు మరియు నవాంశ విశ్లేషణ.",
+    e_gotra_match: "గోత్ర పొంతన",
+    desc_gotra_match:
+      "వధూవరుల గోత్రాలు మరియు ప్రవరల ఆధారంగా సగోత్ర, సప్రవర నిరోధాలను పరిశీలించండి.",
     e_panchanga: "ఈ-పంచాంగం",
     desc_panchanga:
       "రోజువారీ పంచాంగాన్ని చూడండి, శుభ తేదీలను వెతకండి మరియు ముహూర్తాలను గణించండి.",
@@ -128,6 +134,9 @@ const CONTENT = {
     e_match: "ಇ-ಹೊಂದಾಣಿಕೆ",
     desc_match:
       "ವಿವಾಹಕ್ಕಾಗಿ ಸಾಂಪ್ರದಾಯಿಕ ಅಷ್ಟಕೂಟ ಹೊಂದಾಣಿಕೆ, ದೋಷಗಳು ಮತ್ತು ನವಾಂಶ ವಿಶ್ಲೇಷಣೆ.",
+    e_gotra_match: "ಗೋತ್ರ ಹೊಂದಾಣಿಕೆ",
+    desc_gotra_match:
+      "ವರ ಮತ್ತು ವಧುವಿನ ಗೋತ್ರ ಮತ್ತು ಪ್ರವರ ಹೊಂದಾಣಿಕೆಯನ್ನು ಪರಿಶೀಲಿಸಿ.",
     e_panchanga: "ಇ-ಪಂಚಾಂಗ",
     desc_panchanga:
       "ದೈನಂದಿನ ಪಂಚಾಂಗವನ್ನು ನೋಡಿ, ಶುಭ ದಿನಾಂಕಗಳನ್ನು ಹುಡುಕಿ ಮತ್ತು ಮುಹೂರ್ತಗಳನ್ನು ಲೆಕ್ಕಹಾಕಿ.",
@@ -257,7 +266,7 @@ export function HomePage({
         const parsed = JSON.parse(cached);
         if (parsed && Array.isArray(parsed.tickers)) return parsed;
       }
-    } catch (_) {}
+    } catch (_) { }
     return { speed: "normal", tickers: [] };
   });
 
@@ -269,7 +278,7 @@ export function HomePage({
         localStorage.setItem("vaiswanara_ticker_cache", JSON.stringify(data));
         return;
       }
-    } catch (_) {}
+    } catch (_) { }
     try {
       const res = await fetch(`${import.meta.env.BASE_URL}static/ticker.json?_t=${Date.now()}`);
       if (res.ok) {
@@ -279,7 +288,7 @@ export function HomePage({
           localStorage.setItem("vaiswanara_ticker_cache", JSON.stringify(data));
         }
       }
-    } catch (_) {}
+    } catch (_) { }
   };
 
   // Fetch ticker on mount and listen for admin save updates event
@@ -299,7 +308,7 @@ export function HomePage({
   const combinedUpdates = (() => {
     const list = tickerData.tickers || [];
     if (list.length === 0) return [];
-    
+
     // Get current date in IST (Asia/Kolkata)
     let today = "";
     try {
@@ -331,7 +340,7 @@ export function HomePage({
   })();
 
   const isTickerVisible = combinedUpdates.length > 0;
-  
+
   // Calculate dynamic duration based on speed factor
   const tickerDuration = (() => {
     const len = combinedUpdates.length;
@@ -761,6 +770,20 @@ export function HomePage({
                 <div className="icon">💞</div>
                 <h2>{copy.e_match}</h2>
                 <div className="desc">{copy.desc_match}</div>
+              </div>
+            )}
+            {isPageVisible("GotraMatch") && (
+              <div
+                className="card-home"
+                style={{ borderTopColor: "#e67e22" }}
+                onClick={() => onNavigate("GotraMatch")}
+              >
+                <div className="icon">🧬</div>
+                <h2 style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0, lineHeight: 1.2 }}>
+                  <span>e-Gotra</span>
+                  <span style={{ fontSize: "0.8em", opacity: 0.65, fontStyle: "italic", fontWeight: 500 }}>(Beta)</span>
+                </h2>
+                <div className="desc">{copy.desc_gotra_match}</div>
               </div>
             )}
             {isPageVisible("e-Panchanga") && (

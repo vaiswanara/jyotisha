@@ -21,6 +21,7 @@ export function Sidebar({ isOpen, logoUrl, onClose, activePage, onNavigate, prof
     { id: "Sankalpa", icon: "☀️", label: t("e-Sankalpa", "e-Sankalpa") },
     { id: "e-Jataka", icon: "📜", label: t("e-Jataka", "e-Jataka") },
     { id: "e-Match", icon: "💞", label: t("e-Match", "e-Match") },
+    { id: "GotraMatch", icon: "🧬", label: "e-Gotra", subLabel: "(Beta)" },
     { id: "e-Panchanga", icon: "🗓️", label: t("e-Panchanga", "e-Panchanga") },
     { id: "echakra", icon: "☸️", label: t("Prashna", "e-Prashna") },
     { id: "e-Clock", icon: "🕒", label: t("AstroClock", "e-Clock") },
@@ -186,7 +187,14 @@ export function Sidebar({ isOpen, logoUrl, onClose, activePage, onNavigate, prof
               }}
             >
               <span className="sidebar-icon">{item.icon}</span>
-              {item.label}
+              <span style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
+                {item.label}
+                {item.subLabel && (
+                  <span style={{ fontSize: "0.72em", opacity: 0.7, fontStyle: "italic" }}>
+                    {item.subLabel}
+                  </span>
+                )}
+              </span>
             </button>
           ))}
 

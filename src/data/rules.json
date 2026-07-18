@@ -1,0 +1,46 @@
+[
+  {
+    "id": "same_gotra",
+    "severity": "high",
+    "title_en": "Sagotra Observation (Same Gotra)",
+    "title_te": "సగోత్ర పరిశీలన (ఒకే గోత్రం)",
+    "title_kn": "ಸಗೋತ್ರ ವಿಶ್ಲೇಷಣೆ (ಒಂದೇ గోత్ర)",
+    "description_en": "Both Groom and Bride belong to the same Gotram ({{gotra}}). Traditional Dharmashastra discourages Sagotra marriage as they are considered ancestral siblings.",
+    "description_te": "వధూవరులిద్దరూ ఒకే గోత్రానికి ({{gotra}}) చెందినవారు. సాంప్రదాయ ధర్మశాస్త్రం ప్రకారం సగోత్రీయుల మధ్య వివాహం నిషిద్ధం, ఎందుకంటే వారు సోదర సోదరీ సమానులవుతారు.",
+    "description_kn": "ವರ మరియు వಧు ఇಬ್ಬರೂ ಒಂದೇ గోತ್ರಕ್ಕೆ ({{gotra}}) ಸೇರಿದವರಾಗಿದ್ದಾರೆ. ಸಾಂಪ್ರದಾಯಿಕ ధರ್ಮಶಾಸ್ತ್ರವು సಗೋತ್ರ విವಾಹವನ್ನು వర్జಿಸುತ್ತದೆ.",
+    "references": ["Apastamba", "Baudhayana", "Manu"]
+  },
+  {
+    "id": "same_pravara",
+    "severity": "medium",
+    "title_en": "Sapravara Observation (Same Pravara)",
+    "title_te": "సప్రవర పరిశీలన (సామాన్య ఋషులు)",
+    "title_kn": "ಸಪ್ರವರ ವಿಶ್ಲೇಷಣೆ (ಸಮಾನ ಋಷಿಗಳು)",
+    "description_en": "Although their Gotrams are different, they share common Pravara Rishis. Traditional Dharmashastra observes this as sapravara and discourages marriage.",
+    "description_te": "గోత్రాలు వేరైనా, వీరి ప్రవరలో సామాన్య ఋషులు ఉన్నారు. సాంప్రదాయ ధర్మశాస్త్రం ప్రకారం సప్రవరుల మధ్య వివాహం నిషిద్ధం.",
+    "description_kn": "ಗೋತ್ರಗಳು ಬೇರೆಯಾಗಿದ್ದರೂ, ಇವರ ಪ್ರವರದಲ್ಲಿ ಸಮಾನ ಋಷಿಗಳಿದ್ದಾರೆ. ಸಾಂಪ್ರದಾಯಿಕ ధರ್ಮಶಾಸ್ತ್ರದ ಪ್ರಕಾರ ಇದು సಪ್ರವರವಾಗಿದ್ದು ವಿವಾಹವನ್ನು ವರ್ಜಿಸುತ್ತದೆ.",
+    "references": ["Apastamba", "Baudhayana"]
+  },
+  {
+    "id": "maternal_reference",
+    "severity": "low",
+    "title_en": "Maternal Gotra Observation",
+    "title_te": "మాతృగోత్ర పరిశీలన",
+    "title_kn": "ಮಾತೃಗೋತ್ರ ವಿಶ್ಲೇಷಣೆ",
+    "description_en": "Groom's Gotram matches Bride's mother's birth gotram ({{gotra}}). Some traditions (like Yajurveda Madhyandina Shaka) recommend avoiding marriage within the maternal gotra.",
+    "description_te": "వరుని గోత్రం వధువు తల్లిగారి జన్మ గోత్రంతో ({{gotra}}) సరిపోలింది. కొన్ని సాంప్రదాయాలలో మాతృగోత్ర వివాహాన్ని నివారించాలని సూచించబడింది.",
+    "description_kn": "ವರನ ಗೋತ್ರವು ವಧುವಿನ ತಾಯಿಯ ಜನ್ಮ ಗೋತ್ರಕ್ಕೆ ({{gotra}}) ಹೊಂದಿಕೆಯಾಗುತ್ತದೆ. ಕೆಲವು ಸಂಪ್ರದಾಯಗಳಲ್ಲಿ ಮಾತೃಗೋತ್ರ ವಿವಾಹವನ್ನು ತಪ್ಪಿಸಲು ಸೂಚಿಸಲಾಗುತ್ತದೆ.",
+    "references": ["Dharmasindhu", "Nirnayasingha"]
+  },
+  {
+    "id": "different",
+    "severity": "none",
+    "title_en": "Different Gotra & Pravara",
+    "title_te": "భిన్న గోత్ర ప్రవరలు",
+    "title_kn": "ಭಿನ್ನ ಗೋತ್ರ మరియు ప్రವರಗಳು",
+    "description_en": "Traditional Dharmashastra observes different gotra and pravara lineages, which is considered suitable for marriage alignment.",
+    "description_te": "వధూవరుల గోత్రాలు మరియు ప్రవరలు వేరుвеరుగా ఉన్నాయి. సాంప్రదాయ ధర్మశాస్త్రం ప్రకారం ఇది వివాహానికి అనుకూలం.",
+    "description_kn": "ವರ ಮತ್ತು వಧುವಿನ గోತ್ರ ಹಾಗೂ ప్రವರಗಳು ಭಿನ್ನವಾಗಿವೆ. ಸಂಪ್ರದಾಯ ధರ್ಮಶಾಸ್ತ್ರದ ಪ್ರಕಾರ ఇది విವಾహಕ್ಕೆ ಸೂಕ್ತವಾಗಿದೆ.",
+    "references": ["Manu", "Yajnavalkya"]
+  }
+]

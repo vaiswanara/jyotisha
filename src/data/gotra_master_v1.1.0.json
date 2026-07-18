@@ -1,0 +1,5767 @@
+[
+    {
+        "gotra": "Aabasthamba",
+        "aliases": [
+            "Aabasthamba"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Barhaspatya",
+                    "Bharadwaja"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Aachvalaayana",
+        "aliases": [
+            "Aachvalaayana"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Indrapramada",
+                    "Abharadvasu"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 58
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "AagamarshaNa",
+        "aliases": [
+            "AagamarshaNa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Aghamarshana",
+                    "Kaushika"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 57
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Aagasthi",
+        "aliases": [
+            "Aagasthi",
+            "Agasthi"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Drdhachyuta",
+                    "Idhmavaha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 65
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Mahendra",
+                    "Mayobhuva"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 65
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Aarshtimshena",
+        "aliases": [
+            "Aarshtimshena"
+        ],
+        "types": [
+            "Pancharsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Chyavana",
+                    "Apnavana",
+                    "Arshtishena",
+                    "Anupa"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Arshtishena",
+                    "Anupa"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "AartishENa",
+        "aliases": [
+            "AartishENa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Arshtishena",
+                    "Anupa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Aaswalaayana",
+        "aliases": [
+            "Aaswalaayana"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Vadhryashva",
+                    "Daivadasa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Agastya",
+        "aliases": [
+            "Agastya"
+        ],
+        "types": [
+            "Ekarsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Ekarsheya",
+                "rishis": [
+                    "Agastya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 65
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Mahendra",
+                    "Mayobhuva"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 351
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Aghamarsana",
+        "aliases": [
+            "Aghamarsana",
+            "Aghamarshana"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Aghamarshana",
+                    "Kaushika"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 348
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Aja",
+        "aliases": [
+            "Aja"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Madhuchhandasa",
+                    "Aja"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 348
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Aoushanasa",
+        "aliases": [
+            "Aoushanasa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Gautama",
+                    "Aushanasa"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Arshtishena",
+        "aliases": [
+            "Arshtishena"
+        ],
+        "types": [
+            "Pancharsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Chyavana",
+                    "Apnavana",
+                    "Arshtishena",
+                    "Anupa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Arshtishena",
+                    "Anupa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Athri",
+        "aliases": [
+            "Athri"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Shyavashva"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 54
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Atithaya",
+        "aliases": [
+            "Atithaya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Atitha",
+                    "Gavishtira"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 347
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Atithya",
+        "aliases": [
+            "Atithya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Atitha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Atmabhu",
+        "aliases": [
+            "Atmabhu"
+        ],
+        "types": [
+            "Pancharsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Bharadwaja",
+                    "Barhaspatya",
+                    "Vara",
+                    "Atmabhu"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Atmabhuva",
+        "aliases": [
+            "Atmabhuva"
+        ],
+        "types": [
+            "Pancharsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Bharadwaja",
+                    "Barhaspatya",
+                    "Vara",
+                    "Ammabhuva"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 346
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Atreya",
+        "aliases": [
+            "Atreya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Shyavashva"
+                ],
+                "source_count": 4,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 347
+                    },
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 54
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Ausanasa",
+        "aliases": [
+            "Ausanasa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Gautama",
+                    "Aushanasa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Avada",
+        "aliases": [
+            "Avada"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Aurva",
+                    "Jamadagnya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Ayasya",
+        "aliases": [
+            "Aayaasya",
+            "Ayasya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Ayasya",
+                    "Gautama"
+                ],
+                "source_count": 4,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    },
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Baijamathita",
+        "aliases": [
+            "Baijamathita"
+        ],
+        "types": [
+            "Pancharsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Chyavana",
+                    "Apnavana",
+                    "Baija",
+                    "Mathita"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Baukakshi",
+        "aliases": [
+            "Baukakshi"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Kashyapa",
+                    "Avatsara",
+                    "Asita"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 59
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Bhaaleya",
+        "aliases": [
+            "Bhaaleya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Vamarathya",
+                    "Pautrika"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 54
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Bharadvaja",
+        "aliases": [
+            "Bharadvaja",
+            "Bharadwaaja",
+            "Bharadwaja"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Barhaspatya",
+                    "Bharadwaja"
+                ],
+                "source_count": 4,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    },
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 346
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Bhaulathsya",
+        "aliases": [
+            "Bhaulathsya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Aurva",
+                    "Jamadagnya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Bheejaavaaba",
+        "aliases": [
+            "Bheejaavaaba"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Atitha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 54
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Bhodayana",
+        "aliases": [
+            "Bhodayana"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Atreya",
+                    "Jatukarnya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 58
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Bida",
+        "aliases": [
+            "Bida"
+        ],
+        "types": [
+            "Pancharsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Chyavana",
+                    "Apnavana",
+                    "Aurva",
+                    "Baida"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Chyavana",
+                    "Apnavana",
+                    "Aurva",
+                    "Vaida"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Aurva",
+                    "Jamadagnya"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Brhadyuktha",
+        "aliases": [
+            "Brhadyuktha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Brhadyuktha",
+                    "Gautama"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Bruhudhyuktha",
+        "aliases": [
+            "Bruhudhyuktha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Brihadyumna",
+                    "Gautama"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Bruku",
+        "aliases": [
+            "Bruku"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Kashyapa",
+                    "Avatsara",
+                    "Naidhruva"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 59
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Darbhavaha",
+        "aliases": [
+            "Darbhavaaha",
+            "Darbhavaha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Daadharyachyuta",
+                    "Darbhavaaha"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 351
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Drdhachyuta",
+                    "Darbhavaaha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Dattathreya",
+        "aliases": [
+            "Dattathreya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Shyavashva"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 54
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Devaraatha",
+        "aliases": [
+            "Devaraatha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Devarata",
+                    "Aulita"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 57
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Dhaksha",
+        "aliases": [
+            "Dhaksha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Gavishtira",
+                    "Purvatitha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 54
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Dhananjaya",
+        "aliases": [
+            "Dhananjaya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Gavishtira"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 54
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Madhuchhandasa",
+                    "Dhananjaya"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 348
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Dirgha Tamasa",
+        "aliases": [
+            "Dirgha Tamasa"
+        ],
+        "types": [
+            "Pancharsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Autathya",
+                    "Kakshivat",
+                    "Gautama",
+                    "Dirghatamas"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Autathya",
+                    "Dirghatamas"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Dirghatamas",
+        "aliases": [
+            "Dirghatamas"
+        ],
+        "types": [
+            "Pancharsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Autathya",
+                    "Kakshivat",
+                    "Gautama",
+                    "Dirghatamas"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Autathya",
+                    "Dirghatamas"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "GaargEya",
+        "aliases": [
+            "GaargEya"
+        ],
+        "types": [
+            "Pancharsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Barhaspatya",
+                    "Bharadwaja",
+                    "Sainya",
+                    "Gargya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Gargya",
+                    "Chaitya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Garga",
+        "aliases": [
+            "Garga"
+        ],
+        "types": [
+            "Pancharsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Barhaspatya",
+                    "Bharadwaja",
+                    "Sainya",
+                    "Garga"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Barhaspatya",
+                    "Bharadwaja",
+                    "Sainya",
+                    "Gargya"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 346
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Sainya",
+                    "Garga"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Sainya",
+                    "Gargya"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 346
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bharadwaja",
+                    "Garga",
+                    "Sainya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bharadwaja",
+                    "Gargya",
+                    "Sainya"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 346
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Garthsamatha",
+        "aliases": [
+            "Garthsamatha"
+        ],
+        "types": [
+            "Dvayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Dvayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Grtsamada"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Gatha",
+        "aliases": [
+            "Gatha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Madhuchhandasa",
+                    "Aja"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 57
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Gauriveetha",
+        "aliases": [
+            "Gauriveetha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Purvatitha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 54
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Gautama",
+        "aliases": [
+            "Gautama"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Ayasya",
+                    "Gautama"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Gavishthara",
+        "aliases": [
+            "Gavishthara"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Gavishtira"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 347
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Gavishtira",
+                    "Purvatitha"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 347
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Gavisthira",
+        "aliases": [
+            "Gavisthira"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Gavishtira"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Gavishtira",
+                    "Purvatitha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Harita",
+        "aliases": [
+            "Harita",
+            "Haritha"
+        ],
+        "types": [
+            "Ekarsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Ekarsheya",
+                "rishis": [
+                    "Vasishtha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 58
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Ambarisha",
+                    "Yauvanashva"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Harithasa",
+        "aliases": [
+            "Harithasa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Ambarisha",
+                    "Yauvanashva"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 346
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Himodaka",
+        "aliases": [
+            "Himodaka"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Haimavarchi",
+                    "Himodaka"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 351
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Idhmavaaha",
+        "aliases": [
+            "Idhmavaaha",
+            "Idhmavaha"
+        ],
+        "types": [
+            "Ekarsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Ekarsheya",
+                "rishis": [
+                    "Agastya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 65
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Daadharyachyuta",
+                    "Idhmavaha"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 351
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Drdhachyuta",
+                    "Idhmavaha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Vadhryashva",
+                    "Idhmavaha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 65
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Indrakoushika",
+        "aliases": [
+            "Indrakausika",
+            "Indrakoushika"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Indra",
+                    "Kaushika"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 348
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Jaabaali",
+        "aliases": [
+            "Jaabaali"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Vitahavya",
+                    "Raivasa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "JaadhookarNya",
+        "aliases": [
+            "JaadhookarNya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Indrapramada",
+                    "Abharadvasu"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 58
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Jaamadagnya",
+        "aliases": [
+            "Jaamadagnya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Aurva",
+                    "Jamadagnya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Jabhala",
+        "aliases": [
+            "Jabhala"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Devarata",
+                    "Audala"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 57
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Jaimini",
+        "aliases": [
+            "Jaimini"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Vitahavya",
+                    "Raivasa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Jamadagni",
+        "aliases": [
+            "Jamadagni"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Chyavana",
+                    "Apnavana"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kaalava",
+        "aliases": [
+            "Kaalava"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Devarata",
+                    "Audala"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 57
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kaargya",
+        "aliases": [
+            "Kaargya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Vitahavya",
+                    "Raivasa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kaathyaayana",
+        "aliases": [
+            "Kaathyaayana"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Arshtishena",
+                    "Anupa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Katya",
+                    "Ajigarta"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 57
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kabila",
+        "aliases": [
+            "Kabila"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Amahiyava",
+                    "Urukshaya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kachyapa",
+        "aliases": [
+            "Kachyapa"
+        ],
+        "types": [
+            "Saptharsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Saptharsheya",
+                "rishis": [
+                    "Kashyapa",
+                    "Avatsara",
+                    "Naidhruva",
+                    "Rebha",
+                    "Raibhya",
+                    "Sandilya",
+                    "Shandilya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 59
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kadhaka",
+        "aliases": [
+            "Kadhaka"
+        ],
+        "types": [
+            "Dvayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Dvayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Kadhaka"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 57
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kamakayana",
+        "aliases": [
+            "Kaamakaayana",
+            "Kamakaayana",
+            "Kamakayana"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Devasravasa",
+                    "Daivatarasa"
+                ],
+                "source_count": 4,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 348
+                    },
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 57
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kamyaangirasa",
+        "aliases": [
+            "Kamyaangirasa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Amahavya",
+                    "Aurukshaya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kanaka",
+        "aliases": [
+            "Kanaka"
+        ],
+        "types": [
+            "Dvayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Dvayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Grtsamada"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kanva",
+        "aliases": [
+            "KaNva",
+            "KaaNva",
+            "Kanva",
+            "Kanwa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Ajamidha",
+                    "Kanva"
+                ],
+                "source_count": 4,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 346
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Amahiyava",
+                    "Urukshaya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Ghora",
+                    "Kanva"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 346
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Indrapramada",
+                    "Abharadvasu"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 58
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kapaya",
+        "aliases": [
+            "Kapaya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Amahavya",
+                    "Aurukshaya"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 346
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Samahavya",
+                    "Aurukshaya"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 346
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kapi",
+        "aliases": [
+            "Kapi"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Amahavya",
+                    "Aurukshaya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Samahavya",
+                    "Aurukshaya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Karenupaalaya",
+        "aliases": [
+            "Karenupaalaya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Gautama",
+                    "Karenupaalaya"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Karenupala",
+        "aliases": [
+            "Karenupala"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Gautama",
+                    "Karenupala"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kashyapa",
+        "aliases": [
+            "Kashyapa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Kashyapa",
+                    "Asita",
+                    "Devala"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 59
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kasyapi",
+        "aliases": [
+            "Kasyapi"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Vitahavya",
+                    "Savetasa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kata",
+        "aliases": [
+            "Kata"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Katya",
+                    "Ajigarta"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kati",
+        "aliases": [
+            "Kati"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Katya",
+                    "Ajigarta"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 348
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kaundinya",
+        "aliases": [
+            "Kaundinya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Barhaspatya",
+                    "Bharadwaja"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Maitravaruna",
+                    "Kaundinya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 58
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kausika",
+        "aliases": [
+            "Kausika"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Aghamarshana",
+                    "Kaushika"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 57
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Salankayana",
+                    "Kaushika"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 57
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Komanda",
+        "aliases": [
+            "Komanda"
+        ],
+        "types": [
+            "Pancharsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Autathya",
+                    "Gautama",
+                    "Aushija",
+                    "Kakshivat"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Autathya",
+                    "Kakshivat",
+                    "Gautama",
+                    "Komanda"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Autathya",
+                    "Kakshivat"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Koumanda",
+        "aliases": [
+            "Koumanda"
+        ],
+        "types": [
+            "Pancharsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Autathya",
+                    "Kakshivat",
+                    "Gautama",
+                    "Komanda"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    }
+                ]
+            },
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Autathya",
+                    "Gautama",
+                    "Aushija",
+                    "Kakshivat"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Autathya",
+                    "Kakshivat"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kruthsamatha",
+        "aliases": [
+            "Kruthsamatha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Saunahotra",
+                    "Grtsamada"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kundina",
+        "aliases": [
+            "Kundina"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Maitravaruna",
+                    "Kaundinya"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 351
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kusika",
+        "aliases": [
+            "Kushika",
+            "Kusika"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Aghamarshana",
+                    "Kaushika"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 348
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Kutsa",
+        "aliases": [
+            "Kuthsa",
+            "Kutsa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Ambarisha",
+                    "Yauvanashva"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Mandhatr",
+                    "Kautsa"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 346
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Mandhatr",
+                    "Kutsa"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Lohita",
+        "aliases": [
+            "Lohita",
+            "Lohitha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Vishvamitra",
+                    "Lohita"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Ashtaka",
+                    "Lohita"
+                ],
+                "source_count": 4,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 348
+                    },
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 57
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Maandookeya",
+        "aliases": [
+            "Maandookeya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Aurva",
+                    "Jamadagnya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Maareesa",
+        "aliases": [
+            "Maareesa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Kashyapa",
+                    "Avatsara",
+                    "Naidhruva"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 59
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Maayobhuva",
+        "aliases": [
+            "Maayobhuva"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Mahendra",
+                    "Mayobhuva"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 65
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Maunabhargava",
+        "aliases": [
+            "Maunabhargava"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Vitahavya",
+                    "Savetasa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Mauthgala",
+        "aliases": [
+            "Mauthgala"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Maitravaruna",
+                    "Kaundinya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 58
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Mauthgalya",
+        "aliases": [
+            "Mauthgalya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Ambarisha",
+                    "Maudgalya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Bharmyashva",
+                    "Maudgalya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Purvatitha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 54
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "MithraavaruNa",
+        "aliases": [
+            "MithraavaruNa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Maitravaruna",
+                    "Kaundinya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 58
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Mitrayu",
+        "aliases": [
+            "Mitrayu"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Chyavana",
+                    "Daivadasa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Vadhryashva",
+                    "Daivadasa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Mitreyava",
+        "aliases": [
+            "Mitreyava"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Chyavana",
+                    "Daivadasa"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Vadhryashva",
+                    "Daivadasa"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Mudgala",
+        "aliases": [
+            "Mudgala"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Bharmyashva",
+                    "Maudgalya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Tarkshya",
+                    "Maudgalya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Mudgula",
+        "aliases": [
+            "Mudgula"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Tarkshya",
+                    "Maudgalya"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 347
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Bharmyashva",
+                    "Maudgalya"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 347
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Purvatitha"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 347
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Muthkala",
+        "aliases": [
+            "Muthkala"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Purvatitha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 54
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Nairruthi",
+        "aliases": [
+            "Nairruthi"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Arshtishena",
+                    "Anupa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Naithruva Kasyapa",
+        "aliases": [
+            "Naithruva Kasyapa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Kashyapa",
+                    "Avatsara",
+                    "Naidhruva"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 59
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Nidhruva",
+        "aliases": [
+            "Nidhruva"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Kashyapa",
+                    "Avatsara",
+                    "Naidhruva"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 350
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "PaatharaayaNa",
+        "aliases": [
+            "PaatharaayaNa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Purukutsa",
+                    "Trasadasyu"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Panika",
+        "aliases": [
+            "Paanika",
+            "Panika"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Painayaka",
+                    "Panika"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 351
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Parasara",
+        "aliases": [
+            "Parasara",
+            "Parashara"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Saktya",
+                    "Parasharya"
+                ],
+                "source_count": 4,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 351
+                    },
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 58
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Pathanjala",
+        "aliases": [
+            "Pathanjala"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Shyavashva"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 54
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Paurukuthsa",
+        "aliases": [
+            "Paurukuthsa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Purukutsa",
+                    "Trasadasyu"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Pulaha",
+        "aliases": [
+            "Pulaha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Mahendra",
+                    "Mayobhuva"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 65
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Purana",
+        "aliases": [
+            "Purana"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Devarata",
+                    "Audala"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 348
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Purnamasa",
+        "aliases": [
+            "Purnaamaasa",
+            "Purnamasa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Paurnamasa",
+                    "Parana"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 351
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Raghuva",
+        "aliases": [
+            "Raaghuva",
+            "Raghuva"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Raghuva",
+                    "Gautama"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Rahugana",
+        "aliases": [
+            "Rahugana"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Rahugana",
+                    "Gautama"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Raibhya",
+        "aliases": [
+            "Raibhya",
+            "Raibya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Kashyapa",
+                    "Avatsara",
+                    "Raibhya"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 350
+                    },
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 59
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Ratheetara",
+        "aliases": [
+            "Ratheetara",
+            "Ratheethara"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Vairupa",
+                    "Parshvadasva"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 347
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Vairupa",
+                    "Rathitara"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 347
+                    },
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Ashtaadamshtra",
+                    "Parshwadash",
+                    "Vairupa"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 347
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Rathitara",
+        "aliases": [
+            "Rathitara"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Vairupa",
+                    "Parshvadasva"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Vairupa",
+                    "Rathitara"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Ashtaadamshtra",
+                    "Parshvadasva",
+                    "Vairupa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Reba Kasyapa",
+        "aliases": [
+            "Reba Kasyapa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Kashyapa",
+                    "Avatsara",
+                    "Rebha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 59
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Rebha",
+        "aliases": [
+            "Rebha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Kashyapa",
+                    "Avatsara",
+                    "Rebha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Roksaka",
+        "aliases": [
+            "Roksaka"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Aghamarshana",
+                    "Kaushika"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Roukshaka",
+        "aliases": [
+            "Roukshaka"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Aghamarshana",
+                    "Kaushika"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 348
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Ruksha",
+        "aliases": [
+            "Ruksha"
+        ],
+        "types": [
+            "Pancharsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Barhaspatya",
+                    "Bharadwaja",
+                    "Vandana",
+                    "Matavachasa"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 346
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Saalaavatha",
+        "aliases": [
+            "Saalaavatha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Devarata",
+                    "Audala"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 57
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Sambhavaha",
+        "aliases": [
+            "Sambhavaaha",
+            "Sambhavaha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Daadharyachyuta",
+                    "Sambhavaaha"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 351
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Drdhachyuta",
+                    "Sambhavaaha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Sandilya",
+        "aliases": [
+            "Saandilya",
+            "Sandilya",
+            "Shandilya"
+        ],
+        "types": [
+            "Saptharsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Saptharsheya",
+                "rishis": [
+                    "Kashyapa",
+                    "Avatsara",
+                    "Naidhruva",
+                    "Rebha",
+                    "Raibhya",
+                    "Sandilya",
+                    "Shandilya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 59
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Kashyapa",
+                    "Asita",
+                    "Devala"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 350
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Kashyapa",
+                    "Avatsara",
+                    "Shandilya"
+                ],
+                "source_count": 4,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 350
+                    },
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 59
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Kashyapa",
+                    "Devala",
+                    "Asita"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 59
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Sankruthi",
+        "aliases": [
+            "Sankruthi"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Sankritya",
+                    "Gauriviti"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Satya",
+                    "Sankritya",
+                    "Gauriviti"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Saradvata",
+        "aliases": [
+            "Saradvata"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Gautama",
+                    "Sharadvata"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Saravaha",
+        "aliases": [
+            "Saaravaaha",
+            "Saravaha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Daadharyachyuta",
+                    "Saravaha"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 351
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Drdhachyuta",
+                    "Saravaha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Shaatharaamathara",
+        "aliases": [
+            "Shaatharaamathara"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Shaathara",
+                    "Maathara"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Sharaddhata",
+        "aliases": [
+            "Sharaddhata"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Gautama",
+                    "Saradvata"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "ShatamarshNa",
+        "aliases": [
+            "ShatamarshNa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Trasadasyu",
+                    "Purukutsa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Shounaka",
+        "aliases": [
+            "Shounaka"
+        ],
+        "types": [
+            "Ekarsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Ekarsheya",
+                "rishis": [
+                    "Shunaka"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Grtsamada"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Shaunahotra"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Grtsamada"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Somarajaka",
+        "aliases": [
+            "Somaraajaka",
+            "Somarajaka"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angiras",
+                    "Somarajya",
+                    "Gautama"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Somarajya",
+                    "Gautama"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Somavaha",
+        "aliases": [
+            "Somavaaha",
+            "Somavaha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Daadharyachyuta",
+                    "Somavaha"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 351
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Drdhachyuta",
+                    "Somavaha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Srivathsa",
+        "aliases": [
+            "Srivathsa"
+        ],
+        "types": [
+            "Pancharsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Chyavana",
+                    "Apnavana",
+                    "Aurva",
+                    "Jamadagnya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Sunaka",
+        "aliases": [
+            "Sunaka"
+        ],
+        "types": [
+            "Ekarsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Ekarsheya",
+                "rishis": [
+                    "Shunaka"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Shaunahotra",
+                    "Grtsamada"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Upamanyava",
+        "aliases": [
+            "Upamanyava"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Abharadvasu",
+                    "Indrapramada"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 351
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Indrapramada",
+                    "Abharadvasu"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 351
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Upamanyu",
+        "aliases": [
+            "Upamanyu"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Abharadvasu",
+                    "Indrapramada"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Indrapramada",
+                    "Abharadvasu"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 58
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Utathya",
+        "aliases": [
+            "Utathya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Autathya",
+                    "Gautama"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Uthaalaka",
+        "aliases": [
+            "Uthaalaka"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Shyavashva"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 54
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Uthasatha",
+        "aliases": [
+            "Uthasatha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Utathya",
+                    "Gautama"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Uthyaa",
+        "aliases": [
+            "Uthyaa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Autathya",
+                    "Gautama"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Vaarathha",
+        "aliases": [
+            "Vaarathha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Atitha",
+                    "Gavishtira"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 347
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Vaasida",
+        "aliases": [
+            "Vaasida"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Indrapramada",
+                    "Abharadvasu"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 58
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Vaatsya",
+        "aliases": [
+            "Vaathsya",
+            "Vaatsya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Chyavana",
+                    "Apnavana"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Kashyapa",
+                    "Avatsara",
+                    "Raibhya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 59
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Vainya",
+        "aliases": [
+            "Vainya"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Vainya",
+                    "Paartha"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Vakbhuktaka",
+        "aliases": [
+            "Vaakbhuktaka",
+            "Vakbhuktaka"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Atreya",
+                    "Archananasa",
+                    "Savaakbhuktaka"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 347
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Vamadeva",
+        "aliases": [
+            "Vaamadeva",
+            "Vamadeva"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Vamadeva",
+                    "Brhadyuktha"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Vamadeva",
+                    "Gautama"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 345
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Vasishta",
+        "aliases": [
+            "Vasishta",
+            "Vasishtha",
+            "Vasistha"
+        ],
+        "types": [
+            "Ekarsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Ekarsheya",
+                "rishis": [
+                    "Vasishtha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 58
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Indrapramada",
+                    "Abharadvasu"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 351
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vasishtha",
+                    "Maitravaruna",
+                    "Kaundinya"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 58
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Vathoola",
+        "aliases": [
+            "Vathoola"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Vitahavya",
+                    "Savetasa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Vatsa",
+        "aliases": [
+            "Vatsa"
+        ],
+        "types": [
+            "Pancharsheya",
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Chyavana",
+                    "Apnavana",
+                    "Aurva",
+                    "Jamadagnya"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Aurva",
+                    "Jamadagnya"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            },
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Chyavana",
+                    "Apnavana"
+                ],
+                "source_count": 3,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Vatsapurodhasa",
+        "aliases": [
+            "Vatsapurodhasa"
+        ],
+        "types": [
+            "Pancharsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Pancharsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Chyavana",
+                    "Apnavana",
+                    "Vaatsya",
+                    "Paurodhasa"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Vedavishwa Jyotisha",
+        "aliases": [
+            "Vedavishwa Jyotisha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Veda Vaishwa",
+                    "Jyotisha"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Vishnu vriddha",
+        "aliases": [
+            "Vishnu vriddha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Paurukutsya",
+                    "Trasadasva"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 347
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Vishnuvrddha",
+        "aliases": [
+            "Vishnuvrddha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Paurukutsya",
+                    "Trasadasva"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Vishnuvruththa",
+        "aliases": [
+            "Vishnuvruththa"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Angirasa",
+                    "Purukutsa",
+                    "Trasadasyu"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 51
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Vishwamitra",
+        "aliases": [
+            "Vishwamitra"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Vishvamitra",
+                    "Devarata",
+                    "Audala"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 57
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Yagnjapathi",
+        "aliases": [
+            "Yagnjapathi"
+        ],
+        "types": [
+            "Dvayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Dvayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Grtsamada"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Nirnaya-Sindhu",
+                        "page": 48
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Yagnyavaaha",
+        "aliases": [
+            "Yagnyavaaha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Daadharyachyuta",
+                    "Yajnavaha"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 351
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Yajnavaha",
+        "aliases": [
+            "Yajnavaha"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Agastya",
+                    "Drdhachyuta",
+                    "Yajnavaha"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Yaska",
+        "aliases": [
+            "Yaska"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Vaitahavya",
+                    "Savetasa"
+                ],
+                "source_count": 1,
+                "sources": [
+                    {
+                        "name": "Baudhayana",
+                        "page": null
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "gotra": "Yastaka",
+        "aliases": [
+            "Yastaka"
+        ],
+        "types": [
+            "Trayarsheya"
+        ],
+        "pravaras": [
+            {
+                "type": "Trayarsheya",
+                "rishis": [
+                    "Bhargava",
+                    "Vaitahavya",
+                    "Savetasa"
+                ],
+                "source_count": 2,
+                "sources": [
+                    {
+                        "name": "Apastambha",
+                        "page": null
+                    },
+                    {
+                        "name": "Dharma-Sindhu",
+                        "page": 344
+                    }
+                ]
+            }
+        ]
+    }
+]

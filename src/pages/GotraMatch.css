@@ -1,0 +1,544 @@
+/* ===== Base Layout ===== */
+.gotra-workspace {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  padding: 20px 24px;
+  padding-bottom: 120px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  animation: fadeIn 0.35s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Cards ===== */
+.gotra-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(158, 111, 96, 0.25);
+  box-shadow: 0 10px 35px rgba(111, 42, 24, 0.08);
+  padding: 28px;
+  margin-bottom: 24px;
+  transition: all 0.3s ease;
+}
+
+.gotra-card-header {
+  background: linear-gradient(135deg, #eae7e0, #efdab8);
+  border: none;
+  text-align: center;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.gotra-header-title {
+  margin: 0;
+  color: #8a3b24;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.gotra-header-subtitle {
+  margin: 4px 0 0 0;
+  color: #5a4538;
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ===== Grid ===== */
+.gotra-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 768px) {
+  .gotra-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .gotra-workspace {
+    padding: 16px;
+    padding-bottom: 100px;
+  }
+}
+
+/* ===== Section Title ===== */
+.gotra-section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #6f2a18;
+  border-bottom: 2px solid rgba(111, 42, 24, 0.18);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ===== Input Group ===== */
+.input-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.input-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.input-label {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #4a3c31;
+  margin-bottom: 8px;
+}
+
+.input-label-no-margin {
+  margin: 0;
+}
+
+.input-group-adopted {
+  animation: fadeIn 0.25s ease-out;
+}
+
+.input-group-margin-top {
+  margin-top: 12px;
+}
+
+/* ===== Text Input ===== */
+.text-input {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: 8px;
+  border: 1px solid #dcd3cb;
+  background: #fffdfb;
+  font-size: 0.98rem;
+  box-sizing: border-box;
+  color: #2c3e50;
+  transition: all 0.2s ease;
+}
+
+.text-input:focus {
+  border-color: #9e6f60;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(158, 111, 96, 0.2);
+}
+
+/* ===== Autocomplete Dropdown ===== */
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e0d8d0;
+  border-radius: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.dropdown-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #333;
+  border-bottom: 1px solid #f6f1ec;
+  display: flex;
+  justify-content: space-between;
+  transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+  background: #fdf5f0;
+  color: #6f2a18;
+  font-weight: 600;
+}
+
+/* ===== Dropdown Variant Items ===== */
+.dropdown-item-variant {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  padding: 12px 16px !important;
+  border-bottom: 1px solid #f6f1ec !important;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.dropdown-item-variant:hover {
+  background: #fdf5f0;
+}
+
+.variant-gotra-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #6f2a18;
+  line-height: 1.3;
+}
+
+.variant-lineage {
+  font-size: 0.83rem;
+  color: #5a4538;
+  font-weight: 600;
+  margin-top: 3px;
+}
+
+.variant-type {
+  font-size: 0.75rem;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-top: 2px;
+}
+
+.variant-rishis {
+  font-size: 0.82rem;
+  color: #27ae60;
+  margin-top: 4px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.variant-match-reason {
+  font-size: 0.72rem;
+  color: #b07b4a;
+  font-style: italic;
+  margin-top: 6px;
+  padding: 2px 9px;
+  background: rgba(176, 123, 74, 0.09);
+  border-radius: 20px;
+  display: inline-block;
+  letter-spacing: 0.2px;
+}
+
+/* ===== Checkbox ===== */
+.checkbox-container {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: #5d4f43;
+  font-weight: 600;
+  user-select: none;
+  margin: 0;
+  min-width: 0;
+}
+
+.checkbox-container input[type="checkbox"] {
+  display: inline-block !important;
+  width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+  min-width: 16px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  accent-color: #9e6f60;
+}
+
+/* ===== Buttons ===== */
+.button-group {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.btn {
+  padding: 14px 32px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #9e6f60, #6f2a18);
+  color: #fff;
+  box-shadow: 0 5px 18px rgba(111, 42, 24, 0.25);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(111, 42, 24, 0.35);
+}
+
+.btn-secondary {
+  background: #f5ece5;
+  color: #6f2a18;
+  border: 1px solid rgba(111, 42, 24, 0.18);
+}
+
+.btn-secondary:hover {
+  background: #eddccf;
+}
+
+/* ===== Spinner ===== */
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s ease infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== Result Cards ===== */
+.result-card {
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-top: 24px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.result-card-compatible {
+  background: linear-gradient(135deg, rgba(235, 247, 239, 0.98), rgba(212, 239, 222, 0.98));
+  border: 2px solid #27ae60;
+  color: #1e7e34;
+}
+
+.result-card-incompatible {
+  background: linear-gradient(135deg, rgba(253, 237, 237, 0.98), rgba(249, 215, 215, 0.98));
+  border: 2px solid #c0392b;
+  color: #bd2130;
+}
+
+.result-card-maternal {
+  background: linear-gradient(135deg, rgba(255, 251, 235, 0.98), rgba(254, 243, 199, 0.98));
+  border: 2px solid #f59e0b;
+  color: #b45309;
+}
+
+/* Result Typography Hierarchy */
+.result-title {
+  margin: 0 0 12px 0;
+  font-size: 1.45rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.25;
+}
+
+.result-description {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.65;
+  font-weight: 500;
+}
+
+.result-description-margin-bottom {
+  margin: 0 0 14px 0;
+  font-size: 1rem;
+  line-height: 1.65;
+  font-weight: 500;
+}
+
+/* Traditional References section */
+.result-references {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid currentColor;
+  opacity: 0.85;
+}
+
+.result-references-maternal {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid currentColor;
+  opacity: 0.85;
+}
+
+.result-references-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 8px;
+  opacity: 0.75;
+}
+
+.reference-badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.reference-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid currentColor;
+  opacity: 0.9;
+}
+
+.reference-badge-maternal {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Maternal card text */
+.maternal-title {
+  margin: 0 0 10px 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.maternal-description {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* Common Pravara Rishis block */
+.shared-rishis-block {
+  margin-bottom: 14px;
+}
+
+.shared-rishis-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ===== Badge Lists ===== */
+.badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.rishi-badge {
+  background: rgba(111, 42, 24, 0.07);
+  color: #6f2a18;
+  border: 1px solid rgba(111, 42, 24, 0.18);
+  padding: 6px 14px;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.conflict-badge {
+  background: rgba(192, 57, 43, 0.08);
+  color: #c0392b;
+  border: 1px solid rgba(192, 57, 43, 0.18);
+  padding: 6px 14px;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+/* ===== Detailed Gotra Info Cards ===== */
+.detailed-info-card {
+  margin-top: 24px;
+}
+
+.detailed-info-title {
+  margin: 0 0 20px 0;
+  color: #6f2a18;
+  border-bottom: 1px solid #f6f1ec;
+  padding-bottom: 10px;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* Info Box — equal visual weight for Groom & Bride */
+.gotra-info-box {
+  background: #fffdfb;
+  border: 1px solid #f1e7dd;
+  border-radius: 14px;
+  padding: 22px 24px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.gotra-info-box-title {
+  margin: 0 0 18px 0;
+  color: #8a3b24;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(158, 111, 96, 0.2);
+  padding-bottom: 10px;
+}
+
+/* Label / Value Rows */
+.info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 16px;
+}
+
+.info-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.55px;
+  color: #9e8070;
+}
+
+.info-value {
+  font-size: 0.97rem;
+  font-weight: 600;
+  color: #3b2a20;
+  line-height: 1.4;
+}
+
+.info-value-primary {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #6f2a18;
+}
+
+/* Pravara Rishis wrapper inside detail card */
+.gotra-info-pravara-wrapper {
+  margin-top: 4px;
+}
+
+.gotra-info-pravara-label {
+  font-size: 0.9rem;
+  display: block;
+  margin-bottom: 6px;
+}

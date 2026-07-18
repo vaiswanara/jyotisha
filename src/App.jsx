@@ -80,6 +80,13 @@ const EclipsePage = lazy(() =>
 const ELibraryPage = lazy(() =>
   import("./pages/ELibraryPage.jsx").then((m) => ({ default: m.ELibraryPage })),
 );
+const GotraMatch = lazy(() =>
+  import("./pages/GotraMatch.jsx").then((m) => ({ default: m.GotraMatch })),
+);
+const EQuestionsPage = lazy(() =>
+  import("./equestions/EQuestionsPage.jsx").then((m) => ({ default: m.EQuestionsPage })),
+);
+
 
 // Helper functions for custom toast styling and icon categorization
 function getToastIcon(type) {
@@ -611,6 +618,7 @@ export default function App() {
     if (normalized === "EPrashna") normalized = "echakra";
     if (normalized === "Eclipse" || normalized === "EEclipse") normalized = "e-Eclipse";
     if (normalized === "eLibrary" || normalized === "ELibrary" || normalized === "Library") normalized = "e-Library";
+    if (normalized === "gotraMatch" || normalized === "GotraMatch") normalized = "GotraMatch";
     if (normalized === "Dashboard") normalized = "Home";
     return normalized;
   };
@@ -983,8 +991,10 @@ export default function App() {
                                 ? t("AstroClock", "e-Clock").toUpperCase()
                                 : activePage === "e-Eclipse"
                                   ? t("Eclipse", "ECLIPSE CENTRAL")
-                                  : activePage === "e-Library"
-                                    ? t("e-Library", "e-LIBRARY")
+                                    : activePage === "e-Library"
+                                      ? t("e-Library", "e-LIBRARY")
+                                      : activePage === "GotraMatch"
+                                        ? t("GotraMatch", "GOTRA MATCH")
                                     : activePage === "e-Support"
                                       ? t("Support", "Support")
                                     : activePage === "Messages"
@@ -1169,6 +1179,15 @@ export default function App() {
         )}
         {activePage === "e-Library" && (
           <ELibraryPage logoUrl={logoUrl} />
+        )}
+        {activePage === "GotraMatch" && (
+          <GotraMatch logoUrl={logoUrl} onNavigate={setActivePage} />
+        )}
+        {activePage === "e-Questions" && (
+          <EQuestionsPage onNavigate={setActivePage} />
+        )}
+        {activePage === "eq-admin" && (
+          <EQuestionsPage onNavigate={setActivePage} startView="admin" />
         )}
         </ErrorBoundary>
       </Suspense>

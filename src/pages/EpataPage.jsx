@@ -428,6 +428,7 @@ export function EpataPage({ logoUrl, onNavigate }) {
           .epata-wrapper { display: flex; flex-direction: column; width: 100%; max-width: 1400px; margin: 0 auto; }
           .epata-controls-container { display: flex; flex-direction: column; gap: 15px; margin: 0 auto 25px auto; width: 100%; max-width: 1000px; }
           .epata-controls-row { display: flex; gap: 15px; flex-wrap: nowrap; width: 100%; align-items: center; justify-content: center; }
+          .epata-select-row { display: flex; gap: 15px; flex-wrap: nowrap; width: 100%; align-items: center; justify-content: center; }
           .epata-divider { width: 100%; border: none; border-top: 1px dashed #dcdde1; margin: 0 0 25px 0; }
           .epata-search-wrapper { flex: 1; display: flex; min-width: 0; gap: 10px; }
           .epata-search { flex: 1; padding: 12px 18px; border-radius: 10px; border: 1px solid #8e44ad; font-size: 1rem; box-sizing: border-box; background: #fff; outline: none; box-shadow: 0 0 0 3px rgba(142,68,173,0.1); }
@@ -452,6 +453,8 @@ export function EpataPage({ logoUrl, onNavigate }) {
           @media (max-width: 768px) {
             .epata-controls-container { gap: 10px; margin-bottom: 20px; }
             .epata-controls-row { gap: 10px; }
+            .epata-select-row { flex-direction: column; gap: 10px; width: 100%; }
+            .epata-select-row .epata-select { width: 100%; flex: none; }
             .epata-select { padding: 10px 28px 10px 10px; font-size: 0.9rem; border-radius: 8px; }
             .epata-search { padding: 10px 15px; border-radius: 8px; }
             .epata-search-btn, .epata-search-close-btn { width: 50px; min-height: 50px; border-radius: 8px; }
@@ -605,7 +608,7 @@ export function EpataPage({ logoUrl, onNavigate }) {
               </div>
 
               <div
-                className={`epata-controls-row ${isSearchOpen ? "hide-on-mobile" : ""}`}
+                className={`epata-select-row ${isSearchOpen ? "hide-on-mobile" : ""}`}
               >
                 <select
                   className="epata-select"
