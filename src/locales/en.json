@@ -615,5 +615,7 @@
   "detailsRootLabel": "Root Lineage:",
   "detailsPravaraTypeLabel": "Pravara Type:",
   "detailsPravaraRishisLabel": "Pravara Rishis:",
-  "detailsSignificanceLabel": "Significance & Origin:"
+  "detailsSignificanceLabel": "Significance & Origin:",
+  "SunriseLabel": "Sunrise",
+  "SunsetLabel": "Sunset"
 }

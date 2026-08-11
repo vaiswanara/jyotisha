@@ -1765,7 +1765,7 @@ export function EClockPage() {
 
         pKeys.forEach((k) => {
           if (c[k] !== undefined && tTarget[k] !== undefined) {
-            c[k].angle = lerpAngle(c[k].angle, tTarget[k].angle, 0.05);
+            c[k].angle = lerpAngle(c[k].angle, tTarget[k].angle, 0.12);
             c[k].isR = tTarget[k].isR;
             c[k].isC = tTarget[k].isC;
             c[k].isH = tTarget[k].isH;
@@ -1777,7 +1777,7 @@ export function EClockPage() {
         });
         ["lagna", "nav_lagna"].forEach((k) => {
           if (c[k] !== undefined && tTarget[k] !== undefined)
-            c[k] = lerpAngle(c[k], tTarget[k], 0.05);
+            c[k] = lerpAngle(c[k], tTarget[k], 0.12);
         });
         if (tTarget.sunrise !== undefined) c.sunrise = tTarget.sunrise;
 
@@ -1882,10 +1882,6 @@ export function EClockPage() {
     }
     setIsTimeTravel(true);
 
-    if (Math.abs(offsetMs) >= 3600000) {
-      currentAnglesRef.current = null;
-    }
-
     // Update Custom Date UI Match
     const tzOffsetHours = parseFloat(locRef.current.tz || 5.5);
     const locDate = new Date(fixedTimeMsRef.current + tzOffsetHours * 3600000);
@@ -1930,10 +1926,6 @@ export function EClockPage() {
 
     fixedTimeMsRef.current = targetEpoch;
     setIsTimeTravel(true);
-
-    // Reset current angles so the animation snaps instantly to the new target
-    // instead of lerping slowly from the old position (which causes the fast-spin bug)
-    currentAnglesRef.current = null;
 
     fetchAngles();
   };

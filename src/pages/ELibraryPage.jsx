@@ -71,8 +71,9 @@ export function ELibraryPage({ logoUrl }) {
       let loadedBooks = [];
       try {
         const data = await getLibrary();
-        if (data && Array.isArray(data)) {
-          loadedBooks = data;
+        const list = Array.isArray(data) ? data : (data && Array.isArray(data.library) ? data.library : null);
+        if (list && list.length > 0) {
+          loadedBooks = list;
           localStorage.setItem("elibrary_books_cache", JSON.stringify(loadedBooks));
         } else {
           throw new Error("No books returned from API");

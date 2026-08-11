@@ -1,0 +1,415 @@
+[
+  {
+    "date": "2025-03-14",
+    "utcTimestamp": 1741935526000,
+    "type": "total lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Uttara Phalguni"
+  },
+  {
+    "date": "2025-09-07",
+    "utcTimestamp": 1757268710000,
+    "type": "total lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Purva Bhadrapada"
+  },
+  {
+    "date": "2026-03-03",
+    "utcTimestamp": 1772537621000,
+    "type": "total lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Purva Phalguni"
+  },
+  {
+    "date": "2026-08-28",
+    "utcTimestamp": 1787890378000,
+    "type": "partial lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Shatabhisha"
+  },
+  {
+    "date": "2027-02-20",
+    "utcTimestamp": 1803165172000,
+    "type": "penumb. lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Magha"
+  },
+  {
+    "date": "2027-08-02",
+    "utcTimestamp": 1817205807000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Pushya"
+  },
+  {
+    "date": "2027-08-17",
+    "utcTimestamp": 1818486831000,
+    "type": "penumb. lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Dhanishtha"
+  },
+  {
+    "date": "2028-01-12",
+    "utcTimestamp": 1831263187000,
+    "type": "partial lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Punarvasu"
+  },
+  {
+    "date": "2028-07-06",
+    "utcTimestamp": 1846520384000,
+    "type": "partial lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Purva Ashadha"
+  },
+  {
+    "date": "2028-07-22",
+    "utcTimestamp": 1847841612000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Pushya"
+  },
+  {
+    "date": "2028-12-31",
+    "utcTimestamp": 1861894327000,
+    "type": "total lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Ardra"
+  },
+  {
+    "date": "2029-06-26",
+    "utcTimestamp": 1877138532000,
+    "type": "total lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Mula"
+  },
+  {
+    "date": "2029-12-20",
+    "utcTimestamp": 1892500924000,
+    "type": "total lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Mrigashira"
+  },
+  {
+    "date": "2030-06-15",
+    "utcTimestamp": 1907778802000,
+    "type": "partial lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Mula"
+  },
+  {
+    "date": "2030-12-09",
+    "utcTimestamp": 1923085661000,
+    "type": "penumb. lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Mrigashira"
+  },
+  {
+    "date": "2031-05-07",
+    "utcTimestamp": 1935892255000,
+    "type": "penumb. lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Vishakha"
+  },
+  {
+    "date": "2031-05-21",
+    "utcTimestamp": 1937115579000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Krittika"
+  },
+  {
+    "date": "2031-06-05",
+    "utcTimestamp": 1938426251000,
+    "type": "penumb. lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Jyeshtha"
+  },
+  {
+    "date": "2031-10-30",
+    "utcTimestamp": 1951112728000,
+    "type": "penumb. lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Ashwini"
+  },
+  {
+    "date": "2032-04-25",
+    "utcTimestamp": 1966518822000,
+    "type": "total lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Swati"
+  },
+  {
+    "date": "2032-10-18",
+    "utcTimestamp": 1981738948000,
+    "type": "total lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Ashwini"
+  },
+  {
+    "date": "2033-04-14",
+    "utcTimestamp": 1997118762000,
+    "type": "total lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Chitra"
+  },
+  {
+    "date": "2033-10-08",
+    "utcTimestamp": 2012381712000,
+    "type": "total lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Revati"
+  },
+  {
+    "date": "2034-03-20",
+    "utcTimestamp": 2026468601000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Uttara Bhadrapada"
+  },
+  {
+    "date": "2034-04-03",
+    "utcTimestamp": 2027703947000,
+    "type": "penumb. lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Hasta"
+  },
+  {
+    "date": "2034-09-28",
+    "utcTimestamp": 2043024390000,
+    "type": "partial lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Uttara Bhadrapada"
+  },
+  {
+    "date": "2035-02-22",
+    "utcTimestamp": 2055747895000,
+    "type": "penumb. lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Magha"
+  },
+  {
+    "date": "2035-08-19",
+    "utcTimestamp": 2071098668000,
+    "type": "partial lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Dhanishtha"
+  },
+  {
+    "date": "2035-09-02",
+    "utcTimestamp": 2072306438000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Purva Phalguni"
+  },
+  {
+    "date": "2036-02-11",
+    "utcTimestamp": 2086380714000,
+    "type": "total lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Ashlesha"
+  },
+  {
+    "date": "2036-08-07",
+    "utcTimestamp": 2101690281000,
+    "type": "total lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Shravana"
+  },
+  {
+    "date": "2037-01-31",
+    "utcTimestamp": 2117023228000,
+    "type": "total lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Ashlesha"
+  },
+  {
+    "date": "2037-07-27",
+    "utcTimestamp": 2132280519000,
+    "type": "partial lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Shravana"
+  },
+  {
+    "date": "2038-01-21",
+    "utcTimestamp": 2147658525000,
+    "type": "penumb. lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Pushya"
+  },
+  {
+    "date": "2038-06-17",
+    "utcTimestamp": 2160355425000,
+    "type": "penumb. lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Mula"
+  },
+  {
+    "date": "2038-07-16",
+    "utcTimestamp": 2162892878000,
+    "type": "penumb. lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Uttara Ashadha"
+  },
+  {
+    "date": "2038-12-11",
+    "utcTimestamp": 2175702232000,
+    "type": "penumb. lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Mrigashira"
+  },
+  {
+    "date": "2039-06-06",
+    "utcTimestamp": 2190999193000,
+    "type": "partial lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Jyeshtha"
+  },
+  {
+    "date": "2039-11-30",
+    "utcTimestamp": 2206284914000,
+    "type": "partial lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Rohini"
+  },
+  {
+    "date": "2040-05-26",
+    "utcTimestamp": 2221645510000,
+    "type": "total lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Anuradha"
+  },
+  {
+    "date": "2040-11-18",
+    "utcTimestamp": 2236878207000,
+    "type": "total lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Krittika"
+  },
+  {
+    "date": "2041-04-30",
+    "utcTimestamp": 2250939744000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Bharani"
+  },
+  {
+    "date": "2041-05-16",
+    "utcTimestamp": 2252277715000,
+    "type": "partial lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Vishakha"
+  },
+  {
+    "date": "2041-11-08",
+    "utcTimestamp": 2267498027000,
+    "type": "partial lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Bharani"
+  },
+  {
+    "date": "2042-04-05",
+    "utcTimestamp": 2280320940000,
+    "type": "penumb. lunar eclipse",
+    "eventType": "lunar",
+    "nakshatra": "Hasta"
+  },
+  {
+    "date": "2042-04-20",
+    "utcTimestamp": 2281568298000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Ashwini"
+  },
+  {
+    "date": "2042-10-14",
+    "utcTimestamp": 2296860108000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Chitra"
+  },
+  {
+    "date": "2049-11-25",
+    "utcTimestamp": 2521427323000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Anuradha"
+  },
+  {
+    "date": "2051-04-11",
+    "utcTimestamp": 2564786504000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Revati"
+  },
+  {
+    "date": "2053-09-12",
+    "utcTimestamp": 2641287159000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Purva Phalguni"
+  },
+  {
+    "date": "2059-11-05",
+    "utcTimestamp": 2835253851000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Swati"
+  },
+  {
+    "date": "2060-04-30",
+    "utcTimestamp": 2850551251000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Bharani"
+  },
+  {
+    "date": "2061-04-20",
+    "utcTimestamp": 2881186194000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Ashwini"
+  },
+  {
+    "date": "2063-02-28",
+    "utcTimestamp": 2939879515000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Shatabhisha"
+  },
+  {
+    "date": "2064-02-17",
+    "utcTimestamp": 2970459116000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Dhanishtha"
+  },
+  {
+    "date": "2070-04-11",
+    "utcTimestamp": 3164403847000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Revati"
+  },
+  {
+    "date": "2074-01-27",
+    "utcTimestamp": 3284261131000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Shravana"
+  },
+  {
+    "date": "2074-07-24",
+    "utcTimestamp": 3299620842000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Pushya"
+  },
+  {
+    "date": "2081-09-03",
+    "utcTimestamp": 3524119350000,
+    "type": "partial",
+    "eventType": "solar",
+    "nakshatra": "Purva Phalguni"
+  }
+]

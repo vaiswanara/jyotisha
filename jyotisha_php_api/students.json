@@ -1,0 +1,19 @@
+[
+    {
+        "id": "STU-2026-0001",
+        "first_name": "Srikanth",
+        "last_name": "Dharmavaram",
+        "country_code": "+91",
+        "whatsapp_number": "9482094290",
+        "full_phone": "+91 9482094290",
+        "language": "Kannada",
+        "courses": [
+            "Jyotisha"
+        ],
+        "batch_id": "JK-2026-OCT",
+        "email": "",
+        "address": "",
+        "status": "activated",
+        "created_at": "2026-08-11T21:45:17+05:30"
+    }
+]

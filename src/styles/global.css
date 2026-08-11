@@ -1416,3 +1416,42 @@ body {
   overflow-y: visible !important;
   flex: none !important;
 }
+
+/* Active backend pulsing animation */
+@keyframes backend-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.5);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 5px rgba(76, 175, 80, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+@keyframes backend-pulse-php {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(119, 123, 180, 0.5);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 5px rgba(119, 123, 180, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(119, 123, 180, 0);
+  }
+}
+
+.backend-pulse-dot.node {
+  animation: backend-pulse 2s infinite;
+}
+
+.backend-pulse-dot.php {
+  animation: backend-pulse-php 2s infinite;
+}

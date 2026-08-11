@@ -6,5 +6,6 @@
       "packageManager": "ms-python.python:pip"
     }
   ],
-  "terminal.integrated.windowsEnableConpty": false
+  "terminal.integrated.windowsEnableConpty": true,
+  "terminal.integrated.useConpty": true
 }

@@ -1,0 +1,34 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /jyotisha_php_api/
+
+    # Pass custom headers through Apache FastCGI / PHP-FPM
+    SetEnvIfNoCase X-Api-Token "(.*)" HTTP_X_API_TOKEN=$1
+    SetEnvIfNoCase X-Admin-Password "(.*)" HTTP_X_ADMIN_PASSWORD=$1
+
+    # Bypass rewriting for index.php
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule \.php$ - [L]
+
+    # Redirect /jyotisha_php_api/api calls to index.php
+    RewriteRule ^api/?$ index.php [QSA,L]
+    RewriteRule ^api/(.*)$ index.php?endpoint=$1 [QSA,L]
+</IfModule>
+
+# Handle CORS headers for Apache
+<IfModule mod_headers.c>
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+    Header always set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, x-api-token, x-admin-password"
+</IfModule>
+
+# Security Hardening: Block direct browser access to sensitive data, ephemeris & internal files
+<FilesMatch "\.(json|se1|swe|exe|log|ini|env|sh|bat|md)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "^(VedicAstroEngine|constants)\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

@@ -63,6 +63,9 @@ const CONTENT = {
       "Access digital PDF library for Vedic scriptures, spiritual, and educational resources.",
     exit_btn: "Refresh",
     exit_confirm: "Are you sure you want to reset cache, unregister service workers, and reload the app?",
+    backend_active: "Active Backend:",
+    backend_node: "Node.js (TypeScript)",
+    backend_php: "PHP (Vaiswanara API)",
   },
   te: {
     app_title: "e-జ్యోతిషం",
@@ -124,6 +127,9 @@ const CONTENT = {
       "వైదిక, శాస్త్ర, ఆధ్యాత్మిక మరియు విద్యా గ్రంథాల డిజిటల్ లైబ్రరీని సందర్శించండి.",
     exit_btn: "రిఫ్రెష్",
     exit_confirm: "మీరు నిజంగానే యాప్ కాష్ క్లియర్ చేసి, రీసెట్ చేసి మళ్లీ లోడ్ చేయాలనుకుంటున్నారా?",
+    backend_active: "యాక్టివ్ బ్యాకెండ్:",
+    backend_node: "Node.js (టైప్‌స్క్రిప్ట్)",
+    backend_php: "PHP (వైశ్వానర API)",
   },
   kn: {
     app_title: "e-ಜ್ಯೋತಿಷ",
@@ -185,6 +191,9 @@ const CONTENT = {
       "ವೈದಿಕ, ಧರ್ಮಶಾಸ್ತ್ರ ಮತ್ತು ಶೈಕ್ಷಣಿಕ ಪುಸ್ತಕಗಳ ಡಿಜಿಟಲ್ ಲೈಬ್ರರಿ ವೀಕ್ಷಿಸಿ.",
     exit_btn: "ರಿಫ್ರೆಶ್",
     exit_confirm: "ನೀವು ನಿಜವಾಗಿಯೂ ಆ್ಯಪ್ ಕ್ಯಾಶ್ ಕ್ಲಿಯರ್ ಮಾಡಿ, ರಿಸೆಟ್ ಮಾಡಿ ಮತ್ತೆ ಲೋಡ್ ಮಾಡಲು ಬಯಸುವಿರಾ?",
+    backend_active: "ಸಕ್ರಿಯ ಬ್ಯಾಕೆಂಡ್:",
+    backend_node: "Node.js (ಟೈಪ್‌ಸ್ಕ್ರಿಪ್ಟ್)",
+    backend_php: "PHP (ವೈಶ್ವಾನರ API)",
   },
 };
 
@@ -201,6 +210,8 @@ export function HomePage({
   const { t, i18n } = useTranslation();
   const lang = i18n.language?.split("-")[0] || "en";
   const copy = CONTENT[lang] || CONTENT.en;
+  const backendType = import.meta.env.VITE_BACKEND_TYPE || "php";
+  const isPhp = backendType === "php";
   const showInstallBtn = (isInstallable || isIosEligible) && !isStandalone;
   const [userName, setUserName] = useState(() => {
     try {
@@ -954,6 +965,36 @@ export function HomePage({
           marginTop: "auto",
         }}
       >
+        <div style={{
+          marginBottom: "15px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "8px",
+          fontSize: "12px",
+        }}>
+          <span style={{ color: "#7f8c8d" }}>{copy.backend_active}</span>
+          <span style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "4px 10px",
+            borderRadius: "12px",
+            backgroundColor: isPhp ? "rgba(119, 123, 180, 0.12)" : "rgba(76, 175, 80, 0.12)",
+            color: isPhp ? "#5f629c" : "#2e7d32",
+            fontWeight: "600",
+            border: isPhp ? "1px solid rgba(119, 123, 180, 0.3)" : "1px solid rgba(76, 175, 80, 0.3)",
+          }}>
+            <span className={`backend-pulse-dot ${isPhp ? "php" : "node"}`} style={{
+              width: "6px",
+              height: "6px",
+              borderRadius: "50%",
+              backgroundColor: isPhp ? "#777bb4" : "#4caf50",
+              display: "inline-block",
+            }}></span>
+            {isPhp ? copy.backend_php : copy.backend_node}
+          </span>
+        </div>
         <div style={{ marginBottom: "10px" }}>
           <span style={{ fontWeight: "bold", color: "#e74c3c" }}>
             {copy.disclaimer_prefix}

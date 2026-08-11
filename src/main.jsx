@@ -35,7 +35,12 @@ window.addEventListener("unhandledrejection", (event) => {
 // Waking up backend server on Render/free hosting as early as possible
 (async () => {
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || "https://api.vaiswanara.com/api";
+    const backendType = import.meta.env.VITE_BACKEND_TYPE || "php";
+    const apiUrl = import.meta.env.VITE_API_URL || (
+      backendType === "node"
+        ? "https://api.vaiswanara.com/api"
+        : "https://vaiswanara.com/jyotisha_php_api/index.php"
+    );
     const baseUrl = apiUrl.replace(/\/api\/?$/, "");
     fetch(baseUrl, { mode: "no-cors" }).catch(() => {});
   } catch (e) {}

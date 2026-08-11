@@ -86,6 +86,9 @@ const GotraMatch = lazy(() =>
 const EQuestionsPage = lazy(() =>
   import("./equestions/EQuestionsPage.jsx").then((m) => ({ default: m.EQuestionsPage })),
 );
+const StudentRegistration = lazy(() =>
+  import("./pages/StudentRegistration.jsx").then((m) => ({ default: m.StudentRegistration })),
+);
 
 
 // Helper functions for custom toast styling and icon categorization
@@ -313,9 +316,14 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     let targetPage = params.get("page");
 
+    if (params.has("register") || window.location.search.includes("register")) {
+      targetPage = "StudentRegistration";
+    }
+
     if (targetPage === "EClock") targetPage = "e-Clock";
     if (targetPage === "Match") targetPage = "e-Match";
     if (targetPage === "EPrashna") targetPage = "echakra";
+    if (targetPage === "register") targetPage = "StudentRegistration";
 
     let savedLandingPage = localStorage.getItem("vaiswanara_landing_page");
     // పాత యూజర్లకు Dashboard సేవ్ అయి ఉంటే దాన్ని Home కి మారుస్తున్నాము
@@ -1188,6 +1196,9 @@ export default function App() {
         )}
         {activePage === "eq-admin" && (
           <EQuestionsPage onNavigate={setActivePage} startView="admin" />
+        )}
+        {(activePage === "StudentRegistration" || activePage === "register") && (
+          <StudentRegistration logoUrl={logoUrl} onNavigate={setActivePage} />
         )}
         </ErrorBoundary>
       </Suspense>

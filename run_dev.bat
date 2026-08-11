@@ -6,7 +6,7 @@ echo ========================================================
 echo.
 
 echo [1/2] Starting Frontend (Vite) on port 5173...
-start "e-JYOTISHA Frontend" cmd /k "npm run dev"
+start "e-JYOTISHA Frontend" cmd /k "set VITE_BACKEND_TYPE=node&& npm run dev"
 
 echo [2/2] Starting Backend (ts-node API) on port 3000...
 start "e-JYOTISHA Backend" cmd /k "cd jyotisha_api && npx ts-node server.ts"

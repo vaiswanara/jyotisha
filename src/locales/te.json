@@ -587,5 +587,7 @@
   "detailsRootLabel": "మూల వంశం:",
   "detailsPravaraTypeLabel": "ప్రవర రకం:",
   "detailsPravaraRishisLabel": "ప్రవర ఋషులు:",
-  "detailsSignificanceLabel": "గోత్ర విశిష్టత:"
+  "detailsSignificanceLabel": "గోత్ర విశిష్టత:",
+  "SunriseLabel": "సూర్యోదయం",
+  "SunsetLabel": "సూర్యాస్తమయం"
 }

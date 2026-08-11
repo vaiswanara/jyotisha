@@ -134,8 +134,9 @@ export function EpataPage({ logoUrl, onNavigate }) {
       try {
         // Try fetching lessons dynamically from the backend API first
         const data = await getLessons();
-        if (data && Array.isArray(data.lessons) && data.lessons.length > 0) {
-          loadedLessons = data.lessons;
+        const list = Array.isArray(data) ? data : (data && Array.isArray(data.lessons) ? data.lessons : null);
+        if (list && list.length > 0) {
+          loadedLessons = list;
           // Cache the lessons in localStorage
           localStorage.setItem("epata_lessons_cache", JSON.stringify(loadedLessons));
         } else {
@@ -153,7 +154,7 @@ export function EpataPage({ logoUrl, onNavigate }) {
           );
           if (!res.ok) throw new Error("Failed to load static lessons file.");
           const data = await res.json();
-          loadedLessons = data.lessons || [];
+          loadedLessons = Array.isArray(data) ? data : (data?.lessons || []);
           localStorage.setItem("epata_lessons_cache", JSON.stringify(loadedLessons));
         } catch (staticErr) {
           console.error("Static lessons fallback fetch failed:", staticErr);

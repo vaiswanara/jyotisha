@@ -1,0 +1,17 @@
+[
+    {
+        "id": "Jyotisha",
+        "code": "JK",
+        "title": "Jyotisha - Kannada",
+        "language": "Kannada",
+        "description": "Comprehensive Vedic Astrology Course in Kannada"
+    },
+    {
+        "id": "ManaShastra",
+        "code": "MS",
+        "title": "Mana Shastra",
+        "language": "Kannada",
+        "description": "Vedic Psychology and Mind Philosophy Course",
+        "endpoint": "save_course"
+    }
+]

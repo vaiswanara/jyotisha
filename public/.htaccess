@@ -1,14 +1,11 @@
 <IfModule mod_rewrite.c>
 RewriteEngine On
-# RewriteBase /jyotisha/
 
-# Force HTTPS (సైట్ ని ఎప్పుడూ సెక్యూర్ గా ఉంచడానికి)
-
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# Bypass rewriting for PHP files (such as api.php)
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule \.php$ - [L]
 
 # React SPA Routing (పేజీ రిఫ్రెష్ చేసినప్పుడు 404 రాకుండా index.html కి పంపడం)
-
 RewriteRule ^index\.html$ - [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
@@ -16,9 +13,7 @@ RewriteRule . index.html [L]
 </IfModule>
 
 # Block direct access to sensitive data files
-
 <FilesMatch "\.(log|ini|cnf)$">
 Order allow,deny
 Deny from all
 </FilesMatch>
-Redirect 301 /app/ https://vaiswanara.com/jyotisha/

@@ -33,6 +33,7 @@ export function Sidebar({ isOpen, logoUrl, onClose, activePage, onNavigate, prof
     { id: "e-Support", icon: "🤝", label: t("Support", "Donate") },
     { id: "Privacy", icon: "🛡️", label: t("Privacy", "Privacy Policy") },
     { id: "Settings", icon: "⚙️", label: t("Settings", "Settings") },
+    { id: "StudentRegistration", icon: "🎓", label: t("StudentRegistration", "Student Registration") },
     { id: "e-Install", icon: "📲", label: t("installApp", "Install App") },
     { id: "Feedback", icon: "📝", label: t("Feedback", "Feedback") },
   ];

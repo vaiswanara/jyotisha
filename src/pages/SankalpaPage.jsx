@@ -272,14 +272,19 @@ export function SankalpaPage({ onNavigate }) {
                 <>
                   <div
                     style={{
-                      textAlign: "center",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: "20px",
                       fontSize: "0.95rem",
                       color: "#7f8c8d",
                       marginBottom: "10px",
                       fontWeight: "600",
+                      flexWrap: "wrap",
                     }}
                   >
-                    🌅 {t("SunriseLabel", "Sunrise")}: {transitChart.meta?.sunrise || "--:--"}
+                    <span>🌅 {t("SunriseLabel", "Sunrise")}: {transitChart.meta?.sunrise || "--:--"}</span>
+                    <span>🌇 {t("SunsetLabel", "Sunset")}: {transitChart.meta?.sunset || "--:--"}</span>
                   </div>
                   <Sankalpa onNavigate={onNavigate} transitChart={transitChart} hideTitle={true} overrideLang={sankalpaLang} />
                 </>
