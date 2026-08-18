@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { HoroscopeHeader } from "../components/HoroscopeHeader.jsx";
 import { registerStudent, getBatches } from "../services/astrologyApi.js";
+import { StudentRegistrationChatbot } from "../components/StudentRegistrationChatbot.jsx";
 
 const COUNTRY_CODES = [
   { code: "+91", country: "India (🇮🇳)" },
@@ -18,10 +19,46 @@ const COUNTRY_CODES = [
 ];
 
 export function StudentRegistration({ logoUrl, onNavigate }) {
-  const [batchesList, setBatchesList] = useState([
-    { id: "JK-2026-OCT", name: "Jyotisha Kannada - October 2026 Batch", course_id: "Jyotisha" },
-    { id: "MS-2026", name: "Mana Shastra - 2026 Batch", course_id: "ManaShastra" }
-  ]);
+  const [showChatbot, setShowChatbot] = useState(false);
+  const [batchesList, setBatchesList] = useState([]);
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState(() => {
+    try {
+      return localStorage.getItem("vaiswanara_show_registration_form") !== "false";
+    } catch (_) {
+      return true;
+    }
+  });
+
+  useEffect(() => {
+    const handleRegUpdate = () => {
+      try {
+        setIsRegistrationOpen(localStorage.getItem("vaiswanara_show_registration_form") !== "false");
+      } catch (_) { }
+    };
+    window.addEventListener("vaiswanara_reg_setting_updated", handleRegUpdate);
+    return () => {
+      window.removeEventListener("vaiswanara_reg_setting_updated", handleRegUpdate);
+    };
+  }, []);
+
+  const isBatchCurrentlyActive = (b) => {
+    if (!b) return false;
+    if (b.isActive === false || b.status === "inactive") return false;
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const today = `${year}-${month}-${day}`;
+
+    if (b.start_date && today < b.start_date) {
+      return false;
+    }
+    if (b.end_date && today > b.end_date) {
+      return false;
+    }
+    return true;
+  };
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -30,8 +67,7 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
     whatsappNumber: "",
     confirmWhatsappNumber: "",
     language: "Kannada",
-    courses: ["Jyotisha"],
-    batchId: "JK-2026-OCT",
+    batchId: "",
     email: "",
     address: "",
   });
@@ -44,14 +80,17 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
     async function loadBatches() {
       try {
         const res = await getBatches();
-        if (res && res.batches && res.batches.length > 0) {
-          setBatchesList(res.batches);
-          if (res.batches[0]?.id) {
-            setFormData(prev => ({ ...prev, batchId: prev.batchId || res.batches[0].id }));
-          }
-        }
+        const loadedBatches = (res && res.batches && res.batches.length > 0) ? res.batches : [];
+        setBatchesList(loadedBatches);
+
+        // Pick first batch matching default language and active in date range
+        const defaultLangBatches = loadedBatches.filter(
+          b => (b.language || "").toLowerCase() === "kannada" && isBatchCurrentlyActive(b)
+        );
+        const firstBatchId = defaultLangBatches[0]?.id || "";
+        setFormData(prev => ({ ...prev, batchId: firstBatchId }));
       } catch (err) {
-        console.warn("Using default fallback batches:", err);
+        console.error("Failed to load batches:", err);
       }
     }
     loadBatches();
@@ -59,33 +98,22 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errorMessage) setErrorMessage("");
-  };
-
-  const handleCourseSelectionChange = (e) => {
-    const selectedCourseVal = e.target.value;
-    let selectedCoursesArray = ["Jyotisha"];
-    if (selectedCourseVal === "ManaShastra") {
-      selectedCoursesArray = ["ManaShastra"];
-    } else if (selectedCourseVal === "Both") {
-      selectedCoursesArray = ["Jyotisha", "ManaShastra"];
+    if (name === "language") {
+      // Find first batch for the selected language strictly within active date range
+      const langBatches = batchesList.filter(
+        b => (b.language || "").toLowerCase() === (value || "").toLowerCase() && isBatchCurrentlyActive(b)
+      );
+      const nextBatchId = langBatches[0]?.id || "";
+      setFormData(prev => ({
+        ...prev,
+        language: value,
+        batchId: nextBatchId
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
-
-    // Auto-pick first matching batch for the newly selected course
-    const matchingBatch = batchesList.find(b =>
-      b.course_id === selectedCourseVal || b.course_name === selectedCourseVal || selectedCourseVal === "Both"
-    );
-    const nextBatchId = matchingBatch?.id || batchesList[0]?.id || "";
-
-    setFormData(prev => ({
-      ...prev,
-      courses: selectedCoursesArray,
-      batchId: nextBatchId
-    }));
     if (errorMessage) setErrorMessage("");
   };
-
 
   const validateForm = () => {
     if (!formData.firstName.trim()) {
@@ -94,7 +122,7 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
     if (!formData.lastName.trim()) {
       return "Last Name is required.";
     }
-    
+
     // Clean WhatsApp number
     const cleanWa = formData.whatsappNumber.replace(/[^0-9]/g, "");
     if (!cleanWa || cleanWa.length < 7 || cleanWa.length > 13) {
@@ -110,8 +138,8 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
       return "WhatsApp numbers do not match. Please verify your phone number.";
     }
 
-    if (!formData.courses || formData.courses.length === 0) {
-      return "Please select at least one course (Jyotisha or ManaShastra).";
+    if (!formData.batchId) {
+      return `No active batch available for ${formData.language}. Please select a different language or contact administration.`;
     }
 
     if (formData.email.trim()) {
@@ -119,6 +147,10 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
       if (!emailRegex.test(formData.email.trim())) {
         return "Please enter a valid email address.";
       }
+    }
+
+    if (!formData.address.trim()) {
+      return "Address is required. Please enter your residential address.";
     }
 
     return null;
@@ -136,14 +168,18 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
 
     setLoading(true);
 
+    const selectedBatch = batchesList.find(b => b.id === formData.batchId);
+    const batchName = selectedBatch?.name || formData.batchId;
+
     const payload = {
       first_name: formData.firstName.trim(),
       last_name: formData.lastName.trim(),
       country_code: formData.countryCode,
       whatsapp_number: formData.whatsappNumber.trim(),
       language: formData.language,
-      courses: formData.courses,
       batch_id: formData.batchId,
+      batch_name: batchName,
+      courses: [batchName],
       email: formData.email.trim(),
       address: formData.address.trim(),
     };
@@ -164,6 +200,9 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
   };
 
   const handleReset = () => {
+    const defaultLangBatches = batchesList.filter(
+      b => (b.language || "").toLowerCase() === "kannada" && (b.isActive !== false && b.status !== "inactive")
+    );
     setFormData({
       firstName: "",
       lastName: "",
@@ -171,7 +210,7 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
       whatsappNumber: "",
       confirmWhatsappNumber: "",
       language: "Kannada",
-      courses: ["Jyotisha", "ManaShastra"],
+      batchId: defaultLangBatches[0]?.id || "",
       email: "",
       address: "",
     });
@@ -630,29 +669,108 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
       `}</style>
 
       <section className="student-card">
-        <div className="student-header-box">
+        <div className="student-header-box" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
           <div className="student-header-title">
             <h2>🎓 Student Registration Form</h2>
             <p>Fill out the form below to enroll in our classes</p>
           </div>
-          <button
-            type="button"
-            className="share-url-btn"
-            onClick={copyShareLink}
-            title="Copy Registration Link"
-          >
-            🔗 Share Link
-          </button>
+          {isRegistrationOpen && !successData && (
+            <button
+              type="button"
+              id="btn-open-reg-chatbot"
+              onClick={() => setShowChatbot(true)}
+              style={{
+                background: "linear-gradient(135deg, #8a3b24 0%, #a0523d 100%)",
+                color: "#ffffff",
+                border: "1px solid rgba(255, 255, 255, 0.3)",
+                padding: "9px 16px",
+                borderRadius: "12px",
+                fontSize: "0.92rem",
+                fontWeight: "700",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                boxShadow: "0 4px 14px rgba(138, 59, 36, 0.28)",
+                transition: "all 0.2s ease",
+              }}
+            >
+              🤖 Register via Chatbot Assistant
+            </button>
+          )}
         </div>
 
-        {errorMessage && (
-          <div className="error-banner" role="alert">
-            <span>⚠️</span>
-            <div>{errorMessage}</div>
-          </div>
-        )}
+        {errorMessage && (() => {
+          const isAlready = /already|exist|registered|duplicate/i.test(errorMessage);
+          const fullPhone = `${formData.countryCode} ${formData.whatsappNumber}`.trim();
+          const matchedBatch = batchesList.find(b => b.id === formData.batchId);
+          const rawAdminPhone = matchedBatch?.admin_whatsapp || matchedBatch?.contact_phone || localStorage.getItem("vaiswanara_admin_whatsapp") || "919482094290";
+          let adminPhone = String(rawAdminPhone || "").replace(/[^0-9]/g, "");
+          if (adminPhone.length === 10) adminPhone = "91" + adminPhone;
+          if (adminPhone.startsWith("0") && adminPhone.length === 11) adminPhone = "91" + adminPhone.substring(1);
+          if (!adminPhone) adminPhone = "919482094290";
 
-        {successData ? (
+          const msg = `Namaste Admin 🙏, I am trying to register for e-Jyotisha classes with WhatsApp number ${fullPhone}, but it says I am already registered. Please assist me.`;
+          const waLink = `https://wa.me/${adminPhone}?text=${encodeURIComponent(msg)}`;
+
+          return (
+            <div className="error-banner" role="alert" style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-start" }}>
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                <span>⚠️</span>
+                <div>
+                  {isAlready
+                    ? `A student with this WhatsApp number (${fullPhone || "+91 9493371910"}) is already registered. Please Contact the Admin.`
+                    : errorMessage}
+                </div>
+              </div>
+              {isAlready && (
+                <a
+                  href={waLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    backgroundColor: "#25D366",
+                    color: "#ffffff",
+                    padding: "7px 14px",
+                    borderRadius: "8px",
+                    fontWeight: "700",
+                    fontSize: "0.88rem",
+                    textDecoration: "none",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    marginTop: "4px",
+                    boxShadow: "0 2px 8px rgba(37, 211, 102, 0.3)",
+                  }}
+                >
+                  💬 Contact Admin on WhatsApp
+                </a>
+              )}
+            </div>
+          );
+        })()}
+
+        {!isRegistrationOpen ? (
+          <div style={{ textAlign: "center", padding: "40px 20px" }}>
+            <div style={{ fontSize: "3.5rem", marginBottom: "12px" }}>🔒</div>
+            <h3 style={{ color: "#7a3a27", marginBottom: "10px", fontSize: "1.35rem", fontWeight: "700" }}>
+              Student Registration is Currently Closed
+            </h3>
+            <p style={{ color: "#6b6255", fontSize: "0.95rem", maxWidth: "480px", margin: "0 auto 24px auto", lineHeight: 1.5 }}>
+              The registration form has been paused by the administrator. Please check back later or contact the gurukulam administration for upcoming batch details.
+            </p>
+            {onNavigate && (
+              <button
+                type="button"
+                className="btn-submit"
+                onClick={() => onNavigate("Home")}
+                style={{ maxWidth: "200px", margin: "0 auto" }}
+              >
+                Go to Home
+              </button>
+            )}
+          </div>
+        ) : successData ? (
           <div className="confirmation-box">
             <div className="confirmation-icon">✓</div>
             <h3>Registration Successful!</h3>
@@ -679,11 +797,9 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
                   <td className="value">{successData.language}</td>
                 </tr>
                 <tr>
-                  <td className="label">Selected Courses</td>
+                  <td className="label">Enrolled Batch</td>
                   <td className="value">
-                    {Array.isArray(successData.courses)
-                      ? successData.courses.join(", ")
-                      : successData.courses}
+                    <strong>{successData.batch_name || successData.batch_id || successData.batchId || (Array.isArray(successData.courses) ? successData.courses.join(", ") : successData.courses)}</strong>
                   </td>
                 </tr>
                 {(successData.email) && (
@@ -701,7 +817,104 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
               </tbody>
             </table>
 
-            <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+            {/* WhatsApp Actions: Group Joining & Admin Confirmation */}
+            {(() => {
+              const matchedBatch = batchesList.find(b => b.id === (successData.batch_id || formData.batchId));
+              const waGroupLink = matchedBatch?.whatsapp_group_link;
+              const batchName = matchedBatch?.name || successData.batch_name || successData.batch_id || "Astrology Batch";
+              const studentName = `${successData.first_name || successData.firstName || ""} ${successData.last_name || successData.lastName || ""}`.trim();
+              const regId = successData.id || "STU";
+
+              // English pre-filled confirmation message
+              const confirmMsg = `Namaste 🙏, My name is ${studentName}. I have registered for ${batchName}. My Registration ID is ${regId}. Please confirm my enrollment.`;
+              const encodedMsg = encodeURIComponent(confirmMsg);
+
+              // Admin contact phone from batch, localStorage, or system default (919482094290)
+              const rawAdminPhone = matchedBatch?.admin_whatsapp || matchedBatch?.contact_phone || localStorage.getItem("vaiswanara_admin_whatsapp") || "919482094290";
+              let adminPhone = String(rawAdminPhone || "").replace(/[^0-9]/g, "");
+              if (adminPhone.length === 10) adminPhone = "91" + adminPhone;
+              if (adminPhone.startsWith("0") && adminPhone.length === 11) adminPhone = "91" + adminPhone.substring(1);
+              if (!adminPhone) adminPhone = "919482094290";
+
+              const adminWaLink = `https://wa.me/${adminPhone}?text=${encodedMsg}`;
+
+              return (
+                <div style={{
+                  marginTop: "1.5rem",
+                  padding: "1.25rem",
+                  background: "#f0fdf4",
+                  border: "1.5px solid #86efac",
+                  borderRadius: "14px",
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                }}>
+                  <div>
+                    <div style={{ fontWeight: "800", color: "#166534", fontSize: "1.05rem", marginBottom: "4px" }}>
+                      📲 Next Steps: WhatsApp Group & Confirmation
+                    </div>
+                    <p style={{ fontSize: "0.88rem", color: "#15803d", margin: 0 }}>
+                      Join your batch discussion group and send your registration details to the administrator:
+                    </p>
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "4px" }}>
+                    {waGroupLink && (
+                      <a
+                        href={waGroupLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "8px",
+                          background: "#25d366",
+                          color: "#ffffff",
+                          padding: "12px 20px",
+                          borderRadius: "10px",
+                          fontWeight: "700",
+                          fontSize: "14px",
+                          textDecoration: "none",
+                          boxShadow: "0 4px 12px rgba(37, 211, 102, 0.3)",
+                          transition: "all 0.2s ease",
+                        }}
+                      >
+                        <span>💬 Join Batch WhatsApp Group</span>
+                        <span>➔</span>
+                      </a>
+                    )}
+
+                    <a
+                      href={adminWaLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                        background: "#047857",
+                        color: "#ffffff",
+                        padding: "11px 20px",
+                        borderRadius: "10px",
+                        fontWeight: "700",
+                        fontSize: "13.5px",
+                        textDecoration: "none",
+                        boxShadow: "0 4px 10px rgba(4, 120, 87, 0.25)",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <span>📩 Send Confirmation Message to Admin</span>
+                      <span>➔</span>
+                    </a>
+                  </div>
+                </div>
+              );
+            })()}
+
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "center", marginTop: "1.5rem" }}>
               <button
                 type="button"
                 className="btn-submit"
@@ -736,7 +949,7 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
                   id="firstName"
                   name="firstName"
                   className="form-input"
-                  placeholder="e.g. Anjaneyulu"
+                  placeholder="e.g. Sridhar"
                   value={formData.firstName}
                   onChange={handleInputChange}
                   required
@@ -753,7 +966,7 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
                   id="lastName"
                   name="lastName"
                   className="form-input"
-                  placeholder="e.g. Sharma"
+                  placeholder="e.g. Sarma"
                   value={formData.lastName}
                   onChange={handleInputChange}
                   required
@@ -837,52 +1050,60 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
                 </div>
               </div>
 
-              {/* COURSE Select */}
-              <div className="form-group">
-                <label htmlFor="courseSelect">
-                  COURSE <span className="required">*</span>
-                </label>
-                <select
-                  id="courseSelect"
-                  name="courseSelect"
-                  className="form-select"
-                  value={
-                    formData.courses.length > 1
-                      ? "Both"
-                      : formData.courses[0] || "Jyotisha"
-                  }
-                  onChange={handleCourseSelectionChange}
-                >
-                  <option value="Jyotisha">Jyotisha - Kannada (JK)</option>
-                  <option value="ManaShastra">Mana Shastra (MS)</option>
-                  <option value="Both">Both Courses (Jyotisha + ManaShastra)</option>
-                </select>
-              </div>
-
-              {/* BATCH Select */}
-              <div className="form-group">
+              {/* BATCH Select (Filtered by Language and Active Dates) */}
+              <div className="form-group full-width">
                 <label htmlFor="batchId">
                   BATCH <span className="required">*</span>
                 </label>
-                <select
-                  id="batchId"
-                  name="batchId"
-                  className="form-select"
-                  value={formData.batchId}
-                  onChange={handleInputChange}
-                >
-                  {batchesList
-                    .filter(b => {
-                      const cur = formData.courses.length > 1 ? "Both" : formData.courses[0];
-                      if (cur === "Both") return true;
-                      return b.course_id === cur || b.course_name === cur || !b.course_id;
-                    })
-                    .map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name || b.id}
-                      </option>
-                    ))}
-                </select>
+                {(() => {
+                  const filtered = batchesList.filter(
+                    b => (b.language || "").toLowerCase() === (formData.language || "").toLowerCase() && isBatchCurrentlyActive(b)
+                  );
+                  if (filtered.length === 0) {
+                    return (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                        <select
+                          id="batchId"
+                          name="batchId"
+                          className="form-select"
+                          disabled
+                          value=""
+                          style={{ background: "#f8fafc", color: "#94a3b8", cursor: "not-allowed" }}
+                        >
+                          <option value="">-- No Active Batches Available for {formData.language} --</option>
+                        </select>
+                        <div style={{
+                          fontSize: "0.86rem",
+                          color: "#be123c",
+                          fontWeight: "600",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          marginTop: "2px"
+                        }}>
+                          <span>⚠️</span>
+                          <span>Currently no active batches within the valid date range are open for {formData.language}.</span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <select
+                      id="batchId"
+                      name="batchId"
+                      className="form-select"
+                      value={formData.batchId}
+                      onChange={handleInputChange}
+                      required
+                    >
+                      {filtered.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.name || b.id} {b.remarks ? `— ${b.remarks}` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  );
+                })()}
               </div>
 
               {/* Email (Optional) */}
@@ -901,9 +1122,11 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
                 />
               </div>
 
-              {/* Address */}
+              {/* Address (Mandatory) */}
               <div className="form-group full-width">
-                <label htmlFor="address">Address</label>
+                <label htmlFor="address">
+                  Address <span className="required">*</span>
+                </label>
                 <textarea
                   id="address"
                   name="address"
@@ -912,6 +1135,7 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
                   placeholder="Enter full postal address"
                   value={formData.address}
                   onChange={handleInputChange}
+                  required
                 />
               </div>
 
@@ -921,7 +1145,13 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
               <button
                 type="submit"
                 className="btn-submit"
-                disabled={loading}
+                disabled={
+                  loading ||
+                  !formData.batchId ||
+                  batchesList.filter(
+                    b => (b.language || "").toLowerCase() === (formData.language || "").toLowerCase() && isBatchCurrentlyActive(b)
+                  ).length === 0
+                }
               >
                 {loading ? "Registering..." : "Submit Registration"}
               </button>
@@ -933,10 +1163,58 @@ export function StudentRegistration({ logoUrl, onNavigate }) {
               >
                 Clear Form
               </button>
+              <button
+                type="button"
+                className="btn-share"
+                onClick={copyShareLink}
+                title="Copy Registration Link to Share"
+                style={{
+                  background: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)",
+                  color: "#ffffff",
+                  border: "none",
+                  padding: "0.85rem 1.5rem",
+                  borderRadius: "10px",
+                  fontSize: "1rem",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  boxShadow: "0 4px 12px rgba(2, 132, 199, 0.25)",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                🔗 Share Link
+              </button>
             </div>
           </form>
         )}
       </section>
+
+      {/* Interactive Admission Chatbot */}
+      <StudentRegistrationChatbot
+        isOpen={showChatbot}
+        onClose={() => setShowChatbot(false)}
+        batchesList={batchesList}
+        onApplyToForm={(chatData) => {
+          setFormData((prev) => ({
+            ...prev,
+            ...(chatData.firstName ? { firstName: chatData.firstName } : {}),
+            ...(chatData.lastName ? { lastName: chatData.lastName } : {}),
+            ...(chatData.countryCode ? { countryCode: chatData.countryCode } : {}),
+            ...(chatData.whatsappNumber ? { whatsappNumber: chatData.whatsappNumber, confirmWhatsappNumber: chatData.whatsappNumber } : {}),
+            ...(chatData.language ? { language: chatData.language } : {}),
+            ...(chatData.batchId ? { batchId: chatData.batchId } : {}),
+            ...(chatData.email !== undefined ? { email: chatData.email } : {}),
+            ...(chatData.address !== undefined ? { address: chatData.address } : {}),
+          }));
+        }}
+        onRegistrationSuccess={(student) => {
+          setSuccessData(student);
+          setShowChatbot(false);
+        }}
+      />
     </main>
   );
 }

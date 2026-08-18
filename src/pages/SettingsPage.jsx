@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { LocationAutocomplete } from "../components/LocationAutocomplete.jsx";
 import { useTranslation } from "react-i18next";
 import { HoroscopeHeader } from "../components/HoroscopeHeader.jsx";
+import { getAdminEnabledPages, ALL_CONFIGURABLE_PAGES } from "../utils/appPagesConfig.js";
 
 const MASTER_LISTS = {
   maasa: [
@@ -266,6 +267,17 @@ export function SettingsPage({ logoUrl, onNavigate }) {
 
   const [activeTab, setActiveTab] = useState("general");
   const [prefs, setPrefs] = useState(MASTER_LISTS);
+  const [adminEnabledPages, setAdminEnabledPages] = useState(getAdminEnabledPages);
+
+  useEffect(() => {
+    const handleConfigUpdate = () => {
+      setAdminEnabledPages(getAdminEnabledPages());
+    };
+    window.addEventListener("vaiswanara_admin_config_updated", handleConfigUpdate);
+    return () => {
+      window.removeEventListener("vaiswanara_admin_config_updated", handleConfigUpdate);
+    };
+  }, []);
 
   const profilesFileRef = useRef(null);
   const panchangaFileRef = useRef(null);
@@ -1614,7 +1626,7 @@ export function SettingsPage({ logoUrl, onNavigate }) {
               {renderCheckboxGroup(
                 "sidebar_pages",
                 "Visibility of Sidebar Pages",
-                MASTER_LISTS.sidebar_pages,
+                ALL_CONFIGURABLE_PAGES.filter((p) => adminEnabledPages.includes(p.id)).map((p) => p.id),
               )}
 
               <button

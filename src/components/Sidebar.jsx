@@ -1,19 +1,46 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { getAdminEnabledPages } from "../utils/appPagesConfig";
 
 export function Sidebar({ isOpen, logoUrl, onClose, activePage, onNavigate, profileName }) {
   const { t } = useTranslation();
   const [visiblePages, setVisiblePages] = React.useState(null);
+  const [adminEnabledPages, setAdminEnabledPages] = React.useState(getAdminEnabledPages);
+  const [isRegistrationOpen, setIsRegistrationOpen] = React.useState(() => {
+    try {
+      return localStorage.getItem("vaiswanara_show_registration_form") !== "false";
+    } catch (e) {
+      return true;
+    }
+  });
+
+  const refreshVisibilitySettings = () => {
+    try {
+      const prefs = JSON.parse(localStorage.getItem("eclock_prefs") || "{}");
+      setVisiblePages(prefs.sidebar_pages || null);
+      setIsRegistrationOpen(localStorage.getItem("vaiswanara_show_registration_form") !== "false");
+      setAdminEnabledPages(getAdminEnabledPages());
+    } catch (e) {}
+  };
 
   React.useEffect(() => {
     if (isOpen) {
-      try {
-        const prefs = JSON.parse(localStorage.getItem("eclock_prefs") || "{}");
-        setVisiblePages(prefs.sidebar_pages || null);
-      } catch (e) {}
+      refreshVisibilitySettings();
     }
   }, [isOpen]);
+
+  React.useEffect(() => {
+    const handleConfigUpdate = () => {
+      refreshVisibilitySettings();
+    };
+    window.addEventListener("vaiswanara_reg_setting_updated", handleConfigUpdate);
+    window.addEventListener("vaiswanara_admin_config_updated", handleConfigUpdate);
+    return () => {
+      window.removeEventListener("vaiswanara_reg_setting_updated", handleConfigUpdate);
+      window.removeEventListener("vaiswanara_admin_config_updated", handleConfigUpdate);
+    };
+  }, []);
 
   const allMenuItems = [
     { id: "Home", icon: "🏠", label: t("Home", "Home") },
@@ -28,24 +55,28 @@ export function Sidebar({ isOpen, logoUrl, onClose, activePage, onNavigate, prof
     { id: "Profiles", icon: "👥", label: t("Profiles", "e-Profiles") },
     { id: "e-PATA", icon: "📖", label: t("e-PATA", "e-PATA") },
     { id: "e-Library", icon: "📚", label: t("e-Library", "e-Library") },
+    { id: "VoiceQuery", icon: "🎙️", label: t("VoiceQuery", "e-Voice Query"), subLabel: "(New)" },
+    ...(isRegistrationOpen ? [{ id: "StudentRegistration", icon: "🎓", label: t("StudentRegistration", "Student Registration") }] : []),
     { id: "PrecisionTest", icon: "🔬", label: t("PrecisionTest", "Precision Test") },
     { id: "Help", icon: "📖", label: t("Help", "FAQ") },
     { id: "e-Support", icon: "🤝", label: t("Support", "Donate") },
     { id: "Privacy", icon: "🛡️", label: t("Privacy", "Privacy Policy") },
     { id: "Settings", icon: "⚙️", label: t("Settings", "Settings") },
-    { id: "StudentRegistration", icon: "🎓", label: t("StudentRegistration", "Student Registration") },
     { id: "e-Install", icon: "📲", label: t("installApp", "Install App") },
     { id: "Feedback", icon: "📝", label: t("Feedback", "Feedback") },
   ];
 
   const mandatoryPages = ["Home", "Me", "e-Support", "Settings"];
 
-  const menuItems = visiblePages
-    ? allMenuItems.filter(
-        (item) =>
-          mandatoryPages.includes(item.id) || visiblePages.includes(item.id),
-      )
-    : allMenuItems;
+  // Filter by both Admin Permissions & User Settings
+  const menuItems = allMenuItems.filter((item) => {
+    if (mandatoryPages.includes(item.id)) return true;
+    // Check Admin Global Allowed Pages
+    if (adminEnabledPages && !adminEnabledPages.includes(item.id)) return false;
+    // Check User Personal Settings
+    if (visiblePages && !visiblePages.includes(item.id)) return false;
+    return true;
+  });
 
   // Hard Refresh (Clear PWA Caches & Reload)
   const handleHardRefresh = async () => {

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { LocationAutocomplete } from "../components/LocationAutocomplete.jsx";
 import { HoroscopeHeader } from "../components/HoroscopeHeader.jsx";
 import { PredictionPanel } from "../components/PredictionPanel.jsx";
@@ -69,6 +69,98 @@ export function MatchPage({ logoUrl, onNavigate }) {
   const [editFormData, setEditFormData] = useState({});
   const [profiles, setProfiles] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Listen to Voice Assistant Birth Input event for Groom / Bride
+  useEffect(() => {
+    const handleVoiceBirthInput = (e) => {
+      const { target, data } = e.detail || {};
+      if (!data) return;
+
+      const isGroomTarget = target === "groom" || (target === "jataka" && popupConfig.isOpen && popupConfig.type === "boy");
+      const isBrideTarget = target === "bride" || (target === "jataka" && popupConfig.isOpen && popupConfig.type === "girl");
+
+      if (isGroomTarget || target === "groom") {
+        setBoyData((prev) => ({
+          ...prev,
+          ...(data.dob ? { dob: data.dob } : {}),
+          ...(data.tob ? { tob: data.tob } : {}),
+          ...(data.city ? { city: data.city } : {}),
+          ...(data.latitude ? { latitude: data.latitude } : {}),
+          ...(data.longitude ? { longitude: data.longitude } : {}),
+          ...(data.timezone ? { timezone: data.timezone } : {}),
+        }));
+        if (popupConfig.isOpen && popupConfig.type === "boy") {
+          setEditFormData((prev) => ({
+            ...prev,
+            ...(data.dob ? { dob: data.dob } : {}),
+            ...(data.tob ? { tob: data.tob } : {}),
+            ...(data.city ? { city: data.city } : {}),
+            ...(data.latitude ? { latitude: data.latitude } : {}),
+            ...(data.longitude ? { longitude: data.longitude } : {}),
+            ...(data.timezone ? { timezone: data.timezone } : {}),
+          }));
+        }
+      } else if (isBrideTarget || target === "bride") {
+        setGirlData((prev) => ({
+          ...prev,
+          ...(data.dob ? { dob: data.dob } : {}),
+          ...(data.tob ? { tob: data.tob } : {}),
+          ...(data.city ? { city: data.city } : {}),
+          ...(data.latitude ? { latitude: data.latitude } : {}),
+          ...(data.longitude ? { longitude: data.longitude } : {}),
+          ...(data.timezone ? { timezone: data.timezone } : {}),
+        }));
+        if (popupConfig.isOpen && popupConfig.type === "girl") {
+          setEditFormData((prev) => ({
+            ...prev,
+            ...(data.dob ? { dob: data.dob } : {}),
+            ...(data.tob ? { tob: data.tob } : {}),
+            ...(data.city ? { city: data.city } : {}),
+            ...(data.latitude ? { latitude: data.latitude } : {}),
+            ...(data.longitude ? { longitude: data.longitude } : {}),
+            ...(data.timezone ? { timezone: data.timezone } : {}),
+          }));
+        }
+      } else if (target === "jataka") {
+        // If unspecified on Match page, default to updating groom or currently open popup
+        if (popupConfig.isOpen && popupConfig.type === "girl") {
+          setGirlData((prev) => ({
+            ...prev,
+            ...(data.dob ? { dob: data.dob } : {}),
+            ...(data.tob ? { tob: data.tob } : {}),
+            ...(data.city ? { city: data.city } : {}),
+            ...(data.latitude ? { latitude: data.latitude } : {}),
+            ...(data.longitude ? { longitude: data.longitude } : {}),
+            ...(data.timezone ? { timezone: data.timezone } : {}),
+          }));
+          setEditFormData((prev) => ({
+            ...prev,
+            ...(data.dob ? { dob: data.dob } : {}),
+            ...(data.tob ? { tob: data.tob } : {}),
+            ...(data.city ? { city: data.city } : {}),
+            ...(data.latitude ? { latitude: data.latitude } : {}),
+            ...(data.longitude ? { longitude: data.longitude } : {}),
+            ...(data.timezone ? { timezone: data.timezone } : {}),
+          }));
+        } else {
+          setBoyData((prev) => ({
+            ...prev,
+            ...(data.dob ? { dob: data.dob } : {}),
+            ...(data.tob ? { tob: data.tob } : {}),
+            ...(data.city ? { city: data.city } : {}),
+            ...(data.latitude ? { latitude: data.latitude } : {}),
+            ...(data.longitude ? { longitude: data.longitude } : {}),
+            ...(data.timezone ? { timezone: data.timezone } : {}),
+          }));
+        }
+      }
+    };
+
+    window.addEventListener("vaiswanara_voice_birth_input", handleVoiceBirthInput);
+    return () => {
+      window.removeEventListener("vaiswanara_voice_birth_input", handleVoiceBirthInput);
+    };
+  }, [popupConfig]);
 
   const handleOpenPopup = (type) => {
     const savedProfiles = JSON.parse(

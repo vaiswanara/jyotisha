@@ -276,11 +276,26 @@ export async function getBatches() {
       },
     });
     const data = await response.json().catch(() => null);
-    if (!response.ok || (data && data.success === false)) {
-      return { success: true, batches: [] };
+    if (data && Array.isArray(data.batches) && data.batches.length > 0) {
+      return data;
+    }
+    // Fallback to static batches file
+    const staticRes = await fetch(`${import.meta.env.BASE_URL}static/batches.json`).catch(() => null);
+    if (staticRes && staticRes.ok) {
+      const staticBatches = await staticRes.json().catch(() => []);
+      if (Array.isArray(staticBatches) && staticBatches.length > 0) {
+        return { success: true, batches: staticBatches };
+      }
     }
     return data || { success: true, batches: [] };
   } catch (error) {
+    try {
+      const staticRes = await fetch(`${import.meta.env.BASE_URL}static/batches.json`);
+      if (staticRes.ok) {
+        const staticBatches = await staticRes.json();
+        return { success: true, batches: staticBatches };
+      }
+    } catch (e) {}
     return { success: true, batches: [] };
   }
 }

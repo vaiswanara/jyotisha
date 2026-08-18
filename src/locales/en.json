@@ -617,5 +617,7 @@
   "detailsPravaraRishisLabel": "Pravara Rishis:",
   "detailsSignificanceLabel": "Significance & Origin:",
   "SunriseLabel": "Sunrise",
-  "SunsetLabel": "Sunset"
+  "SunsetLabel": "Sunset",
+  "VoiceQuery": "e-Voice Query",
+  "StudentRegistration": "Student Registration"
 }

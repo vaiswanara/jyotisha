@@ -1519,6 +1519,43 @@ export function HoroscopePageNew({ logoUrl, onNavigate }) {
     loadChart(formData);
   }, []);
 
+  // Listen to Voice Assistant Birth Input event
+  useEffect(() => {
+    const handleVoiceBirthInput = (e) => {
+      const { target, data } = e.detail || {};
+      if (target === "jataka" && data) {
+        setFormData((prev) => {
+          const updated = {
+            ...prev,
+            ...(data.dob ? { dob: data.dob } : {}),
+            ...(data.tob ? { tob: data.tob } : {}),
+            ...(data.city ? { city: data.city } : {}),
+            ...(data.latitude ? { latitude: data.latitude } : {}),
+            ...(data.longitude ? { longitude: data.longitude } : {}),
+            ...(data.timezone ? { timezone: data.timezone } : {}),
+          };
+          loadChart(updated);
+          return updated;
+        });
+
+        setEditFormData((prev) => ({
+          ...prev,
+          ...(data.dob ? { dob: data.dob } : {}),
+          ...(data.tob ? { tob: data.tob } : {}),
+          ...(data.city ? { city: data.city } : {}),
+          ...(data.latitude ? { latitude: data.latitude } : {}),
+          ...(data.longitude ? { longitude: data.longitude } : {}),
+          ...(data.timezone ? { timezone: data.timezone } : {}),
+        }));
+      }
+    };
+
+    window.addEventListener("vaiswanara_voice_birth_input", handleVoiceBirthInput);
+    return () => {
+      window.removeEventListener("vaiswanara_voice_birth_input", handleVoiceBirthInput);
+    };
+  }, []);
+
   const handleOpenPopup = () => {
     const savedProfiles = JSON.parse(
       localStorage.getItem("vaiswanara_profiles") || "{}",

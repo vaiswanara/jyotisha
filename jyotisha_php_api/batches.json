@@ -1,23 +1,29 @@
 [
     {
         "id": "JK-2026-OCT",
-        "name": "Jyotisha Kannada - October 2026 Batch",
-        "course_id": "Jyotisha",
-        "course_name": "Jyotisha",
-        "start_date": "2026-10-01",
-        "end_date": "2027-09-30",
+        "name": "Jyotisha-2026 (LIVE)",
+        "language": "Kannada",
+        "start_date": "2026-07-01",
+        "end_date": "2027-07-30",
+        "isActive": true,
+        "remarks": "Kannada",
         "whatsapp_group_link": "https:\/\/chat.whatsapp.com\/JOdywULnGMtKrseQDXRYdj",
-        "status": "active",
-        "endpoint": "save_batch"
+        "admin_whatsapp": "919482094290",
+        "google_meet_link": "https:\/\/meet.google.com\/yee-uppj-for",
+        "endpoint": "save_batch",
+        "status": "active"
     },
     {
+        "endpoint": "save_batch",
         "id": "MS-2026",
-        "name": "Mana Shastra - 2026 Batch",
-        "course_id": "ManaShastra",
-        "course_name": "ManaShastra",
-        "start_date": "2026-08-01",
-        "end_date": "2027-07-31",
+        "name": "ManaShaastra",
+        "language": "Kannada",
+        "start_date": "2026-06-01",
+        "end_date": "2026-09-21",
+        "remarks": "",
         "whatsapp_group_link": "",
-        "status": "active"
+        "google_meet_link": "",
+        "status": "active",
+        "isActive": true
     }
 ]

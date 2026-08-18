@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { getTicker } from "../services/astrologyApi.js";
+import { getAdminEnabledPages } from "../utils/appPagesConfig.js";
 
 const CONTENT = {
   en: {
@@ -61,6 +62,12 @@ const CONTENT = {
     e_library: "e-Library",
     desc_library:
       "Access digital PDF library for Vedic scriptures, spiritual, and educational resources.",
+    student_reg: "Student Registration",
+    desc_student_reg:
+      "Enroll in Vedic Astrology Gurukulam batches & classes.",
+    e_voice_query: "e-Voice Query",
+    desc_voice_query:
+      "Ask your astrology doubts to Guru via Telugu/Kannada voice speech & WhatsApp.",
     exit_btn: "Refresh",
     exit_confirm: "Are you sure you want to reset cache, unregister service workers, and reload the app?",
     backend_active: "Active Backend:",
@@ -84,7 +91,7 @@ const CONTENT = {
       "రోజువారీ పంచాంగాన్ని చూడండి, శుభ తేదీలను వెతకండి మరియు ముహూర్తాలను గణించండి.",
     e_prashna: "ఈ-ప్రశ్న",
     desc_echakra:
-      "సాంప్రదాయ స్పిన్నింగ్ వీల్ ద్వారా మీ ప్రశ్నలకు సమాధానాలు కనుగొనడానికి శ్రీ ప్రశ్నా చక్రం.",
+      "సాంప్రదాయ స్పిన్నింగ్ వీల్ ద్వారా మీ ప్రశ్నలకు సమాధానాలు కనుగొనడానికి శ్రీ ప్రశ్నా చక్ర.",
     e_sankalpa: "ఈ-సంకల్పం",
     desc_quick_panchanga:
       "ప్రస్తుత సమయం మరియు ప్రదేశం ఆధారంగా రోజువారీ నిత్య సంకల్పాన్ని తక్షణమే రూపొందించండి.",
@@ -125,6 +132,12 @@ const CONTENT = {
     e_library: "ఈ-లైబ్రరీ",
     desc_library:
       "వైదిక, శాస్త్ర, ఆధ్యాత్మిక మరియు విద్యా గ్రంథాల డిజిటల్ లైబ్రరీని సందర్శించండి.",
+    student_reg: "విద్యార్థి నమోదు",
+    desc_student_reg:
+      "వేద జ్యోతిష గురుకుల తరగతులకు నమోదు చేసుకోండి.",
+    e_voice_query: "ఈ-ధ్వని సందేహం",
+    desc_voice_query:
+      "మీ సందేహాలను తెలుగు లేదా కన్నడలో మాట్లాడి గురువుగారికి వాట్సాప్‌లో పంపండి.",
     exit_btn: "రిఫ్రెష్",
     exit_confirm: "మీరు నిజంగానే యాప్ కాష్ క్లియర్ చేసి, రీసెట్ చేసి మళ్లీ లోడ్ చేయాలనుకుంటున్నారా?",
     backend_active: "యాక్టివ్ బ్యాకెండ్:",
@@ -189,6 +202,12 @@ const CONTENT = {
     e_library: "ಇ-ಲೈಬ್ರರಿ",
     desc_library:
       "ವೈದಿಕ, ಧರ್ಮಶಾಸ್ತ್ರ ಮತ್ತು ಶೈಕ್ಷಣಿಕ ಪುಸ್ತಕಗಳ ಡಿಜಿಟಲ್ ಲೈಬ್ರರಿ ವೀಕ್ಷಿಸಿ.",
+    student_reg: "ವಿದ್ಯಾರ್ಥಿ ನೋಂದಣಿ",
+    desc_student_reg:
+      "ವೇದ ಜ್ಯೋತಿಷ್ಯ ಗುರುಕುಲ ತರಗತಿಗಳಿಗೆ ನೋಂದಾಯಿಸಿಕೊಳ್ಳಿ.",
+    e_voice_query: "ಇ-ಧ್ವನಿ ಪ್ರಶ್ನೆ",
+    desc_voice_query:
+      "ನಿಮ್ಮ ಪ್ರಶ್ನೆಗಳನ್ನು ಕನ್ನಡ ಅಥವಾ ತೆಲುಗಿನಲ್ಲಿ ಧ್ವನಿಯ ಮೂಲಕ ಕೇಳಿ ವಾಟ್ಸಾಪ್‌ಗೆ ಕಳುಹಿಸಿ.",
     exit_btn: "ರಿಫ್ರೆಶ್",
     exit_confirm: "ನೀವು ನಿಜವಾಗಿಯೂ ಆ್ಯಪ್ ಕ್ಯಾಶ್ ಕ್ಲಿಯರ್ ಮಾಡಿ, ರಿಸೆಟ್ ಮಾಡಿ ಮತ್ತೆ ಲೋಡ್ ಮಾಡಲು ಬಯಸುವಿರಾ?",
     backend_active: "ಸಕ್ರಿಯ ಬ್ಯಾಕೆಂಡ್:",
@@ -213,6 +232,27 @@ export function HomePage({
   const backendType = import.meta.env.VITE_BACKEND_TYPE || "php";
   const isPhp = backendType === "php";
   const showInstallBtn = (isInstallable || isIosEligible) && !isStandalone;
+
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState(() => {
+    try {
+      return localStorage.getItem("vaiswanara_show_registration_form") !== "false";
+    } catch (_) {
+      return true;
+    }
+  });
+
+  useEffect(() => {
+    const handleRegUpdate = () => {
+      try {
+        setIsRegistrationOpen(localStorage.getItem("vaiswanara_show_registration_form") !== "false");
+      } catch (_) {}
+    };
+    window.addEventListener("vaiswanara_reg_setting_updated", handleRegUpdate);
+    return () => {
+      window.removeEventListener("vaiswanara_reg_setting_updated", handleRegUpdate);
+    };
+  }, []);
+
   const [userName, setUserName] = useState(() => {
     try {
       const meProfile = JSON.parse(
@@ -253,6 +293,7 @@ export function HomePage({
     }
   };
 
+  const [adminEnabledPages, setAdminEnabledPages] = useState(getAdminEnabledPages);
   const [visiblePages, setVisiblePages] = useState(() => {
     try {
       const prefs = JSON.parse(localStorage.getItem("eclock_prefs") || "{}");
@@ -263,9 +304,28 @@ export function HomePage({
     return null;
   });
 
+  useEffect(() => {
+    const handleConfigUpdate = () => {
+      try {
+        const prefs = JSON.parse(localStorage.getItem("eclock_prefs") || "{}");
+        setVisiblePages(prefs.sidebar_pages || null);
+        setAdminEnabledPages(getAdminEnabledPages());
+      } catch (e) {}
+    };
+    window.addEventListener("vaiswanara_admin_config_updated", handleConfigUpdate);
+    window.addEventListener("vaiswanara_reg_setting_updated", handleConfigUpdate);
+    return () => {
+      window.removeEventListener("vaiswanara_admin_config_updated", handleConfigUpdate);
+      window.removeEventListener("vaiswanara_reg_setting_updated", handleConfigUpdate);
+    };
+  }, []);
+
   const isPageVisible = (pageId) => {
     const mandatoryPages = ["Home", "Me", "e-Support", "Settings"];
     if (mandatoryPages.includes(pageId)) return true;
+    // Check Admin Permission First
+    if (adminEnabledPages && !adminEnabledPages.includes(pageId)) return false;
+    // Check User Preference
     if (!visiblePages) return true;
     return visiblePages.includes(pageId);
   };
@@ -866,6 +926,28 @@ export function HomePage({
                 <div className="icon">📚</div>
                 <h2>{copy.e_library}</h2>
                 <div className="desc">{copy.desc_library}</div>
+              </div>
+            )}
+            {isRegistrationOpen && (
+              <div
+                className="card-home"
+                style={{ borderTopColor: "#6b1170" }}
+                onClick={() => onNavigate("StudentRegistration")}
+              >
+                <div className="icon">🎓</div>
+                <h2>{copy.student_reg}</h2>
+                <div className="desc">{copy.desc_student_reg}</div>
+              </div>
+            )}
+            {isPageVisible("VoiceQuery") && (
+              <div
+                className="card-home"
+                style={{ borderTopColor: "#d35400" }}
+                onClick={() => onNavigate("VoiceQuery")}
+              >
+                <div className="icon">🎙️</div>
+                <h2>{copy.e_voice_query}</h2>
+                <div className="desc">{copy.desc_voice_query}</div>
               </div>
             )}
             <div

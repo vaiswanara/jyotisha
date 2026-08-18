@@ -1,15 +1,4 @@
 {
-  "speed": "slow",
-  "tickers": [
-    {
-      "id": "default",
-      "startDate": "2026-06-01",
-      "endDate": "2030-12-31",
-      "updates": [
-        "ఒకవేళ వైట్ స్క్రీన్ (White Page) వస్తే, వెంటనే రీసెట్ / హార్డ్ రిఫ్రెష్ ఆప్షన్‌ను క్లిక్ చేయండి.",
-        "ಒಂದು ವೇಳೆ ವೈಟ್ ಪೇಜ್ (White Page) ಬಂದರೆ, ತಕ್ಷಣವೇ ರಿಸೆಟ್ / ಹಾರ್ಡ್ ರಿಫ್ರೆಶ್ ಆಯ್ಕೆಯನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ.",
-        "If you see a white page, please click the Reset / Hard Refresh option immediately."
-      ]
-    }
-  ]
+    "speed": "slow",
+    "tickers": []
 }

@@ -5,6 +5,7 @@ import { BottomNav } from "./components/BottomNav.jsx";
 import { useTranslation } from "react-i18next";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
+import { VoiceAssistantWidget } from "./components/VoiceAssistantWidget.jsx";
 import { API_URL, API_TOKEN, getInAppMessages } from "./services/astrologyApi.js";
 
 // Dynamic Imports for Pages (To split code and improve load speed)
@@ -88,6 +89,9 @@ const EQuestionsPage = lazy(() =>
 );
 const StudentRegistration = lazy(() =>
   import("./pages/StudentRegistration.jsx").then((m) => ({ default: m.StudentRegistration })),
+);
+const VoiceQueryPage = lazy(() =>
+  import("./pages/VoiceQueryPage.jsx").then((m) => ({ default: m.VoiceQueryPage })),
 );
 
 
@@ -316,14 +320,48 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     let targetPage = params.get("page");
 
+    const isRegOpen = (() => {
+      try {
+        return localStorage.getItem("vaiswanara_show_registration_form") !== "false";
+      } catch (_) {
+        return true;
+      }
+    })();
+
     if (params.has("register") || window.location.search.includes("register")) {
-      targetPage = "StudentRegistration";
+      targetPage = isRegOpen ? "StudentRegistration" : "Home";
     }
 
-    if (targetPage === "EClock") targetPage = "e-Clock";
-    if (targetPage === "Match") targetPage = "e-Match";
-    if (targetPage === "EPrashna") targetPage = "echakra";
-    if (targetPage === "register") targetPage = "StudentRegistration";
+    if (params.has("admin") || window.location.search.includes("admin")) {
+      targetPage = "Admin";
+    }
+
+    if (targetPage) {
+      const lower = targetPage.toLowerCase();
+      if (lower === "admin") targetPage = "Admin";
+      else if (lower === "home") targetPage = "Home";
+      else if (lower === "eclock" || lower === "e-clock" || lower === "astroclock") targetPage = "e-Clock";
+      else if (lower === "match" || lower === "e-match") targetPage = "e-Match";
+      else if (lower === "gotra" || lower === "gotramatch" || lower === "e-gotra") targetPage = "GotraMatch";
+      else if (lower === "panchanga" || lower === "e-panchanga") targetPage = "e-Panchanga";
+      else if (lower === "jataka" || lower === "e-jataka") targetPage = "e-Jataka";
+      else if (lower === "prashna" || lower === "eprashna" || lower === "echakra") targetPage = "echakra";
+      else if (lower === "sankalpa" || lower === "e-sankalpa") targetPage = "Sankalpa";
+      else if (lower === "pata" || lower === "epata" || lower === "e-pata") targetPage = "e-PATA";
+      else if (lower === "library" || lower === "elibrary" || lower === "e-library") targetPage = "e-Library";
+      else if (lower === "voice" || lower === "voicequery" || lower === "e-voicequery" || lower === "prashna-voice" || lower === "e-voice") targetPage = "VoiceQuery";
+      else if (lower === "register" || lower === "studentregistration") targetPage = isRegOpen ? "StudentRegistration" : "Home";
+      else if (lower === "settings") targetPage = "Settings";
+      else if (lower === "profiles") targetPage = "Profiles";
+      else if (lower === "support" || lower === "e-support") targetPage = "e-Support";
+      else if (lower === "feedback") targetPage = "Feedback";
+      else if (lower === "help" || lower === "faq") targetPage = "Help";
+      else if (lower === "privacy") targetPage = "Privacy";
+      else if (lower === "precision" || lower === "precisiontest") targetPage = "PrecisionTest";
+      else if (lower === "install" || lower === "e-install") targetPage = "e-Install";
+      else if (lower === "me") targetPage = "Me";
+      else if (lower === "messages") targetPage = "Messages";
+    }
 
     let savedLandingPage = localStorage.getItem("vaiswanara_landing_page");
     // పాత యూజర్లకు Dashboard సేవ్ అయి ఉంటే దాన్ని Home కి మారుస్తున్నాము
@@ -1178,7 +1216,7 @@ export default function App() {
         {activePage === "Feedback" && (
           <FeedbackPage logoUrl={logoUrl} onNavigate={setActivePage} />
         )}
-        {activePage === "Admin" && <AdminPage onNavigate={setActivePage} />}
+        {(activePage === "Admin" || activePage === "admin") && <AdminPage onNavigate={setActivePage} />}
         {activePage === "PrecisionTest" && (
           <EPrecisionTestPage logoUrl={logoUrl} />
         )}
@@ -1199,6 +1237,9 @@ export default function App() {
         )}
         {(activePage === "StudentRegistration" || activePage === "register") && (
           <StudentRegistration logoUrl={logoUrl} onNavigate={setActivePage} />
+        )}
+        {(activePage === "VoiceQuery" || activePage === "e-VoiceQuery") && (
+          <VoiceQueryPage logoUrl={logoUrl} onNavigate={setActivePage} />
         )}
         </ErrorBoundary>
       </Suspense>
@@ -1342,6 +1383,18 @@ export default function App() {
           </div>
         </div>
       )}
+      {/* Voice Assistant Floating Widget (Only displayed on e-Jataka and e-Match pages) */}
+      {(activePage === "e-Jataka" || activePage === "e-Match") && (
+        <VoiceAssistantWidget
+          onNavigate={(page) => {
+            setActivePage(page);
+            const url = new URL(window.location);
+            url.searchParams.set("page", page);
+            window.history.pushState({}, "", url);
+          }}
+        />
+      )}
+
       {/* Custom Toast Notification */}
       {toast && (
         <div

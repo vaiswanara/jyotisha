@@ -19,5 +19,13 @@
         "description": "Notification for newly published video lessons",
         "title": "📖 New Lesson Uploaded",
         "content": "Hare srinivasa\n\nNew lesson video and study materials have been uploaded to e-PATA portal.\n\nPlease check the Course\/Lessons section to access the new class recording.\n\nDhanyavaadagalu."
+    },
+    {
+        "endpoint": "save_template",
+        "id": "TPL-004",
+        "name": "JYOTISHA Live Class",
+        "title": "Sunday Class Reminder",
+        "content": "📚 JYOTISHA(Kannada)\n\nLive Class\n📅 Sunday\n⏰ 07:30 AM IST\n\nLIVE CLASS\nhttps:\/\/meet.google.com\/yee-uppj-for\n[ JOIN LIVE CLASS ]",
+        "description": "Kananda"
     }
 ]

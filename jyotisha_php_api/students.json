@@ -1,19 +1,65 @@
 [
     {
         "id": "STU-2026-0001",
-        "first_name": "Srikanth",
+        "first_name": "Kitti",
         "last_name": "Dharmavaram",
         "country_code": "+91",
         "whatsapp_number": "9482094290",
         "full_phone": "+91 9482094290",
         "language": "Kannada",
         "courses": [
-            "Jyotisha"
+            "Jyotisha-2026 (LIVE)",
+            "ManaShaastra"
         ],
         "batch_id": "JK-2026-OCT",
+        "batches": [
+            "JK-2026-OCT"
+        ],
         "email": "",
         "address": "",
         "status": "activated",
-        "created_at": "2026-08-11T21:45:17+05:30"
+        "created_at": "2026-08-18T12:57:31+05:30",
+        "approved_at": "2026-08-18T13:34:27+05:30",
+        "updated_at": "2026-08-18T13:39:49+05:30"
+    },
+    {
+        "id": "STU-2026-0002",
+        "first_name": "Bhavana",
+        "last_name": "Dharmavaram",
+        "country_code": "+91",
+        "whatsapp_number": "9493371910",
+        "full_phone": "+91 9493371910",
+        "language": "Kannada",
+        "courses": [
+            "Jyotisha-2026 (LIVE)"
+        ],
+        "batch_id": "JK-2026-OCT",
+        "batches": [
+            "JK-2026-OCT"
+        ],
+        "email": "",
+        "address": "",
+        "status": "pending",
+        "created_at": "2026-08-18T16:54:41+05:30"
+    },
+    {
+        "id": "STU-2026-0003",
+        "first_name": "Krishna",
+        "last_name": "Sharma",
+        "country_code": "+91",
+        "whatsapp_number": "9494949494",
+        "full_phone": "+91 9494949494",
+        "language": "Kannada",
+        "courses": [
+            "Jyotisha-2026 (LIVE)"
+        ],
+        "batch_id": "JK-2026-OCT",
+        "batches": [
+            "JK-2026-OCT"
+        ],
+        "email": "",
+        "address": "",
+        "status": "pending",
+        "created_at": "2026-08-18T17:02:56+05:30"
     }
 ]

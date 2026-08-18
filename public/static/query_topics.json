@@ -1,0 +1,47 @@
+[
+  {
+    "id": "class_doubt",
+    "name": "Gurukulam Live Class Doubt",
+    "icon": "🎓"
+  },
+  {
+    "id": "horoscope",
+    "name": "Horoscope (Janma Kundali) Analysis",
+    "icon": "📜"
+  },
+  {
+    "id": "dasha_bhukti",
+    "name": "Dasha & Antardasha Predictions",
+    "icon": "⏳"
+  },
+  {
+    "id": "gochara_transit",
+    "name": "Planetary Transit (Gochara) & Remedies",
+    "icon": "🪐"
+  },
+  {
+    "id": "muhurtha",
+    "name": "Muhurtha (Auspicious Timing) Query",
+    "icon": "⏰"
+  },
+  {
+    "id": "prashna_shastra",
+    "name": "Prashna Shastra (Horary) Query",
+    "icon": "☸️"
+  },
+  {
+    "id": "retrograde_combustion",
+    "name": "Retrograde (Vakra) & Combust Planets",
+    "icon": "🔄"
+  },
+  {
+    "id": "match_compatibility",
+    "name": "Kundali Matching & Dosha Parihara",
+    "icon": "💞"
+  },
+  {
+    "id": "general_astrology",
+    "name": "General Astrology / Siddhanta Doubt",
+    "icon": "☀️"
+  }
+]

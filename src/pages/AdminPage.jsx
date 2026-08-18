@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { API_URL, API_TOKEN, getLessons, saveLessons, getLibrary, saveLibrary, getTicker, saveTicker, getInAppMessages, saveInAppMessage, getStudents, addStudentAdmin, updateStudent, approveStudent, toggleStudentStatus, deleteStudent, getBatches, saveBatch, deleteBatch, getCourses, saveCourse, deleteCourse, getTemplates, saveTemplate, deleteTemplate } from "../services/astrologyApi.js";
+import { ALL_CONFIGURABLE_PAGES, getAdminEnabledPages, saveAdminEnabledPages, DEFAULT_ENABLED_PAGE_IDS } from "../utils/appPagesConfig.js";
 
 const COUNTRY_CODES = [
   { code: "+91", country: "India (🇮🇳)" },
@@ -25,8 +26,8 @@ export function AdminPage({ onNavigate }) {
   const [message, setMessage] = useState(null); // { type: 'success' | 'error', text: '' }
   const [filterPlaylist, setFilterPlaylist] = useState("");
 
-  // Sub-tab for Course/Lessons Tab
-  const [lessonSubTab, setLessonSubTab] = useState("lessons"); // "courses" | "batches" | "lessons"
+  // Sub-tab for Batches & Lessons Tab
+  const [lessonSubTab, setLessonSubTab] = useState("batches"); // "batches" | "lessons"
 
   // Courses & Batches State
   const [coursesList, setCoursesList] = useState([]);
@@ -34,7 +35,7 @@ export function AdminPage({ onNavigate }) {
   const [isEditingCourse, setIsEditingCourse] = useState(false);
 
   const [batchesList, setBatchesList] = useState([]);
-  const [batchForm, setBatchForm] = useState({ id: "", name: "", course_id: "Jyotisha", start_date: "", end_date: "", whatsapp_group_link: "", status: "active" });
+  const [batchForm, setBatchForm] = useState({ id: "", name: "", language: "Kannada", start_date: "", end_date: "", remarks: "", whatsapp_group_link: "", google_meet_link: "", status: "active", isActive: true });
   const [isEditingBatch, setIsEditingBatch] = useState(false);
 
   // Message Templates State
@@ -73,6 +74,389 @@ export function AdminPage({ onNavigate }) {
     pdfLink: "",
     status: "ON",
   });
+
+  // Lesson Share Modal State
+  const shareTextareaRef = useRef(null);
+  const tplTextareaRef = useRef(null);
+  const waTextareaRef = useRef(null);
+  const msgBodyTextareaRef = useRef(null);
+
+  const [shareLessonModalData, setShareLessonModalData] = useState(null); // lesson object
+  const [shareLessonTemplateId, setShareLessonTemplateId] = useState("telugu_lesson_std");
+  const [shareLessonCustomText, setShareLessonCustomText] = useState("");
+  const [shareLessonStudentId, setShareLessonStudentId] = useState("");
+  const [shareLessonCopied, setShareLessonCopied] = useState(false);
+
+  // General App & Page Visibility State
+  const [adminEnabledPages, setAdminEnabledPages] = useState(getAdminEnabledPages);
+
+  const handleTogglePageVisibility = (pageId) => {
+    setAdminEnabledPages((prev) => {
+      const next = prev.includes(pageId) ? prev.filter((p) => p !== pageId) : [...prev, pageId];
+      saveAdminEnabledPages(next);
+      return next;
+    });
+  };
+
+  const handleSelectAllPages = () => {
+    const all = DEFAULT_ENABLED_PAGE_IDS;
+    setAdminEnabledPages(all);
+    saveAdminEnabledPages(all);
+    setMessage({ type: "success", text: "✅ All features and pages enabled for Students!" });
+  };
+
+  const handleDeselectAllPages = () => {
+    const empty = [];
+    setAdminEnabledPages(empty);
+    saveAdminEnabledPages(empty);
+    setMessage({ type: "success", text: "⚠️ All optional features hidden from Students." });
+  };
+
+  const handleResetPageVisibility = () => {
+    localStorage.removeItem("vaiswanara_admin_enabled_pages");
+    setAdminEnabledPages(DEFAULT_ENABLED_PAGE_IDS);
+    window.dispatchEvent(new Event("vaiswanara_admin_config_updated"));
+    setMessage({ type: "success", text: "✅ Reset page visibility settings to default!" });
+  };
+
+  // Voice Query Topics State
+  const [voiceTopics, setVoiceTopics] = useState([]);
+  const [voiceTopicForm, setVoiceTopicForm] = useState({ id: "", name: "", icon: "🎓" });
+  const [isEditingVoiceTopic, setIsEditingVoiceTopic] = useState(false);
+  const [voiceTopicFilter, setVoiceTopicFilter] = useState("");
+
+  // Custom Placeholders State & CSV Loader
+  const [customPlaceholders, setCustomPlaceholders] = useState([
+    { key: "meet_url", value: "https://meet.google.com/yee-uppj-for" },
+    { key: "jyotisha_url", value: "https://vaiswanara.com/jyotisha" },
+  ]);
+
+  const parseCSVPlaceholders = (csvText) => {
+    if (!csvText) return [];
+    const lines = csvText.split(/\r?\n/);
+    const result = [];
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      const parts = line.split(",");
+      if (parts.length >= 2) {
+        const k = parts[0].trim().replace(/^["']|["']$/g, "");
+        const v = parts.slice(1).join(",").trim().replace(/^["']|["']$/g, "");
+        if (k && k !== "key") {
+          result.push({ key: k, value: v });
+        }
+      }
+    }
+    return result;
+  };
+
+  const fetchCustomPlaceholders = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.BASE_URL}static/custom_placeholders.csv?_t=${Date.now()}`);
+      if (res.ok) {
+        const text = await res.text();
+        const parsed = parseCSVPlaceholders(text);
+        if (parsed.length > 0) setCustomPlaceholders(parsed);
+      }
+    } catch (e) {
+      console.warn("Failed to fetch custom_placeholders.csv", e);
+    }
+  };
+
+  const handleCustomPlaceholdersCSVUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target.result;
+      const parsed = parseCSVPlaceholders(text);
+      if (parsed.length > 0) {
+        setCustomPlaceholders((prev) => {
+          const merged = [...prev];
+          parsed.forEach((item) => {
+            const idx = merged.findIndex((m) => m.key === item.key);
+            if (idx >= 0) merged[idx] = item;
+            else merged.push(item);
+          });
+          return merged;
+        });
+        setMessage({ type: "success", text: `✅ Loaded ${parsed.length} custom placeholders from CSV!` });
+      } else {
+        setMessage({ type: "error", text: "❌ Could not parse any key,value pairs from CSV file." });
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const exportCustomPlaceholdersCSV = () => {
+    if (!customPlaceholders || customPlaceholders.length === 0) {
+      setMessage({ type: "error", text: "⚠️ No custom placeholders to export." });
+      return;
+    }
+    let csvContent = "key,value\n";
+    customPlaceholders.forEach(({ key, value }) => {
+      const cleanKey = `"${(key || "").replace(/"/g, '""')}"`;
+      const cleanVal = `"${(value || "").replace(/"/g, '""')}"`;
+      csvContent += `${cleanKey},${cleanVal}\n`;
+    });
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `custom_placeholders_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setMessage({ type: "success", text: "✅ Custom placeholders CSV exported successfully!" });
+  };
+
+  const exportTemplatesJSON = () => {
+    if (!templatesList || templatesList.length === 0) {
+      setMessage({ type: "error", text: "⚠️ No templates to export." });
+      return;
+    }
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(templatesList, null, 2));
+    const downloadAnchor = document.createElement("a");
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `templates_${new Date().toISOString().split("T")[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    setMessage({ type: "success", text: "✅ Message templates exported successfully!" });
+  };
+
+  const handleImportTemplatesFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target.result;
+        let imported = [];
+        if (file.name.endsWith(".json")) {
+          imported = JSON.parse(text);
+          if (!Array.isArray(imported)) {
+            imported = imported.templates || [];
+          }
+        } else if (file.name.endsWith(".csv")) {
+          const lines = text.split(/\r?\n/);
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            const parts = line.split(",");
+            if (parts.length >= 2) {
+              imported.push({
+                id: parts[0].trim(),
+                name: parts[1].trim(),
+                content: parts.slice(2).join(",").trim() || parts[1].trim()
+              });
+            }
+          }
+        }
+        if (Array.isArray(imported) && imported.length > 0) {
+          setTemplatesList((prev) => {
+            const merged = [...prev];
+            imported.forEach((item) => {
+              if (item.id && !merged.some((m) => m.id === item.id)) {
+                merged.push(item);
+              }
+            });
+            return merged;
+          });
+          setMessage({ type: "success", text: `✅ Loaded ${imported.length} templates successfully!` });
+        } else {
+          setMessage({ type: "error", text: "❌ Could not parse templates from file." });
+        }
+      } catch (err) {
+        setMessage({ type: "error", text: `❌ Failed to import templates: ${err.message}` });
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const insertPlaceholderAtCursor = (tag, targetType = "share") => {
+    let target = targetType;
+    if (typeof targetType === "boolean") {
+      target = targetType ? "tpl" : "share";
+    }
+
+    let el = null;
+    if (target === "tpl") el = tplTextareaRef.current;
+    else if (target === "wa") el = waTextareaRef.current;
+    else if (target === "msgBody") el = msgBodyTextareaRef.current;
+    else el = shareTextareaRef.current;
+
+    if (target === "msgBody") {
+      if (!el) {
+        setAlertForm((prev) => ({ ...prev, body: (prev.body || "") + tag }));
+        return;
+      }
+      const start = el.selectionStart || 0;
+      const end = el.selectionEnd || 0;
+      const prevText = alertForm.body || "";
+      const newText = prevText.substring(0, start) + tag + prevText.substring(end);
+      setAlertForm((prev) => ({ ...prev, body: newText }));
+      setTimeout(() => {
+        el.focus();
+        const newCursorPos = start + tag.length;
+        el.setSelectionRange(newCursorPos, newCursorPos);
+      }, 0);
+      return;
+    }
+
+    if (target === "wa") {
+      if (!el) {
+        setWaMessageText((prev) => (prev || "") + tag);
+        return;
+      }
+      const start = el.selectionStart || 0;
+      const end = el.selectionEnd || 0;
+      const prevText = waMessageText || "";
+      const newText = prevText.substring(0, start) + tag + prevText.substring(end);
+      setWaMessageText(newText);
+      setTimeout(() => {
+        el.focus();
+        const newCursorPos = start + tag.length;
+        el.setSelectionRange(newCursorPos, newCursorPos);
+      }, 0);
+      return;
+    }
+
+    if (target === "tpl") {
+      if (!el) {
+        setTplForm((prev) => ({ ...prev, content: (prev.content || "") + tag }));
+        return;
+      }
+      const start = el.selectionStart || 0;
+      const end = el.selectionEnd || 0;
+      const prevText = tplForm.content || "";
+      const newText = prevText.substring(0, start) + tag + prevText.substring(end);
+      setTplForm((prev) => ({ ...prev, content: newText }));
+      setTimeout(() => {
+        el.focus();
+        const newCursorPos = start + tag.length;
+        el.setSelectionRange(newCursorPos, newCursorPos);
+      }, 0);
+    } else {
+      if (!el) {
+        setShareLessonCustomText((prev) => (prev || "") + tag);
+        setShareLessonTemplateId("custom");
+        return;
+      }
+      const start = el.selectionStart || 0;
+      const end = el.selectionEnd || 0;
+      const prevText = shareLessonCustomText || "";
+      const newText = prevText.substring(0, start) + tag + prevText.substring(end);
+      setShareLessonCustomText(newText);
+      setShareLessonTemplateId("custom");
+      setTimeout(() => {
+        el.focus();
+        const newCursorPos = start + tag.length;
+        el.setSelectionRange(newCursorPos, newCursorPos);
+      }, 0);
+    }
+  };
+
+  const DEFAULT_PRESET_TEMPLATES = [
+    {
+      id: "telugu_lesson_std",
+      name: "🌸 తెలుగు పాఠం ప్రామాణికం (Lesson Telugu Standard)",
+      title: "జ్యోతిష్య తరగతి పాఠం",
+      content: `🌸 *జ్యోతిష్య తరగతి పాఠం (Jyotisha Class Lesson)* 🌸\n📚 *కోర్సు/ప్లేలిస్ట్:* {playlist}\n🎥 *పాఠం శీర్షిక:* {title}\n\n📺 *యూట్యూబ్ వీడియో (YouTube Link):* {videoUrl}\n📄 *పిడిఎఫ్ నోట్స్ (PDF Notes):* {pdfLink}\n\nHari Om 🙏`,
+      description: "పాఠాల వాట్సాప్ షేరింగ్ కోసం తెలుగు ప్రామాణిక టెంప్లేట్",
+    },
+    {
+      id: "english_lesson_std",
+      name: "📚 Lesson English Standard",
+      title: "Jyotisha Class Lesson",
+      content: `📚 *Course:* {playlist}\n📖 *Lesson:* {title}\n\n▶️ *Watch Video:* {videoUrl}\n📄 *PDF Notes:* {pdfLink}\n\nHappy Learning! 🌟`,
+      description: "Standard English lesson share template with video & pdf placeholders",
+    },
+    {
+      id: "compact_lesson_share",
+      name: "⚡ సంక్షిప్త పాఠం లింకులు (Compact Lesson Share)",
+      title: "Lesson Quick Links",
+      content: `*Lesson:* {title} ({playlist})\n🎥 {videoUrl}\n📄 {pdfLink}`,
+      description: "Quick compact links for lesson video and notes",
+    },
+  ];
+
+  const formatLessonShareMessage = (templateText, lesson) => {
+    if (!templateText) return "";
+    let result = templateText;
+    if (lesson) {
+      const videoUrl = lesson.videoId ? `https://youtu.be/${lesson.videoId}` : "";
+      const pdfLinkStr = lesson.pdfLink && lesson.pdfLink.trim() ? lesson.pdfLink.trim() : "(పిడిఎఫ్ నోట్స్ లింక్ లేదు)";
+      result = result
+        .replace(/\{title\}/g, lesson.title || "")
+        .replace(/\{playlist\}/g, lesson.playlist || "")
+        .replace(/\{videoId\}/g, lesson.videoId || "")
+        .replace(/\{videoUrl\}/g, videoUrl)
+        .replace(/\{pdfLink\}/g, pdfLinkStr);
+    }
+    if (Array.isArray(customPlaceholders)) {
+      customPlaceholders.forEach(({ key, value }) => {
+        if (key) {
+          const regex = new RegExp(`\\{${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\}`, "g");
+          result = result.replace(regex, value || "");
+        }
+      });
+    }
+    return result;
+  };
+
+  const handleOpenShareLessonModal = (lesson) => {
+    setShareLessonModalData(lesson);
+    const initialTpl = templatesList.find((t) => t.id === "telugu_lesson_std") || templatesList[0] || DEFAULT_PRESET_TEMPLATES[0];
+    setShareLessonTemplateId(initialTpl ? initialTpl.id : "custom");
+    setShareLessonCustomText(initialTpl ? initialTpl.content : "");
+    setShareLessonStudentId("");
+    setShareLessonCopied(false);
+  };
+
+  const handleSelectShareLessonTemplate = (tplId) => {
+    setShareLessonTemplateId(tplId);
+    if (tplId === "custom") return;
+    const selectedTpl = templatesList.find((t) => t.id === tplId);
+    if (selectedTpl) {
+      setShareLessonCustomText(selectedTpl.content);
+    }
+  };
+
+  const handleShareLessonGroup = () => {
+    if (!shareLessonModalData) return;
+    const text = formatLessonShareMessage(shareLessonCustomText, shareLessonModalData);
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
+  };
+
+  const handleShareLessonIndividual = () => {
+    if (!shareLessonModalData) return;
+    const text = formatLessonShareMessage(shareLessonCustomText, shareLessonModalData);
+    let phone = "";
+    if (shareLessonStudentId) {
+      const st = students.find((s) => String(s.id) === String(shareLessonStudentId));
+      if (st) {
+        phone = formatWhatsAppPhone(st.whatsapp_number, st.country_code);
+      }
+    }
+    let url = "";
+    if (phone) {
+      url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(text)}`;
+    } else {
+      url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    }
+    window.open(url, "_blank");
+  };
+
+  const handleCopyShareLessonText = () => {
+    if (!shareLessonModalData) return;
+    const text = formatLessonShareMessage(shareLessonCustomText, shareLessonModalData);
+    navigator.clipboard.writeText(text);
+    setShareLessonCopied(true);
+    setTimeout(() => setShareLessonCopied(false), 2500);
+  };
+
   // e-Library Form State
   const [library, setLibrary] = useState([]);
   const [tickerList, setTickerList] = useState([]);
@@ -307,11 +691,15 @@ export function AdminPage({ onNavigate }) {
     e.preventDefault();
     if (!batchForm.name.trim()) return;
     try {
-      const bId = batchForm.id.trim() || `${batchForm.course_id}-${new Date().getFullYear()}`;
-      const bData = { ...batchForm, id: bId };
+      const bId = batchForm.id.trim() || batchForm.name.trim().replace(/\s+/g, '-').toUpperCase();
+      const bData = {
+        ...batchForm,
+        id: bId,
+        isActive: batchForm.status === "active" || batchForm.isActive === true
+      };
       await saveBatch(bData);
       setMessage({ type: "success", text: `✅ Batch ${isEditingBatch ? 'updated' : 'created'} successfully!` });
-      setBatchForm({ id: "", name: "", course_id: coursesList[0]?.id || "Jyotisha", start_date: "", end_date: "", whatsapp_group_link: "", status: "active" });
+      setBatchForm({ id: "", name: "", language: "Kannada", start_date: "", end_date: "", remarks: "", whatsapp_group_link: "", google_meet_link: "", status: "active", isActive: true });
       setIsEditingBatch(false);
       fetchBatchesList();
     } catch (err) {
@@ -320,7 +708,18 @@ export function AdminPage({ onNavigate }) {
   };
 
   const handleEditBatch = (b) => {
-    setBatchForm(b);
+    setBatchForm({
+      id: b.id || "",
+      name: b.name || "",
+      language: b.language || "Kannada",
+      start_date: b.start_date || "",
+      end_date: b.end_date || "",
+      remarks: b.remarks || "",
+      whatsapp_group_link: b.whatsapp_group_link || "",
+      google_meet_link: b.google_meet_link || "",
+      status: b.status || (b.isActive !== false ? "active" : "inactive"),
+      isActive: b.isActive !== false,
+    });
     setIsEditingBatch(true);
   };
 
@@ -338,10 +737,149 @@ export function AdminPage({ onNavigate }) {
   const fetchTemplatesList = async () => {
     try {
       const res = await getTemplates();
-      if (res && res.templates) setTemplatesList(res.templates);
+      let fetched = (res && res.templates) ? res.templates : [];
+      const combined = [...fetched];
+      DEFAULT_PRESET_TEMPLATES.forEach((preset) => {
+        if (!combined.some((t) => t.id === preset.id || t.name === preset.name)) {
+          combined.push(preset);
+        }
+      });
+      setTemplatesList(combined);
     } catch (e) {
       console.warn("Failed to fetch templates:", e);
+      setTemplatesList(DEFAULT_PRESET_TEMPLATES);
     }
+  };
+
+  const fetchVoiceTopicsList = async () => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("vaiswanara_query_topics") || "null");
+      if (Array.isArray(saved) && saved.length > 0) {
+        setVoiceTopics(saved);
+        return;
+      }
+    } catch (_) {}
+
+    try {
+      const res = await fetch(`${import.meta.env.BASE_URL}static/query_topics.json?_t=${Date.now()}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setVoiceTopics(data);
+          return;
+        }
+      }
+    } catch (_) {}
+
+    setVoiceTopics([
+      { id: "class_doubt", name: "Gurukulam Live Class Doubt", icon: "🎓" },
+      { id: "horoscope", name: "Horoscope (Janma Kundali) Analysis", icon: "📜" },
+      { id: "dasha_bhukti", name: "Dasha & Antardasha Predictions", icon: "⏳" },
+      { id: "gochara_transit", name: "Planetary Transit (Gochara) & Remedies", icon: "🪐" },
+      { id: "muhurtha", name: "Muhurtha (Auspicious Timing) Query", icon: "⏰" },
+      { id: "prashna_shastra", name: "Prashna Shastra (Horary) Query", icon: "☸️" },
+      { id: "retrograde_combustion", name: "Retrograde (Vakra) & Combust Planets", icon: "🔄" },
+      { id: "match_compatibility", name: "Kundali Matching & Dosha Parihara", icon: "💞" },
+      { id: "general_astrology", name: "General Astrology / Siddhanta Doubt", icon: "☀️" },
+    ]);
+  };
+
+  const handleSaveVoiceTopic = (e) => {
+    e.preventDefault();
+    if (!voiceTopicForm.name.trim()) return;
+    const tId = (voiceTopicForm.id.trim() || voiceTopicForm.name.trim().toLowerCase().replace(/[^a-z0-9]/g, "_")).replace(/^_+|_+$/g, "");
+    const updatedTopic = {
+      id: tId || `topic_${Date.now()}`,
+      name: voiceTopicForm.name.trim(),
+      icon: voiceTopicForm.icon.trim() || "🎓",
+    };
+
+    let updatedList;
+    if (isEditingVoiceTopic) {
+      updatedList = voiceTopics.map((t) => (t.id === voiceTopicForm.id ? updatedTopic : t));
+    } else {
+      updatedList = [...voiceTopics, updatedTopic];
+    }
+
+    setVoiceTopics(updatedList);
+    try {
+      localStorage.setItem("vaiswanara_query_topics", JSON.stringify(updatedList));
+      window.dispatchEvent(new Event("vaiswanara_query_topics_updated"));
+    } catch (_) {}
+
+    setMessage({ type: "success", text: `✅ Voice Query Topic ${isEditingVoiceTopic ? "updated" : "added"} successfully!` });
+    setVoiceTopicForm({ id: "", name: "", icon: "🎓" });
+    setIsEditingVoiceTopic(false);
+  };
+
+  const handleEditVoiceTopic = (t) => {
+    setVoiceTopicForm(t);
+    setIsEditingVoiceTopic(true);
+  };
+
+  const handleDeleteVoiceTopic = (id) => {
+    if (!window.confirm("Are you sure you want to delete this Query Topic?")) return;
+    const updatedList = voiceTopics.filter((t) => t.id !== id);
+    setVoiceTopics(updatedList);
+    try {
+      localStorage.setItem("vaiswanara_query_topics", JSON.stringify(updatedList));
+      window.dispatchEvent(new Event("vaiswanara_query_topics_updated"));
+    } catch (_) {}
+    setMessage({ type: "success", text: "✅ Query Topic removed successfully!" });
+  };
+
+  const handleMoveVoiceTopic = (index, dir) => {
+    const targetIdx = index + dir;
+    if (targetIdx < 0 || targetIdx >= voiceTopics.length) return;
+    const newList = [...voiceTopics];
+    const temp = newList[index];
+    newList[index] = newList[targetIdx];
+    newList[targetIdx] = temp;
+    setVoiceTopics(newList);
+    try {
+      localStorage.setItem("vaiswanara_query_topics", JSON.stringify(newList));
+      window.dispatchEvent(new Event("vaiswanara_query_topics_updated"));
+    } catch (_) {}
+  };
+
+  const handleResetVoiceTopics = () => {
+    if (!window.confirm("Reset all Voice Query Topics to default?")) return;
+    localStorage.removeItem("vaiswanara_query_topics");
+    window.dispatchEvent(new Event("vaiswanara_query_topics_updated"));
+    fetchVoiceTopicsList();
+    setMessage({ type: "success", text: "✅ Reset to default query topics successfully!" });
+  };
+
+  const handleDownloadVoiceTopicsJSON = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(voiceTopics, null, 2));
+    const dlAnchorElem = document.createElement("a");
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", "query_topics.json");
+    dlAnchorElem.click();
+    dlAnchorElem.remove();
+  };
+
+  const handleImportVoiceTopicsJSON = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setVoiceTopics(parsed);
+          localStorage.setItem("vaiswanara_query_topics", JSON.stringify(parsed));
+          window.dispatchEvent(new Event("vaiswanara_query_topics_updated"));
+          setMessage({ type: "success", text: `✅ Successfully imported ${parsed.length} query topics!` });
+        } else {
+          setMessage({ type: "error", text: "❌ Invalid JSON: Expected an array of topic objects." });
+        }
+      } catch (err) {
+        setMessage({ type: "error", text: `❌ Import failed: ${err.message}` });
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
   };
 
   const handleSelectTemplate = (tplId) => {
@@ -391,10 +929,9 @@ export function AdminPage({ onNavigate }) {
 
   const isStudentInBatch = (student, batch) => {
     if (!student || !batch) return false;
-    if (student.batch_id && student.batch_id === batch.id) return true;
-    if (!student.batch_id && Array.isArray(student.courses) && batch.course_id) {
-      return student.courses.includes(batch.course_id);
-    }
+    if (Array.isArray(student.batches) && student.batches.includes(batch.id)) return true;
+    if (student.batch_id && (student.batch_id === batch.id || student.batch_id === batch.name)) return true;
+    if (Array.isArray(student.courses) && (student.courses.includes(batch.name) || student.courses.includes(batch.id))) return true;
     return false;
   };
 
@@ -411,23 +948,49 @@ export function AdminPage({ onNavigate }) {
   const replaceMessagePlaceholders = (text, student, batch) => {
     if (!text) return "";
     let result = text;
-    if (student) {
-      const fullName = `${student.first_name || ""} ${student.last_name || ""}`.trim();
-      result = result
-        .replace(/\{student_name\}/g, fullName)
-        .replace(/\{first_name\}/g, student.first_name || "")
-        .replace(/\{last_name\}/g, student.last_name || "")
-        .replace(/\{whatsapp_number\}/g, student.whatsapp_number || "")
-        .replace(/\{language\}/g, student.language || "")
-        .replace(/\{course\}/g, Array.isArray(student.courses) ? student.courses.join(", ") : (student.courses || ""))
-        .replace(/\{batch_id\}/g, student.batch_id || "");
-    }
-    if (batch) {
-      result = result
-        .replace(/\{batch_name\}/g, batch.name || batch.id || "")
-        .replace(/\{batch_id\}/g, batch.id || "")
-        .replace(/\{course_name\}/g, batch.course_id || batch.course_name || "")
-        .replace(/\{whatsapp_group_link\}/g, batch.whatsapp_group_link || "");
+
+    // Use selected student, first student in list, or sample preview fallback
+    const st = student || (students && students.length > 0 ? students[0] : null) || {
+      first_name: "రాము",
+      last_name: "శర్మ",
+      whatsapp_number: "+91 9876543210",
+      language: "తెలుగు",
+      courses: ["జ్యోతిష్య ప్రాథమికం"],
+      batch_id: "JYOTISHA-2025"
+    };
+
+    const fullName = `${st.first_name || ""} ${st.last_name || ""}`.trim() || "రాము శర్మ";
+    result = result
+      .replace(/\{student_name\}/g, fullName)
+      .replace(/\{first_name\}/g, st.first_name || "రాము")
+      .replace(/\{last_name\}/g, st.last_name || "శర్మ")
+      .replace(/\{whatsapp_number\}/g, st.whatsapp_number || "+91 9876543210")
+      .replace(/\{language\}/g, st.language || "తెలుగు")
+      .replace(/\{course\}/g, Array.isArray(st.courses) ? st.courses.join(", ") : (st.courses || "జ్యోతిష్య ప్రాథమికం"))
+      .replace(/\{batch_id\}/g, st.batch_id || "JYOTISHA-2025");
+
+    // Use selected batch, first batch in list, or sample preview fallback
+    const bt = batch || (batchesList && batchesList.length > 0 ? batchesList[0] : null) || {
+      name: "జ్యోతిష తరగతులు 2025",
+      id: st.batch_id || "JYOTISHA-2025",
+      course_id: "JYOTISHA",
+      whatsapp_group_link: "https://chat.whatsapp.com/SampleGroupLink"
+    };
+
+    result = result
+      .replace(/\{batch_name\}/g, bt.name || bt.id || "జ్యోతిష తరగతులు 2025")
+      .replace(/\{batch_id\}/g, bt.id || "JYOTISHA-2025")
+      .replace(/\{course_name\}/g, bt.course_id || bt.course_name || "జ్యోతిష్య ప్రాథమికం")
+      .replace(/\{whatsapp_group_link\}/g, bt.whatsapp_group_link || "https://chat.whatsapp.com/SampleGroupLink");
+
+    // Replace custom placeholders from CSV / state
+    if (Array.isArray(customPlaceholders)) {
+      customPlaceholders.forEach(({ key, value }) => {
+        if (key) {
+          const regex = new RegExp(`\\{${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\}`, "g");
+          result = result.replace(regex, value || "");
+        }
+      });
     }
     return result;
   };
@@ -494,6 +1057,7 @@ export function AdminPage({ onNavigate }) {
         await fetchCoursesList();
         await fetchBatchesList();
         await fetchTemplatesList();
+        await fetchCustomPlaceholders();
         await fetchLibraryList();
         await fetchTickerList();
         if (data.inAppMessages) {
@@ -1151,7 +1715,7 @@ export function AdminPage({ onNavigate }) {
   const filteredLessons = filterPlaylist ? lessons.filter((l) => l.playlist === filterPlaylist) : lessons;
 
   // ── Students helpers ──────────────────────────────────────────────────────
-  const BLANK_STU = { first_name: "", last_name: "", whatsapp_number: "", country_code: "+91", language: "Kannada", courses: ["Jyotisha"], batch_id: "JK-2026-OCT", email: "", address: "" };
+  const BLANK_STU = { first_name: "", last_name: "", whatsapp_number: "", country_code: "+91", language: "Kannada", batch_id: "JK-2026-OCT", email: "", address: "" };
 
   const fetchStudentsList = async () => {
     setLoadingStudents(true);
@@ -1164,11 +1728,27 @@ export function AdminPage({ onNavigate }) {
     setLoadingStudents(false);
   };
 
+  const isBatchCurrentlyActive = (b) => {
+    if (!b) return false;
+    if (b.isActive === false || b.status === "inactive") return false;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const today = `${year}-${month}-${day}`;
+    if (b.start_date && today < b.start_date) return false;
+    if (b.end_date && today > b.end_date) return false;
+    return true;
+  };
+
   const openAddModal = () => {
     setEditingStudent(null);
+    const defaultBatch = batchesList.find(b => (b.language || "").toLowerCase() === "kannada" && isBatchCurrentlyActive(b))?.id || (batchesList[0]?.id || "");
     setStuForm({
       ...BLANK_STU,
-      batch_id: batchesList[0]?.id || "JK-2026-OCT"
+      language: "Kannada",
+      batch_id: defaultBatch,
+      batches: defaultBatch ? [defaultBatch] : [],
     });
     setStuFormErr("");
     setShowAddStudentForm(true);
@@ -1176,15 +1756,28 @@ export function AdminPage({ onNavigate }) {
 
   const openEditModal = (student) => {
     setEditingStudent(student);
-    const stuBatch = student.batch_id || (Array.isArray(student.batches) ? student.batches[0] : "") || (batchesList[0]?.id || "JK-2026-OCT");
+    const stuLang = student.language || "Kannada";
+    let initialBatches = [];
+    if (Array.isArray(student.batches) && student.batches.length > 0) {
+      initialBatches = [...student.batches];
+    } else if (student.batch_id) {
+      initialBatches = [student.batch_id];
+    } else if (Array.isArray(student.courses) && student.courses.length > 0) {
+      initialBatches = student.courses.map(c => batchesList.find(b => b.name === c || b.id === c)?.id || c).filter(Boolean);
+    }
+    if (initialBatches.length === 0 && batchesList.length > 0) {
+      const matchBatch = batchesList.find(b => (b.language || "").toLowerCase() === stuLang.toLowerCase() && isBatchCurrentlyActive(b)) || batchesList[0];
+      if (matchBatch) initialBatches = [matchBatch.id];
+    }
+
     setStuForm({
       first_name: student.first_name || "",
       last_name: student.last_name || "",
       whatsapp_number: student.whatsapp_number || "",
       country_code: student.country_code || "+91",
-      language: student.language || "Kannada",
-      courses: Array.isArray(student.courses) ? [...student.courses] : ["Jyotisha"],
-      batch_id: stuBatch,
+      language: stuLang,
+      batch_id: initialBatches[0] || "",
+      batches: initialBatches,
       email: student.email || "",
       address: student.address || "",
     });
@@ -1192,40 +1785,29 @@ export function AdminPage({ onNavigate }) {
     setShowAddStudentForm(true);
   };
 
-  const handleStuCourseToggle = (course) => {
-    setStuForm((prev) => {
-      const nextCourses = prev.courses.includes(course)
-        ? prev.courses.filter((c) => c !== course)
-        : [...prev.courses, course];
-
-      const primaryCourse = nextCourses[0] || "Jyotisha";
-      const matchingBatch = batchesList.find(b =>
-        b.course_id === primaryCourse || b.course_name === primaryCourse
-      );
-      return {
-        ...prev,
-        courses: nextCourses,
-        batch_id: matchingBatch?.id || prev.batch_id || batchesList[0]?.id || ""
-      };
-    });
-  };
-
   const handleStudentModalSave = async () => {
     if (!stuForm.first_name.trim()) { setStuFormErr("First Name is required."); return; }
     if (!stuForm.last_name.trim()) { setStuFormErr("Last Name is required."); return; }
     if (!stuForm.whatsapp_number.trim()) { setStuFormErr("WhatsApp number is required."); return; }
-    if (stuForm.courses.length === 0) { setStuFormErr("Select at least one course."); return; }
-    if (!stuForm.batch_id) { setStuFormErr("Please select an assigned batch."); return; }
+    const selectedBatches = Array.isArray(stuForm.batches) ? stuForm.batches : (stuForm.batch_id ? [stuForm.batch_id] : []);
+    if (selectedBatches.length === 0) { setStuFormErr("Please select at least one assigned batch."); return; }
 
     setStuSaving(true);
     setStuFormErr("");
     try {
+      const batchNames = selectedBatches.map(bId => batchesList.find(b => b.id === bId)?.name || bId);
+      const savePayload = {
+        ...stuForm,
+        batch_id: selectedBatches[0] || "",
+        batches: selectedBatches,
+        courses: batchNames,
+      };
       if (editingStudent) {
-        await updateStudent({ student_id: editingStudent.id, ...stuForm });
-        setStudents((prev) => prev.map((s) => s.id === editingStudent.id ? { ...s, ...stuForm } : s));
+        await updateStudent({ student_id: editingStudent.id, ...savePayload });
+        setStudents((prev) => prev.map((s) => s.id === editingStudent.id ? { ...s, ...savePayload } : s));
         setMessage({ type: "success", text: "✅ Student updated successfully!" });
       } else {
-        const res = await addStudentAdmin(stuForm);
+        const res = await addStudentAdmin(savePayload);
         if (res?.student) setStudents((prev) => [...prev, res.student]);
         else fetchStudentsList();
         setMessage({ type: "success", text: "✅ Student added successfully!" });
@@ -1235,6 +1817,58 @@ export function AdminPage({ onNavigate }) {
       setStuFormErr(err.message);
     }
     setStuSaving(false);
+  };
+
+  const [showRegFormSetting, setShowRegFormSetting] = useState(() => {
+    try {
+      return localStorage.getItem("vaiswanara_show_registration_form") !== "false";
+    } catch (_) {
+      return true;
+    }
+  });
+
+  const handleToggleShowRegForm = (enabled) => {
+    setShowRegFormSetting(enabled);
+    try {
+      localStorage.setItem("vaiswanara_show_registration_form", enabled ? "true" : "false");
+      window.dispatchEvent(new Event("vaiswanara_reg_setting_updated"));
+    } catch (e) {
+      console.error("Failed to save reg setting", e);
+    }
+    setMessage({
+      type: "success",
+      text: enabled ? "✅ Student Registration Form is now visible in Sidebar & Home screen." : "⚠️ Student Registration Form is now hidden and disabled in App."
+    });
+  };
+
+  const handleShareRegForm = () => {
+    const shareUrl = `${window.location.origin}${window.location.pathname}?register`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(shareUrl);
+      setMessage({
+        type: "success",
+        text: `🔗 Student Registration Form URL copied to clipboard: ${shareUrl}`
+      });
+    } else {
+      prompt("Copy Registration Link:", shareUrl);
+    }
+  };
+
+  const [adminWaNumber, setAdminWaNumber] = useState(() => {
+    try {
+      return localStorage.getItem("vaiswanara_admin_whatsapp") || "919482094290";
+    } catch (_) {
+      return "919482094290";
+    }
+  });
+
+  const handleSaveAdminWaNumber = (num) => {
+    setAdminWaNumber(num);
+    try {
+      let clean = String(num || "").replace(/[^0-9]/g, "");
+      if (clean.length === 10) clean = "91" + clean;
+      localStorage.setItem("vaiswanara_admin_whatsapp", clean || "919482094290");
+    } catch (_) { }
   };
 
   const handleApproveStudent = async (studentId) => {
@@ -1491,6 +2125,45 @@ export function AdminPage({ onNavigate }) {
           background: #e8d5f5;
           color: #8e44ad;
         }
+        .admin-subtabs-nav {
+          display: flex;
+          gap: 10px;
+          background: #f8fafc;
+          border-bottom: 1.5px solid #e2e8f0;
+          padding: 12px 20px;
+          flex-wrap: wrap;
+          align-items: center;
+        }
+        .admin-subtab-btn {
+          background: #ffffff;
+          border: 1.5px solid #cbd5e1;
+          border-radius: 20px;
+          padding: 7px 16px;
+          font-size: 13px;
+          font-weight: 700;
+          color: #475569;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          transition: all 0.2s ease;
+          font-family: inherit;
+        }
+        .admin-subtab-btn:hover {
+          background: #f1f5f9;
+          color: #0f172a;
+          border-color: #94a3b8;
+        }
+        .admin-subtab-btn.active {
+          background: #8e44ad;
+          color: #ffffff;
+          border-color: #8e44ad;
+          box-shadow: 0 2px 8px rgba(142, 68, 173, 0.25);
+        }
+        .admin-subtab-btn.active .admin-tab-badge {
+          background: rgba(255, 255, 255, 0.25);
+          color: #ffffff;
+        }
         .admin-tab-panel {
           background: #fff;
           border: 1px solid #e9ecef;
@@ -1630,71 +2303,419 @@ export function AdminPage({ onNavigate }) {
         )}
 
 
-        {/* ── Tab Navigation ── */}
+        {/* ── Main Tab Navigation (4 Clear Categorized Tabs) ── */}
         <div className="admin-tabs-nav">
           <button
-            className={`admin-tab-btn${activeTab === "messages" ? " active" : ""}`}
-            onClick={() => setActiveTab("messages")}
+            type="button"
+            className={`admin-tab-btn${activeTab === "general" ? " active" : ""}`}
+            onClick={() => setActiveTab("general")}
+          >
+            ⚙️ General
+            <span className="admin-tab-badge" style={{ background: "#e0e7ff", color: "#4338ca" }}>
+              {adminEnabledPages.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className={`admin-tab-btn${["messages", "whatsapp", "templates", "tickers"].includes(activeTab) ? " active" : ""}`}
+            onClick={() => {
+              if (!["messages", "whatsapp", "templates", "tickers"].includes(activeTab)) {
+                setActiveTab("messages");
+              }
+            }}
           >
             📣 Messages
-            <span className="admin-tab-badge">{inAppMessages.length}</span>
+            <span className="admin-tab-badge">
+              {inAppMessages.length + templatesList.length + tickerList.length}
+            </span>
           </button>
+
           <button
-            className={`admin-tab-btn${activeTab === "tickers" ? " active" : ""}`}
-            onClick={() => setActiveTab("tickers")}
-          >
-            🛎️ Tickers
-            <span className="admin-tab-badge">{tickerList.length}</span>
-          </button>
-          <button
-            className={`admin-tab-btn${activeTab === "lessons" ? " active" : ""}`}
-            onClick={() => setActiveTab("lessons")}
-          >
-            📖 Course/Lessons
-            <span className="admin-tab-badge">{lessons.length}</span>
-          </button>
-          <button
-            className={`admin-tab-btn${activeTab === "library" ? " active" : ""}`}
-            onClick={() => setActiveTab("library")}
-          >
-            📚 e-Library
-            <span className="admin-tab-badge">{library.length}</span>
-          </button>
-          <button
-            className={`admin-tab-btn${activeTab === "students" ? " active" : ""}`}
-            onClick={() => { setActiveTab("students"); if (students.length === 0) fetchStudentsList(); }}
-          >
-            🎓 Students
-            <span className="admin-tab-badge">{students.length}</span>
-          </button>
-          <button
-            className={`admin-tab-btn${activeTab === "templates" ? " active" : ""}`}
+            type="button"
+            className={`admin-tab-btn${["students", "lessons", "library"].includes(activeTab) ? " active" : ""}`}
             onClick={() => {
-              setActiveTab("templates");
-              if (templatesList.length === 0) fetchTemplatesList();
+              if (!["students", "lessons", "library"].includes(activeTab)) {
+                setActiveTab("students");
+                if (students.length === 0) fetchStudentsList();
+              }
             }}
           >
-            📋 Templates
-            <span className="admin-tab-badge">{templatesList.length}</span>
+            📖 e-PATA
+            <span className="admin-tab-badge">
+              {students.length + batchesList.length + lessons.length + library.length}
+            </span>
           </button>
+
           <button
-            className={`admin-tab-btn${activeTab === "whatsapp" ? " active" : ""}`}
+            type="button"
+            className={`admin-tab-btn${activeTab === "voice_topics" ? " active" : ""}`}
             onClick={() => {
-              setActiveTab("whatsapp");
-              if (students.length === 0) fetchStudentsList();
-              if (batchesList.length === 0) fetchBatchesList();
-              if (templatesList.length === 0) fetchTemplatesList();
+              setActiveTab("voice_topics");
+              if (voiceTopics.length === 0) fetchVoiceTopicsList();
             }}
           >
-            💬 WhatsApp Direct
-            <span className="admin-tab-badge" style={{ background: "#dcfce7", color: "#15803d", fontSize: "10.5px" }}>
-              FREE
+            🎙️ Voice Topics
+            <span className="admin-tab-badge" style={{ background: "#fed7aa", color: "#c2410c" }}>
+              {voiceTopics.length || 9}
             </span>
           </button>
         </div>
 
+        {/* ── Sub-Tab Navigation for 📣 Messages ── */}
+        {["messages", "whatsapp", "templates", "tickers"].includes(activeTab) && (
+          <div className="admin-subtabs-nav">
+            <button
+              type="button"
+              className={`admin-subtab-btn${activeTab === "messages" ? " active" : ""}`}
+              onClick={() => setActiveTab("messages")}
+            >
+              📩 In-App Messages
+              <span className="admin-tab-badge">{inAppMessages.length}</span>
+            </button>
+            <button
+              type="button"
+              className={`admin-subtab-btn${activeTab === "whatsapp" ? " active" : ""}`}
+              onClick={() => {
+                setActiveTab("whatsapp");
+                if (students.length === 0) fetchStudentsList();
+                if (batchesList.length === 0) fetchBatchesList();
+                if (templatesList.length === 0) fetchTemplatesList();
+              }}
+            >
+              💬 WhatsApp Direct
+              <span className="admin-tab-badge" style={{ background: "#dcfce7", color: "#15803d", fontSize: "10.5px" }}>
+                FREE
+              </span>
+            </button>
+            <button
+              type="button"
+              className={`admin-subtab-btn${activeTab === "templates" ? " active" : ""}`}
+              onClick={() => {
+                setActiveTab("templates");
+                if (templatesList.length === 0) fetchTemplatesList();
+              }}
+            >
+              📋 Templates
+              <span className="admin-tab-badge">{templatesList.length}</span>
+            </button>
+            <button
+              type="button"
+              className={`admin-subtab-btn${activeTab === "tickers" ? " active" : ""}`}
+              onClick={() => setActiveTab("tickers")}
+            >
+              🛎️ Tickers
+              <span className="admin-tab-badge">{tickerList.length}</span>
+            </button>
+          </div>
+        )}
+
+        {/* ── Sub-Tab Navigation for 📖 e-PATA ── */}
+        {["students", "lessons", "library"].includes(activeTab) && (
+          <div className="admin-subtabs-nav">
+            <button
+              type="button"
+              className={`admin-subtab-btn${activeTab === "students" ? " active" : ""}`}
+              onClick={() => {
+                setActiveTab("students");
+                if (students.length === 0) fetchStudentsList();
+              }}
+            >
+              🎓 Students
+              <span className="admin-tab-badge">{students.length}</span>
+            </button>
+            <button
+              type="button"
+              className={`admin-subtab-btn${activeTab === "lessons" ? " active" : ""}`}
+              onClick={() => {
+                setActiveTab("lessons");
+                if (batchesList.length === 0) fetchBatchesList();
+              }}
+            >
+              👥 Batches & Lessons
+              <span className="admin-tab-badge">{batchesList.length + lessons.length}</span>
+            </button>
+            <button
+              type="button"
+              className={`admin-subtab-btn${activeTab === "library" ? " active" : ""}`}
+              onClick={() => setActiveTab("library")}
+            >
+              📚 e-Library
+              <span className="admin-tab-badge">{library.length}</span>
+            </button>
+          </div>
+        )}
+
         {/* ── Tab Panels ── */}
         <div className="admin-tab-panel">
+          {/* ── GENERAL TAB ── */}
+          {activeTab === "general" && (
+            <div className="admin-card-body">
+              {/* Header Bar */}
+              <div
+                style={{
+                  marginBottom: "20px",
+                  borderBottom: "1px solid #e2e8f0",
+                  paddingBottom: "16px",
+                }}
+              >
+                <h3 style={{ margin: "0 0 4px 0", fontSize: "1.4rem", color: "#0f172a", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ fontSize: "1.5rem" }}>⚙️</span> General App Settings & Feature Visibility
+                </h3>
+                <p style={{ margin: 0, fontSize: "0.88rem", color: "#64748b" }}>
+                  Master controls to decide which features are globally enabled for Students across the Sidebar, Home Screen, and User Settings.
+                </p>
+              </div>
+
+              {/* Status Banner */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                  gap: "14px",
+                  marginBottom: "24px",
+                }}
+              >
+                <div
+                  style={{
+                    background: "linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)",
+                    border: "1.5px solid #c7d2fe",
+                    borderRadius: "12px",
+                    padding: "14px 18px",
+                  }}
+                >
+                  <div style={{ fontSize: "12px", fontWeight: "700", color: "#4338ca", textTransform: "uppercase" }}>
+                    Enabled Features
+                  </div>
+                  <div style={{ fontSize: "1.8rem", fontWeight: "800", color: "#312e81", marginTop: "4px" }}>
+                    {adminEnabledPages.length} <span style={{ fontSize: "1rem", fontWeight: "600", color: "#6366f1" }}>/ {ALL_CONFIGURABLE_PAGES.length}</span>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    background: showRegFormSetting ? "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)" : "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
+                    border: showRegFormSetting ? "1.5px solid #86efac" : "1.5px solid #fca5a5",
+                    borderRadius: "12px",
+                    padding: "14px 18px",
+                  }}
+                >
+                  <div style={{ fontSize: "12px", fontWeight: "700", color: showRegFormSetting ? "#166534" : "#991b1b", textTransform: "uppercase" }}>
+                    Registration Form
+                  </div>
+                  <div style={{ fontSize: "1.2rem", fontWeight: "800", color: showRegFormSetting ? "#14532d" : "#7f1d1d", marginTop: "6px" }}>
+                    {showRegFormSetting ? "🟢 Enabled (Open)" : "🔴 Hidden (Disabled)"}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    background: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)",
+                    border: "1.5px solid #fed7aa",
+                    borderRadius: "12px",
+                    padding: "14px 18px",
+                  }}
+                >
+                  <div style={{ fontSize: "12px", fontWeight: "700", color: "#9a3412", textTransform: "uppercase" }}>
+                    Admin WhatsApp Phone
+                  </div>
+                  <div style={{ fontSize: "1.15rem", fontWeight: "800", color: "#7c2d12", marginTop: "6px" }}>
+                    +{adminWaNumber}
+                  </div>
+                </div>
+              </div>
+
+              {/* 🛡️ Section 1: Visibility of Sidebar & Home Screen Pages */}
+              <div
+                style={{
+                  background: "#ffffff",
+                  border: "2px solid #e2e8f0",
+                  borderRadius: "14px",
+                  padding: "20px",
+                  marginBottom: "24px",
+                  boxShadow: "0 4px 14px rgba(0,0,0,0.03)",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", marginBottom: "16px" }}>
+                  <div>
+                    <h4 style={{ margin: "0 0 4px 0", color: "#1e293b", fontSize: "1.1rem", fontWeight: "700" }}>
+                      🛡️ Visibility of Sidebar/Home Screen Pages
+                    </h4>
+                    <p style={{ margin: 0, fontSize: "0.84rem", color: "#64748b" }}>
+                      Check items to make them visible to students. Unchecked items are hidden across Sidebar, Home cards, and Student Settings.
+                    </p>
+                  </div>
+
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    <button
+                      type="button"
+                      onClick={handleSelectAllPages}
+                      style={{ padding: "6px 14px", fontSize: "12.5px", background: "#f0fdf4", color: "#15803d", border: "1px solid #bbf7d0", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}
+                    >
+                      ☑️ Select All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDeselectAllPages}
+                      style={{ padding: "6px 14px", fontSize: "12.5px", background: "#fef2f2", color: "#b91c1c", border: "1px solid #fecaca", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}
+                    >
+                      ⬜ Deselect All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleResetPageVisibility}
+                      style={{ padding: "6px 14px", fontSize: "12.5px", background: "#f1f5f9", color: "#475569", border: "1px solid #cbd5e1", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}
+                    >
+                      🔄 Reset Defaults
+                    </button>
+                  </div>
+                </div>
+
+                {/* Grid of Page Checkbox Cards */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "12px" }}>
+                  {ALL_CONFIGURABLE_PAGES.map((page) => {
+                    const isEnabled = adminEnabledPages.includes(page.id);
+                    return (
+                      <div
+                        key={page.id}
+                        onClick={() => handleTogglePageVisibility(page.id)}
+                        style={{
+                          background: isEnabled ? "#f8fafc" : "#fafafa",
+                          border: isEnabled ? "1.5px solid #3b82f6" : "1px dashed #cbd5e1",
+                          borderRadius: "10px",
+                          padding: "12px 14px",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: "10px",
+                          transition: "all 0.2s ease",
+                          opacity: isEnabled ? 1 : 0.65,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <span style={{ fontSize: "1.5rem" }}>{page.icon}</span>
+                          <div>
+                            <div style={{ fontSize: "0.92rem", fontWeight: "700", color: isEnabled ? "#0f172a" : "#64748b" }}>
+                              {page.label}
+                            </div>
+                            <div style={{ fontSize: "11px", color: "#94a3b8" }}>
+                              {page.desc}
+                            </div>
+                          </div>
+                        </div>
+
+                        <input
+                          type="checkbox"
+                          checked={isEnabled}
+                          onChange={() => {}} // handled by parent div onClick
+                          style={{
+                            width: "18px",
+                            height: "18px",
+                            accentColor: "#3b82f6",
+                            cursor: "pointer",
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 🎓 Section 2: Student Registration Form Setting */}
+              <div
+                style={{
+                  background: "#ffffff",
+                  border: "1.5px solid #e2e8f0",
+                  borderRadius: "14px",
+                  padding: "18px 20px",
+                  marginBottom: "24px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "14px",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <span style={{ fontSize: "1.8rem" }}>🎓</span>
+                  <div>
+                    <h4 style={{ margin: "0 0 2px 0", color: "#1e293b", fontSize: "1rem", fontWeight: "700" }}>
+                      Public Student Registration Form
+                    </h4>
+                    <p style={{ margin: 0, fontSize: "0.84rem", color: "#64748b" }}>
+                      Enable or disable the online registration form link on Home and Sidebar.
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleShowRegForm(!showRegFormSetting)}
+                    style={{
+                      padding: "8px 18px",
+                      borderRadius: "8px",
+                      border: "none",
+                      background: showRegFormSetting ? "#16a34a" : "#dc2626",
+                      color: "#ffffff",
+                      fontWeight: "700",
+                      fontSize: "13px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {showRegFormSetting ? "🟢 Form Enabled" : "🔴 Form Disabled"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleShareRegForm}
+                    style={{ padding: "8px 14px", fontSize: "12.5px", background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", borderRadius: "8px", cursor: "pointer", fontWeight: "700" }}
+                  >
+                    🔗 Copy Link
+                  </button>
+                </div>
+              </div>
+
+              {/* 📱 Section 3: WhatsApp Admin Number Setting */}
+              <div
+                style={{
+                  background: "#ffffff",
+                  border: "1.5px solid #e2e8f0",
+                  borderRadius: "14px",
+                  padding: "18px 20px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "14px",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <span style={{ fontSize: "1.8rem" }}>📱</span>
+                  <div>
+                    <h4 style={{ margin: "0 0 2px 0", color: "#1e293b", fontSize: "1rem", fontWeight: "700" }}>
+                      Guru / Admin WhatsApp Phone Number
+                    </h4>
+                    <p style={{ margin: 0, fontSize: "0.84rem", color: "#64748b" }}>
+                      Default number for student queries, registrations, and direct support.
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    style={{ width: "180px", fontWeight: "700", color: "#166534" }}
+                    value={adminWaNumber}
+                    onChange={(e) => handleSaveAdminWaNumber(e.target.value)}
+                    placeholder="919482094290"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ── MESSAGES TAB ── */}
           {activeTab === "messages" && (
             <div className="admin-card-body">
@@ -1773,8 +2794,65 @@ export function AdminPage({ onNavigate }) {
                   />
                 </div>
                 <div style={{ marginBottom: "20px" }}>
-                  <label className="admin-label">Message Body</label>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                    <label className="admin-label" style={{ margin: 0 }}>Message Body</label>
+                    <span style={{ fontSize: "11px", color: "#64748b" }}>
+                      కర్సర్ ఉన్న చోట అమర్చడానికి క్లిక్ చేయండి:
+                    </span>
+                  </div>
+
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
+                    {[
+                      { tag: "{student_name}", label: "విద్యార్థి పేరు" },
+                      { tag: "{first_name}", label: "పేరు" },
+                      { tag: "{course}", label: "కోర్సు" },
+                      { tag: "{batch_id}", label: "బ్యాచ్ ID" },
+                    ].map((p) => (
+                      <button
+                        key={p.tag}
+                        type="button"
+                        onClick={() => insertPlaceholderAtCursor(p.tag, "msgBody")}
+                        style={{
+                          padding: "3px 8px",
+                          fontSize: "11.5px",
+                          fontFamily: "monospace",
+                          fontWeight: "600",
+                          background: "#e0f2fe",
+                          color: "#0369a1",
+                          border: "1px solid #bae6fd",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                        }}
+                        title={`${p.tag} (${p.label})`}
+                      >
+                        + {p.tag}
+                      </button>
+                    ))}
+                    {customPlaceholders.map((c) => (
+                      <button
+                        key={c.key}
+                        type="button"
+                        onClick={() => insertPlaceholderAtCursor(`{${c.key}}`, "msgBody")}
+                        style={{
+                          padding: "3px 8px",
+                          fontSize: "11.5px",
+                          fontFamily: "monospace",
+                          fontWeight: "600",
+                          background: "#fef3c7",
+                          color: "#92400e",
+                          border: "1px solid #fde68a",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                        }}
+                        title={`{${c.key}} -> ${c.value}`}
+                      >
+                        + {`{${c.key}}`}
+                      </button>
+                    ))}
+                  </div>
+
                   <textarea
+                    ref={msgBodyTextareaRef}
                     className="admin-input"
                     rows="3"
                     value={alertForm.body}
@@ -1811,6 +2889,32 @@ export function AdminPage({ onNavigate }) {
                     />
                   )}
                 </div>
+
+                {/* Live In-App Announcement Message Preview */}
+                {(alertForm.title || alertForm.body) && (
+                  <div style={{ background: "#f8fafc", padding: "16px", borderRadius: "12px", border: "1px dashed #cbd5e1", marginBottom: "20px" }}>
+                    <span style={{ fontSize: "11.5px", color: "#6b1170", fontWeight: "700", textTransform: "uppercase", display: "block", marginBottom: "8px" }}>
+                      📢 Live Announcement Preview (Real Data & Custom Placeholders Replaced):
+                    </span>
+                    <div style={{ background: "#ffffff", border: "1px solid #e9d5ff", borderRadius: "10px", padding: "16px", boxShadow: "0 2px 8px rgba(107, 17, 112, 0.05)" }}>
+                      {alertForm.title && (
+                        <h4 style={{ margin: "0 0 8px 0", color: "#4c1d95", fontSize: "1.05rem", fontWeight: "700" }}>
+                          {replaceMessagePlaceholders(alertForm.title, students[0] || null)}
+                        </h4>
+                      )}
+                      {alertForm.body && (
+                        <div style={{ fontSize: "13.5px", color: "#334155", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>
+                          {replaceMessagePlaceholders(alertForm.body, students[0] || null)}
+                        </div>
+                      )}
+                      {hasActionLink && alertForm.url && (
+                        <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid #f1f5f9", fontSize: "12.5px", color: "#6b1170", fontWeight: "600" }}>
+                          🔗 Action Link: <span style={{ textDecoration: "underline" }}>{replaceMessagePlaceholders(alertForm.url, students[0] || null)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Behavior Settings */}
                 <div
@@ -2266,32 +3370,11 @@ export function AdminPage({ onNavigate }) {
             </div>
           )}
 
-          {/* ── COURSE/LESSONS TAB ── */}
+          {/* ── BATCHES & LESSONS TAB ── */}
           {activeTab === "lessons" && (
             <div className="admin-card-body">
-              {/* ── Sub Tabs (Courses | Batches | Lessons) ── */}
+              {/* ── Sub Tabs (Batches | Lessons) ── */}
               <div style={{ display: "flex", gap: "10px", marginBottom: "24px", borderBottom: "2px solid #e2e8f0", paddingBottom: "12px" }}>
-                <button
-                  type="button"
-                  onClick={() => { setLessonSubTab("courses"); if (coursesList.length === 0) fetchCoursesList(); }}
-                  style={{
-                    padding: "9px 20px",
-                    borderRadius: "8px",
-                    border: "none",
-                    background: lessonSubTab === "courses" ? "#8e44ad" : "#f1f5f9",
-                    color: lessonSubTab === "courses" ? "#ffffff" : "#475569",
-                    fontWeight: "700",
-                    fontSize: "13.5px",
-                    cursor: "pointer",
-                    boxShadow: lessonSubTab === "courses" ? "0 2px 6px rgba(142, 68, 173, 0.2)" : "none",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px"
-                  }}
-                >
-                  📚 Courses ({coursesList.length})
-                </button>
-
                 <button
                   type="button"
                   onClick={() => { setLessonSubTab("batches"); if (batchesList.length === 0) fetchBatchesList(); }}
@@ -2335,143 +3418,14 @@ export function AdminPage({ onNavigate }) {
                 </button>
               </div>
 
-              {/* ── 1. COURSES SUB-TAB ── */}
-              {lessonSubTab === "courses" && (
-                <div>
-                  <form onSubmit={handleSaveCourse} style={{ marginBottom: "25px", background: "#f8f9fa", padding: "20px", borderRadius: "10px", border: "1px solid #e9ecef" }}>
-                    <h3 style={{ marginTop: 0, marginBottom: "16px", color: "#2c3e50" }}>
-                      {isEditingCourse ? "✏️ Edit Course" : "➕ Add New Course"}
-                    </h3>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "14px", marginBottom: "14px" }}>
-                      <div>
-                        <label className="admin-label">Course ID *</label>
-                        <input
-                          type="text"
-                          className="admin-input"
-                          placeholder="e.g. Jyotisha"
-                          value={courseForm.id}
-                          disabled={isEditingCourse}
-                          onChange={(e) => setCourseForm({ ...courseForm, id: e.target.value })}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="admin-label">Course Code *</label>
-                        <input
-                          type="text"
-                          className="admin-input"
-                          placeholder="e.g. JK"
-                          value={courseForm.code}
-                          onChange={(e) => setCourseForm({ ...courseForm, code: e.target.value })}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="admin-label">Language *</label>
-                        <select
-                          className="admin-input"
-                          value={courseForm.language}
-                          onChange={(e) => setCourseForm({ ...courseForm, language: e.target.value })}
-                        >
-                          <option value="Kannada">Kannada</option>
-                          <option value="Telugu">Telugu</option>
-                          <option value="English">English</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: "14px" }}>
-                      <label className="admin-label">Course Title *</label>
-                      <input
-                        type="text"
-                        className="admin-input"
-                        placeholder="e.g. Jyotisha - Kannada"
-                        value={courseForm.title}
-                        onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <div style={{ marginBottom: "16px" }}>
-                      <label className="admin-label">Description</label>
-                      <textarea
-                        className="admin-input"
-                        rows="2"
-                        placeholder="Comprehensive Vedic Astrology Course..."
-                        value={courseForm.description}
-                        onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
-                      />
-                    </div>
-
-                    <div style={{ display: "flex", gap: "10px" }}>
-                      <button type="submit" className="admin-btn admin-btn-success" style={{ padding: "8px 20px" }}>
-                        {isEditingCourse ? "Update Course" : "Save Course"}
-                      </button>
-                      {isEditingCourse && (
-                        <button
-                          type="button"
-                          className="admin-btn"
-                          style={{ background: "#7f8c8d", padding: "8px 16px" }}
-                          onClick={() => {
-                            setCourseForm({ id: "", code: "", title: "", language: "Kannada", description: "" });
-                            setIsEditingCourse(false);
-                          }}
-                        >
-                          Cancel
-                        </button>
-                      )}
-                    </div>
-                  </form>
-
-                  <h3 style={{ color: "#2c3e50", fontSize: "16px", marginBottom: "14px" }}>Available Courses</h3>
-                  {coursesList.length === 0 ? (
-                    <p style={{ color: "#7f8c8d" }}>No courses created yet.</p>
-                  ) : (
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "15px" }}>
-                      {coursesList.map((c) => (
-                        <div key={c.id} style={{ background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "10px", padding: "16px", boxShadow: "0 2px 6px rgba(0,0,0,0.03)" }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                            <span style={{ background: "#e0e7ff", color: "#3730a3", fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "6px" }}>
-                              CODE: {c.code || c.id}
-                            </span>
-                            <span style={{ background: "#fef3c7", color: "#92400e", fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "6px" }}>
-                              {c.language || "Kannada"}
-                            </span>
-                          </div>
-                          <h4 style={{ margin: "0 0 6px 0", color: "#0f172a", fontSize: "1.05rem" }}>{c.title} ({c.id})</h4>
-                          <p style={{ fontSize: "0.85rem", color: "#64748b", margin: "0 0 14px 0" }}>{c.description || "No description provided."}</p>
-
-                          <div style={{ display: "flex", gap: "8px" }}>
-                            <button
-                              type="button"
-                              onClick={() => handleEditCourse(c)}
-                              style={{ padding: "4px 10px", fontSize: "12px", background: "#3498db", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "600" }}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteCourseClick(c.id)}
-                              style={{ padding: "4px 10px", fontSize: "12px", background: "#e74c3c", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "600" }}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* ── 2. BATCHES SUB-TAB ── */}
+              {/* ── 1. BATCHES SUB-TAB ── */}
               {lessonSubTab === "batches" && (
                 <div>
                   <form onSubmit={handleSaveBatch} style={{ marginBottom: "25px", background: "#f8f9fa", padding: "20px", borderRadius: "10px", border: "1px solid #e9ecef" }}>
                     <h3 style={{ marginTop: 0, marginBottom: "16px", color: "#2c3e50" }}>
                       {isEditingBatch ? "✏️ Edit Batch" : "➕ Create New Batch"}
                     </h3>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "14px", marginBottom: "14px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1.2fr 2fr 1fr", gap: "14px", marginBottom: "14px" }}>
                       <div>
                         <label className="admin-label">Batch ID *</label>
                         <input
@@ -2489,28 +3443,23 @@ export function AdminPage({ onNavigate }) {
                         <input
                           type="text"
                           className="admin-input"
-                          placeholder="e.g. Jyotisha Kannada Oct 2026 Batch"
+                          placeholder="e.g. Jyotisha Kannada - October 2026 Batch"
                           value={batchForm.name}
                           onChange={(e) => setBatchForm({ ...batchForm, name: e.target.value })}
                           required
                         />
                       </div>
                       <div>
-                        <label className="admin-label">Course *</label>
+                        <label className="admin-label">Language *</label>
                         <select
                           className="admin-input"
-                          value={batchForm.course_id}
-                          onChange={(e) => setBatchForm({ ...batchForm, course_id: e.target.value })}
-                          required
+                          value={batchForm.language || "Kannada"}
+                          onChange={(e) => setBatchForm({ ...batchForm, language: e.target.value })}
                         >
-                          {coursesList.length > 0 ? (
-                            coursesList.map(c => <option key={c.id} value={c.id}>{c.title} ({c.id})</option>)
-                          ) : (
-                            <>
-                              <option value="Jyotisha">Jyotisha (JK)</option>
-                              <option value="ManaShastra">ManaShastra (MS)</option>
-                            </>
-                          )}
+                          <option value="Kannada">Kannada</option>
+                          <option value="Telugu">Telugu</option>
+                          <option value="English">English</option>
+                          <option value="Sanskrit">Sanskrit</option>
                         </select>
                       </div>
                     </div>
@@ -2521,7 +3470,7 @@ export function AdminPage({ onNavigate }) {
                         <input
                           type="date"
                           className="admin-input"
-                          value={batchForm.start_date}
+                          value={batchForm.start_date || ""}
                           onChange={(e) => setBatchForm({ ...batchForm, start_date: e.target.value })}
                         />
                       </div>
@@ -2530,7 +3479,7 @@ export function AdminPage({ onNavigate }) {
                         <input
                           type="date"
                           className="admin-input"
-                          value={batchForm.end_date}
+                          value={batchForm.end_date || ""}
                           onChange={(e) => setBatchForm({ ...batchForm, end_date: e.target.value })}
                         />
                       </div>
@@ -2538,8 +3487,8 @@ export function AdminPage({ onNavigate }) {
                         <label className="admin-label">Status</label>
                         <select
                           className="admin-input"
-                          value={batchForm.status || "active"}
-                          onChange={(e) => setBatchForm({ ...batchForm, status: e.target.value })}
+                          value={batchForm.status || (batchForm.isActive !== false ? "active" : "inactive")}
+                          onChange={(e) => setBatchForm({ ...batchForm, status: e.target.value, isActive: e.target.value === "active" })}
                         >
                           <option value="active">Active</option>
                           <option value="inactive">Inactive</option>
@@ -2547,14 +3496,37 @@ export function AdminPage({ onNavigate }) {
                       </div>
                     </div>
 
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "14px" }}>
+                      <div>
+                        <label className="admin-label">WhatsApp Group Link (Optional)</label>
+                        <input
+                          type="url"
+                          className="admin-input"
+                          placeholder="https://chat.whatsapp.com/..."
+                          value={batchForm.whatsapp_group_link || ""}
+                          onChange={(e) => setBatchForm({ ...batchForm, whatsapp_group_link: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className="admin-label">Google Meet Link (Optional)</label>
+                        <input
+                          type="url"
+                          className="admin-input"
+                          placeholder="https://meet.google.com/..."
+                          value={batchForm.google_meet_link || ""}
+                          onChange={(e) => setBatchForm({ ...batchForm, google_meet_link: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
                     <div style={{ marginBottom: "16px" }}>
-                      <label className="admin-label">WhatsApp Group Link (Optional)</label>
+                      <label className="admin-label">Remarks / Description (Optional)</label>
                       <input
-                        type="url"
+                        type="text"
                         className="admin-input"
-                        placeholder="https://chat.whatsapp.com/..."
-                        value={batchForm.whatsapp_group_link || ""}
-                        onChange={(e) => setBatchForm({ ...batchForm, whatsapp_group_link: e.target.value })}
+                        placeholder="e.g. Regular Kannada Jyotisha batch"
+                        value={batchForm.remarks || ""}
+                        onChange={(e) => setBatchForm({ ...batchForm, remarks: e.target.value })}
                       />
                     </div>
 
@@ -2568,7 +3540,7 @@ export function AdminPage({ onNavigate }) {
                           className="admin-btn"
                           style={{ background: "#7f8c8d", padding: "8px 16px" }}
                           onClick={() => {
-                            setBatchForm({ id: "", name: "", course_id: "Jyotisha", start_date: "", end_date: "", whatsapp_group_link: "", status: "active" });
+                            setBatchForm({ id: "", name: "", language: "Kannada", start_date: "", end_date: "", remarks: "", whatsapp_group_link: "", google_meet_link: "", status: "active", isActive: true });
                             setIsEditingBatch(false);
                           }}
                         >
@@ -2586,23 +3558,33 @@ export function AdminPage({ onNavigate }) {
                       {batchesList.map((b) => (
                         <div key={b.id} style={{ background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "10px", padding: "16px", boxShadow: "0 2px 6px rgba(0,0,0,0.03)" }}>
                           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                            <span style={{ background: "#dcfce7", color: "#15803d", fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "6px" }}>
-                              COURSE: {b.course_id || b.course_name}
+                            <span style={{ background: "#e0e7ff", color: "#3730a3", fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "6px" }}>
+                              🌐 {b.language || "Kannada"}
                             </span>
-                            <span style={{ background: b.status === "active" ? "#d1fae5" : "#fee2e2", color: b.status === "active" ? "#047857" : "#b91c1c", fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "6px" }}>
-                              {(b.status || "active").toUpperCase()}
+                            <span style={{ background: (b.status === "active" || b.isActive !== false) ? "#d1fae5" : "#fee2e2", color: (b.status === "active" || b.isActive !== false) ? "#047857" : "#b91c1c", fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "6px" }}>
+                              {((b.status || (b.isActive !== false ? "active" : "inactive"))).toUpperCase()}
                             </span>
                           </div>
                           <h4 style={{ margin: "0 0 6px 0", color: "#0f172a", fontSize: "1.05rem" }}>{b.name}</h4>
                           <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "0 0 8px 0" }}>ID: <strong>{b.id}</strong></p>
+                          {b.remarks && (
+                            <p style={{ fontSize: "0.82rem", color: "#475569", margin: "0 0 8px 0", fontStyle: "italic" }}>
+                              {b.remarks}
+                            </p>
+                          )}
                           {(b.start_date || b.end_date) && (
                             <p style={{ fontSize: "0.8rem", color: "#475569", margin: "0 0 10px 0" }}>
                               📅 {b.start_date || "N/A"} to {b.end_date || "N/A"}
                             </p>
                           )}
                           {b.whatsapp_group_link && (
-                            <p style={{ fontSize: "0.8rem", margin: "0 0 12px 0" }}>
+                            <p style={{ fontSize: "0.8rem", margin: "0 0 8px 0" }}>
                               💬 Group: <a href={b.whatsapp_group_link} target="_blank" rel="noreferrer" style={{ color: "#059669", fontWeight: "bold" }}>Open WhatsApp Link</a>
+                            </p>
+                          )}
+                          {b.google_meet_link && (
+                            <p style={{ fontSize: "0.8rem", margin: "0 0 12px 0" }}>
+                              📹 Meet: <a href={b.google_meet_link} target="_blank" rel="noreferrer" style={{ color: "#2563eb", fontWeight: "bold" }}>Open Google Meet</a>
                             </p>
                           )}
 
@@ -2629,245 +3611,254 @@ export function AdminPage({ onNavigate }) {
                 </div>
               )}
 
-              {/* ── 3. LESSONS SUB-TAB ── */}
+              {/* ── 2. LESSONS SUB-TAB ── */}
               {lessonSubTab === "lessons" && (
                 <>
                   {/* Add / Edit Lesson Form */}
                   <form onSubmit={handleSaveLesson} style={{ marginBottom: "30px", background: "#f8f9fa", padding: "20px", borderRadius: "8px", border: "1px solid #e9ecef" }}>
-                <h3 style={{ marginTop: 0, marginBottom: "15px", color: "#2c3e50" }}>
-                  {editingLessonId ? "✏️ Edit Lesson" : "➕ Add New Lesson"}
-                </h3>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
-                  <div>
-                    <label className="admin-label">Course / Playlist Name</label>
-                    <select
-                      className="admin-input"
-                      value={isCreatingNewPlaylist ? "__NEW__" : lessonForm.playlist}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === "__NEW__") {
-                          setIsCreatingNewPlaylist(true);
-                          setLessonForm({ ...lessonForm, playlist: "" });
-                        } else {
-                          setIsCreatingNewPlaylist(false);
-                          setLessonForm({ ...lessonForm, playlist: val });
-                        }
-                      }}
-                      required={!isCreatingNewPlaylist}
-                    >
-                      <option value="">-- Select Course / Playlist --</option>
-                      {coursesList.map((c) => (
-                        <option key={c.id} value={c.title || c.id}>
-                          📚 Course: {c.title} ({c.id})
-                        </option>
-                      ))}
-                      {uniquePlaylists.filter(p => !coursesList.some(c => (c.title === p || c.id === p))).map((p) => (
-                        <option key={p} value={p}>
-                          📺 Playlist: {p}
-                        </option>
-                      ))}
-                      <option value="__NEW__">➕ Create Custom Course / Playlist...</option>
-                    </select>
-                    {isCreatingNewPlaylist && (
+                    <h3 style={{ marginTop: 0, marginBottom: "15px", color: "#2c3e50" }}>
+                      {editingLessonId ? "✏️ Edit Lesson" : "➕ Add New Lesson"}
+                    </h3>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
+                      <div>
+                        <label className="admin-label">Playlist / Batch Name</label>
+                        <select
+                          className="admin-input"
+                          value={isCreatingNewPlaylist ? "__NEW__" : lessonForm.playlist}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === "__NEW__") {
+                              setIsCreatingNewPlaylist(true);
+                              setLessonForm({ ...lessonForm, playlist: "" });
+                            } else {
+                              setIsCreatingNewPlaylist(false);
+                              setLessonForm({ ...lessonForm, playlist: val });
+                            }
+                          }}
+                          required={!isCreatingNewPlaylist}
+                        >
+                          <option value="">-- Select Batch / Playlist --</option>
+                          {batchesList.map((b) => (
+                            <option key={b.id} value={b.name || b.id}>
+                              👥 Batch: {b.name} ({b.id})
+                            </option>
+                          ))}
+                          {uniquePlaylists.filter(p => !batchesList.some(b => (b.name === p || b.id === p))).map((p) => (
+                            <option key={p} value={p}>
+                              📺 Playlist: {p}
+                            </option>
+                          ))}
+                          <option value="__NEW__">➕ Create Custom Playlist...</option>
+                        </select>
+                        {isCreatingNewPlaylist && (
+                          <input
+                            type="text"
+                            className="admin-input"
+                            style={{ marginTop: "8px" }}
+                            value={lessonForm.playlist}
+                            onChange={(e) => setLessonForm({ ...lessonForm, playlist: e.target.value })}
+                            placeholder="Enter New Playlist Name"
+                            required
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <label className="admin-label">Video ID (YouTube)</label>
+                        <input
+                          type="text"
+                          className="admin-input"
+                          value={lessonForm.videoId}
+                          onChange={(e) => setLessonForm({ ...lessonForm, videoId: e.target.value })}
+                          placeholder="Ex: QSoXOqu8Z8E"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div style={{ marginBottom: "15px" }}>
+                      <label className="admin-label">Lesson Title</label>
                       <input
                         type="text"
                         className="admin-input"
-                        style={{ marginTop: "8px" }}
-                        value={lessonForm.playlist}
-                        onChange={(e) => setLessonForm({ ...lessonForm, playlist: e.target.value })}
-                        placeholder="Enter New Course / Playlist Name"
+                        value={lessonForm.title}
+                        onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
+                        placeholder="Ex: KA01: Course Introduction & Syllabus"
                         required
                       />
-                    )}
-                  </div>
-                  <div>
-                    <label className="admin-label">Video ID (YouTube)</label>
-                    <input
-                      type="text"
-                      className="admin-input"
-                      value={lessonForm.videoId}
-                      onChange={(e) => setLessonForm({ ...lessonForm, videoId: e.target.value })}
-                      placeholder="Ex: QSoXOqu8Z8E"
-                      required
-                    />
-                  </div>
-                </div>
-                <div style={{ marginBottom: "15px" }}>
-                  <label className="admin-label">Lesson Title</label>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    value={lessonForm.title}
-                    onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
-                    placeholder="Ex: KA01: Course Introduction & Syllabus"
-                    required
-                  />
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "15px", marginBottom: "20px" }}>
-                  <div>
-                    <label className="admin-label">PDF Notes Link (Optional)</label>
-                    <input
-                      type="text"
-                      className="admin-input"
-                      value={lessonForm.pdfLink}
-                      onChange={(e) => setLessonForm({ ...lessonForm, pdfLink: e.target.value })}
-                      placeholder="Ex: https://drive.google.com/file/d/..."
-                    />
-                  </div>
-                  <div>
-                    <label className="admin-label">Status</label>
-                    <select
-                      className="admin-input"
-                      value={lessonForm.status}
-                      onChange={(e) => setLessonForm({ ...lessonForm, status: e.target.value })}
-                    >
-                      <option value="ON">ON (Visible)</option>
-                      <option value="OFF">OFF (Hidden)</option>
-                    </select>
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: "10px" }}>
-                  <button type="submit" className="admin-btn admin-btn-success" style={{ flex: 1 }}>
-                    {editingLessonId ? "Update Lesson" : "Add Lesson"}
-                  </button>
-                  {editingLessonId && (
-                    <button
-                      type="button"
-                      className="admin-btn admin-btn-danger"
-                      onClick={() => {
-                        setEditingLessonId(null);
-                        setLessonForm({ playlist: "", title: "", videoId: "", pdfLink: "", status: "ON" });
-                        setIsCreatingNewPlaylist(false);
-                      }}
-                      style={{ flex: 1 }}
-                    >
-                      Cancel
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "15px", marginBottom: "20px" }}>
+                      <div>
+                        <label className="admin-label">PDF Notes Link (Optional)</label>
+                        <input
+                          type="text"
+                          className="admin-input"
+                          value={lessonForm.pdfLink}
+                          onChange={(e) => setLessonForm({ ...lessonForm, pdfLink: e.target.value })}
+                          placeholder="Ex: https://drive.google.com/file/d/..."
+                        />
+                      </div>
+                      <div>
+                        <label className="admin-label">Status</label>
+                        <select
+                          className="admin-input"
+                          value={lessonForm.status}
+                          onChange={(e) => setLessonForm({ ...lessonForm, status: e.target.value })}
+                        >
+                          <option value="ON">ON (Visible)</option>
+                          <option value="OFF">OFF (Hidden)</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <button type="submit" className="admin-btn admin-btn-success" style={{ flex: 1 }}>
+                        {editingLessonId ? "Update Lesson" : "Add Lesson"}
+                      </button>
+                      {editingLessonId && (
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-danger"
+                          onClick={() => {
+                            setEditingLessonId(null);
+                            setLessonForm({ playlist: "", title: "", videoId: "", pdfLink: "", status: "ON" });
+                            setIsCreatingNewPlaylist(false);
+                          }}
+                          style={{ flex: 1 }}
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+                  </form>
+
+                  {/* Import / Export Tools */}
+                  <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "25px", background: "#eafaf1", padding: "15px", borderRadius: "8px", border: "1px solid #b9e7c9", alignItems: "center" }}>
+                    <button onClick={handleExportJSON} className="admin-btn admin-btn-success" style={{ fontSize: "13px", padding: "8px 16px" }}>
+                      📤 Export JSON
                     </button>
+                    <button onClick={exportLessonsCSV} className="admin-btn admin-btn-success" style={{ fontSize: "13px", padding: "8px 16px" }}>
+                      📤 Export CSV
+                    </button>
+                    <button onClick={() => document.getElementById("lessons-import-file").click()} className="admin-btn" style={{ fontSize: "13px", padding: "8px 16px", background: "#f39c12" }}>
+                      📥 Import JSON / CSV
+                    </button>
+                    <input
+                      id="lessons-import-file"
+                      type="file"
+                      accept=".json,.csv"
+                      onChange={handleImportFile}
+                      style={{ display: "none" }}
+                    />
+                  </div>
+
+                  {/* Lessons List Table */}
+                  {lessons.length > 0 && (
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+                      <h3 style={{ margin: 0, color: "#2c3e50", fontSize: "1.1rem" }}>📋 Lessons List</h3>
+                      <select
+                        className="admin-input"
+                        style={{ width: "auto", minWidth: "200px", padding: "8px 12px" }}
+                        value={filterPlaylist}
+                        onChange={(e) => setFilterPlaylist(e.target.value)}
+                      >
+                        <option value="">-- All Playlists --</option>
+                        {uniquePlaylists.map((p) => (
+                          <option key={p} value={p}>{p}</option>
+                        ))}
+                      </select>
+                    </div>
                   )}
-                </div>
-              </form>
 
-              {/* Import / Export Tools */}
-              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "25px", background: "#eafaf1", padding: "15px", borderRadius: "8px", border: "1px solid #b9e7c9" }}>
-                <button onClick={handleExportJSON} className="admin-btn admin-btn-success" style={{ fontSize: "13px", padding: "8px 16px" }}>
-                  📤 Export JSON
-                </button>
-                <button onClick={exportLessonsCSV} className="admin-btn admin-btn-success" style={{ fontSize: "13px", padding: "8px 16px" }}>
-                  📤 Export CSV
-                </button>
-                <button onClick={() => document.getElementById("lessons-import-file").click()} className="admin-btn" style={{ fontSize: "13px", padding: "8px 16px", background: "#f39c12" }}>
-                  📥 Import JSON / CSV
-                </button>
-                <input
-                  id="lessons-import-file"
-                  type="file"
-                  accept=".json,.csv"
-                  onChange={handleImportFile}
-                  style={{ display: "none" }}
-                />
-              </div>
-
-              {/* Lessons List Table */}
-              {lessons.length > 0 && (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
-                  <h3 style={{ margin: 0, color: "#2c3e50", fontSize: "1.1rem" }}>📋 Lessons List</h3>
-                  <select
-                    className="admin-input"
-                    style={{ width: "auto", minWidth: "200px", padding: "8px 12px" }}
-                    value={filterPlaylist}
-                    onChange={(e) => setFilterPlaylist(e.target.value)}
-                  >
-                    <option value="">-- All Playlists --</option>
-                    {uniquePlaylists.map((p) => (
-                      <option key={p} value={p}>{p}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {filteredLessons.length > 0 ? (
-                <div className="admin-table-wrapper">
-                  <table className="admin-table">
-                    <thead>
-                      <tr>
-                        <th style={{ width: "200px" }}>Playlist</th>
-                        <th>Title</th>
-                        <th style={{ width: "120px" }}>Video ID</th>
-                        <th style={{ width: "80px" }}>Status</th>
-                        <th style={{ width: "280px" }}>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[...filteredLessons].reverse().map((lesson, idx, arr) => (
-                        <tr key={lesson.id} style={{ opacity: lesson.status === "OFF" ? 0.6 : 1 }}>
-                          <td style={{ fontWeight: "600", fontSize: "13px" }}>{lesson.playlist}</td>
-                          <td>
-                            <div style={{ fontWeight: "bold", color: "#2c3e50" }}>{lesson.title}</div>
-                            {lesson.pdfLink && (
-                              <a href={lesson.pdfLink} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#d35400", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "3px", marginTop: "4px" }}>
-                                📄 Notes Link
-                              </a>
-                            )}
-                          </td>
-                          <td style={{ fontFamily: "monospace", fontSize: "13px" }}>{lesson.videoId}</td>
-                          <td>
-                            <span style={{
-                              padding: "3px 8px",
-                              borderRadius: "12px",
-                              fontSize: "11px",
-                              fontWeight: "bold",
-                              color: "#fff",
-                              background: lesson.status === "ON" ? "#27ae60" : "#7f8c8d"
-                            }}>
-                              {lesson.status}
-                            </span>
-                          </td>
-                          <td>
-                            <div style={{ display: "flex", gap: "6px" }}>
-                              <button
-                                type="button"
-                                onClick={() => handleMoveLesson(lesson.id, "up")}
-                                disabled={idx === 0 || loading}
-                                className="admin-btn"
-                                title="Move Up"
-                                style={{ padding: "5px 8px", fontSize: "12px", background: (idx === 0 || loading) ? "#bdc3c7" : "#f39c12", cursor: (idx === 0 || loading) ? "not-allowed" : "pointer" }}
-                              >
-                                ⬆️
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleMoveLesson(lesson.id, "down")}
-                                disabled={idx === arr.length - 1 || loading}
-                                className="admin-btn"
-                                title="Move Down"
-                                style={{ padding: "5px 8px", fontSize: "12px", background: (idx === arr.length - 1 || loading) ? "#bdc3c7" : "#f39c12", cursor: (idx === arr.length - 1 || loading) ? "not-allowed" : "pointer" }}
-                              >
-                                ⬇️
-                              </button>
-                              <button
-                                onClick={() => handleEditLesson(lesson)}
-                                className="admin-btn"
-                                style={{ padding: "5px 10px", fontSize: "12px", background: "#3498db" }}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDeleteLesson(lesson.id)}
-                                className="admin-btn admin-btn-danger"
-                                style={{ padding: "5px 10px", fontSize: "12px" }}
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p style={{ color: "#7f8c8d" }}>{lessons.length > 0 ? "No lessons match this playlist." : "No lessons found yet."}</p>
-              )}
+                  {filteredLessons.length > 0 ? (
+                    <div className="admin-table-wrapper">
+                      <table className="admin-table">
+                        <thead>
+                          <tr>
+                            <th style={{ width: "200px" }}>Playlist</th>
+                            <th>Title</th>
+                            <th style={{ width: "120px" }}>Video ID</th>
+                            <th style={{ width: "80px" }}>Status</th>
+                            <th style={{ width: "280px" }}>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[...filteredLessons].reverse().map((lesson, idx, arr) => (
+                            <tr key={lesson.id} style={{ opacity: lesson.status === "OFF" ? 0.6 : 1 }}>
+                              <td style={{ fontWeight: "600", fontSize: "13px" }}>{lesson.playlist}</td>
+                              <td>
+                                <div style={{ fontWeight: "bold", color: "#2c3e50" }}>{lesson.title}</div>
+                                {lesson.pdfLink && (
+                                  <a href={lesson.pdfLink} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#d35400", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "3px", marginTop: "4px" }}>
+                                    📄 Notes Link
+                                  </a>
+                                )}
+                              </td>
+                              <td style={{ fontFamily: "monospace", fontSize: "13px" }}>{lesson.videoId}</td>
+                              <td>
+                                <span style={{
+                                  padding: "3px 8px",
+                                  borderRadius: "12px",
+                                  fontSize: "11px",
+                                  fontWeight: "bold",
+                                  color: "#fff",
+                                  background: lesson.status === "ON" ? "#27ae60" : "#7f8c8d"
+                                }}>
+                                  {lesson.status}
+                                </span>
+                              </td>
+                              <td>
+                                <div style={{ display: "flex", gap: "6px" }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleMoveLesson(lesson.id, "up")}
+                                    disabled={idx === 0 || loading}
+                                    className="admin-btn"
+                                    title="Move Up"
+                                    style={{ padding: "5px 8px", fontSize: "12px", background: (idx === 0 || loading) ? "#bdc3c7" : "#f39c12", cursor: (idx === 0 || loading) ? "not-allowed" : "pointer" }}
+                                  >
+                                    ⬆️
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleMoveLesson(lesson.id, "down")}
+                                    disabled={idx === arr.length - 1 || loading}
+                                    className="admin-btn"
+                                    title="Move Down"
+                                    style={{ padding: "5px 8px", fontSize: "12px", background: (idx === arr.length - 1 || loading) ? "#bdc3c7" : "#f39c12", cursor: (idx === arr.length - 1 || loading) ? "not-allowed" : "pointer" }}
+                                  >
+                                    ⬇️
+                                  </button>
+                                  <button
+                                    onClick={() => handleEditLesson(lesson)}
+                                    className="admin-btn"
+                                    style={{ padding: "5px 10px", fontSize: "12px", background: "#3498db" }}
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteLesson(lesson.id)}
+                                    className="admin-btn admin-btn-danger"
+                                    style={{ padding: "5px 10px", fontSize: "12px" }}
+                                  >
+                                    Delete
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenShareLessonModal(lesson)}
+                                    className="admin-btn"
+                                    style={{ padding: "5px 10px", fontSize: "12px", background: "#27ae60", color: "#fff", display: "inline-flex", alignItems: "center", gap: "4px" }}
+                                    title="వాట్సాప్ ద్వారా షేర్ చేయండి"
+                                  >
+                                    Share
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p style={{ color: "#7f8c8d" }}>{lessons.length > 0 ? "No lessons match this playlist." : "No lessons found yet."}</p>
+                  )}
                 </>
               )}
             </div>
@@ -3123,7 +4114,88 @@ export function AdminPage({ onNavigate }) {
                     Manage and view all enrolled students.
                   </p>
                 </div>
-                <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+                  {/* Display Registration Form Toggle Checkbox */}
+                  <label
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      background: showRegFormSetting ? "#ecfdf5" : "#fef2f2",
+                      border: showRegFormSetting ? "1.5px solid #10b981" : "1.5px solid #ef4444",
+                      color: showRegFormSetting ? "#065f46" : "#991b1b",
+                      padding: "7px 14px",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                      fontWeight: "700",
+                      userSelect: "none",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                      transition: "all 0.2s ease",
+                    }}
+                    title="Enable or disable Student Registration Form across Sidebar, Home screen, and URL"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={showRegFormSetting}
+                      onChange={(e) => handleToggleShowRegForm(e.target.checked)}
+                      style={{ width: "16px", height: "16px", cursor: "pointer", accentColor: "#10b981" }}
+                    />
+                    <span>Display Registration form</span>
+                  </label>
+
+                  {/* Admin WhatsApp Number Field */}
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      background: "#f8fafc",
+                      padding: "6px 10px",
+                      borderRadius: "8px",
+                      border: "1px solid #cbd5e1",
+                      fontSize: "12.5px"
+                    }}
+                    title="Set Admin WhatsApp Number (e.g. 919876543210) for receiving student registration notifications"
+                  >
+                    <span style={{ color: "#475569", fontWeight: "700" }}>📱 Admin WA:</span>
+                    <input
+                      type="text"
+                      placeholder="e.g. 919876543210"
+                      value={adminWaNumber}
+                      onChange={(e) => handleSaveAdminWaNumber(e.target.value)}
+                      style={{
+                        width: "130px",
+                        padding: "4px 8px",
+                        fontSize: "12px",
+                        borderRadius: "6px",
+                        border: "1px solid #94a3b8",
+                        outline: "none"
+                      }}
+                    />
+                  </div>
+
+                  {/* Share Form Button (Placed right before + Add button) */}
+                  <button
+                    type="button"
+                    className="admin-btn"
+                    onClick={handleShareRegForm}
+                    style={{
+                      background: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)",
+                      color: "#ffffff",
+                      padding: "9px 15px",
+                      fontSize: "13px",
+                      fontWeight: "700",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      boxShadow: "0 2px 6px rgba(2, 132, 199, 0.25)"
+                    }}
+                    title="Copy Student Registration Form URL to clipboard"
+                  >
+                    🔗 Share Form
+                  </button>
+
                   <button
                     type="button"
                     className="admin-btn admin-btn-success"
@@ -3235,8 +4307,7 @@ export function AdminPage({ onNavigate }) {
                         <th>Name</th>
                         <th>WhatsApp</th>
                         <th>Language</th>
-                        <th>Courses</th>
-                        <th>Batch</th>
+                        <th>Assigned Batches</th>
                         <th>Status</th>
                         <th>Email</th>
                         <th>Time</th>
@@ -3248,7 +4319,9 @@ export function AdminPage({ onNavigate }) {
                         const cleanWa = (student.whatsapp_number || "").replace(/[^0-9]/g, "");
                         const fullWa = `${student.country_code || "+91"} ${student.whatsapp_number || ""}`;
                         const waLink = cleanWa ? `https://wa.me/${cleanWa}` : null;
-                        const bId = student.batch_id || (Array.isArray(student.batches) ? student.batches[0] : "") || "-";
+                        const stuBatches = Array.isArray(student.batches) && student.batches.length > 0
+                          ? student.batches
+                          : (student.batch_id ? [student.batch_id] : (Array.isArray(student.courses) ? student.courses : [student.courses]));
                         return (
                           <tr key={student.id || student.whatsapp_number}>
                             <td>
@@ -3267,15 +4340,29 @@ export function AdminPage({ onNavigate }) {
                             </td>
                             <td>
                               <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
-                                {Array.isArray(student.courses) ? student.courses.map((c) => (
-                                  <span key={c} style={{ background: "#e8f8f5", color: "#117864", padding: "3px 8px", borderRadius: "6px", fontSize: "11.5px", fontWeight: "600" }}>{c}</span>
-                                )) : <span style={{ fontSize: "12px" }}>{student.courses}</span>}
+                                {stuBatches.filter(Boolean).map((bId) => {
+                                  const bObj = batchesList.find(b => b.id === bId || b.name === bId);
+                                  const label = bObj?.name || bId;
+                                  return (
+                                    <span
+                                      key={bId}
+                                      style={{
+                                        background: "#f3e8ff",
+                                        color: "#6b21a8",
+                                        padding: "3px 8px",
+                                        borderRadius: "6px",
+                                        fontSize: "11.5px",
+                                        fontWeight: "700",
+                                        border: "1px solid #e9d5ff",
+                                        display: "inline-block"
+                                      }}
+                                      title={`Batch ID: ${bObj?.id || bId}`}
+                                    >
+                                      🏷️ {label}
+                                    </span>
+                                  );
+                                })}
                               </div>
-                            </td>
-                            <td>
-                              <span style={{ background: "#fef3c7", color: "#92400e", padding: "3px 8px", borderRadius: "6px", fontSize: "11.5px", fontWeight: "700" }}>
-                                {bId}
-                              </span>
                             </td>
                             <td>
                               {(() => {
@@ -3599,10 +4686,53 @@ export function AdminPage({ onNavigate }) {
 
                   {/* Message Input */}
                   <div>
-                    <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#334155", marginBottom: "6px" }}>
-                      Message Content *
-                    </label>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#334155", margin: 0 }}>
+                        Message Content *
+                      </label>
+                      <span style={{ fontSize: "11px", color: "#64748b" }}>
+                        కర్సర్ ఉన్న చోట అమర్చడానికి క్లిక్ చేయండి:
+                      </span>
+                    </div>
+
+                    <div style={{ marginTop: "6px", marginBottom: "8px", display: "flex", gap: "6px", flexWrap: "wrap", alignItems: "center" }}>
+                      <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>Insert Tag:</span>
+                      {["first_name", "last_name", "student_name", "course", "batch_id", "whatsapp_number"].map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => insertPlaceholderAtCursor(`{${tag}}`, "wa")}
+                          style={{ padding: "3px 8px", fontSize: "11.5px", background: "#f0fdf4", color: "#047857", border: "1px solid #86efac", borderRadius: "6px", cursor: "pointer", fontWeight: "700" }}
+                          title={`{${tag}}`}
+                        >
+                          +{tag}
+                        </button>
+                      ))}
+                      {customPlaceholders.map((c) => (
+                        <button
+                          key={c.key}
+                          type="button"
+                          onClick={() => insertPlaceholderAtCursor(`{${c.key}}`, "wa")}
+                          style={{
+                            padding: "3px 8px",
+                            fontSize: "11.5px",
+                            fontFamily: "monospace",
+                            fontWeight: "600",
+                            background: "#fef3c7",
+                            color: "#92400e",
+                            border: "1px solid #fde68a",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                          }}
+                          title={`{${c.key}} -> ${c.value}`}
+                        >
+                          + {`{${c.key}}`}
+                        </button>
+                      ))}
+                    </div>
+
                     <textarea
+                      ref={waTextareaRef}
                       rows="5"
                       className="admin-input"
                       value={waMessageText}
@@ -3610,19 +4740,6 @@ export function AdminPage({ onNavigate }) {
                       placeholder="Enter WhatsApp message..."
                       style={{ fontFamily: "inherit" }}
                     ></textarea>
-                    <div style={{ marginTop: "6px", display: "flex", gap: "6px", flexWrap: "wrap", alignItems: "center" }}>
-                      <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>Insert Tag:</span>
-                      {["first_name", "last_name", "student_name", "course", "batch_id"].map(tag => (
-                        <button
-                          key={tag}
-                          type="button"
-                          onClick={() => setWaMessageText(prev => prev + ` {${tag}}`)}
-                          style={{ padding: "3px 8px", fontSize: "11.5px", background: "#f0fdf4", color: "#047857", border: "1px solid #86efac", borderRadius: "4px", cursor: "pointer", fontWeight: "700" }}
-                        >
-                          +{tag}
-                        </button>
-                      ))}
-                    </div>
                   </div>
 
                   {/* Live Message Preview */}
@@ -3741,10 +4858,69 @@ export function AdminPage({ onNavigate }) {
 
                   {/* Message Input */}
                   <div>
-                    <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#334155", marginBottom: "6px" }}>
-                      Batch Announcement Message Content *
-                    </label>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#334155", margin: 0 }}>
+                        Batch Announcement Message Content *
+                      </label>
+                      <span style={{ fontSize: "11px", color: "#64748b" }}>
+                        కర్సర్ ఉన్న చోట అమర్చడానికి క్లిక్ చేయండి:
+                      </span>
+                    </div>
+
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
+                      {[
+                        { tag: "{batch_name}", label: "బ్యాచ్ పేరు" },
+                        { tag: "{batch_id}", label: "బ్యాచ్ ID" },
+                        { tag: "{course_name}", label: "కోర్సు" },
+                        { tag: "{whatsapp_group_link}", label: "గ్రూప్ లింక్" },
+                        { tag: "{first_name}", label: "విద్యార్థి పేరు" },
+                        { tag: "{student_name}", label: "పూర్తి పేరు" },
+                      ].map((p) => (
+                        <button
+                          key={p.tag}
+                          type="button"
+                          onClick={() => insertPlaceholderAtCursor(p.tag, "wa")}
+                          style={{
+                            padding: "3px 8px",
+                            fontSize: "11.5px",
+                            fontFamily: "monospace",
+                            fontWeight: "600",
+                            background: "#e0f2fe",
+                            color: "#0369a1",
+                            border: "1px solid #bae6fd",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                          }}
+                          title={`${p.tag} (${p.label})`}
+                        >
+                          + {p.tag}
+                        </button>
+                      ))}
+                      {customPlaceholders.map((c) => (
+                        <button
+                          key={c.key}
+                          type="button"
+                          onClick={() => insertPlaceholderAtCursor(`{${c.key}}`, "wa")}
+                          style={{
+                            padding: "3px 8px",
+                            fontSize: "11.5px",
+                            fontFamily: "monospace",
+                            fontWeight: "600",
+                            background: "#fef3c7",
+                            color: "#92400e",
+                            border: "1px solid #fde68a",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                          }}
+                          title={`{${c.key}} -> ${c.value}`}
+                        >
+                          + {`{${c.key}}`}
+                        </button>
+                      ))}
+                    </div>
+
                     <textarea
+                      ref={waTextareaRef}
                       rows="5"
                       className="admin-input"
                       value={waMessageText}
@@ -3889,34 +5065,35 @@ export function AdminPage({ onNavigate }) {
               {/* Header Bar */}
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "24px",
-                  flexWrap: "wrap",
-                  gap: "16px",
+                  marginBottom: "20px",
                   borderBottom: "1px solid #e2e8f0",
                   paddingBottom: "16px",
                 }}
               >
-                <div>
-                  <h3 style={{ margin: 0, fontSize: "1.4rem", color: "#0f172a", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ fontSize: "1.5rem" }}>📋</span> Reusable Message Templates
-                  </h3>
-                  <p style={{ margin: "4px 0 0 0", fontSize: "0.88rem", color: "#64748b" }}>
-                    Manage pre-written notification and class reminder templates for WhatsApp and In-App messaging.
-                  </p>
-                </div>
+                <h3 style={{ margin: "0 0 4px 0", fontSize: "1.4rem", color: "#0f172a", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ fontSize: "1.5rem" }}>📋</span> Reusable Message Templates
+                </h3>
+                <p style={{ margin: 0, fontSize: "0.88rem", color: "#64748b" }}>
+                  Manage pre-written notification and class reminder templates for WhatsApp and In-App messaging.
+                </p>
+              </div>
 
-                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    placeholder="🔍 Search templates..."
-                    value={tplSearch}
-                    onChange={(e) => setTplSearch(e.target.value)}
-                    style={{ padding: "8px 14px", fontSize: "13.5px", width: "220px" }}
-                  />
+              {/* Action Toolbar Row */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: "#f8fafc",
+                  padding: "14px 18px",
+                  borderRadius: "12px",
+                  border: "1px solid #e2e8f0",
+                  marginBottom: "24px"
+                }}
+              >
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
                   <button
                     type="button"
                     onClick={() => {
@@ -3925,10 +5102,71 @@ export function AdminPage({ onNavigate }) {
                       setShowManageTemplatesModal(true);
                     }}
                     className="admin-btn admin-btn-success"
-                    style={{ padding: "9px 18px", fontSize: "13.5px" }}
+                    style={{ padding: "8px 16px", fontSize: "13px", fontWeight: "700" }}
                   >
-                    + Create New Template
+                    ➕ Create New Template
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById("templates-import-file-input").click()}
+                    className="admin-btn"
+                    style={{ padding: "8px 14px", fontSize: "12.5px", background: "#3b82f6", color: "#ffffff", fontWeight: "600" }}
+                  >
+                    📥 Import Templates
+                  </button>
+                  <input
+                    id="templates-import-file-input"
+                    type="file"
+                    accept=".json,.csv"
+                    onChange={handleImportTemplatesFile}
+                    style={{ display: "none" }}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={exportTemplatesJSON}
+                    className="admin-btn"
+                    style={{ padding: "8px 14px", fontSize: "12.5px", background: "#0284c7", color: "#ffffff", fontWeight: "600" }}
+                  >
+                    📤 Export Templates
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById("templates-placeholders-csv-input").click()}
+                    className="admin-btn"
+                    style={{ padding: "8px 14px", fontSize: "12.5px", background: "#6366f1", color: "#ffffff", fontWeight: "600" }}
+                  >
+                    📥 Import Placeholders
+                  </button>
+                  <input
+                    id="templates-placeholders-csv-input"
+                    type="file"
+                    accept=".csv,.txt"
+                    onChange={handleCustomPlaceholdersCSVUpload}
+                    style={{ display: "none" }}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={exportCustomPlaceholdersCSV}
+                    className="admin-btn"
+                    style={{ padding: "8px 14px", fontSize: "12.5px", background: "#8b5cf6", color: "#ffffff", fontWeight: "600" }}
+                  >
+                    📤 Export Placeholders
+                  </button>
+                </div>
+
+                <div style={{ minWidth: "200px" }}>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    placeholder="🔍 Search templates..."
+                    value={tplSearch}
+                    onChange={(e) => setTplSearch(e.target.value)}
+                    style={{ padding: "8px 12px", fontSize: "13px" }}
+                  />
                 </div>
               </div>
 
@@ -4095,6 +5333,306 @@ export function AdminPage({ onNavigate }) {
                   </div>
                 );
               })()}
+            </div>
+          )}
+
+          {/* ── VOICE QUERY TOPICS TAB ── */}
+          {activeTab === "voice_topics" && (
+            <div className="admin-card-body">
+              {/* Header Bar */}
+              <div
+                style={{
+                  marginBottom: "20px",
+                  borderBottom: "1px solid #e2e8f0",
+                  paddingBottom: "16px",
+                }}
+              >
+                <h3 style={{ margin: "0 0 4px 0", fontSize: "1.4rem", color: "#0f172a", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ fontSize: "1.5rem" }}>🎙️</span> Voice Query Topics & WhatsApp Settings
+                </h3>
+                <p style={{ margin: 0, fontSize: "0.88rem", color: "#64748b" }}>
+                  Customize the question categories shown to students in the <strong>e-Voice Query</strong> speech-to-text page.
+                </p>
+              </div>
+
+              {/* Admin WhatsApp Number Config Box */}
+              <div
+                style={{
+                  background: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)",
+                  border: "1.5px solid #fed7aa",
+                  borderRadius: "14px",
+                  padding: "16px 20px",
+                  marginBottom: "24px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "14px",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1, minWidth: "280px" }}>
+                  <span style={{ fontSize: "1.8rem" }}>📱</span>
+                  <div>
+                    <h4 style={{ margin: 0, color: "#9a3412", fontSize: "1rem", fontWeight: "700" }}>
+                      Destination WhatsApp Number for Voice Queries
+                    </h4>
+                    <p style={{ margin: "2px 0 0 0", fontSize: "0.82rem", color: "#c2410c" }}>
+                      Students' dictated voice queries will be dispatched directly to this WhatsApp number.
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    style={{ width: "170px", background: "#ffffff", fontWeight: "700", color: "#15803d" }}
+                    value={adminWaNumber}
+                    onChange={(e) => handleSaveAdminWaNumber(e.target.value)}
+                    placeholder="919482094290"
+                  />
+                  <span style={{ fontSize: "12px", color: "#166534", fontWeight: "700", background: "#dcfce7", padding: "6px 12px", borderRadius: "8px" }}>
+                    ✔️ Auto-Saved
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Toolbar Row */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: "#f8fafc",
+                  padding: "14px 18px",
+                  borderRadius: "12px",
+                  border: "1px solid #e2e8f0",
+                  marginBottom: "20px",
+                }}
+              >
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setVoiceTopicForm({ id: "", name: "", icon: "🎓" });
+                      setIsEditingVoiceTopic(false);
+                    }}
+                    className="admin-btn admin-btn-success"
+                    style={{ background: "#d35400", borderColor: "#b84700" }}
+                  >
+                    ➕ Add New Query Topic
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDownloadVoiceTopicsJSON}
+                    className="admin-btn admin-btn-secondary"
+                  >
+                    📥 Download JSON
+                  </button>
+                  <label className="admin-btn admin-btn-secondary" style={{ cursor: "pointer", margin: 0 }}>
+                    📤 Import JSON
+                    <input type="file" accept=".json" onChange={handleImportVoiceTopicsJSON} style={{ display: "none" }} />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleResetVoiceTopics}
+                    className="admin-btn admin-btn-secondary"
+                    style={{ color: "#c0392b" }}
+                  >
+                    🔄 Reset Defaults
+                  </button>
+                </div>
+
+                <div style={{ minWidth: "220px" }}>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    placeholder="🔍 Filter topics..."
+                    value={voiceTopicFilter}
+                    onChange={(e) => setVoiceTopicFilter(e.target.value)}
+                    style={{ padding: "8px 12px", fontSize: "13px" }}
+                  />
+                </div>
+              </div>
+
+              {/* Add / Edit Topic Form */}
+              <div
+                style={{
+                  background: "#ffffff",
+                  border: "2px solid #fdba74",
+                  borderRadius: "14px",
+                  padding: "20px",
+                  marginBottom: "24px",
+                  boxShadow: "0 4px 16px rgba(211, 84, 0, 0.08)",
+                }}
+              >
+                <h4 style={{ margin: "0 0 14px 0", color: "#8a3b24", fontSize: "1.05rem", fontWeight: "700" }}>
+                  {isEditingVoiceTopic ? "✏️ Edit Query Topic" : "➕ Create New Query Topic"}
+                </h4>
+
+                <form onSubmit={handleSaveVoiceTopic}>
+                  <div style={{ display: "grid", gridTemplateColumns: "100px 1fr 1fr", gap: "14px", marginBottom: "14px" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12.5px", fontWeight: "700", color: "#475569", marginBottom: "4px" }}>
+                        Icon *
+                      </label>
+                      <input
+                        type="text"
+                        className="admin-input"
+                        style={{ textAlign: "center", fontSize: "1.3rem" }}
+                        value={voiceTopicForm.icon}
+                        onChange={(e) => setVoiceTopicForm({ ...voiceTopicForm, icon: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", fontSize: "12.5px", fontWeight: "700", color: "#475569", marginBottom: "4px" }}>
+                        Topic Display Name * (English)
+                      </label>
+                      <input
+                        type="text"
+                        className="admin-input"
+                        placeholder="e.g. Navamsha Chart Analysis"
+                        value={voiceTopicForm.name}
+                        onChange={(e) => setVoiceTopicForm({ ...voiceTopicForm, name: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", fontSize: "12.5px", fontWeight: "700", color: "#475569", marginBottom: "4px" }}>
+                        Unique Identifier (ID)
+                      </label>
+                      <input
+                        type="text"
+                        className="admin-input"
+                        placeholder="e.g. navamsha_analysis"
+                        value={voiceTopicForm.id}
+                        onChange={(e) => setVoiceTopicForm({ ...voiceTopicForm, id: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Quick Emoji Selection Chips */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginBottom: "16px" }}>
+                    <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>Quick Icons:</span>
+                    {["🎓", "📜", "⏳", "🪐", "⏰", "☸️", "🔄", "💞", "☀️", "🕉️", "🔮", "📖", "🌙", "⭐"].map((em) => (
+                      <button
+                        key={em}
+                        type="button"
+                        onClick={() => setVoiceTopicForm({ ...voiceTopicForm, icon: em })}
+                        style={{
+                          background: voiceTopicForm.icon === em ? "#ffedd5" : "#f1f5f9",
+                          border: voiceTopicForm.icon === em ? "1.5px solid #ea580c" : "1px solid #cbd5e1",
+                          borderRadius: "6px",
+                          padding: "4px 8px",
+                          fontSize: "1rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {em}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <button
+                      type="submit"
+                      className="admin-btn admin-btn-success"
+                      style={{ background: "#d35400", borderColor: "#b84700", padding: "10px 24px" }}
+                    >
+                      {isEditingVoiceTopic ? "💾 Update Topic" : "➕ Add Topic"}
+                    </button>
+                    {isEditingVoiceTopic && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setVoiceTopicForm({ id: "", name: "", icon: "🎓" });
+                          setIsEditingVoiceTopic(false);
+                        }}
+                        className="admin-btn admin-btn-secondary"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </form>
+              </div>
+
+              {/* Topics Table / Cards Grid */}
+              <div style={{ display: "grid", gap: "10px" }}>
+                {voiceTopics
+                  .filter((t) => !voiceTopicFilter || t.name.toLowerCase().includes(voiceTopicFilter.toLowerCase()) || t.id.toLowerCase().includes(voiceTopicFilter.toLowerCase()))
+                  .map((topic, idx) => (
+                    <div
+                      key={topic.id || idx}
+                      style={{
+                        background: "#ffffff",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "12px",
+                        padding: "14px 18px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        flexWrap: "wrap",
+                        gap: "12px",
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.02)",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                        <span style={{ fontSize: "1.8rem", width: "42px", height: "42px", background: "#f8fafc", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                          {topic.icon || "🎓"}
+                        </span>
+                        <div>
+                          <h4 style={{ margin: 0, fontSize: "1rem", color: "#1e293b", fontWeight: "700" }}>
+                            {topic.name}
+                          </h4>
+                          <span style={{ fontSize: "12px", color: "#64748b", fontFamily: "monospace" }}>
+                            ID: {topic.id}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <button
+                          type="button"
+                          onClick={() => handleMoveVoiceTopic(idx, -1)}
+                          disabled={idx === 0}
+                          style={{ padding: "6px 10px", fontSize: "12px", background: "#f1f5f9", border: "1px solid #cbd5e1", borderRadius: "6px", cursor: idx === 0 ? "default" : "pointer", opacity: idx === 0 ? 0.4 : 1 }}
+                          title="Move Up"
+                        >
+                          ⬆️
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleMoveVoiceTopic(idx, 1)}
+                          disabled={idx === voiceTopics.length - 1}
+                          style={{ padding: "6px 10px", fontSize: "12px", background: "#f1f5f9", border: "1px solid #cbd5e1", borderRadius: "6px", cursor: idx === voiceTopics.length - 1 ? "default" : "pointer", opacity: idx === voiceTopics.length - 1 ? 0.4 : 1 }}
+                          title="Move Down"
+                        >
+                          ⬇️
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleEditVoiceTopic(topic)}
+                          style={{ padding: "6px 12px", fontSize: "12.5px", background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a", borderRadius: "6px", cursor: "pointer", fontWeight: "700" }}
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteVoiceTopic(topic.id)}
+                          style={{ padding: "6px 12px", fontSize: "12.5px", background: "#fee2e2", color: "#b91c1c", border: "1px solid #fca5a5", borderRadius: "6px", cursor: "pointer", fontWeight: "700" }}
+                        >
+                          🗑️ Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
             </div>
           )}
         </div>
@@ -4296,7 +5834,11 @@ export function AdminPage({ onNavigate }) {
                         <button
                           key={lang}
                           type="button"
-                          onClick={() => setStuForm({ ...stuForm, language: lang })}
+                          onClick={() => {
+                            const langBatches = batchesList.filter(b => (b.language || "").toLowerCase() === lang.toLowerCase() && isBatchCurrentlyActive(b));
+                            const nextBatchId = langBatches[0]?.id || "";
+                            setStuForm({ ...stuForm, language: lang, batch_id: nextBatchId });
+                          }}
                           style={{
                             flex: 1,
                             padding: "10px 16px",
@@ -4323,73 +5865,82 @@ export function AdminPage({ onNavigate }) {
                   </div>
                 </div>
 
-                {/* Courses Selector Cards */}
-                <div style={{ marginBottom: "18px" }}>
-                  <label style={{ display: "block", fontWeight: "600", marginBottom: "8px", fontSize: "13px", color: "#334155" }}>
-                    Course Selection <span style={{ color: "#ef4444" }}>*</span>
-                  </label>
-                  <div style={{ display: "flex", gap: "10px" }}>
-                    {["Jyotisha", "ManaShastra"].map((course) => {
-                      const checked = stuForm.courses.includes(course);
-                      return (
-                        <button
-                          key={course}
-                          type="button"
-                          onClick={() => handleStuCourseToggle(course)}
-                          style={{
-                            flex: 1,
-                            padding: "10px 16px",
-                            borderRadius: "10px",
-                            border: checked ? "2px solid #0d9488" : "1px solid #cbd5e1",
-                            background: checked ? "#f0fdf4" : "#f8fafc",
-                            color: checked ? "#0f766e" : "#475569",
-                            fontWeight: checked ? "700" : "600",
-                            fontSize: "13.5px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "8px",
-                            transition: "all 0.2s ease",
-                            boxShadow: checked ? "0 2px 8px rgba(13, 148, 136, 0.15)" : "none",
-                          }}
-                        >
-                          <span style={{ fontSize: "14px" }}>{checked ? "☑" : "☐"}</span>
-                          {course}
-                        </button>
-                      );
-                    })}
+                {/* Multi-Batch Selection Section */}
+                <div style={{ marginBottom: "20px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                    <label style={{ display: "block", fontWeight: "700", fontSize: "13px", color: "#334155", margin: 0 }}>
+                      Assigned Batches (Select One or More) <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <span style={{ fontSize: "12px", color: "#6b1170", fontWeight: "700", background: "#f3e8ff", padding: "2px 8px", borderRadius: "10px" }}>
+                      {(stuForm.batches || []).length} Selected
+                    </span>
                   </div>
-                </div>
 
-                {/* Assigned Batch Selection */}
-                <div style={{ marginBottom: "18px" }}>
-                  <label style={{ display: "block", fontWeight: "600", marginBottom: "8px", fontSize: "13px", color: "#334155" }}>
-                    Assigned Batch <span style={{ color: "#ef4444" }}>*</span>
-                  </label>
-                  <select
-                    style={{
-                      width: "100%",
-                      padding: "10px 14px",
-                      fontSize: "14px",
-                      borderRadius: "8px",
-                      border: "1px solid #cbd5e1",
-                      outline: "none",
-                      boxSizing: "border-box",
-                      background: "#ffffff",
-                      color: "#0f172a",
-                      fontWeight: "600"
-                    }}
-                    value={stuForm.batch_id || ""}
-                    onChange={(e) => setStuForm({ ...stuForm, batch_id: e.target.value })}
-                  >
-                    <option value="">Select Batch</option>
-                    {batchesList.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name || b.id} ({b.id})
-                      </option>
-                    ))}
-                  </select>
+                  {batchesList.length === 0 ? (
+                    <div style={{ padding: "12px", background: "#fef2f2", color: "#991b1b", borderRadius: "8px", fontSize: "13px" }}>
+                      ⚠️ No batches created yet. Please create a batch first under Batches & Lessons tab.
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "220px", overflowY: "auto", border: "1px solid #e2e8f0", padding: "10px", borderRadius: "10px", background: "#fafafa" }}>
+                      {batchesList.map((b) => {
+                        const isSelected = (stuForm.batches || []).includes(b.id);
+                        const isLangMatch = (b.language || "").toLowerCase() === (stuForm.language || "").toLowerCase();
+                        return (
+                          <div
+                            key={b.id}
+                            onClick={() => {
+                              const cur = stuForm.batches || [];
+                              const next = isSelected ? cur.filter(id => id !== b.id) : [...cur, b.id];
+                              setStuForm({
+                                ...stuForm,
+                                batches: next,
+                                batch_id: next[0] || "",
+                              });
+                            }}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              padding: "10px 14px",
+                              borderRadius: "8px",
+                              border: isSelected ? "1.5px solid #6b1170" : "1px solid #e2e8f0",
+                              background: isSelected ? "#fdf4ff" : "#ffffff",
+                              cursor: "pointer",
+                              transition: "all 0.15s ease",
+                            }}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => {}}
+                                style={{ width: "16px", height: "16px", cursor: "pointer", accentColor: "#6b1170" }}
+                              />
+                              <div>
+                                <strong style={{ fontSize: "13.5px", color: isSelected ? "#4a154b" : "#1e293b", display: "block" }}>
+                                  {b.name || b.id}
+                                </strong>
+                                <span style={{ fontSize: "11.5px", color: "#64748b" }}>
+                                  ID: {b.id} {b.remarks ? `• ${b.remarks}` : ""}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                              <span style={{ fontSize: "11px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px", background: isLangMatch ? "#dbeafe" : "#f1f5f9", color: isLangMatch ? "#1d4ed8" : "#64748b" }}>
+                                {b.language}
+                              </span>
+                              {b.isActive === false && (
+                                <span style={{ fontSize: "10.5px", fontWeight: "700", padding: "2px 5px", borderRadius: "4px", background: "#fee2e2", color: "#dc2626" }}>
+                                  Inactive
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {/* Email */}
@@ -4462,21 +6013,23 @@ export function AdminPage({ onNavigate }) {
                   <button
                     type="button"
                     onClick={handleStudentModalSave}
-                    disabled={stuSaving}
+                    disabled={stuSaving || !stuForm.batch_id}
                     style={{
                       padding: "10px 24px",
-                      background: stuSaving ? "#94a3b8" : "linear-gradient(135deg, #4a154b 0%, #6b1170 100%)",
+                      background: (stuSaving || !stuForm.batch_id) ? "#94a3b8" : "linear-gradient(135deg, #4a154b 0%, #6b1170 100%)",
                       color: "#ffffff",
                       border: "none",
                       borderRadius: "8px",
                       fontWeight: "700",
-                      cursor: stuSaving ? "not-allowed" : "pointer",
+                      cursor: (stuSaving || !stuForm.batch_id) ? "not-allowed" : "pointer",
                       fontSize: "14px",
-                      boxShadow: "0 4px 12px rgba(107, 17, 112, 0.25)",
-                      transition: "opacity 0.2s",
+                      boxShadow: (stuSaving || !stuForm.batch_id) ? "none" : "0 4px 12px rgba(107, 17, 112, 0.25)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
                     }}
                   >
-                    {stuSaving ? "Saving..." : editingStudent ? "Save Changes" : "Add Student"}
+                    {stuSaving ? "Saving..." : (editingStudent ? "Update Student" : "Save Student")}
                   </button>
                 </div>
               </div>
@@ -4595,8 +6148,71 @@ export function AdminPage({ onNavigate }) {
                   </div>
 
                   <div style={{ marginBottom: "14px" }}>
-                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: "700", marginBottom: "4px" }}>Message Content *</label>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                      <label style={{ fontSize: "12.5px", fontWeight: "700", margin: 0 }}>Message Content *</label>
+                      <span style={{ fontSize: "11px", color: "#64748b" }}>క్లిక్ చేసి కర్సర్ వద్ద అమర్చండి:</span>
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginBottom: "8px" }}>
+                      {["{title}", "{playlist}", "{videoId}", "{videoUrl}", "{pdfLink}"].map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => insertPlaceholderAtCursor(tag, true)}
+                          style={{
+                            padding: "2px 7px",
+                            fontSize: "11px",
+                            fontFamily: "monospace",
+                            fontWeight: "600",
+                            background: "#ede9fe",
+                            color: "#6d28d9",
+                            border: "1px solid #ddd6fe",
+                            borderRadius: "5px",
+                            cursor: "pointer"
+                          }}
+                        >
+                          + {tag}
+                        </button>
+                      ))}
+                      {customPlaceholders.map((c) => (
+                        <button
+                          key={c.key}
+                          type="button"
+                          onClick={() => insertPlaceholderAtCursor(`{${c.key}}`, true)}
+                          style={{
+                            padding: "2px 7px",
+                            fontSize: "11px",
+                            fontFamily: "monospace",
+                            fontWeight: "600",
+                            background: "#fef3c7",
+                            color: "#92400e",
+                            border: "1px solid #fde68a",
+                            borderRadius: "5px",
+                            cursor: "pointer"
+                          }}
+                          title={`Value: ${c.value}`}
+                        >
+                          + {`{${c.key}}`}
+                        </button>
+                      ))}
+                    </div>
+                    <div style={{ marginBottom: "12px", display: "flex", alignItems: "center", gap: "10px" }}>
+                      <button
+                        type="button"
+                        onClick={() => document.getElementById("manage-tpl-placeholders-csv-file").click()}
+                        style={{ padding: "6px 12px", fontSize: "12px", background: "#4f46e5", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "5px" }}
+                      >
+                        📥 Import Custom Placeholders CSV
+                      </button>
+                      <input
+                        id="manage-tpl-placeholders-csv-file"
+                        type="file"
+                        accept=".csv,.txt"
+                        onChange={handleCustomPlaceholdersCSVUpload}
+                        style={{ display: "none" }}
+                      />
+                    </div>
                     <textarea
+                      ref={tplTextareaRef}
                       rows="4"
                       className="admin-input"
                       placeholder="Enter announcement text body..."
@@ -4625,61 +6241,316 @@ export function AdminPage({ onNavigate }) {
                     )}
                   </div>
                 </form>
+              </div>
+            </div>
+          </div>
+        )}
 
-                {/* Templates Directory List */}
-                <h4 style={{ color: "#334155", margin: "0 0 12px 0" }}>Saved Message Templates</h4>
-                {templatesList.length === 0 ? (
-                  <p style={{ color: "#64748b", fontStyle: "italic" }}>No templates saved yet.</p>
-                ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    {templatesList.map((tpl) => (
-                      <div
-                        key={tpl.id}
+        {/* ── SHARE LESSON MODAL ── */}
+        {shareLessonModalData && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.6)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 9999,
+              padding: "20px"
+            }}
+            onClick={() => setShareLessonModalData(null)}
+          >
+            <div
+              style={{
+                background: "#ffffff",
+                borderRadius: "14px",
+                width: "100%",
+                maxWidth: "680px",
+                maxHeight: "90vh",
+                overflowY: "auto",
+                padding: "24px",
+                boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2), 0 10px 10px -5px rgba(0,0,0,0.1)",
+                border: "1px solid #e2e8f0"
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px", borderBottom: "1px solid #f1f5f9", paddingBottom: "12px" }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "4px" }}>
+                    <span style={{ background: "#dcfce7", color: "#166534", fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "6px" }}>
+                      📚 {shareLessonModalData.playlist}
+                    </span>
+                    {shareLessonModalData.videoId && (
+                      <span style={{ background: "#fee2e2", color: "#991b1b", fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "6px" }}>
+                        🎥 YouTube: {shareLessonModalData.videoId}
+                      </span>
+                    )}
+                  </div>
+                  <h3 style={{ margin: 0, color: "#1e293b", fontSize: "1.15rem", fontWeight: "700" }}>
+                    Share Lesson: {shareLessonModalData.title}
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setShareLessonModalData(null)}
+                  style={{ background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#64748b", lineHeight: 1 }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                {/* Template Selector */}
+                <div>
+                  <label className="admin-label" style={{ display: "block", marginBottom: "6px", fontWeight: "600", color: "#334155" }}>
+                    Select Message Template (టెంప్లేట్ ఎంచుకోండి)
+                  </label>
+                  <select
+                    className="admin-input"
+                    value={shareLessonTemplateId}
+                    onChange={(e) => handleSelectShareLessonTemplate(e.target.value)}
+                    style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+                  >
+                    {templatesList.map((t) => (
+                      <option key={t.id} value={t.id}>{t.name} ({t.id})</option>
+                    ))}
+                    <option value="custom">✍️ Custom Message (సొంత టెక్స్ట్)</option>
+                  </select>
+                </div>
+
+                {/* Template Editor */}
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                    <label className="admin-label" style={{ fontWeight: "600", color: "#334155", margin: 0 }}>
+                      Edit Template Text / Placeholders
+                    </label>
+                    <span style={{ fontSize: "11px", color: "#64748b" }}>
+                      కర్సర్ ఉన్న చోట అమర్చడానికి క్లిక్ చేయండి:
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
+                    {[
+                      { tag: "{title}", label: "పాఠం పేరు" },
+                      { tag: "{playlist}", label: "కోర్సు" },
+                      { tag: "{videoId}", label: "వీడియో ID" },
+                      { tag: "{videoUrl}", label: "యూట్యూబ్ లింక్" },
+                      { tag: "{pdfLink}", label: "PDF నోట్స్" },
+                    ].map((p) => (
+                      <button
+                        key={p.tag}
+                        type="button"
+                        onClick={() => insertPlaceholderAtCursor(p.tag, false)}
                         style={{
-                          background: "#ffffff",
-                          border: "1px solid #cbd5e1",
-                          borderRadius: "10px",
-                          padding: "14px 16px",
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "flex-start",
-                          gap: "14px",
+                          padding: "3px 8px",
+                          fontSize: "11.5px",
+                          fontFamily: "monospace",
+                          fontWeight: "600",
+                          background: "#e0f2fe",
+                          color: "#0369a1",
+                          border: "1px solid #bae6fd",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          transition: "all 0.15s ease",
                         }}
+                        title={`${p.tag} (${p.label}) - కర్సర్ ఉన్న చోట అమర్చబడుతుంది`}
                       >
-                        <div style={{ flex: 1 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                            <strong style={{ color: "#5b21b6", fontSize: "14px" }}>{tpl.name}</strong>
-                            <span style={{ background: "#f3e8ff", color: "#6b21a8", fontSize: "11px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px" }}>
-                              {tpl.id}
-                            </span>
-                          </div>
-                          {tpl.description && (
-                            <p style={{ margin: "0 0 6px 0", fontSize: "12px", color: "#64748b" }}>{tpl.description}</p>
-                          )}
-                          <pre style={{ background: "#f8fafc", padding: "8px 12px", borderRadius: "6px", fontSize: "12.5px", color: "#334155", margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit" }}>
-                            {tpl.content}
-                          </pre>
-                        </div>
-                        <div style={{ display: "flex", gap: "6px" }}>
-                          <button
-                            type="button"
-                            onClick={() => handleEditTemplate(tpl)}
-                            style={{ padding: "4px 10px", fontSize: "12px", background: "#3498db", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "600" }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteTemplateClick(tpl.id)}
-                            style={{ padding: "4px 10px", fontSize: "12px", background: "#e74c3c", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "600" }}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
+                        + {p.tag}
+                      </button>
+                    ))}
+                    {customPlaceholders.map((c) => (
+                      <button
+                        key={c.key}
+                        type="button"
+                        onClick={() => insertPlaceholderAtCursor(`{${c.key}}`, false)}
+                        style={{
+                          padding: "3px 8px",
+                          fontSize: "11.5px",
+                          fontFamily: "monospace",
+                          fontWeight: "600",
+                          background: "#fef3c7",
+                          color: "#92400e",
+                          border: "1px solid #fde68a",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          transition: "all 0.15s ease",
+                        }}
+                        title={`{${c.key}} -> ${c.value}`}
+                      >
+                        + {`{${c.key}}`}
+                      </button>
                     ))}
                   </div>
-                )}
+
+                  <div style={{ marginBottom: "8px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById("share-modal-placeholders-csv-file").click()}
+                      style={{ padding: "5px 12px", fontSize: "12px", background: "#4f46e5", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "600", display: "inline-flex", alignItems: "center", gap: "5px" }}
+                    >
+                      📥 Import Custom Placeholders CSV
+                    </button>
+                    <button
+                      type="button"
+                      onClick={exportCustomPlaceholdersCSV}
+                      style={{ padding: "5px 12px", fontSize: "12px", background: "#0284c7", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "600", display: "inline-flex", alignItems: "center", gap: "5px" }}
+                    >
+                      📤 Export Custom Placeholders CSV
+                    </button>
+                    <input
+                      id="share-modal-placeholders-csv-file"
+                      type="file"
+                      accept=".csv,.txt"
+                      onChange={handleCustomPlaceholdersCSVUpload}
+                      style={{ display: "none" }}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: "8px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById("share-modal-placeholders-csv-file").click()}
+                      style={{ padding: "5px 12px", fontSize: "12px", background: "#4f46e5", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "600", display: "inline-flex", alignItems: "center", gap: "5px" }}
+                    >
+                      📥 Import Custom Placeholders CSV
+                    </button>
+                    <input
+                      id="share-modal-placeholders-csv-file"
+                      type="file"
+                      accept=".csv,.txt"
+                      onChange={handleCustomPlaceholdersCSVUpload}
+                      style={{ display: "none" }}
+                    />
+                  </div>
+                  <textarea
+                    ref={shareTextareaRef}
+                    rows="4"
+                    className="admin-input"
+                    value={shareLessonCustomText}
+                    onChange={(e) => {
+                      setShareLessonCustomText(e.target.value);
+                      setShareLessonTemplateId("custom");
+                    }}
+                    style={{ fontFamily: "monospace", fontSize: "13px", padding: "10px", borderRadius: "8px" }}
+                  />
+                </div>
+
+                {/* Live Message Preview */}
+                <div>
+                  <label className="admin-label" style={{ display: "block", marginBottom: "6px", fontWeight: "600", color: "#15803d" }}>
+                    💬 Real-time WhatsApp Message Preview (ప్రత్యక్ష సమాచారం ప్రివ్యూ)
+                  </label>
+                  <div
+                    style={{
+                      background: "#e7f5e8",
+                      border: "1px solid #bbf7d0",
+                      borderRadius: "10px",
+                      padding: "14px",
+                      color: "#14532d",
+                      whiteSpace: "pre-wrap",
+                      fontFamily: "inherit",
+                      fontSize: "13.5px",
+                      lineHeight: "1.5",
+                      boxShadow: "inset 0 1px 2px rgba(0,0,0,0.03)"
+                    }}
+                  >
+                    {formatLessonShareMessage(shareLessonCustomText, shareLessonModalData)}
+                  </div>
+                </div>
+
+                {/* Target Student Picker */}
+                <div style={{ background: "#f8fafc", padding: "12px 16px", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                  <label className="admin-label" style={{ display: "block", marginBottom: "6px", fontWeight: "600", color: "#334155" }}>
+                    Select Student for Individual Share (ఐచ్ఛికం - వ్యక్తిగత విద్యార్థి ఎంపిక)
+                  </label>
+                  <select
+                    className="admin-input"
+                    value={shareLessonStudentId}
+                    onChange={(e) => setShareLessonStudentId(e.target.value)}
+                    style={{ padding: "8px 12px", borderRadius: "8px" }}
+                  >
+                    <option value="">-- Direct WhatsApp Share (No specific student selected) --</option>
+                    {students.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        👤 {s.first_name} {s.last_name} ({s.whatsapp_number || "No Phone"}) - {s.courses?.join(", ") || "No Course"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", paddingTop: "8px" }}>
+                  <button
+                    type="button"
+                    onClick={handleShareLessonGroup}
+                    className="admin-btn"
+                    style={{
+                      flex: 1,
+                      minWidth: "180px",
+                      padding: "10px 16px",
+                      background: "#25D366",
+                      color: "#ffffff",
+                      fontWeight: "700",
+                      fontSize: "13.5px",
+                      borderRadius: "8px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      border: "none",
+                      cursor: "pointer"
+                    }}
+                  >
+                    💬 Share to WhatsApp Group / Chat
+                  </button>
+
+                  {shareLessonStudentId && (
+                    <button
+                      type="button"
+                      onClick={handleShareLessonIndividual}
+                      className="admin-btn"
+                      style={{
+                        padding: "10px 16px",
+                        background: "#0284c7",
+                        color: "#ffffff",
+                        fontWeight: "700",
+                        fontSize: "13.5px",
+                        borderRadius: "8px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "6px",
+                        border: "none",
+                        cursor: "pointer"
+                      }}
+                    >
+                      👤 Send to Student
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleCopyShareLessonText}
+                    className="admin-btn"
+                    style={{
+                      padding: "10px 16px",
+                      background: shareLessonCopied ? "#16a34a" : "#475569",
+                      color: "#ffffff",
+                      fontWeight: "600",
+                      fontSize: "13.5px",
+                      borderRadius: "8px",
+                      border: "none",
+                      cursor: "pointer",
+                      transition: "background 0.2s"
+                    }}
+                  >
+                    {shareLessonCopied ? "✓ Copied!" : "📋 Copy Text"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

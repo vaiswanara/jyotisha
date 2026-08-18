@@ -38,7 +38,7 @@ export function EPrecisionTestPage({ logoUrl }) {
     const pad = (num) => String(num).padStart(2, "0");
     const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
     const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    
+
     return {
       date: todayStr,
       time: timeStr,
@@ -303,7 +303,7 @@ export function EPrecisionTestPage({ logoUrl }) {
 
         {result && (
           <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-            
+
             {/* Meta and Ayanamsha Card */}
             <div
               style={{
@@ -339,13 +339,13 @@ export function EPrecisionTestPage({ logoUrl }) {
                   <div style={{ borderTop: "1px solid rgba(122, 83, 48, 0.16)", marginTop: "6px", paddingTop: "6px", display: "flex", justifyContent: "space-between" }}>
                     <span style={{ fontWeight: 700 }}>Deviation:</span>
                     <span style={{ fontWeight: 700, color: "#9a3725" }}>
-                      {Math.abs(result.panchanga.fallback.ayanamsha - result.panchanga.precise.ayanamsha).toFixed(6)}° 
+                      {Math.abs(result.panchanga.fallback.ayanamsha - result.panchanga.precise.ayanamsha).toFixed(6)}°
                       ({((Math.abs(result.panchanga.fallback.ayanamsha - result.panchanga.precise.ayanamsha)) * 60).toFixed(2)} arcminutes)
                     </span>
                   </div>
                 </div>
               </div>
-              
+
               <div style={{ borderLeft: "1px solid rgba(122, 83, 48, 0.16)", paddingLeft: "20px" }}>
                 <span style={{ display: "block", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "1px", color: "#8a3b24", fontWeight: 800, marginBottom: "8px" }}>
                   🔬 Explanation
@@ -358,7 +358,7 @@ export function EPrecisionTestPage({ logoUrl }) {
 
             {/* Side-by-side Tables */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
-              
+
               {/* Rise / Set Comparison Card */}
               <div
                 style={{
@@ -372,7 +372,7 @@ export function EPrecisionTestPage({ logoUrl }) {
                 <h3 style={{ fontSize: "1.1rem", color: "#8a3b24", marginBottom: "16px", borderBottom: "1px solid #eadfce", paddingBottom: "10px", fontFamily: "Georgia, serif", fontWeight: 700 }}>
                   🌅 Sun & Moon Rise/Set
                 </h3>
-                
+
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
                   <thead>
                     <tr style={{ borderBottom: "1px solid #eadfce" }}>
@@ -425,9 +425,9 @@ export function EPrecisionTestPage({ logoUrl }) {
                 }}
               >
                 <h3 style={{ fontSize: "1.1rem", color: "#8a3b24", marginBottom: "16px", borderBottom: "1px solid #eadfce", paddingBottom: "10px", fontFamily: "Georgia, serif", fontWeight: 700 }}>
-                  🕉️ Panchanga Element End Times
+                  ☀️ Panchanga Element End Times
                 </h3>
-                
+
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
                   <thead>
                     <tr style={{ borderBottom: "1px solid #eadfce" }}>
@@ -440,7 +440,7 @@ export function EPrecisionTestPage({ logoUrl }) {
                   <tbody>
                     <tr style={{ borderBottom: "1px solid rgba(122, 83, 48, 0.08)" }}>
                       <td style={{ padding: "12px 8px", fontWeight: 500, color: "#2d2419" }}>
-                        Tithi<br/><span style={{ fontSize: "0.75rem", color: "#857869" }}>{result.panchanga.precise.tithi}</span>
+                        Tithi<br /><span style={{ fontSize: "0.75rem", color: "#857869" }}>{result.panchanga.precise.tithi}</span>
                       </td>
                       <td style={{ padding: "12px 8px", textAlign: "center", color: "#2d2419" }}>{formatTimestamp(result.panchanga.fallback.tithi_end, formData.timezone)}</td>
                       <td style={{ padding: "12px 8px", textAlign: "center", color: "#2f7d42", fontWeight: 700 }}>{formatTimestamp(result.panchanga.precise.tithi_end, formData.timezone)}</td>
@@ -448,7 +448,7 @@ export function EPrecisionTestPage({ logoUrl }) {
                     </tr>
                     <tr style={{ borderBottom: "1px solid rgba(122, 83, 48, 0.08)" }}>
                       <td style={{ padding: "12px 8px", fontWeight: 500, color: "#2d2419" }}>
-                        Nakshatra<br/><span style={{ fontSize: "0.75rem", color: "#857869" }}>{result.panchanga.precise.nakshatra}</span>
+                        Nakshatra<br /><span style={{ fontSize: "0.75rem", color: "#857869" }}>{result.panchanga.precise.nakshatra}</span>
                       </td>
                       <td style={{ padding: "12px 8px", textAlign: "center", color: "#2d2419" }}>{formatTimestamp(result.panchanga.fallback.nakshatra_end, formData.timezone)}</td>
                       <td style={{ padding: "12px 8px", textAlign: "center", color: "#2f7d42", fontWeight: 700 }}>{formatTimestamp(result.panchanga.precise.nakshatra_end, formData.timezone)}</td>
@@ -456,7 +456,7 @@ export function EPrecisionTestPage({ logoUrl }) {
                     </tr>
                     <tr style={{ borderBottom: "1px solid rgba(122, 83, 48, 0.08)" }}>
                       <td style={{ padding: "12px 8px", fontWeight: 500, color: "#2d2419" }}>
-                        Yoga<br/><span style={{ fontSize: "0.75rem", color: "#857869" }}>{result.panchanga.precise.yoga}</span>
+                        Yoga<br /><span style={{ fontSize: "0.75rem", color: "#857869" }}>{result.panchanga.precise.yoga}</span>
                       </td>
                       <td style={{ padding: "12px 8px", textAlign: "center", color: "#2d2419" }}>{formatTimestamp(result.panchanga.fallback.yoga_end, formData.timezone)}</td>
                       <td style={{ padding: "12px 8px", textAlign: "center", color: "#2f7d42", fontWeight: 700 }}>{formatTimestamp(result.panchanga.precise.yoga_end, formData.timezone)}</td>
@@ -464,7 +464,7 @@ export function EPrecisionTestPage({ logoUrl }) {
                     </tr>
                     <tr style={{ borderBottom: "1px solid rgba(122, 83, 48, 0.08)" }}>
                       <td style={{ padding: "12px 8px", fontWeight: 500, color: "#2d2419" }}>
-                        Karana<br/><span style={{ fontSize: "0.75rem", color: "#857869" }}>{result.panchanga.precise.karana}</span>
+                        Karana<br /><span style={{ fontSize: "0.75rem", color: "#857869" }}>{result.panchanga.precise.karana}</span>
                       </td>
                       <td style={{ padding: "12px 8px", textAlign: "center", color: "#2d2419" }}>{formatTimestamp(result.panchanga.fallback.karana_end, formData.timezone)}</td>
                       <td style={{ padding: "12px 8px", textAlign: "center", color: "#2f7d42", fontWeight: 700 }}>{formatTimestamp(result.panchanga.precise.karana_end, formData.timezone)}</td>
