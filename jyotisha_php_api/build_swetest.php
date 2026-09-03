@@ -5,6 +5,8 @@
  */
 
 header("Content-Type: text/plain; charset=utf-8");
+@set_time_limit(300);
+@ini_set('max_execution_time', 300);
 
 echo "=== SWETEST CPANEL AUTO-COMPILER ===\n\n";
 
@@ -44,17 +46,30 @@ if (!$foundCompiler) {
     exit;
 }
 
-echo "\nDownloading Swiss Ephemeris C source tarball (3.8MB)...\n";
+echo "\nDownloading Swiss Ephemeris C source...\n";
 $tarPath = $rootDir . '/libswe_source.tar.gz';
-$sourceUrl = "https://archive.ubuntu.com/ubuntu/pool/universe/libs/libswe/libswe_2.10.03.orig.tar.gz";
+$mirrors = [
+    "https://archive.ubuntu.com/ubuntu/pool/universe/libs/libswe/libswe_2.10.03.orig.tar.gz",
+    "https://github.com/aloistr/swisseph/archive/refs/heads/master.tar.gz",
+    "https://www.astro.com/ftp/swisseph/sweph.tar.gz"
+];
 
-$data = @file_get_contents($sourceUrl);
-if (!$data) {
-    $ch = curl_init($sourceUrl);
+$data = null;
+foreach ($mirrors as $url) {
+    echo "Trying download from: {$url}...\n";
+    $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     $data = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    if ($data && $httpCode >= 200 && $httpCode < 300 && strlen($data) > 50000) {
+        echo "✅ Downloaded " . strlen($data) . " bytes from {$url}\n";
+        break;
+    }
+    $data = null;
 }
 
 if ($data) {

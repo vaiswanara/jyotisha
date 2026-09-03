@@ -3,6 +3,7 @@ import { LocationAutocomplete } from "../components/LocationAutocomplete.jsx";
 import { useTranslation } from "react-i18next";
 import { HoroscopeHeader } from "../components/HoroscopeHeader.jsx";
 import { getAdminEnabledPages, ALL_CONFIGURABLE_PAGES } from "../utils/appPagesConfig.js";
+import { triggerDownload } from "../utils/downloadHelper.js";
 
 const MASTER_LISTS = {
   maasa: [
@@ -232,6 +233,7 @@ const MASTER_LISTS = {
     "Profiles",
     "e-PATA",
     "e-Library",
+    "StudyLibrary",
     "PrecisionTest",
     "Help",
     "Privacy",
@@ -664,34 +666,26 @@ export function SettingsPage({ logoUrl, onNavigate }) {
     return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
   };
 
-  const triggerDownload = (content, filename) => {
-    const blob = new Blob([content], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  };
-
   const handleBackupData = (storageKey, filenamePrefix) => {
     if (storageKey === "epata") {
       const epataProgress = localStorage.getItem("epata_progress");
       const epataBookmarks = localStorage.getItem("epata_bookmarks");
       const epataLastPlaylist = localStorage.getItem("epata_last_playlist");
 
-      const hasData =
-        (epataProgress && epataProgress !== "{}") ||
-        (epataBookmarks && epataBookmarks !== "{}") ||
-        epataLastPlaylist;
+      const parsedProgress = epataProgress ? JSON.parse(epataProgress) : {};
+      const parsedBookmarks = epataBookmarks ? JSON.parse(epataBookmarks) : {};
 
-      if (!hasData) {
-        alert(t("noDataToBackup", "No data found to backup!"));
+      const hasProgress = Object.keys(parsedProgress).length > 0;
+      const hasBookmarks = Object.keys(parsedBookmarks).length > 0;
+
+      if (!hasProgress && !hasBookmarks) {
+        alert(t("noDataToBackup", "No e-PATA watch progress or bookmarks found on this device to backup! (మీరు ఇంకా ఏ పాఠాలనూ చూడలేదు లేదా బుక్‌మార్క్ చేయలేదు)"));
         return;
       }
 
       const exportData = {
-        epata_progress: epataProgress ? JSON.parse(epataProgress) : {},
-        epata_bookmarks: epataBookmarks ? JSON.parse(epataBookmarks) : {},
+        epata_progress: parsedProgress,
+        epata_bookmarks: parsedBookmarks,
         epata_last_playlist: epataLastPlaylist || "",
       };
 
@@ -711,11 +705,16 @@ export function SettingsPage({ logoUrl, onNavigate }) {
     if (storageKey === "vaiswanara_profiles") {
       try {
         const parsed = JSON.parse(data);
+        const profilesObj = parsed.profiles || parsed;
+        if (!profilesObj || typeof profilesObj !== "object" || Object.keys(profilesObj).length === 0) {
+          alert(t("noDataToBackup", "No saved profiles found on this device to backup! (ఈ డివైస్ లో ప్రొఫైల్స్ ఏవీ లేవు)"));
+          return;
+        }
         exportContent = JSON.stringify(
           {
             version: "2.0",
             exported: new Date().toISOString(),
-            profiles: parsed,
+            profiles: profilesObj,
           },
           null,
           2,

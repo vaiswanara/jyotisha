@@ -2333,9 +2333,9 @@ export function AdminPage({ onNavigate }) {
 
           <button
             type="button"
-            className={`admin-tab-btn${["students", "lessons", "library"].includes(activeTab) ? " active" : ""}`}
+            className={`admin-tab-btn${["students", "batches", "lessons", "library"].includes(activeTab) ? " active" : ""}`}
             onClick={() => {
-              if (!["students", "lessons", "library"].includes(activeTab)) {
+              if (!["students", "batches", "lessons", "library"].includes(activeTab)) {
                 setActiveTab("students");
                 if (students.length === 0) fetchStudentsList();
               }
@@ -2411,7 +2411,7 @@ export function AdminPage({ onNavigate }) {
         )}
 
         {/* ── Sub-Tab Navigation for 📖 e-PATA ── */}
-        {["students", "lessons", "library"].includes(activeTab) && (
+        {["students", "batches", "lessons", "library"].includes(activeTab) && (
           <div className="admin-subtabs-nav">
             <button
               type="button"
@@ -2426,14 +2426,25 @@ export function AdminPage({ onNavigate }) {
             </button>
             <button
               type="button"
+              className={`admin-subtab-btn${activeTab === "batches" ? " active" : ""}`}
+              onClick={() => {
+                setActiveTab("batches");
+                if (batchesList.length === 0) fetchBatchesList();
+              }}
+            >
+              👥 Batches
+              <span className="admin-tab-badge">{batchesList.length}</span>
+            </button>
+            <button
+              type="button"
               className={`admin-subtab-btn${activeTab === "lessons" ? " active" : ""}`}
               onClick={() => {
                 setActiveTab("lessons");
                 if (batchesList.length === 0) fetchBatchesList();
               }}
             >
-              👥 Batches & Lessons
-              <span className="admin-tab-badge">{batchesList.length + lessons.length}</span>
+              📖 Lessons
+              <span className="admin-tab-badge">{lessons.length}</span>
             </button>
             <button
               type="button"
@@ -3370,496 +3381,452 @@ export function AdminPage({ onNavigate }) {
             </div>
           )}
 
-          {/* ── BATCHES & LESSONS TAB ── */}
+          {/* ── BATCHES TAB ── */}
+          {activeTab === "batches" && (
+            <div className="admin-card-body">
+              <form onSubmit={handleSaveBatch} style={{ marginBottom: "25px", background: "#f8f9fa", padding: "20px", borderRadius: "10px", border: "1px solid #e9ecef" }}>
+                <h3 style={{ marginTop: 0, marginBottom: "16px", color: "#2c3e50" }}>
+                  {isEditingBatch ? "✏️ Edit Batch" : "➕ Create New Batch"}
+                </h3>
+                <div style={{ display: "grid", gridTemplateColumns: "1.2fr 2fr 1fr", gap: "14px", marginBottom: "14px" }}>
+                  <div>
+                    <label className="admin-label">Batch ID *</label>
+                    <input
+                      type="text"
+                      className="admin-input"
+                      placeholder="e.g. JK-2026-OCT"
+                      value={batchForm.id}
+                      disabled={isEditingBatch}
+                      onChange={(e) => setBatchForm({ ...batchForm, id: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Batch Name *</label>
+                    <input
+                      type="text"
+                      className="admin-input"
+                      placeholder="e.g. Jyotisha Kannada - October 2026 Batch"
+                      value={batchForm.name}
+                      onChange={(e) => setBatchForm({ ...batchForm, name: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Language *</label>
+                    <select
+                      className="admin-input"
+                      value={batchForm.language || "Kannada"}
+                      onChange={(e) => setBatchForm({ ...batchForm, language: e.target.value })}
+                    >
+                      <option value="Kannada">Kannada</option>
+                      <option value="Telugu">Telugu</option>
+                      <option value="English">English</option>
+                      <option value="Sanskrit">Sanskrit</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "14px", marginBottom: "14px" }}>
+                  <div>
+                    <label className="admin-label">Start Date</label>
+                    <input
+                      type="date"
+                      className="admin-input"
+                      value={batchForm.start_date || ""}
+                      onChange={(e) => setBatchForm({ ...batchForm, start_date: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">End Date</label>
+                    <input
+                      type="date"
+                      className="admin-input"
+                      value={batchForm.end_date || ""}
+                      onChange={(e) => setBatchForm({ ...batchForm, end_date: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Status</label>
+                    <select
+                      className="admin-input"
+                      value={batchForm.status || (batchForm.isActive !== false ? "active" : "inactive")}
+                      onChange={(e) => setBatchForm({ ...batchForm, status: e.target.value, isActive: e.target.value === "active" })}
+                    >
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "14px" }}>
+                  <div>
+                    <label className="admin-label">WhatsApp Group Link (Optional)</label>
+                    <input
+                      type="url"
+                      className="admin-input"
+                      placeholder="https://chat.whatsapp.com/..."
+                      value={batchForm.whatsapp_group_link || ""}
+                      onChange={(e) => setBatchForm({ ...batchForm, whatsapp_group_link: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Google Meet Link (Optional)</label>
+                    <input
+                      type="url"
+                      className="admin-input"
+                      placeholder="https://meet.google.com/..."
+                      value={batchForm.google_meet_link || ""}
+                      onChange={(e) => setBatchForm({ ...batchForm, google_meet_link: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: "16px" }}>
+                  <label className="admin-label">Remarks / Description (Optional)</label>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    placeholder="e.g. Regular Kannada Jyotisha batch"
+                    value={batchForm.remarks || ""}
+                    onChange={(e) => setBatchForm({ ...batchForm, remarks: e.target.value })}
+                  />
+                </div>
+
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <button type="submit" className="admin-btn admin-btn-success" style={{ padding: "8px 20px" }}>
+                    {isEditingBatch ? "Update Batch" : "Save Batch"}
+                  </button>
+                  {isEditingBatch && (
+                    <button
+                      type="button"
+                      className="admin-btn"
+                      style={{ background: "#7f8c8d", padding: "8px 16px" }}
+                      onClick={() => {
+                        setBatchForm({ id: "", name: "", language: "Kannada", start_date: "", end_date: "", remarks: "", whatsapp_group_link: "", google_meet_link: "", status: "active", isActive: true });
+                        setIsEditingBatch(false);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </form>
+
+              <h3 style={{ color: "#2c3e50", fontSize: "16px", marginBottom: "14px" }}>Available Batches</h3>
+              {batchesList.length === 0 ? (
+                <p style={{ color: "#7f8c8d" }}>No batches created yet.</p>
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "15px" }}>
+                  {batchesList.map((b) => (
+                    <div key={b.id} style={{ background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "10px", padding: "16px", boxShadow: "0 2px 6px rgba(0,0,0,0.03)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                        <span style={{ background: "#e0e7ff", color: "#3730a3", fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "6px" }}>
+                          🌐 {b.language || "Kannada"}
+                        </span>
+                        <span style={{ background: (b.status === "active" || b.isActive !== false) ? "#d1fae5" : "#fee2e2", color: (b.status === "active" || b.isActive !== false) ? "#047857" : "#b91c1c", fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "6px" }}>
+                          {((b.status || (b.isActive !== false ? "active" : "inactive"))).toUpperCase()}
+                        </span>
+                      </div>
+                      <h4 style={{ margin: "0 0 6px 0", color: "#0f172a", fontSize: "1.05rem" }}>{b.name}</h4>
+                      <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "0 0 8px 0" }}>ID: <strong>{b.id}</strong></p>
+                      {b.remarks && (
+                        <p style={{ fontSize: "0.82rem", color: "#475569", margin: "0 0 8px 0", fontStyle: "italic" }}>
+                          {b.remarks}
+                        </p>
+                      )}
+                      {(b.start_date || b.end_date) && (
+                        <p style={{ fontSize: "0.8rem", color: "#475569", margin: "0 0 10px 0" }}>
+                          📅 {b.start_date || "N/A"} to {b.end_date || "N/A"}
+                        </p>
+                      )}
+                      {b.whatsapp_group_link && (
+                        <p style={{ fontSize: "0.8rem", margin: "0 0 8px 0" }}>
+                          💬 Group: <a href={b.whatsapp_group_link} target="_blank" rel="noreferrer" style={{ color: "#059669", fontWeight: "bold" }}>Open WhatsApp Link</a>
+                        </p>
+                      )}
+                      {b.google_meet_link && (
+                        <p style={{ fontSize: "0.8rem", margin: "0 0 12px 0" }}>
+                          📹 Meet: <a href={b.google_meet_link} target="_blank" rel="noreferrer" style={{ color: "#2563eb", fontWeight: "bold" }}>Open Google Meet</a>
+                        </p>
+                      )}
+
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button
+                          type="button"
+                          onClick={() => handleEditBatch(b)}
+                          style={{ padding: "4px 10px", fontSize: "12px", background: "#3498db", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "600" }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteBatchClick(b.id)}
+                          style={{ padding: "4px 10px", fontSize: "12px", background: "#e74c3c", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "600" }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── LESSONS TAB ── */}
           {activeTab === "lessons" && (
             <div className="admin-card-body">
-              {/* ── Sub Tabs (Batches | Lessons) ── */}
-              <div style={{ display: "flex", gap: "10px", marginBottom: "24px", borderBottom: "2px solid #e2e8f0", paddingBottom: "12px" }}>
-                <button
-                  type="button"
-                  onClick={() => { setLessonSubTab("batches"); if (batchesList.length === 0) fetchBatchesList(); }}
-                  style={{
-                    padding: "9px 20px",
-                    borderRadius: "8px",
-                    border: "none",
-                    background: lessonSubTab === "batches" ? "#8e44ad" : "#f1f5f9",
-                    color: lessonSubTab === "batches" ? "#ffffff" : "#475569",
-                    fontWeight: "700",
-                    fontSize: "13.5px",
-                    cursor: "pointer",
-                    boxShadow: lessonSubTab === "batches" ? "0 2px 6px rgba(142, 68, 173, 0.2)" : "none",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px"
-                  }}
-                >
-                  👥 Batches ({batchesList.length})
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setLessonSubTab("lessons")}
-                  style={{
-                    padding: "9px 20px",
-                    borderRadius: "8px",
-                    border: "none",
-                    background: lessonSubTab === "lessons" ? "#8e44ad" : "#f1f5f9",
-                    color: lessonSubTab === "lessons" ? "#ffffff" : "#475569",
-                    fontWeight: "700",
-                    fontSize: "13.5px",
-                    cursor: "pointer",
-                    boxShadow: lessonSubTab === "lessons" ? "0 2px 6px rgba(142, 68, 173, 0.2)" : "none",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px"
-                  }}
-                >
-                  📖 Lessons ({lessons.length})
-                </button>
-              </div>
-
-              {/* ── 1. BATCHES SUB-TAB ── */}
-              {lessonSubTab === "batches" && (
-                <div>
-                  <form onSubmit={handleSaveBatch} style={{ marginBottom: "25px", background: "#f8f9fa", padding: "20px", borderRadius: "10px", border: "1px solid #e9ecef" }}>
-                    <h3 style={{ marginTop: 0, marginBottom: "16px", color: "#2c3e50" }}>
-                      {isEditingBatch ? "✏️ Edit Batch" : "➕ Create New Batch"}
-                    </h3>
-                    <div style={{ display: "grid", gridTemplateColumns: "1.2fr 2fr 1fr", gap: "14px", marginBottom: "14px" }}>
-                      <div>
-                        <label className="admin-label">Batch ID *</label>
-                        <input
-                          type="text"
-                          className="admin-input"
-                          placeholder="e.g. JK-2026-OCT"
-                          value={batchForm.id}
-                          disabled={isEditingBatch}
-                          onChange={(e) => setBatchForm({ ...batchForm, id: e.target.value })}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="admin-label">Batch Name *</label>
-                        <input
-                          type="text"
-                          className="admin-input"
-                          placeholder="e.g. Jyotisha Kannada - October 2026 Batch"
-                          value={batchForm.name}
-                          onChange={(e) => setBatchForm({ ...batchForm, name: e.target.value })}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="admin-label">Language *</label>
-                        <select
-                          className="admin-input"
-                          value={batchForm.language || "Kannada"}
-                          onChange={(e) => setBatchForm({ ...batchForm, language: e.target.value })}
-                        >
-                          <option value="Kannada">Kannada</option>
-                          <option value="Telugu">Telugu</option>
-                          <option value="English">English</option>
-                          <option value="Sanskrit">Sanskrit</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "14px", marginBottom: "14px" }}>
-                      <div>
-                        <label className="admin-label">Start Date</label>
-                        <input
-                          type="date"
-                          className="admin-input"
-                          value={batchForm.start_date || ""}
-                          onChange={(e) => setBatchForm({ ...batchForm, start_date: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <label className="admin-label">End Date</label>
-                        <input
-                          type="date"
-                          className="admin-input"
-                          value={batchForm.end_date || ""}
-                          onChange={(e) => setBatchForm({ ...batchForm, end_date: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <label className="admin-label">Status</label>
-                        <select
-                          className="admin-input"
-                          value={batchForm.status || (batchForm.isActive !== false ? "active" : "inactive")}
-                          onChange={(e) => setBatchForm({ ...batchForm, status: e.target.value, isActive: e.target.value === "active" })}
-                        >
-                          <option value="active">Active</option>
-                          <option value="inactive">Inactive</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "14px" }}>
-                      <div>
-                        <label className="admin-label">WhatsApp Group Link (Optional)</label>
-                        <input
-                          type="url"
-                          className="admin-input"
-                          placeholder="https://chat.whatsapp.com/..."
-                          value={batchForm.whatsapp_group_link || ""}
-                          onChange={(e) => setBatchForm({ ...batchForm, whatsapp_group_link: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <label className="admin-label">Google Meet Link (Optional)</label>
-                        <input
-                          type="url"
-                          className="admin-input"
-                          placeholder="https://meet.google.com/..."
-                          value={batchForm.google_meet_link || ""}
-                          onChange={(e) => setBatchForm({ ...batchForm, google_meet_link: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: "16px" }}>
-                      <label className="admin-label">Remarks / Description (Optional)</label>
+              {/* Add / Edit Lesson Form */}
+              <form onSubmit={handleSaveLesson} style={{ marginBottom: "30px", background: "#f8f9fa", padding: "20px", borderRadius: "8px", border: "1px solid #e9ecef" }}>
+                <h3 style={{ marginTop: 0, marginBottom: "15px", color: "#2c3e50" }}>
+                  {editingLessonId ? "✏️ Edit Lesson" : "➕ Add New Lesson"}
+                </h3>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
+                  <div>
+                    <label className="admin-label">Playlist / Batch Name</label>
+                    <select
+                      className="admin-input"
+                      value={isCreatingNewPlaylist ? "__NEW__" : lessonForm.playlist}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "__NEW__") {
+                          setIsCreatingNewPlaylist(true);
+                          setLessonForm({ ...lessonForm, playlist: "" });
+                        } else {
+                          setIsCreatingNewPlaylist(false);
+                          setLessonForm({ ...lessonForm, playlist: val });
+                        }
+                      }}
+                      required={!isCreatingNewPlaylist}
+                    >
+                      <option value="">-- Select Batch / Playlist --</option>
+                      {batchesList.map((b) => (
+                        <option key={b.id} value={b.name || b.id}>
+                          👥 Batch: {b.name} ({b.id})
+                        </option>
+                      ))}
+                      {uniquePlaylists.filter(p => !batchesList.some(b => (b.name === p || b.id === p))).map((p) => (
+                        <option key={p} value={p}>
+                          📺 Playlist: {p}
+                        </option>
+                      ))}
+                      <option value="__NEW__">➕ Add New Playlist / Batch Name...</option>
+                    </select>
+                    {isCreatingNewPlaylist && (
                       <input
                         type="text"
                         className="admin-input"
-                        placeholder="e.g. Regular Kannada Jyotisha batch"
-                        value={batchForm.remarks || ""}
-                        onChange={(e) => setBatchForm({ ...batchForm, remarks: e.target.value })}
+                        style={{ marginTop: "8px" }}
+                        placeholder="Enter New Playlist / Batch Name (e.g., Jyotisha-2026)"
+                        value={lessonForm.playlist}
+                        onChange={(e) => setLessonForm({ ...lessonForm, playlist: e.target.value })}
+                        required
+                        autoFocus
                       />
-                    </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="admin-label">Video ID (YouTube) *</label>
+                    <input
+                      type="text"
+                      className="admin-input"
+                      placeholder="Ex: QSoXoQu8Z8E"
+                      value={lessonForm.videoId}
+                      onChange={(e) => setLessonForm({ ...lessonForm, videoId: e.target.value.trim() })}
+                      required
+                    />
+                  </div>
+                </div>
 
-                    <div style={{ display: "flex", gap: "10px" }}>
-                      <button type="submit" className="admin-btn admin-btn-success" style={{ padding: "8px 20px" }}>
-                        {isEditingBatch ? "Update Batch" : "Save Batch"}
-                      </button>
-                      {isEditingBatch && (
-                        <button
-                          type="button"
-                          className="admin-btn"
-                          style={{ background: "#7f8c8d", padding: "8px 16px" }}
-                          onClick={() => {
-                            setBatchForm({ id: "", name: "", language: "Kannada", start_date: "", end_date: "", remarks: "", whatsapp_group_link: "", google_meet_link: "", status: "active", isActive: true });
-                            setIsEditingBatch(false);
-                          }}
-                        >
-                          Cancel
-                        </button>
-                      )}
-                    </div>
-                  </form>
+                <div style={{ marginBottom: "15px" }}>
+                  <label className="admin-label">Lesson Title *</label>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    placeholder="Ex: KA01: Course Introduction & Syllabus"
+                    value={lessonForm.title}
+                    onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
+                    required
+                  />
+                </div>
 
-                  <h3 style={{ color: "#2c3e50", fontSize: "16px", marginBottom: "14px" }}>Available Batches</h3>
-                  {batchesList.length === 0 ? (
-                    <p style={{ color: "#7f8c8d" }}>No batches created yet.</p>
-                  ) : (
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "15px" }}>
-                      {batchesList.map((b) => (
-                        <div key={b.id} style={{ background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "10px", padding: "16px", boxShadow: "0 2px 6px rgba(0,0,0,0.03)" }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                            <span style={{ background: "#e0e7ff", color: "#3730a3", fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "6px" }}>
-                              🌐 {b.language || "Kannada"}
-                            </span>
-                            <span style={{ background: (b.status === "active" || b.isActive !== false) ? "#d1fae5" : "#fee2e2", color: (b.status === "active" || b.isActive !== false) ? "#047857" : "#b91c1c", fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "6px" }}>
-                              {((b.status || (b.isActive !== false ? "active" : "inactive"))).toUpperCase()}
-                            </span>
-                          </div>
-                          <h4 style={{ margin: "0 0 6px 0", color: "#0f172a", fontSize: "1.05rem" }}>{b.name}</h4>
-                          <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "0 0 8px 0" }}>ID: <strong>{b.id}</strong></p>
-                          {b.remarks && (
-                            <p style={{ fontSize: "0.82rem", color: "#475569", margin: "0 0 8px 0", fontStyle: "italic" }}>
-                              {b.remarks}
-                            </p>
-                          )}
-                          {(b.start_date || b.end_date) && (
-                            <p style={{ fontSize: "0.8rem", color: "#475569", margin: "0 0 10px 0" }}>
-                              📅 {b.start_date || "N/A"} to {b.end_date || "N/A"}
-                            </p>
-                          )}
-                          {b.whatsapp_group_link && (
-                            <p style={{ fontSize: "0.8rem", margin: "0 0 8px 0" }}>
-                              💬 Group: <a href={b.whatsapp_group_link} target="_blank" rel="noreferrer" style={{ color: "#059669", fontWeight: "bold" }}>Open WhatsApp Link</a>
-                            </p>
-                          )}
-                          {b.google_meet_link && (
-                            <p style={{ fontSize: "0.8rem", margin: "0 0 12px 0" }}>
-                              📹 Meet: <a href={b.google_meet_link} target="_blank" rel="noreferrer" style={{ color: "#2563eb", fontWeight: "bold" }}>Open Google Meet</a>
-                            </p>
-                          )}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 120px", gap: "15px", marginBottom: "15px" }}>
+                  <div>
+                    <label className="admin-label">PDF Notes Link (Optional)</label>
+                    <input
+                      type="url"
+                      className="admin-input"
+                      placeholder="https://drive.google.com/... or https://archive.org/..."
+                      value={lessonForm.pdfLink}
+                      onChange={(e) => setLessonForm({ ...lessonForm, pdfLink: e.target.value.trim() })}
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Status</label>
+                    <select
+                      className="admin-input"
+                      value={lessonForm.status}
+                      onChange={(e) => setLessonForm({ ...lessonForm, status: e.target.value })}
+                    >
+                      <option value="ON">ON</option>
+                      <option value="OFF">OFF</option>
+                    </select>
+                  </div>
+                </div>
 
-                          <div style={{ display: "flex", gap: "8px" }}>
-                            <button
-                              type="button"
-                              onClick={() => handleEditBatch(b)}
-                              style={{ padding: "4px 10px", fontSize: "12px", background: "#3498db", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "600" }}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteBatchClick(b.id)}
-                              style={{ padding: "4px 10px", fontSize: "12px", background: "#e74c3c", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "600" }}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <button type="submit" className="admin-btn admin-btn-success">
+                    {editingLessonId ? "Save Changes" : "Add Lesson"}
+                  </button>
+                  {editingLessonId && (
+                    <button
+                      type="button"
+                      className="admin-btn"
+                      style={{ background: "#7f8c8d" }}
+                      onClick={() => {
+                        setEditingLessonId(null);
+                        setLessonForm({ playlist: "", title: "", videoId: "", pdfLink: "", status: "ON" });
+                        setIsCreatingNewPlaylist(false);
+                      }}
+                    >
+                      Cancel
+                    </button>
                   )}
+                </div>
+              </form>
+
+              {/* Quick Actions / Bulk Operations */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", alignItems: "center", marginBottom: "20px" }}>
+                <button
+                  type="button"
+                  onClick={handleExportJSON}
+                  className="admin-btn"
+                  style={{ background: "#34495e", color: "#fff", display: "inline-flex", alignItems: "center", gap: "6px" }}
+                >
+                  📥 Export Lessons JSON
+                </button>
+                <button
+                  type="button"
+                  onClick={exportLessonsCSV}
+                  className="admin-btn"
+                  style={{ background: "#16a085", color: "#fff", display: "inline-flex", alignItems: "center", gap: "6px" }}
+                >
+                  📊 Export Lessons CSV
+                </button>
+                <label
+                  className="admin-btn"
+                  style={{ background: "#8e44ad", color: "#fff", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px" }}
+                >
+                  📤 Import JSON / CSV
+                  <input
+                    type="file"
+                    accept=".json,.csv"
+                    onChange={handleImportFile}
+                    style={{ display: "none" }}
+                  />
+                </label>
+              </div>
+
+              {/* Lessons List Table */}
+              {lessons.length > 0 && (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+                  <h3 style={{ margin: 0, color: "#2c3e50", fontSize: "1.1rem" }}>📋 Lessons List</h3>
+                  <select
+                    className="admin-input"
+                    style={{ width: "auto", minWidth: "200px", padding: "8px 12px" }}
+                    value={filterPlaylist}
+                    onChange={(e) => setFilterPlaylist(e.target.value)}
+                  >
+                    <option value="">-- All Playlists --</option>
+                    {uniquePlaylists.map((p) => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
                 </div>
               )}
 
-              {/* ── 2. LESSONS SUB-TAB ── */}
-              {lessonSubTab === "lessons" && (
-                <>
-                  {/* Add / Edit Lesson Form */}
-                  <form onSubmit={handleSaveLesson} style={{ marginBottom: "30px", background: "#f8f9fa", padding: "20px", borderRadius: "8px", border: "1px solid #e9ecef" }}>
-                    <h3 style={{ marginTop: 0, marginBottom: "15px", color: "#2c3e50" }}>
-                      {editingLessonId ? "✏️ Edit Lesson" : "➕ Add New Lesson"}
-                    </h3>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
-                      <div>
-                        <label className="admin-label">Playlist / Batch Name</label>
-                        <select
-                          className="admin-input"
-                          value={isCreatingNewPlaylist ? "__NEW__" : lessonForm.playlist}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            if (val === "__NEW__") {
-                              setIsCreatingNewPlaylist(true);
-                              setLessonForm({ ...lessonForm, playlist: "" });
-                            } else {
-                              setIsCreatingNewPlaylist(false);
-                              setLessonForm({ ...lessonForm, playlist: val });
-                            }
-                          }}
-                          required={!isCreatingNewPlaylist}
-                        >
-                          <option value="">-- Select Batch / Playlist --</option>
-                          {batchesList.map((b) => (
-                            <option key={b.id} value={b.name || b.id}>
-                              👥 Batch: {b.name} ({b.id})
-                            </option>
-                          ))}
-                          {uniquePlaylists.filter(p => !batchesList.some(b => (b.name === p || b.id === p))).map((p) => (
-                            <option key={p} value={p}>
-                              📺 Playlist: {p}
-                            </option>
-                          ))}
-                          <option value="__NEW__">➕ Create Custom Playlist...</option>
-                        </select>
-                        {isCreatingNewPlaylist && (
-                          <input
-                            type="text"
-                            className="admin-input"
-                            style={{ marginTop: "8px" }}
-                            value={lessonForm.playlist}
-                            onChange={(e) => setLessonForm({ ...lessonForm, playlist: e.target.value })}
-                            placeholder="Enter New Playlist Name"
-                            required
-                          />
-                        )}
-                      </div>
-                      <div>
-                        <label className="admin-label">Video ID (YouTube)</label>
-                        <input
-                          type="text"
-                          className="admin-input"
-                          value={lessonForm.videoId}
-                          onChange={(e) => setLessonForm({ ...lessonForm, videoId: e.target.value })}
-                          placeholder="Ex: QSoXOqu8Z8E"
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div style={{ marginBottom: "15px" }}>
-                      <label className="admin-label">Lesson Title</label>
-                      <input
-                        type="text"
-                        className="admin-input"
-                        value={lessonForm.title}
-                        onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
-                        placeholder="Ex: KA01: Course Introduction & Syllabus"
-                        required
-                      />
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "15px", marginBottom: "20px" }}>
-                      <div>
-                        <label className="admin-label">PDF Notes Link (Optional)</label>
-                        <input
-                          type="text"
-                          className="admin-input"
-                          value={lessonForm.pdfLink}
-                          onChange={(e) => setLessonForm({ ...lessonForm, pdfLink: e.target.value })}
-                          placeholder="Ex: https://drive.google.com/file/d/..."
-                        />
-                      </div>
-                      <div>
-                        <label className="admin-label">Status</label>
-                        <select
-                          className="admin-input"
-                          value={lessonForm.status}
-                          onChange={(e) => setLessonForm({ ...lessonForm, status: e.target.value })}
-                        >
-                          <option value="ON">ON (Visible)</option>
-                          <option value="OFF">OFF (Hidden)</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: "10px" }}>
-                      <button type="submit" className="admin-btn admin-btn-success" style={{ flex: 1 }}>
-                        {editingLessonId ? "Update Lesson" : "Add Lesson"}
-                      </button>
-                      {editingLessonId && (
-                        <button
-                          type="button"
-                          className="admin-btn admin-btn-danger"
-                          onClick={() => {
-                            setEditingLessonId(null);
-                            setLessonForm({ playlist: "", title: "", videoId: "", pdfLink: "", status: "ON" });
-                            setIsCreatingNewPlaylist(false);
-                          }}
-                          style={{ flex: 1 }}
-                        >
-                          Cancel
-                        </button>
-                      )}
-                    </div>
-                  </form>
-
-                  {/* Import / Export Tools */}
-                  <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "25px", background: "#eafaf1", padding: "15px", borderRadius: "8px", border: "1px solid #b9e7c9", alignItems: "center" }}>
-                    <button onClick={handleExportJSON} className="admin-btn admin-btn-success" style={{ fontSize: "13px", padding: "8px 16px" }}>
-                      📤 Export JSON
-                    </button>
-                    <button onClick={exportLessonsCSV} className="admin-btn admin-btn-success" style={{ fontSize: "13px", padding: "8px 16px" }}>
-                      📤 Export CSV
-                    </button>
-                    <button onClick={() => document.getElementById("lessons-import-file").click()} className="admin-btn" style={{ fontSize: "13px", padding: "8px 16px", background: "#f39c12" }}>
-                      📥 Import JSON / CSV
-                    </button>
-                    <input
-                      id="lessons-import-file"
-                      type="file"
-                      accept=".json,.csv"
-                      onChange={handleImportFile}
-                      style={{ display: "none" }}
-                    />
-                  </div>
-
-                  {/* Lessons List Table */}
-                  {lessons.length > 0 && (
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
-                      <h3 style={{ margin: 0, color: "#2c3e50", fontSize: "1.1rem" }}>📋 Lessons List</h3>
-                      <select
-                        className="admin-input"
-                        style={{ width: "auto", minWidth: "200px", padding: "8px 12px" }}
-                        value={filterPlaylist}
-                        onChange={(e) => setFilterPlaylist(e.target.value)}
-                      >
-                        <option value="">-- All Playlists --</option>
-                        {uniquePlaylists.map((p) => (
-                          <option key={p} value={p}>{p}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  {filteredLessons.length > 0 ? (
-                    <div className="admin-table-wrapper">
-                      <table className="admin-table">
-                        <thead>
-                          <tr>
-                            <th style={{ width: "200px" }}>Playlist</th>
-                            <th>Title</th>
-                            <th style={{ width: "120px" }}>Video ID</th>
-                            <th style={{ width: "80px" }}>Status</th>
-                            <th style={{ width: "280px" }}>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {[...filteredLessons].reverse().map((lesson, idx, arr) => (
-                            <tr key={lesson.id} style={{ opacity: lesson.status === "OFF" ? 0.6 : 1 }}>
-                              <td style={{ fontWeight: "600", fontSize: "13px" }}>{lesson.playlist}</td>
-                              <td>
-                                <div style={{ fontWeight: "bold", color: "#2c3e50" }}>{lesson.title}</div>
-                                {lesson.pdfLink && (
-                                  <a href={lesson.pdfLink} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#d35400", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "3px", marginTop: "4px" }}>
-                                    📄 Notes Link
-                                  </a>
-                                )}
-                              </td>
-                              <td style={{ fontFamily: "monospace", fontSize: "13px" }}>{lesson.videoId}</td>
-                              <td>
-                                <span style={{
-                                  padding: "3px 8px",
-                                  borderRadius: "12px",
-                                  fontSize: "11px",
-                                  fontWeight: "bold",
-                                  color: "#fff",
-                                  background: lesson.status === "ON" ? "#27ae60" : "#7f8c8d"
-                                }}>
-                                  {lesson.status}
-                                </span>
-                              </td>
-                              <td>
-                                <div style={{ display: "flex", gap: "6px" }}>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleMoveLesson(lesson.id, "up")}
-                                    disabled={idx === 0 || loading}
-                                    className="admin-btn"
-                                    title="Move Up"
-                                    style={{ padding: "5px 8px", fontSize: "12px", background: (idx === 0 || loading) ? "#bdc3c7" : "#f39c12", cursor: (idx === 0 || loading) ? "not-allowed" : "pointer" }}
-                                  >
-                                    ⬆️
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleMoveLesson(lesson.id, "down")}
-                                    disabled={idx === arr.length - 1 || loading}
-                                    className="admin-btn"
-                                    title="Move Down"
-                                    style={{ padding: "5px 8px", fontSize: "12px", background: (idx === arr.length - 1 || loading) ? "#bdc3c7" : "#f39c12", cursor: (idx === arr.length - 1 || loading) ? "not-allowed" : "pointer" }}
-                                  >
-                                    ⬇️
-                                  </button>
-                                  <button
-                                    onClick={() => handleEditLesson(lesson)}
-                                    className="admin-btn"
-                                    style={{ padding: "5px 10px", fontSize: "12px", background: "#3498db" }}
-                                  >
-                                    Edit
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteLesson(lesson.id)}
-                                    className="admin-btn admin-btn-danger"
-                                    style={{ padding: "5px 10px", fontSize: "12px" }}
-                                  >
-                                    Delete
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenShareLessonModal(lesson)}
-                                    className="admin-btn"
-                                    style={{ padding: "5px 10px", fontSize: "12px", background: "#27ae60", color: "#fff", display: "inline-flex", alignItems: "center", gap: "4px" }}
-                                    title="వాట్సాప్ ద్వారా షేర్ చేయండి"
-                                  >
-                                    Share
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    <p style={{ color: "#7f8c8d" }}>{lessons.length > 0 ? "No lessons match this playlist." : "No lessons found yet."}</p>
-                  )}
-                </>
+              {filteredLessons.length > 0 ? (
+                <div className="admin-table-wrapper">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: "200px" }}>Playlist</th>
+                        <th>Title</th>
+                        <th style={{ width: "120px" }}>Video ID</th>
+                        <th style={{ width: "80px" }}>Status</th>
+                        <th style={{ width: "280px" }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[...filteredLessons].reverse().map((lesson, idx, arr) => (
+                        <tr key={lesson.id} style={{ opacity: lesson.status === "OFF" ? 0.6 : 1 }}>
+                          <td style={{ fontWeight: "600", fontSize: "13px" }}>{lesson.playlist}</td>
+                          <td>
+                            <div style={{ fontWeight: "bold", color: "#2c3e50" }}>{lesson.title}</div>
+                            {lesson.pdfLink && (
+                              <a href={lesson.pdfLink} target="_blank" rel="noopener noreferrer" style={{ fontSize: "11px", color: "#d35400", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "3px", marginTop: "4px" }}>
+                                📄 Notes Link
+                              </a>
+                            )}
+                          </td>
+                          <td style={{ fontFamily: "monospace", fontSize: "13px" }}>{lesson.videoId}</td>
+                          <td>
+                            <span style={{
+                              padding: "3px 8px",
+                              borderRadius: "12px",
+                              fontSize: "11px",
+                              fontWeight: "bold",
+                              background: lesson.status === "ON" ? "#e8f8f5" : "#fdedec",
+                              color: lesson.status === "ON" ? "#27ae60" : "#e74c3c"
+                            }}>
+                              {lesson.status}
+                            </span>
+                          </td>
+                          <td>
+                            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                              <button
+                                type="button"
+                                onClick={() => handleToggleLessonStatus(lesson.id)}
+                                className="admin-btn"
+                                style={{ padding: "5px 8px", fontSize: "12px", background: lesson.status === "ON" ? "#f39c12" : "#27ae60", color: "#fff" }}
+                              >
+                                {lesson.status === "ON" ? "Turn OFF" : "Turn ON"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleEditLesson(lesson)}
+                                className="admin-btn"
+                                style={{ padding: "5px 8px", fontSize: "12px", background: "#2980b9", color: "#fff" }}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteLesson(lesson.id)}
+                                className="admin-btn"
+                                style={{ padding: "5px 8px", fontSize: "12px", background: "#c0392b", color: "#fff" }}
+                              >
+                                Delete
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenShareLessonModal(lesson)}
+                                className="admin-btn"
+                                style={{ padding: "5px 10px", fontSize: "12px", background: "#27ae60", color: "#fff", display: "inline-flex", alignItems: "center", gap: "4px" }}
+                                title="వాట్సాప్ ద్వారా షేర్ చేయండి"
+                              >
+                                Share
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p style={{ color: "#7f8c8d" }}>{lessons.length > 0 ? "No lessons match this playlist." : "No lessons found yet."}</p>
               )}
             </div>
           )}

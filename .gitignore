@@ -2,3 +2,5 @@ node_modules
 vendor
 dist
 dev-dist
+scratch/
+!scratch/generate_wp_code.mjs

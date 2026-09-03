@@ -87,6 +87,8 @@ export function RashiChart({
   hideDivisionalSelector = false,
   defaultShowDivisional = true,
   d1Size = 320,
+  d1HighlightRashi = null,
+  d9HighlightRashi = null,
 }) {
   const { t } = useTranslation();
 
@@ -103,6 +105,19 @@ export function RashiChart({
       window.removeEventListener("vaiswanara_chart_style_changed", handleStyleChange);
     };
   }, []);
+
+  const getHighlightInfo = (isD1) => {
+    const hl = isD1 ? d1HighlightRashi : d9HighlightRashi;
+    if (!hl) return null;
+    const targetRashi = typeof hl === "number" ? hl : hl.rashi;
+    if (!targetRashi) return null;
+    return {
+      targetRashi: Number(targetRashi),
+      badge: hl.badge || hl.label || "🌱",
+      color: hl.color || "#8e44ad",
+      bg: hl.bg || "rgba(142, 68, 173, 0.12)",
+    };
+  };
 
   const renderHousePlanets = (planetList, cx, cy, isD1 = false) => {
     const rows = [];
@@ -158,6 +173,7 @@ export function RashiChart({
 
   const renderNorthIndianChart = (chartPlanets, title, subtitle, isD1 = false) => {
     const lagnaRashi = chartPlanets["Ascendant"]?.rashi ?? 1;
+    const hlInfo = getHighlightInfo(isD1);
 
     const houses = [];
     for (let h = 1; h <= 12; h++) {
@@ -211,6 +227,7 @@ export function RashiChart({
 
           {/* Render Houses Content */}
           {houses.map(({ houseNum, rashiNum, planetList, pos }) => {
+            const isHighlighted = hlInfo && rashiNum === hlInfo.targetRashi;
             return (
               <g key={houseNum}>
                 {/* Rashi Number */}
@@ -229,6 +246,22 @@ export function RashiChart({
                 >
                   {rashiNum}
                 </text>
+
+                {/* Highlight Symbol */}
+                {isHighlighted && hlInfo.badge && (
+                  <text
+                    x={pos.rashi.x}
+                    y={pos.rashi.y - 12}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    style={{
+                      fontSize: "12px",
+                      userSelect: "none",
+                    }}
+                  >
+                    {hlInfo.badge}
+                  </text>
+                )}
                 
                 {/* Planets inside the house */}
                 {renderHousePlanets(planetList, pos.planets.x, pos.planets.y, isD1)}
@@ -283,6 +316,7 @@ export function RashiChart({
 
   const renderEastIndianChart = (chartPlanets, title, subtitle, isD1 = false) => {
     const lagnaRashi = chartPlanets["Ascendant"]?.rashi ?? 1;
+    const hlInfo = getHighlightInfo(isD1);
 
     const cells = [];
     for (let r = 1; r <= 12; r++) {
@@ -323,6 +357,7 @@ export function RashiChart({
         >
           {/* Main Grid Polygons */}
           {cells.map(({ rashiNum, planetList, pos, isLagna }) => {
+            const isHighlighted = hlInfo && rashiNum === hlInfo.targetRashi;
             const fill = isLagna ? "rgba(142, 68, 173, 0.08)" : "#ffffff";
             return (
               <g key={rashiNum}>
@@ -341,6 +376,22 @@ export function RashiChart({
                     <line x1={pos.rashi.x + 8} y1={pos.rashi.y - 12} x2={pos.rashi.x + 18} y2={pos.rashi.y - 2} />
                     <line x1={pos.rashi.x + 12} y1={pos.rashi.y - 12} x2={pos.rashi.x + 22} y2={pos.rashi.y - 2} />
                   </g>
+                )}
+
+                {/* Highlight Symbol */}
+                {isHighlighted && hlInfo.badge && (
+                  <text
+                    x={pos.rashi.x}
+                    y={pos.rashi.y - 12}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    style={{
+                      fontSize: "12px",
+                      userSelect: "none",
+                    }}
+                  >
+                    {hlInfo.badge}
+                  </text>
                 )}
 
                 {/* Rashi Number */}
@@ -417,6 +468,9 @@ export function RashiChart({
     if (chartStyle === "east") {
       return renderEastIndianChart(chartPlanets, title, subtitle, isD1);
     }
+
+    const hlInfo = getHighlightInfo(isD1);
+
     return (
       <div
         className="south-chart"
@@ -439,6 +493,7 @@ export function RashiChart({
               return null;
             }
 
+            const isHighlighted = hlInfo && rashiNumber === hlInfo.targetRashi;
             const planetList = getPlanetsForRashi(chartPlanets, rashiNumber);
             const pCount = planetList.length;
 
@@ -476,6 +531,8 @@ export function RashiChart({
                   gridColumn: columnIndex + 1,
                   gridRow: rowIndex + 1,
                   border: "1px solid #ccc",
+                  background: "transparent",
+                  position: "relative",
                   padding: "2px",
                   display: "flex",
                   alignItems: "center",
@@ -486,6 +543,23 @@ export function RashiChart({
                   minHeight: 0,
                 }}
               >
+                {/* Highlight Symbol */}
+                {isHighlighted && hlInfo.badge && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "2px",
+                      right: "3px",
+                      fontSize: "12px",
+                      lineHeight: "1",
+                      zIndex: 2,
+                      pointerEvents: "none",
+                      userSelect: "none",
+                    }}
+                  >
+                    {hlInfo.badge}
+                  </span>
+                )}
                 <div
                   className="planet-cluster"
                   style={{

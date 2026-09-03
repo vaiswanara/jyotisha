@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { HoroscopeHeader } from "../components/HoroscopeHeader.jsx";
+import { triggerDownload } from "../utils/downloadHelper.js";
 
 export function ProfilesPage({ logoUrl, onNavigate }) {
   const [profiles, setProfiles] = useState({});
@@ -45,15 +46,10 @@ export function ProfilesPage({ logoUrl, onNavigate }) {
       exported: new Date().toISOString(),
       profiles,
     };
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "vaiswanara_profiles_backup.json";
-    a.click();
-    URL.revokeObjectURL(url);
+    triggerDownload(
+      JSON.stringify(exportData, null, 2),
+      "vaiswanara_profiles_backup.json",
+    );
   }
 
   function handleImport(event) {

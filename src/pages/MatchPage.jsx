@@ -811,6 +811,37 @@ export function MatchPage({ logoUrl, onNavigate }) {
           margin-top: 10px;
           width: 100%;
         }
+
+        /* Santana Sphuta Styling */
+        .new-horo-page .santana-container {
+          margin-top: 25px !important;
+          width: 100% !important;
+        }
+        .new-horo-page .santana-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 20px;
+          margin-top: 15px;
+          width: 100%;
+        }
+        .new-horo-page .santana-card {
+          background: #ffffff !important;
+          border: 1px solid #eaecee !important;
+          border-radius: 14px !important;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+          padding: 20px !important;
+          box-sizing: border-box !important;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          text-align: left;
+        }
+        .new-horo-page .santana-card.boy {
+          border-top: 4px solid #3498db !important;
+        }
+        .new-horo-page .santana-card.girl {
+          border-top: 4px solid #e74c3c !important;
+        }
         
         /* Typography */
         .new-horo-page h2 {
@@ -1000,6 +1031,9 @@ export function MatchPage({ logoUrl, onNavigate }) {
             font-size: 2.8rem !important;
           }
           .new-horo-page .match-charts-container {
+            grid-template-columns: 1fr !important;
+          }
+          .new-horo-page .santana-grid {
             grid-template-columns: 1fr !important;
           }
         
@@ -1673,51 +1707,734 @@ export function MatchPage({ logoUrl, onNavigate }) {
               
                         
               {/* Rashi Charts Panel */}
-              {!matchData.isNakshatraOnly && (
-                <div className="match-charts-container">
-                  {matchData.raw.boy?.chart?.planets && (
-                    <div className="chart-card boy">
-                      <h3
-                        style={{
-                          textAlign: "center",
-                          color: "#3498db",
-                          margin: "0 0 20px 0",
-                        }}
-                      >
-                         {boyData.name || t("groom", "Groom")} -{" "}
-                        {t("Charts", "Charts")}
-                      </h3>
-                      <RashiChart
-                        planets={matchData.raw.boy.chart.planets}
-                        navamsa={matchData.raw.boy.chart.navamsa_d9 || {}}
-                        hideD1Settings={true}
-                        hideDivisionalSelector={true}
-                      />
-                    </div>
-                  )}
+              {!matchData.isNakshatraOnly && (() => {
+                const boyPlanets = matchData.raw?.boy?.chart?.planets || matchData.raw?.boy?.planets;
+                const girlPlanets = matchData.raw?.girl?.chart?.planets || matchData.raw?.girl?.planets;
+                const boyBeejaData = calculateBeejaSphutaData(boyPlanets);
+                const girlKshetraData = calculateKshetraSphutaData(girlPlanets);
 
-                  {matchData.raw.girl?.chart?.planets && (
-                    <div className="chart-card girl">
-                      <h3
-                        style={{
-                          textAlign: "center",
-                          color: "#e74c3c",
-                          margin: "0 0 20px 0",
-                        }}
-                      >
-                         {girlData.name || t("bride", "Bride")} -{" "}
-                        {t("Charts", "Charts")}
-                      </h3>
-                      <RashiChart
-                        planets={matchData.raw.girl.chart.planets}
-                        navamsa={matchData.raw.girl.chart.navamsa_d9 || {}}
-                        hideD1Settings={true}
-                        hideDivisionalSelector={true}
-                      />
+                return (
+                  <div className="match-charts-container">
+                    {matchData.raw.boy?.chart?.planets && (
+                      <div className="chart-card boy">
+                        <h3
+                          style={{
+                            textAlign: "center",
+                            color: "#3498db",
+                            margin: "0 0 20px 0",
+                          }}
+                        >
+                           {boyData.name || t("groom", "Groom")} -{" "}
+                          {t("Charts", "Charts")}
+                        </h3>
+                        <RashiChart
+                          planets={matchData.raw.boy.chart.planets}
+                          navamsa={matchData.raw.boy.chart.navamsa_d9 || {}}
+                          hideD1Settings={true}
+                          hideDivisionalSelector={true}
+                          d1HighlightRashi={boyBeejaData ? {
+                            rashi: boyBeejaData.sphutaInfo.rashiNum,
+                            badge: "🌱",
+                          } : null}
+                          d9HighlightRashi={boyBeejaData ? {
+                            rashi: boyBeejaData.navamsaInfo.navamsaRashiNum,
+                            badge: "🌱",
+                          } : null}
+                        />
+                      </div>
+                    )}
+
+                    {matchData.raw.girl?.chart?.planets && (
+                      <div className="chart-card girl">
+                        <h3
+                          style={{
+                            textAlign: "center",
+                            color: "#e74c3c",
+                            margin: "0 0 20px 0",
+                          }}
+                        >
+                           {girlData.name || t("bride", "Bride")} -{" "}
+                          {t("Charts", "Charts")}
+                        </h3>
+                        <RashiChart
+                          planets={matchData.raw.girl.chart.planets}
+                          navamsa={matchData.raw.girl.chart.navamsa_d9 || {}}
+                          hideD1Settings={true}
+                          hideDivisionalSelector={true}
+                          d1HighlightRashi={girlKshetraData ? {
+                            rashi: girlKshetraData.sphutaInfo.rashiNum,
+                            badge: "🌸",
+                          } : null}
+                          d9HighlightRashi={girlKshetraData ? {
+                            rashi: girlKshetraData.navamsaInfo.navamsaRashiNum,
+                            badge: "🌸",
+                          } : null}
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* ================================================== */}
+              {/* BEEJA & KSHETRA SPHUTA — SANTANA */}
+              {/* ================================================== */}
+              <section className="santana-container">
+                <div
+                  style={{
+                    background: "#ffffff",
+                    border: "1px solid #eaecee",
+                    borderRadius: "14px",
+                    padding: "20px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
+                    boxSizing: "border-box",
+                    width: "100%",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      borderBottom: "1.5px solid #f1f2f6",
+                      paddingBottom: "12px",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    <h2
+                      style={{
+                        margin: 0,
+                        border: "none",
+                        padding: 0,
+                        fontSize: "18px",
+                        color: "#2c3e50",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <span>🌱</span>
+                      <span>Santāna — Beeja &amp; Kṣetra Sphuṭa</span>
+                    </h2>
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        color: "#7f8c8d",
+                        background: "#f8f9fa",
+                        padding: "4px 10px",
+                        borderRadius: "12px",
+                        border: "1px solid #eee",
+                      }}
+                    >
+                      Traditional Jyotiṣa
+                    </span>
+                  </div>
+
+                  {matchData.isNakshatraOnly ? (
+                    <div
+                      style={{
+                        background: "#fffbeb",
+                        border: "1px solid #fef3c7",
+                        borderLeft: "4px solid #f59e0b",
+                        padding: "16px",
+                        borderRadius: "8px",
+                        color: "#92400e",
+                        fontSize: "14px",
+                        lineHeight: "1.6",
+                      }}
+                    >
+                      ℹ️ <strong>Note:</strong> Beeja Sphuṭa &amp; Kṣetra Sphuṭa calculations require complete birth chart longitudes (Sun, Moon, Mars, Venus, Jupiter). Please generate the match using the <strong>Birth Details (Date, Time, Place)</strong> mode to view these calculations.
                     </div>
+                  ) : (
+                    <>
+                      {(() => {
+                        const boyPlanets = matchData.raw?.boy?.chart?.planets || matchData.raw?.boy?.planets;
+                        const girlPlanets = matchData.raw?.girl?.chart?.planets || matchData.raw?.girl?.planets;
+                        const beejaData = calculateBeejaSphutaData(boyPlanets);
+                        const kshetraData = calculateKshetraSphutaData(girlPlanets);
+
+                        return (
+                          <>
+                            <div className="santana-grid">
+                              {/* CARD 1: Male Horoscope — Beeja Sphuta */}
+                              <div className="santana-card boy">
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                    borderBottom: "1.5px solid #ebf5fb",
+                                    paddingBottom: "10px",
+                                  }}
+                                >
+                                  <span style={{ fontSize: "20px" }}>👨</span>
+                                  <div>
+                                    <h3
+                                      style={{
+                                        margin: 0,
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        color: "#2980b9",
+                                      }}
+                                    >
+                                      {boyData.name || t("groom", "Groom")} — Beeja Sphuṭa
+                                    </h3>
+                                    <span style={{ fontSize: "11px", color: "#7f8c8d" }}>
+                                      Male Horoscope · Sūrya + Śukra + Guru
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {beejaData ? (
+                                  <>
+                                    {/* Planetary Table */}
+                                    <div className="table-scroll" style={{ border: "1px solid #f1f2f6", borderRadius: "8px" }}>
+                                      <table style={{ width: "100%", margin: 0 }}>
+                                        <thead>
+                                          <tr style={{ background: "#f8f9fa" }}>
+                                            <th style={{ padding: "8px 10px", fontSize: "12px", color: "#636e72" }}>Planet</th>
+                                            <th style={{ padding: "8px 10px", fontSize: "12px", color: "#636e72" }}>Rashi Position</th>
+                                            <th style={{ padding: "8px 10px", fontSize: "12px", color: "#636e72", textAlign: "right" }}>Absolute Longitude</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {beejaData.planets.map((p) => (
+                                            <tr key={p.name} style={{ borderBottom: "1px solid #f1f2f6" }}>
+                                              <td style={{ padding: "8px 10px", fontWeight: "600", color: "#2c3e50" }}>
+                                                {t(p.name)}
+                                              </td>
+                                              <td style={{ padding: "8px 10px", color: "#2980b9", fontWeight: "500" }}>
+                                                {t(p.info.rashiName)} {formatSphutaDMS(p.info.degInRashi)}
+                                              </td>
+                                              <td style={{ padding: "8px 10px", color: "#2c3e50", textAlign: "right", fontFamily: "monospace" }}>
+                                                {p.info.absLonStr}
+                                              </td>
+                                            </tr>
+                                          ))}
+                                        </tbody>
+                                      </table>
+                                    </div>
+
+                                    {/* Total and 360 Adjustment */}
+                                    <div
+                                      style={{
+                                        background: "#fcfdfe",
+                                        border: "1px solid #eef2f5",
+                                        borderRadius: "8px",
+                                        padding: "10px 14px",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "6px",
+                                        fontSize: "13px",
+                                      }}
+                                    >
+                                      <div style={{ display: "flex", justifyContent: "space-between", color: "#2c3e50" }}>
+                                        <span>Total (Surya + Shukra + Guru):</span>
+                                        <strong style={{ fontFamily: "monospace" }}>{beejaData.totalDms}</strong>
+                                      </div>
+                                      <div style={{ display: "flex", justifyContent: "space-between", color: "#7f8c8d" }}>
+                                        <span>360° Adjustment:</span>
+                                        <span style={{ fontFamily: "monospace" }}>{beejaData.adjustmentStr}</span>
+                                      </div>
+                                    </div>
+
+                                    {/* Result Box */}
+                                    <div
+                                      style={{
+                                        background: "#ebf5fb",
+                                        border: "1.5px solid #bee3f8",
+                                        borderRadius: "10px",
+                                        padding: "14px",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "8px",
+                                      }}
+                                    >
+                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <span style={{ fontSize: "14px", fontWeight: "700", color: "#2980b9" }}>
+                                          Beeja Sphuṭa:
+                                        </span>
+                                        <span style={{ fontSize: "16px", fontWeight: "800", color: "#1a365d", fontFamily: "monospace" }}>
+                                          {beejaData.sphutaDms}
+                                        </span>
+                                      </div>
+                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed #bee3f8", paddingTop: "6px" }}>
+                                        <span style={{ fontSize: "13px", color: "#4a5568" }}>Rashi:</span>
+                                        <strong style={{ fontSize: "14px", color: "#2b6cb0" }}>
+                                          {t(beejaData.sphutaInfo.rashiName)} ({beejaData.sphutaInfo.rashiPositionStr})
+                                        </strong>
+                                      </div>
+                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed #bee3f8", paddingTop: "6px" }}>
+                                        <span style={{ fontSize: "13px", color: "#4a5568" }}>Rashi Type:</span>
+                                        <span
+                                          style={{
+                                            fontSize: "12px",
+                                            fontWeight: "700",
+                                            padding: "3px 10px",
+                                            borderRadius: "12px",
+                                            background: beejaData.sphutaInfo.isOja ? "#e6fffa" : "#faf5ff",
+                                            color: beejaData.sphutaInfo.isOja ? "#234e52" : "#44337a",
+                                            border: `1px solid ${beejaData.sphutaInfo.isOja ? "#81e6d9" : "#d6bcfa"}`,
+                                          }}
+                                        >
+                                          Rashi Type: {beejaData.sphutaInfo.rashiType}
+                                        </span>
+                                      </div>
+                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed #bee3f8", paddingTop: "6px" }}>
+                                        <span style={{ fontSize: "13px", color: "#4a5568" }}>Navāṁśa:</span>
+                                        <strong style={{ fontSize: "14px", color: "#2b6cb0" }}>
+                                          {t(beejaData.navamsaInfo.navamsa)} ({beejaData.navamsaInfo.navamsaNumber}th Navāṁśa)
+                                        </strong>
+                                      </div>
+                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed #bee3f8", paddingTop: "6px" }}>
+                                        <span style={{ fontSize: "13px", color: "#4a5568" }}>Navāṁśa Type:</span>
+                                        <span
+                                          style={{
+                                            fontSize: "12px",
+                                            fontWeight: "700",
+                                            padding: "3px 10px",
+                                            borderRadius: "12px",
+                                            background: beejaData.navamsaInfo.isNavamsaOja ? "#e6fffa" : "#faf5ff",
+                                            color: beejaData.navamsaInfo.isNavamsaOja ? "#234e52" : "#44337a",
+                                            border: `1px solid ${beejaData.navamsaInfo.isNavamsaOja ? "#81e6d9" : "#d6bcfa"}`,
+                                          }}
+                                        >
+                                          Navāṁśa Type: {beejaData.navamsaInfo.navamsaType}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    {/* Expandable Calculation Steps */}
+                                    <details
+                                      style={{
+                                        background: "#ffffff",
+                                        border: "1px solid #e2e8f0",
+                                        borderRadius: "8px",
+                                        padding: "10px 12px",
+                                        fontSize: "13px",
+                                      }}
+                                    >
+                                      <summary
+                                        style={{
+                                          cursor: "pointer",
+                                          fontWeight: "600",
+                                          color: "#3182ce",
+                                          outline: "none",
+                                        }}
+                                      >
+                                        🔍 How is this calculated?
+                                      </summary>
+                                      <div
+                                        style={{
+                                          marginTop: "10px",
+                                          padding: "10px",
+                                          background: "#f7fafc",
+                                          borderRadius: "6px",
+                                          fontFamily: "monospace",
+                                          fontSize: "12px",
+                                          lineHeight: "1.7",
+                                          color: "#2d3748",
+                                        }}
+                                      >
+                                        <div style={{ color: "#718096", marginBottom: "4px" }}>Formula: Surya + Shukra + Guru</div>
+                                        <div>
+                                          {beejaData.planets[0].info.absLonStr} (Surya) + {beejaData.planets[1].info.absLonStr} (Shukra) + {beejaData.planets[2].info.absLonStr} (Guru)
+                                        </div>
+                                        <div style={{ color: "#3182ce", fontWeight: "bold" }}>↓</div>
+                                        <div>Total Longitude = {beejaData.totalDms}</div>
+                                        {beejaData.turns > 0 && (
+                                          <>
+                                            <div style={{ color: "#3182ce", fontWeight: "bold" }}>↓</div>
+                                            <div>{beejaData.totalDms} − {beejaData.turns * 360}° (360° Normalization)</div>
+                                          </>
+                                        )}
+                                        <div style={{ color: "#3182ce", fontWeight: "bold" }}>↓</div>
+                                        <div>Final Beeja Sphuṭa = {beejaData.sphutaDms}</div>
+                                        <div style={{ color: "#3182ce", fontWeight: "bold" }}>↓</div>
+                                        <div>
+                                          Rāśi Position = {beejaData.sphutaInfo.rashiPositionStr} ({beejaData.sphutaInfo.rashiType})
+                                        </div>
+                                        <div style={{ color: "#3182ce", fontWeight: "bold" }}>↓</div>
+                                        <div>
+                                          Position in Rāśi = {formatSphutaDMS(beejaData.sphutaInfo.degInRashi)}
+                                        </div>
+                                        <div style={{ color: "#3182ce", fontWeight: "bold" }}>↓</div>
+                                        <div>
+                                          3°20′ Division = {formatSphutaDMS(beejaData.sphutaInfo.degInRashi)} ÷ 3°20′ → {beejaData.navamsaInfo.navamsaNumber}th Navāṁśa
+                                        </div>
+                                        <div style={{ color: "#3182ce", fontWeight: "bold" }}>↓</div>
+                                        <div>
+                                          {beejaData.navamsaInfo.signModality} sign ({beejaData.sphutaInfo.rashiName}) → Starts from {beejaData.navamsaInfo.startSignName}
+                                        </div>
+                                        <div style={{ color: "#3182ce", fontWeight: "bold" }}>↓</div>
+                                        <div style={{ fontWeight: "bold", color: "#2b6cb0" }}>
+                                          Navāṁśa Rāśi = {beejaData.navamsaInfo.navamsa} (Navāṁśa Type: {beejaData.navamsaInfo.navamsaType})
+                                        </div>
+                                      </div>
+                                    </details>
+                                  </>
+                                ) : (
+                                  <div style={{ color: "#7f8c8d", fontSize: "13px" }}>Planetary longitudes unavailable.</div>
+                                )}
+                              </div>
+
+                              {/* CARD 2: Female Horoscope — Kshetra Sphuta */}
+                              <div className="santana-card girl">
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                    borderBottom: "1.5px solid #fdedec",
+                                    paddingBottom: "10px",
+                                  }}
+                                >
+                                  <span style={{ fontSize: "20px" }}>👩</span>
+                                  <div>
+                                    <h3
+                                      style={{
+                                        margin: 0,
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        color: "#c0392b",
+                                      }}
+                                    >
+                                      {girlData.name || t("bride", "Bride")} — Kṣetra Sphuṭa
+                                    </h3>
+                                    <span style={{ fontSize: "11px", color: "#7f8c8d" }}>
+                                      Female Horoscope · Moon + Mars + Jupiter
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {kshetraData ? (
+                                  <>
+                                    {/* Planetary Table */}
+                                    <div className="table-scroll" style={{ border: "1px solid #f1f2f6", borderRadius: "8px" }}>
+                                      <table style={{ width: "100%", margin: 0 }}>
+                                        <thead>
+                                          <tr style={{ background: "#f8f9fa" }}>
+                                            <th style={{ padding: "8px 10px", fontSize: "12px", color: "#636e72" }}>Planet</th>
+                                            <th style={{ padding: "8px 10px", fontSize: "12px", color: "#636e72" }}>Rashi Position</th>
+                                            <th style={{ padding: "8px 10px", fontSize: "12px", color: "#636e72", textAlign: "right" }}>Absolute Longitude</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {kshetraData.planets.map((p) => (
+                                            <tr key={p.name} style={{ borderBottom: "1px solid #f1f2f6" }}>
+                                              <td style={{ padding: "8px 10px", fontWeight: "600", color: "#2c3e50" }}>
+                                                {t(p.name)}
+                                              </td>
+                                              <td style={{ padding: "8px 10px", color: "#c0392b", fontWeight: "500" }}>
+                                                {t(p.info.rashiName)} {formatSphutaDMS(p.info.degInRashi)}
+                                              </td>
+                                              <td style={{ padding: "8px 10px", color: "#2c3e50", textAlign: "right", fontFamily: "monospace" }}>
+                                                {p.info.absLonStr}
+                                              </td>
+                                            </tr>
+                                          ))}
+                                        </tbody>
+                                      </table>
+                                    </div>
+
+                                    {/* Total and 360 Adjustment */}
+                                    <div
+                                      style={{
+                                        background: "#fcfdfe",
+                                        border: "1px solid #eef2f5",
+                                        borderRadius: "8px",
+                                        padding: "10px 14px",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "6px",
+                                        fontSize: "13px",
+                                      }}
+                                    >
+                                      <div style={{ display: "flex", justifyContent: "space-between", color: "#2c3e50" }}>
+                                        <span>Total (Chandra + Kuja + Guru):</span>
+                                        <strong style={{ fontFamily: "monospace" }}>{kshetraData.totalDms}</strong>
+                                      </div>
+                                      <div style={{ display: "flex", justifyContent: "space-between", color: "#7f8c8d" }}>
+                                        <span>360° Adjustment:</span>
+                                        <span style={{ fontFamily: "monospace" }}>{kshetraData.adjustmentStr}</span>
+                                      </div>
+                                    </div>
+
+                                    {/* Result Box */}
+                                    <div
+                                      style={{
+                                        background: "#fdf2f2",
+                                        border: "1.5px solid #fecaca",
+                                        borderRadius: "10px",
+                                        padding: "14px",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "8px",
+                                      }}
+                                    >
+                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <span style={{ fontSize: "14px", fontWeight: "700", color: "#c0392b" }}>
+                                          Kṣetra Sphuṭa:
+                                        </span>
+                                        <span style={{ fontSize: "16px", fontWeight: "800", color: "#771d1d", fontFamily: "monospace" }}>
+                                          {kshetraData.sphutaDms}
+                                        </span>
+                                      </div>
+                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed #fecaca", paddingTop: "6px" }}>
+                                        <span style={{ fontSize: "13px", color: "#4a5568" }}>Rashi:</span>
+                                        <strong style={{ fontSize: "14px", color: "#c53030" }}>
+                                          {t(kshetraData.sphutaInfo.rashiName)} ({kshetraData.sphutaInfo.rashiPositionStr})
+                                        </strong>
+                                      </div>
+                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed #fecaca", paddingTop: "6px" }}>
+                                        <span style={{ fontSize: "13px", color: "#4a5568" }}>Rashi Type:</span>
+                                        <span
+                                          style={{
+                                            fontSize: "12px",
+                                            fontWeight: "700",
+                                            padding: "3px 10px",
+                                            borderRadius: "12px",
+                                            background: kshetraData.sphutaInfo.isOja ? "#e6fffa" : "#faf5ff",
+                                            color: kshetraData.sphutaInfo.isOja ? "#234e52" : "#44337a",
+                                            border: `1px solid ${kshetraData.sphutaInfo.isOja ? "#81e6d9" : "#d6bcfa"}`,
+                                          }}
+                                        >
+                                          Rashi Type: {kshetraData.sphutaInfo.rashiType}
+                                        </span>
+                                      </div>
+                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed #fecaca", paddingTop: "6px" }}>
+                                        <span style={{ fontSize: "13px", color: "#4a5568" }}>Navāṁśa:</span>
+                                        <strong style={{ fontSize: "14px", color: "#c53030" }}>
+                                          {t(kshetraData.navamsaInfo.navamsa)} ({kshetraData.navamsaInfo.navamsaNumber}th Navāṁśa)
+                                        </strong>
+                                      </div>
+                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed #fecaca", paddingTop: "6px" }}>
+                                        <span style={{ fontSize: "13px", color: "#4a5568" }}>Navāṁśa Type:</span>
+                                        <span
+                                          style={{
+                                            fontSize: "12px",
+                                            fontWeight: "700",
+                                            padding: "3px 10px",
+                                            borderRadius: "12px",
+                                            background: kshetraData.navamsaInfo.isNavamsaOja ? "#e6fffa" : "#faf5ff",
+                                            color: kshetraData.navamsaInfo.isNavamsaOja ? "#234e52" : "#44337a",
+                                            border: `1px solid ${kshetraData.navamsaInfo.isNavamsaOja ? "#81e6d9" : "#d6bcfa"}`,
+                                          }}
+                                        >
+                                          Navāṁśa Type: {kshetraData.navamsaInfo.navamsaType}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    {/* Expandable Calculation Steps */}
+                                    <details
+                                      style={{
+                                        background: "#ffffff",
+                                        border: "1px solid #e2e8f0",
+                                        borderRadius: "8px",
+                                        padding: "10px 12px",
+                                        fontSize: "13px",
+                                      }}
+                                    >
+                                      <summary
+                                        style={{
+                                          cursor: "pointer",
+                                          fontWeight: "600",
+                                          color: "#e53e3e",
+                                          outline: "none",
+                                        }}
+                                      >
+                                        🔍 How is this calculated?
+                                      </summary>
+                                      <div
+                                        style={{
+                                          marginTop: "10px",
+                                          padding: "10px",
+                                          background: "#f7fafc",
+                                          borderRadius: "6px",
+                                          fontFamily: "monospace",
+                                          fontSize: "12px",
+                                          lineHeight: "1.7",
+                                          color: "#2d3748",
+                                        }}
+                                      >
+                                        <div style={{ color: "#718096", marginBottom: "4px" }}>Formula: Chandra + Kuja + Guru</div>
+                                        <div>
+                                          {kshetraData.planets[0].info.absLonStr} (Chandra) + {kshetraData.planets[1].info.absLonStr} (Kuja) + {kshetraData.planets[2].info.absLonStr} (Guru)
+                                        </div>
+                                        <div style={{ color: "#e53e3e", fontWeight: "bold" }}>↓</div>
+                                        <div>Total Longitude = {kshetraData.totalDms}</div>
+                                        {kshetraData.turns > 0 && (
+                                          <>
+                                            <div style={{ color: "#e53e3e", fontWeight: "bold" }}>↓</div>
+                                            <div>{kshetraData.totalDms} − {kshetraData.turns * 360}° (360° Normalization)</div>
+                                          </>
+                                        )}
+                                        <div style={{ color: "#e53e3e", fontWeight: "bold" }}>↓</div>
+                                        <div>Final Kṣetra Sphuṭa = {kshetraData.sphutaDms}</div>
+                                        <div style={{ color: "#e53e3e", fontWeight: "bold" }}>↓</div>
+                                        <div>
+                                          Rāśi Position = {kshetraData.sphutaInfo.rashiPositionStr} ({kshetraData.sphutaInfo.rashiType})
+                                        </div>
+                                        <div style={{ color: "#e53e3e", fontWeight: "bold" }}>↓</div>
+                                        <div>
+                                          Position in Rāśi = {formatSphutaDMS(kshetraData.sphutaInfo.degInRashi)}
+                                        </div>
+                                        <div style={{ color: "#e53e3e", fontWeight: "bold" }}>↓</div>
+                                        <div>
+                                          3°20′ Division = {formatSphutaDMS(kshetraData.sphutaInfo.degInRashi)} ÷ 3°20′ → {kshetraData.navamsaInfo.navamsaNumber}th Navāṁśa
+                                        </div>
+                                        <div style={{ color: "#e53e3e", fontWeight: "bold" }}>↓</div>
+                                        <div>
+                                          {kshetraData.navamsaInfo.signModality} sign ({kshetraData.sphutaInfo.rashiName}) → Starts from {kshetraData.navamsaInfo.startSignName}
+                                        </div>
+                                        <div style={{ color: "#e53e3e", fontWeight: "bold" }}>↓</div>
+                                        <div style={{ fontWeight: "bold", color: "#c53030" }}>
+                                          Navāṁśa Rāśi = {kshetraData.navamsaInfo.navamsa} (Navāṁśa Type: {kshetraData.navamsaInfo.navamsaType})
+                                        </div>
+                                      </div>
+                                    </details>
+                                  </>
+                                ) : (
+                                  <div style={{ color: "#7f8c8d", fontSize: "13px" }}>Planetary longitudes unavailable.</div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Educational Reference Section — How to Study Beeja & Kṣetra Sphuṭa */}
+                            <details
+                              style={{
+                                marginTop: "20px",
+                                background: "#f8fafc",
+                                border: "1px solid #e2e8f0",
+                                borderLeft: "4px solid #8e44ad",
+                                borderRadius: "10px",
+                                padding: "12px 18px",
+                                fontSize: "13px",
+                                lineHeight: "1.6",
+                                color: "#4a5568",
+                              }}
+                            >
+                              <summary
+                                style={{
+                                  cursor: "pointer",
+                                  fontWeight: "700",
+                                  color: "#2d3748",
+                                  fontSize: "14px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                  outline: "none",
+                                  userSelect: "none",
+                                }}
+                              >
+                                <span>📖</span>
+                                <span>How to Study Beeja & Kṣetra Sphuṭa</span>
+                              </summary>
+
+                              <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid #e2e8f0" }}>
+                                {/* 1. Beeja Sphuṭa — Male Horoscope */}
+                                <div style={{ marginBottom: "18px" }}>
+                                  <h4 style={{ margin: "0 0 8px 0", fontSize: "13.5px", fontWeight: "700", color: "#2b6cb0" }}>
+                                    1. Beeja Sphuṭa — Male Horoscope
+                                  </h4>
+                                  <p style={{ margin: "0 0 6px 0", color: "#4a5568" }}>Traditionally, students may examine:</p>
+                                  <ul style={{ margin: "0", paddingLeft: "20px", display: "flex", flexDirection: "column", gap: "4px" }}>
+                                    <li>The Rāśi occupied by Beeja Sphuṭa.</li>
+                                    <li>Whether the Rāśi is Oja (Odd) or Yugma (Even).</li>
+                                    <li>The Navāṁśa occupied by Beeja Sphuṭa.</li>
+                                    <li>Whether the Navāṁśa is Oja (Odd) or Yugma (Even).</li>
+                                    <li>Benefic, malefic and neutral planetary influences on the Sphuṭa.</li>
+                                    <li>The 5th house from Beeja Sphuṭa.</li>
+                                    <li>The condition of the relevant Rāśi and Navāṁśa lords.</li>
+                                  </ul>
+                                </div>
+
+                                <hr style={{ border: "none", borderTop: "1px dashed #e2e8f0", margin: "16px 0" }} />
+
+                                {/* 2. Kṣetra Sphuṭa — Female Horoscope */}
+                                <div style={{ marginBottom: "18px" }}>
+                                  <h4 style={{ margin: "0 0 8px 0", fontSize: "13.5px", fontWeight: "700", color: "#c53030" }}>
+                                    2. Kṣetra Sphuṭa — Female Horoscope
+                                  </h4>
+                                  <p style={{ margin: "0 0 6px 0", color: "#4a5568" }}>Traditionally, students may examine:</p>
+                                  <ul style={{ margin: "0", paddingLeft: "20px", display: "flex", flexDirection: "column", gap: "4px" }}>
+                                    <li>The Rāśi occupied by Kṣetra Sphuṭa.</li>
+                                    <li>Whether the Rāśi is Oja (Odd) or Yugma (Even).</li>
+                                    <li>The Navāṁśa occupied by Kṣetra Sphuṭa.</li>
+                                    <li>Whether the Navāṁśa is Oja (Odd) or Yugma (Even).</li>
+                                    <li>Benefic, malefic and neutral planetary influences on the Sphuṭa.</li>
+                                    <li>The 9th house from Kṣetra Sphuṭa.</li>
+                                    <li>The condition of the relevant Rāśi and Navāṁśa lords.</li>
+                                  </ul>
+                                </div>
+
+                                <hr style={{ border: "none", borderTop: "1px dashed #e2e8f0", margin: "16px 0" }} />
+
+                                {/* 3. Broader Santāna Assessment */}
+                                <div style={{ marginBottom: "18px" }}>
+                                  <h4 style={{ margin: "0 0 8px 0", fontSize: "13.5px", fontWeight: "700", color: "#2d3748" }}>
+                                    3. Broader Santāna Assessment
+                                  </h4>
+                                  <p style={{ margin: "0 0 6px 0", color: "#4a5568" }}>
+                                    Beeja and Kṣetra Sphuṭa should not be studied in isolation.
+                                  </p>
+                                  <p style={{ margin: "0 0 6px 0", color: "#4a5568" }}>
+                                    A broader Jyotiṣa assessment may consider:
+                                  </p>
+                                  <ul style={{ margin: "0", paddingLeft: "20px", display: "flex", flexDirection: "column", gap: "4px" }}>
+                                    <li>5th Bhāva</li>
+                                    <li>5th Lord</li>
+                                    <li>Guru (Jupiter)</li>
+                                    <li>Relevant planetary influences</li>
+                                    <li>Other supporting Santāna factors</li>
+                                    <li>Daśā and timing factors, when appropriate</li>
+                                  </ul>
+                                </div>
+
+                                <hr style={{ border: "none", borderTop: "1px dashed #e2e8f0", margin: "16px 0" }} />
+
+                                {/* 4. Important Educational Note */}
+                                <div style={{ marginBottom: "16px" }}>
+                                  <h4 style={{ margin: "0 0 8px 0", fontSize: "13.5px", fontWeight: "700", color: "#2d3748" }}>
+                                    4. Important Educational Note
+                                  </h4>
+                                  <p style={{ margin: "0 0 8px 0", color: "#4a5568" }}>
+                                    Beeja and Kṣetra Sphuṭa are traditional Jyotiṣa indicators used as part of Santāna-related analysis.
+                                  </p>
+                                  <p style={{ margin: "0 0 8px 0", color: "#4a5568" }}>
+                                    They should not be treated as a standalone method for making definitive statements about fertility or infertility.
+                                  </p>
+                                  <p style={{ margin: "0", color: "#4a5568" }}>
+                                    Students should study these factors together with the complete horoscope and the relevant classical principles.
+                                  </p>
+                                </div>
+
+                                {/* Footer inside expanded section */}
+                                <div
+                                  style={{
+                                    marginTop: "16px",
+                                    padding: "10px 14px",
+                                    background: "#ffffff",
+                                    border: "1px solid #e2e8f0",
+                                    borderRadius: "6px",
+                                    fontSize: "12px",
+                                    fontStyle: "italic",
+                                    color: "#718096",
+                                  }}
+                                >
+                                  Purpose: This section provides reference information for Jyotiṣa students. The application displays the calculations; interpretation is left to the student's study and judgement.
+                                </div>
+                              </div>
+                            </details>
+                          </>
+                        );
+                      })()}
+                    </>
                   )}
                 </div>
-              )}
+              </section>
             </>
           )}
         </div>
@@ -2486,6 +3203,216 @@ export function MatchPage({ logoUrl, onNavigate }) {
       )}
     </main>
   );
+}
+
+// ==================================================
+// BEEJA & KSHETRA SPHUTA — SANTANA
+// ==================================================
+
+const SPHUTA_RASHI_NAMES = [
+  "",
+  "Mesha",
+  "Vrishabha",
+  "Mithuna",
+  "Karka",
+  "Simha",
+  "Kanya",
+  "Tula",
+  "Vrischika",
+  "Dhanu",
+  "Makara",
+  "Kumbha",
+  "Meena",
+];
+
+function formatSphutaDMS(degFloat, includeSeconds = true) {
+  if (degFloat === null || degFloat === undefined || isNaN(degFloat)) return "-";
+  let totalSec = Math.round(Number(degFloat) * 3600);
+  if (totalSec < 0) totalSec = (totalSec % (360 * 3600)) + 360 * 3600;
+
+  const d = Math.floor(totalSec / 3600);
+  const remSec = totalSec % 3600;
+  const m = Math.floor(remSec / 60);
+  const s = remSec % 60;
+
+  if (!includeSeconds || s === 0) {
+    return `${d}° ${String(m).padStart(2, "0")}′`;
+  }
+  return `${d}° ${String(m).padStart(2, "0")}′ ${String(s).padStart(2, "0")}″`;
+}
+
+function getPlanetAbsoluteLongitude(planet) {
+  if (!planet) return 0;
+  if (planet.longitude !== undefined && planet.longitude !== null && !isNaN(Number(planet.longitude))) {
+    return Number(planet.longitude);
+  }
+  if (planet.degree !== undefined && planet.degree !== null && planet.rashi !== undefined && planet.rashi !== null) {
+    const deg = Number(planet.degree);
+    const rashi = Number(planet.rashi);
+    if (!isNaN(deg) && !isNaN(rashi) && rashi >= 1 && rashi <= 12) {
+      return (rashi - 1) * 30 + deg;
+    }
+  }
+  return 0;
+}
+
+function findPlanetObject(planets, names) {
+  if (!planets) return null;
+  if (Array.isArray(planets)) {
+    return planets.find((p) => names.some((n) => p?.name?.toLowerCase() === n.toLowerCase() || p?.label?.toLowerCase() === n.toLowerCase()));
+  }
+  for (const name of names) {
+    if (planets[name]) return planets[name];
+    const matchKey = Object.keys(planets).find((k) => k.toLowerCase() === name.toLowerCase());
+    if (matchKey && planets[matchKey]) return planets[matchKey];
+  }
+  return null;
+}
+
+function getSphutaRashiInfo(absLon) {
+  const norm = ((Number(absLon) % 360) + 360) % 360;
+  const rashiNum = Math.floor(norm / 30) + 1; // 1 to 12
+  const degInRashi = norm - (rashiNum - 1) * 30; // 0 to 30
+  const rashiName = SPHUTA_RASHI_NAMES[rashiNum] || "";
+  const isOja = rashiNum % 2 !== 0; // 1, 3, 5, 7, 9, 11 (Odd)
+  const rashiType = isOja ? "Oja / Odd" : "Yugma / Even";
+
+  return {
+    norm,
+    rashiNum,
+    rashiName,
+    degInRashi,
+    rashiPositionStr: `${rashiName} ${formatSphutaDMS(degInRashi)}`,
+    absLonStr: formatSphutaDMS(norm),
+    isOja,
+    rashiType,
+  };
+}
+
+export function getNavamsaFromLongitude(longitude) {
+  const norm = ((Number(longitude) % 360) + 360) % 360;
+  const totalSec = Math.round(norm * 3600);
+  const rashiNum = Math.floor(totalSec / 108000) + 1; // 1 to 12
+  const secInRashi = totalSec % 108000;
+  const degInRashi = secInRashi / 3600;
+  const navamsaNumber = Math.floor(secInRashi / 12000) + 1; // 1 to 9
+  const totalNavamsaIdx = Math.floor(totalSec / 12000); // 0 to 107
+  const navamsaRashiNum = (totalNavamsaIdx % 12) + 1; // 1 to 12
+  const navamsaRashiName = SPHUTA_RASHI_NAMES[navamsaRashiNum] || "";
+  const isNavamsaOja = navamsaRashiNum % 2 !== 0;
+  const navamsaType = isNavamsaOja ? "Oja / Odd" : "Yugma / Even";
+
+  // Sign modality for educational display:
+  // Chara (Movable): 1, 4, 7, 10 -> Starts from same sign
+  // Sthira (Fixed): 2, 5, 8, 11 -> Starts from 9th sign
+  // Dvisvabhava (Dual): 3, 6, 9, 12 -> Starts from 5th sign
+  let signModality = "";
+  let startSignNum = 1;
+  if ([1, 4, 7, 10].includes(rashiNum)) {
+    signModality = "Movable (Chara)";
+    startSignNum = rashiNum;
+  } else if ([2, 5, 8, 11].includes(rashiNum)) {
+    signModality = "Fixed (Sthira)";
+    startSignNum = ((rashiNum - 1 + 8) % 12) + 1;
+  } else {
+    signModality = "Dual (Dvisvabhāva)";
+    startSignNum = ((rashiNum - 1 + 4) % 12) + 1;
+  }
+  const startSignName = SPHUTA_RASHI_NAMES[startSignNum];
+
+  return {
+    rashi: SPHUTA_RASHI_NAMES[rashiNum] || "",
+    rashiNum,
+    rashiDegree: degInRashi,
+    rashiPositionStr: `${SPHUTA_RASHI_NAMES[rashiNum]} ${formatSphutaDMS(degInRashi)}`,
+    navamsa: navamsaRashiName,
+    navamsaRashiNum,
+    navamsaNumber,
+    navamsaType,
+    isNavamsaOja,
+    signModality,
+    startSignName,
+  };
+}
+
+function calculateBeejaSphutaData(planets) {
+  if (!planets) return null;
+
+  const sunObj = findPlanetObject(planets, ["Sun", "Su", "Surya", "సూర్యుడు"]);
+  const venusObj = findPlanetObject(planets, ["Venus", "Ve", "Sk", "Sukra", "Shukra", "శుక్రుడు"]);
+  const jupObj = findPlanetObject(planets, ["Jupiter", "Ju", "Gu", "Guru", "గురువు"]);
+
+  if (!sunObj || !venusObj || !jupObj) return null;
+
+  const sunLon = getPlanetAbsoluteLongitude(sunObj);
+  const venusLon = getPlanetAbsoluteLongitude(venusObj);
+  const jupLon = getPlanetAbsoluteLongitude(jupObj);
+
+  const total = sunLon + venusLon + jupLon;
+  const normalized = ((total % 360) + 360) % 360;
+  const turns = Math.floor(total / 360);
+
+  const sunInfo = getSphutaRashiInfo(sunLon);
+  const venusInfo = getSphutaRashiInfo(venusLon);
+  const jupInfo = getSphutaRashiInfo(jupLon);
+  const sphutaInfo = getSphutaRashiInfo(normalized);
+  const navamsaInfo = getNavamsaFromLongitude(normalized);
+
+  return {
+    planets: [
+      { name: "Sun", sanskrit: "Surya", eng: "Surya", tel: "సూర్యుడు", lon: sunLon, info: sunInfo },
+      { name: "Venus", sanskrit: "Shukra", eng: "Shukra", tel: "శుక్రుడు", lon: venusLon, info: venusInfo },
+      { name: "Jupiter", sanskrit: "Guru", eng: "Guru", tel: "గురువు", lon: jupLon, info: jupInfo },
+    ],
+    total,
+    totalDms: formatSphutaDMS(total),
+    turns,
+    adjustmentStr: turns > 0 ? `- ${turns * 360}° (${formatSphutaDMS(turns * 360)})` : "0° (No Adjustment)",
+    sphutaLon: normalized,
+    sphutaDms: formatSphutaDMS(normalized),
+    sphutaInfo,
+    navamsaInfo,
+  };
+}
+
+function calculateKshetraSphutaData(planets) {
+  if (!planets) return null;
+
+  const moonObj = findPlanetObject(planets, ["Moon", "Mo", "Ch", "Chandra", "చంద్రుడు"]);
+  const marsObj = findPlanetObject(planets, ["Mars", "Ma", "Ku", "Kuja", "కుజుడు"]);
+  const jupObj = findPlanetObject(planets, ["Jupiter", "Ju", "Gu", "Guru", "గురువు"]);
+
+  if (!moonObj || !marsObj || !jupObj) return null;
+
+  const moonLon = getPlanetAbsoluteLongitude(moonObj);
+  const marsLon = getPlanetAbsoluteLongitude(marsObj);
+  const jupLon = getPlanetAbsoluteLongitude(jupObj);
+
+  const total = moonLon + marsLon + jupLon;
+  const normalized = ((total % 360) + 360) % 360;
+  const turns = Math.floor(total / 360);
+
+  const moonInfo = getSphutaRashiInfo(moonLon);
+  const marsInfo = getSphutaRashiInfo(marsLon);
+  const jupInfo = getSphutaRashiInfo(jupLon);
+  const sphutaInfo = getSphutaRashiInfo(normalized);
+  const navamsaInfo = getNavamsaFromLongitude(normalized);
+
+  return {
+    planets: [
+      { name: "Moon", sanskrit: "Chandra", eng: "Chandra", tel: "చంద్రుడు", lon: moonLon, info: moonInfo },
+      { name: "Mars", sanskrit: "Kuja", eng: "Kuja", tel: "కుజుడు", lon: marsLon, info: marsInfo },
+      { name: "Jupiter", sanskrit: "Guru", eng: "Guru", tel: "గురువు", lon: jupLon, info: jupInfo },
+    ],
+    total,
+    totalDms: formatSphutaDMS(total),
+    turns,
+    adjustmentStr: turns > 0 ? `- ${turns * 360}° (${formatSphutaDMS(turns * 360)})` : "0° (No Adjustment)",
+    sphutaLon: normalized,
+    sphutaDms: formatSphutaDMS(normalized),
+    sphutaInfo,
+    navamsaInfo,
+  };
 }
 
 function buildPrintNorthSvg(planets, navamsa, title, subtitle, t) {

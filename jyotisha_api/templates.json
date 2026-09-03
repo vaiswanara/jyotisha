@@ -1,0 +1,31 @@
+[
+    {
+        "id": "TPL-001",
+        "name": "Sunday Class Reminder (Tomorrow)",
+        "description": "Sunday Kannada Class Reminder for Tomorrow 7:30 AM IST",
+        "title": "Sunday Class Reminder",
+        "content": "Hare srinivasa\n\nJyotisha Shaastra class will be on Sunday (Tomorrow) at 07:30 AM IST.\n\nYou may participate live class through below google meet link.\n\nhttps:\/\/meet.google.com\/yee-uppj-for\n\nDhanyavaadagalu."
+    },
+    {
+        "id": "TPL-002",
+        "name": "Sunday Class Reminder (Today)",
+        "description": "Sunday Kannada Class Reminder for Today 7:30 AM IST",
+        "title": "Sunday Class Reminder - Today",
+        "content": "Hare srinivasa\n\nJyotisha Shaastra class will be on Sunday (Today) at 07:30 AM IST.\n\nYou may participate live class through below google meet link.\n\nhttps:\/\/meet.google.com\/yee-uppj-for\n\nDhanyavaadagalu."
+    },
+    {
+        "id": "TPL-003",
+        "name": "New Lesson Upload Alert",
+        "description": "Notification for newly published video lessons",
+        "title": "📖 New Lesson Uploaded",
+        "content": "Hare srinivasa\n\nNew lesson video and study materials have been uploaded to e-PATA portal.\n\nPlease check the Course\/Lessons section to access the new class recording.\n\nDhanyavaadagalu."
+    },
+    {
+        "endpoint": "save_template",
+        "id": "TPL-004",
+        "name": "JYOTISHA Live Class",
+        "title": "Sunday Class Reminder",
+        "content": "📚 JYOTISHA(Kannada)\n\nLive Class\n📅 Sunday\n⏰ 07:30 AM IST\n\nLIVE CLASS\nhttps:\/\/meet.google.com\/yee-uppj-for\n[ JOIN LIVE CLASS ]",
+        "description": "Kananda"
+    }
+]

@@ -81,6 +81,11 @@ const EclipsePage = lazy(() =>
 const ELibraryPage = lazy(() =>
   import("./pages/ELibraryPage.jsx").then((m) => ({ default: m.ELibraryPage })),
 );
+const StudyLibraryPage = lazy(() =>
+  import("./pages/StudyLibraryPage.jsx").then((m) => ({
+    default: m.StudyLibraryPage,
+  })),
+);
 const GotraMatch = lazy(() =>
   import("./pages/GotraMatch.jsx").then((m) => ({ default: m.GotraMatch })),
 );
@@ -93,6 +98,10 @@ const StudentRegistration = lazy(() =>
 const VoiceQueryPage = lazy(() =>
   import("./pages/VoiceQueryPage.jsx").then((m) => ({ default: m.VoiceQueryPage })),
 );
+const MyPhilosophy = lazy(() =>
+  import("./pages/MyPhilosophy.jsx").then((m) => ({ default: m.MyPhilosophy })),
+);
+
 
 
 // Helper functions for custom toast styling and icon categorization
@@ -349,6 +358,17 @@ export default function App() {
       else if (lower === "sankalpa" || lower === "e-sankalpa") targetPage = "Sankalpa";
       else if (lower === "pata" || lower === "epata" || lower === "e-pata") targetPage = "e-PATA";
       else if (lower === "library" || lower === "elibrary" || lower === "e-library") targetPage = "e-Library";
+      else if (
+        lower === "studylibrary" ||
+        lower === "study-library" ||
+        lower === "study" ||
+        lower === "e-study" ||
+        lower === "notes" ||
+        lower === "e-notes" ||
+        lower === "studynotes" ||
+        lower === "studylib"
+      )
+        targetPage = "StudyLibrary";
       else if (lower === "voice" || lower === "voicequery" || lower === "e-voicequery" || lower === "prashna-voice" || lower === "e-voice") targetPage = "VoiceQuery";
       else if (lower === "register" || lower === "studentregistration") targetPage = isRegOpen ? "StudentRegistration" : "Home";
       else if (lower === "settings") targetPage = "Settings";
@@ -359,6 +379,7 @@ export default function App() {
       else if (lower === "privacy") targetPage = "Privacy";
       else if (lower === "precision" || lower === "precisiontest") targetPage = "PrecisionTest";
       else if (lower === "install" || lower === "e-install") targetPage = "e-Install";
+      else if (lower === "philosophy" || lower === "myphilosophy" || lower === "e-philosophy") targetPage = "MyPhilosophy";
       else if (lower === "me") targetPage = "Me";
       else if (lower === "messages") targetPage = "Messages";
     }
@@ -1051,11 +1072,13 @@ export default function App() {
                                           ? t("Help", "FAQ")
                                           : activePage === "Privacy"
                                             ? t("Privacy", "PRIVACY POLICY")
-                                            : activePage === "Feedback"
-                                              ? t("Feedback", "FEEDBACK")
-                                              : activePage === "Admin"
-                                                ? "ADMIN DASHBOARD"
-                                                : "e-JYOTISHA"}
+                                             : activePage === "Feedback"
+                                               ? t("Feedback", "FEEDBACK")
+                                               : activePage === "MyPhilosophy"
+                                                 ? t("MyPhilosophy", "MY PHILOSOPHY").toUpperCase()
+                                                 : activePage === "Admin"
+                                                   ? "ADMIN DASHBOARD"
+                                                   : "e-JYOTISHA"}
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
@@ -1226,6 +1249,9 @@ export default function App() {
         {activePage === "e-Library" && (
           <ELibraryPage logoUrl={logoUrl} />
         )}
+        {activePage === "StudyLibrary" && (
+          <StudyLibraryPage logoUrl={logoUrl} onNavigate={setActivePage} />
+        )}
         {activePage === "GotraMatch" && (
           <GotraMatch logoUrl={logoUrl} onNavigate={setActivePage} />
         )}
@@ -1240,6 +1266,9 @@ export default function App() {
         )}
         {(activePage === "VoiceQuery" || activePage === "e-VoiceQuery") && (
           <VoiceQueryPage logoUrl={logoUrl} onNavigate={setActivePage} />
+        )}
+        {activePage === "MyPhilosophy" && (
+          <MyPhilosophy logoUrl={logoUrl} onNavigate={setActivePage} />
         )}
         </ErrorBoundary>
       </Suspense>

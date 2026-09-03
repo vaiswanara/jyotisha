@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { getLessons } from "../services/astrologyApi.js";
+import { triggerDownload } from "../utils/downloadHelper.js";
 
 export function EpataPage({ logoUrl, onNavigate }) {
   const { t, i18n } = useTranslation();
@@ -70,24 +71,31 @@ export function EpataPage({ logoUrl, onNavigate }) {
 
   // Export User Data (Progress, Bookmarks, Preferences)
   const handleExportData = () => {
+    const progressData = JSON.parse(
+      localStorage.getItem("epata_progress") || "{}",
+    );
+    const bookmarksData = JSON.parse(
+      localStorage.getItem("epata_bookmarks") || "{}",
+    );
+    const lastPlaylist = localStorage.getItem("epata_last_playlist") || "";
+
+    const hasProgress = Object.keys(progressData).length > 0;
+    const hasBookmarks = Object.keys(bookmarksData).length > 0;
+
+    if (!hasProgress && !hasBookmarks) {
+      alert(t("noDataToBackup", "No e-PATA watch progress or bookmarks found on this device to backup! (మీరు ఇంకా ఏ పాఠాలనూ చూడలేదు లేదా బుక్‌మార్క్ చేయలేదు)"));
+      return;
+    }
+
     const exportData = {
-      epata_progress: JSON.parse(
-        localStorage.getItem("epata_progress") || "{}",
-      ),
-      epata_bookmarks: JSON.parse(
-        localStorage.getItem("epata_bookmarks") || "{}",
-      ),
-      epata_last_playlist: localStorage.getItem("epata_last_playlist") || "",
+      epata_progress: progressData,
+      epata_bookmarks: bookmarksData,
+      epata_last_playlist: lastPlaylist,
     };
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `epata_backup_${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    triggerDownload(
+      JSON.stringify(exportData, null, 2),
+      `epata_backup_${new Date().toISOString().slice(0, 10)}.json`,
+    );
   };
 
   // Import User Data

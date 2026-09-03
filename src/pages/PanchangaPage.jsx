@@ -6,6 +6,7 @@ import { API_URL, API_TOKEN } from "../services/astrologyApi.js";
 import { EclipsePage } from "./EclipsePage.jsx";
 import { getLocalDateStr } from "../utils/formatters.js";
 import { RashiChart } from "../components/RashiChart.jsx";
+import { triggerDownload } from "../utils/downloadHelper.js";
 
 const renderIntervalList = (valString) => {
   if (!valString || valString === "-") return "-";
@@ -1157,11 +1158,7 @@ export function PanchangaPage({ logoUrl, onNavigate }) {
   };
 
   const downloadFile = (content, fileName, contentType) => {
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([content], { type: contentType }));
-    a.download = fileName;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    triggerDownload(content, fileName, contentType);
   };
 
   // ===== Muhurtha Specific Functions =====

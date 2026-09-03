@@ -841,7 +841,7 @@ switch (strtolower($endpoint)) {
         }
 
         $rahuRatios = [0.875, 0.125, 0.75, 0.5, 0.625, 0.375, 0.25];
-        $yamaRatios = [0.5, 0.375, 0.25, 0.125, 0.875, 0.75, 0.625];
+        $yamaRatios = [0.5, 0.375, 0.25, 0.125, 0.0, 0.75, 0.625];
         $gulikaRatios = [0.75, 0.625, 0.5, 0.375, 0.25, 0.125, 0.0];
 
         $rahuStart = $sunriseTs + (int)floor($mDayDuration * $rahuRatios[$mVaaraNum]);
@@ -980,6 +980,151 @@ switch (strtolower($endpoint)) {
         $moonLon = isset($planets[Planet::MOON]) ? $planets[Planet::MOON]['longitude'] : 0;
         $panchanga = $engine->calcPanchanga($sunLon, $moonLon);
 
+        $sunSpeed = isset($planets[Planet::SUN]['speed']) ? (float)$planets[Planet::SUN]['speed'] : 0.9856;
+        $moonSpeed = isset($planets[Planet::MOON]['speed']) ? (float)$planets[Planet::MOON]['speed'] : 13.176;
+        if ($moonSpeed <= 0) $moonSpeed = 13.176;
+
+        $tithiSpeed = $moonSpeed - $sunSpeed;
+        if ($tithiSpeed <= 0) $tithiSpeed = 12.19;
+        $yogaSpeed = $moonSpeed + $sunSpeed;
+        if ($yogaSpeed <= 0) $yogaSpeed = 14.16;
+
+        $diff = fmod(fmod($moonLon - $sunLon, 360.0) + 360.0, 360.0);
+
+        $tithiRemDeg = 12.0 - fmod($diff, 12.0);
+        $tithiEndTs = $timestamp + (int)floor(($tithiRemDeg / $tithiSpeed) * 86400);
+        $tithiEndTs = findExactTimePHP(
+            $tithiEndTs,
+            "tithi",
+            (floor($diff / 12.0) + 1) * 12.0,
+            $lat,
+            $lon,
+            $tz,
+            $ayKey,
+            !$engine->isUsingSwetest()
+        );
+
+        $nakLen = 360.0 / 27.0;
+        $nakRemDeg = $nakLen - fmod($moonLon, $nakLen);
+        $nakEndTs = $timestamp + (int)floor(($nakRemDeg / $moonSpeed) * 86400);
+        $nakEndTs = findExactTimePHP(
+            $nakEndTs,
+            "nakshatra",
+            (floor($moonLon / $nakLen) + 1) * $nakLen,
+            $lat,
+            $lon,
+            $tz,
+            $ayKey,
+            !$engine->isUsingSwetest()
+        );
+
+        $yogaVal = fmod($moonLon + $sunLon, 360.0);
+        $yogaRemDeg = $nakLen - fmod($yogaVal, $nakLen);
+        $yogaEndTs = $timestamp + (int)floor(($yogaRemDeg / $yogaSpeed) * 86400);
+        $yogaEndTs = findExactTimePHP(
+            $yogaEndTs,
+            "yoga",
+            (floor($yogaVal / $nakLen) + 1) * $nakLen,
+            $lat,
+            $lon,
+            $tz,
+            $ayKey,
+            !$engine->isUsingSwetest()
+        );
+
+        $karanaRemDeg = 6.0 - fmod($diff, 6.0);
+        $karanaEndTs = $timestamp + (int)floor(($karanaRemDeg / $tithiSpeed) * 86400);
+        $karanaEndTs = findExactTimePHP(
+            $karanaEndTs,
+            "karana",
+            (floor($diff / 6.0) + 1) * 6.0,
+            $lat,
+            $lon,
+            $tz,
+            $ayKey,
+            !$engine->isUsingSwetest()
+        );
+
+        $ascLon = isset($planets[Planet::ASCENDANT]['longitude']) ? (float)$planets[Planet::ASCENDANT]['longitude'] : 0.0;
+        $lagnaRemDeg = 30.0 - fmod($ascLon, 30.0);
+        $lagnaEndTsPrecise = $timestamp + (int)floor($lagnaRemDeg * 240);
+
+        $sunRS = getPreciseSunriseSunsetPHP($timestamp, $lat, $lon, $tz);
+        $sunriseTs = $sunRS['sunrise'];
+        $sunsetTs = $sunRS['sunset'];
+
+        if ($timestamp < $sunriseTs) {
+            $prevRS = getPreciseSunriseSunsetPHP($timestamp - 86400, $lat, $lon, $tz);
+            $baseTs = $prevRS['sunset'];
+            $endTs = $sunriseTs;
+            $isDay = false;
+            $vaaraStartTs = $prevRS['sunrise'];
+            $vaaraEndTs = $sunriseTs;
+            $wd = (int)gmdate('w', $timestamp - 86400 + (int)round($tz * 3600));
+        } else if ($timestamp < $sunsetTs) {
+            $baseTs = $sunriseTs;
+            $endTs = $sunsetTs;
+            $isDay = true;
+            $nextRS = getPreciseSunriseSunsetPHP($timestamp + 86400, $lat, $lon, $tz);
+            $vaaraStartTs = $sunriseTs;
+            $vaaraEndTs = $nextRS['sunrise'];
+            $wd = (int)gmdate('w', $timestamp + (int)round($tz * 3600));
+        } else {
+            $nextRS = getPreciseSunriseSunsetPHP($timestamp + 86400, $lat, $lon, $tz);
+            $baseTs = $sunsetTs;
+            $endTs = $nextRS['sunrise'];
+            $isDay = false;
+            $vaaraStartTs = $sunriseTs;
+            $vaaraEndTs = $nextRS['sunrise'];
+            $wd = (int)gmdate('w', $timestamp + (int)round($tz * 3600));
+        }
+
+        $duration = max(0.1, $endTs - $baseTs);
+        $muhDuration = max(0.1, $duration / 15.0);
+        $mIdx = max(0, min(14, (int)floor(($timestamp - $baseTs) / $muhDuration)));
+        $dayMuhurthas = [
+            "Rudra", "Ahi", "Mitra", "Pitru", "Vasu", "Varaaha", "Viswedeva", "Vidhi",
+            "Satamukhi", "Puruhuta", "Vaahini", "Nakshatra", "Varuna", "Aryamana", "Bhaga"
+        ];
+        $nightMuhurthas = [
+            "Gireesha", "Ajapaada", "Ahir-budha", "Pushya", "Ashwini", "Yama", "Agni",
+            "Vidhaata", "Kanda", "Adithi", "Jiva/Amrutha", "Vishnu", "Dyumadgadyuti", "Brahma", "Samudra"
+        ];
+        $currMuhurtha = $isDay ? $dayMuhurthas[$mIdx] : $nightMuhurthas[$mIdx];
+        $muhurthaEndTs = (int)floor($baseTs + ($mIdx + 1) * $muhDuration);
+        $badMuhurthas = [
+            "Rudra", "Ahi", "Pitru", "Vaahini", "Nakshatra", "Bhaga",
+            "Gireesha", "Ahir-budha", "Yama", "Agni"
+        ];
+
+        $horaDur = max(0.1, $duration / 12.0);
+        $hIdx = max(0, min(11, (int)floor(($timestamp - $baseTs) / $horaDur)));
+        if (!$isDay) $hIdx += 12;
+
+        $horaLords = ["Sun", "Venus", "Mercury", "Moon", "Saturn", "Jupiter", "Mars"];
+        $horaLordsJs = [
+            'Sun' => 'Surya',
+            'Venus' => 'Shukra',
+            'Mercury' => 'Budha',
+            'Moon' => 'Chandra',
+            'Saturn' => 'Shani',
+            'Jupiter' => 'Guru',
+            'Mars' => 'Kuja',
+        ];
+        $horaLordsKey = [
+            'Sun' => 'Su',
+            'Venus' => 'Sk',
+            'Mercury' => 'Bu',
+            'Moon' => 'Mo',
+            'Saturn' => 'Sa',
+            'Jupiter' => 'Gu',
+            'Mars' => 'Ku',
+        ];
+        $wdStartIdx = [0, 3, 6, 2, 5, 1, 4];
+        $currentHoraEng = $horaLords[($wdStartIdx[$wd] + $hIdx) % 7];
+        $horaLordCode = $horaLordsKey[$currentHoraEng];
+        $horaEndTs = (int)floor($baseTs + (($hIdx % 12) + 1) * $horaDur);
+
         $clockData = [
             'endpoint' => 'clock',
             'meta' => [
@@ -1008,60 +1153,56 @@ switch (strtolower($endpoint)) {
                     'angle' => isset($p['longitude']) ? $p['longitude'] : 0,
                     'isR' => $isR,
                     'isC' => !empty($p['combust']),
-                    'isH' => false,
+                    'isH' => $jsKey === $horaLordCode,
                 ];
             }
         }
 
-        $ascLon = isset($planets[Planet::ASCENDANT]) ? $planets[Planet::ASCENDANT]['longitude'] : 0;
         $clockData['lagna'] = $ascLon;
         if (isset($clockData['Mo'])) {
-            $diff = fmod(fmod($moonLon - $sunLon, 360) + 360, 360);
-            $tIndex = (int)floor($diff / 12);
+            $tIndex = (int)floor($diff / 12.0);
             $clockData['Mo']['tithi_num'] = ($tIndex % 15) + 1;
             $clockData['Mo']['paksha'] = $tIndex < 15 ? "Shukla" : "Krishna";
         }
 
-        $dateStr = gmdate('Y-m-d', $utcTs);
-        $riseSet = VedicAstroEngine::getRiseSetTimes(0, $dateStr, $lon, $lat, $tz);
-        $sunriseTs = $riseSet['rise'] ?: ($timestamp - 43200);
-
+        $pPaksha = !empty($panchanga['paksha']) ? explode(' ', $panchanga['paksha'])[0] : '';
         $rashiNames = ["", "Mesha", "Vrishabha", "Mithuna", "Karka", "Simha", "Kanya", "Tula", "Vrischika", "Dhanu", "Makara", "Kumbha", "Meena"];
+
         $clockData['sunrise'] = $sunriseTs;
         $clockData['panchanga'] = [
             'vaara' => str_replace('vara', '', strtolower($panchanga['vara'] ?? '')),
-            'vaara_end' => formatTsLocalPHP($sunriseTs + 86400, $tz),
-            'vaara_end_ts' => $sunriseTs + 86400,
-            'vaara_rem' => 50,
-            'tithi' => $panchanga['tithi'] ?? '',
-            'tithi_end' => formatTsLocalPHP($timestamp + 43200, $tz),
-            'tithi_end_ts' => $timestamp + 43200,
-            'tithi_rem' => 50,
+            'vaara_end' => formatTsLocalPHP($vaaraEndTs, $tz),
+            'vaara_end_ts' => $vaaraEndTs,
+            'vaara_rem' => (int)floor((($vaaraEndTs - $timestamp) / max(1, $vaaraEndTs - $vaaraStartTs)) * 100),
+            'tithi' => trim($pPaksha . ' ' . ($panchanga['tithi'] ?? '')),
+            'tithi_end' => formatTsLocalPHP($tithiEndTs, $tz),
+            'tithi_end_ts' => $tithiEndTs,
+            'tithi_rem' => (int)floor(($tithiRemDeg / 12.0) * 100),
             'nakshatra' => ($panchanga['moon_nakshatra'] ?? '') . " (P" . ($panchanga['moon_pada'] ?? 1) . ")",
-            'nakshatra_end' => formatTsLocalPHP($timestamp + 43200, $tz),
-            'nakshatra_end_ts' => $timestamp + 43200,
-            'nakshatra_rem' => 50,
+            'nakshatra_end' => formatTsLocalPHP($nakEndTs, $tz),
+            'nakshatra_end_ts' => $nakEndTs,
+            'nakshatra_rem' => (int)floor(($nakRemDeg / $nakLen) * 100),
             'yoga' => $panchanga['yoga'] ?? '',
-            'yoga_end' => formatTsLocalPHP($timestamp + 43200, $tz),
-            'yoga_end_ts' => $timestamp + 43200,
-            'yoga_rem' => 50,
+            'yoga_end' => formatTsLocalPHP($yogaEndTs, $tz),
+            'yoga_end_ts' => $yogaEndTs,
+            'yoga_rem' => (int)floor(($yogaRemDeg / $nakLen) * 100),
             'karana' => $panchanga['karana'] ?? '',
-            'karana_end' => formatTsLocalPHP($timestamp + 21600, $tz),
-            'karana_end_ts' => $timestamp + 21600,
-            'karana_rem' => 50,
-            'muhurtha' => 'Mitra',
-            'muhurtha_end' => formatTsLocalPHP($timestamp + 3600, $tz),
-            'muhurtha_end_ts' => $timestamp + 3600,
-            'muhurtha_rem' => 50,
-            'muhurtha_is_good' => true,
-            'hora' => 'Guru',
-            'hora_end' => formatTsLocalPHP($timestamp + 3600, $tz),
-            'hora_end_ts' => $timestamp + 3600,
-            'hora_rem' => 50,
+            'karana_end' => formatTsLocalPHP($karanaEndTs, $tz),
+            'karana_end_ts' => $karanaEndTs,
+            'karana_rem' => (int)floor(($karanaRemDeg / 6.0) * 100),
+            'muhurtha' => $currMuhurtha,
+            'muhurtha_end' => formatTsLocalPHP($muhurthaEndTs, $tz),
+            'muhurtha_end_ts' => $muhurthaEndTs,
+            'muhurtha_rem' => (int)floor((($muhurthaEndTs - $timestamp) / max(1, $muhDuration)) * 100),
+            'muhurtha_is_good' => !in_array($currMuhurtha, $badMuhurthas),
+            'hora' => isset($horaLordsJs[$currentHoraEng]) ? $horaLordsJs[$currentHoraEng] : $currentHoraEng,
+            'hora_end' => formatTsLocalPHP($horaEndTs, $tz),
+            'hora_end_ts' => $horaEndTs,
+            'hora_rem' => (int)floor((($horaEndTs - $timestamp) / max(1, $horaDur)) * 100),
             'lagna' => isset($rashiNames[$lagnaRashi]) ? $rashiNames[$lagnaRashi] : 'Mesha',
-            'lagna_end' => formatTsLocalPHP($timestamp + 7200, $tz),
-            'lagna_end_ts' => $timestamp + 7200,
-            'lagna_rem' => 50,
+            'lagna_end' => formatTsLocalPHP($lagnaEndTsPrecise, $tz),
+            'lagna_end_ts' => $lagnaEndTsPrecise,
+            'lagna_rem' => (int)floor(($lagnaRemDeg / 30.0) * 100),
         ];
 
         sendJson($clockData);
@@ -1249,7 +1390,7 @@ switch (strtolower($endpoint)) {
             // Inauspicious & Timing windows
             $dayDur = $sunsetTs - $sunriseTs;
             $rahuRatios = [0.875, 0.125, 0.75, 0.5, 0.625, 0.375, 0.25];
-            $yamaRatios = [0.5, 0.375, 0.25, 0.125, 0.875, 0.75, 0.625];
+            $yamaRatios = [0.5, 0.375, 0.25, 0.125, 0.0, 0.75, 0.625];
             $gulikaRatios = [0.75, 0.625, 0.5, 0.375, 0.25, 0.125, 0.0];
 
             $rkStartTs = $sunriseTs + (int)floor($dayDur * $rahuRatios[$vaaraNum]);
@@ -1411,18 +1552,50 @@ switch (strtolower($endpoint)) {
         $dateUtc = gmmktime($hour, $minute, $second, $month, $day, $year);
         $timestamp = $dateUtc - (int)round($tz * 3600);
 
-        $riseSet = VedicAstroEngine::getRiseSetTimes(0, $dateStr, $lon, $lat, $tz);
-        $mSunriseTs = $riseSet['rise'] ?: ($timestamp - 43200);
-        $mSunsetTs = $riseSet['set'] ?: ($timestamp + 43200);
-        $mDayDuration = max(1, $mSunsetTs - $mSunriseTs);
-
-        $mVaaraNum = (int)gmdate('w', $timestamp + (int)round($tz * 3600));
+        $sunRS = getPreciseSunriseSunsetPHP($timestamp, $lat, $lon, $tz);
+        $mSunriseTs = $sunRS['sunrise'];
+        $mSunsetTs = $sunRS['sunset'];
         if ($timestamp < $mSunriseTs) {
-            $mVaaraNum = ($mVaaraNum - 1 + 7) % 7;
+            $prevRS = getPreciseSunriseSunsetPHP($timestamp - 86400, $lat, $lon, $tz);
+            $mBaseTs = $prevRS['sunset'];
+            $mEndTs = $mSunriseTs;
+            $mIsDay = false;
+            $mVaaraNum = (int)gmdate('w', $timestamp - 86400 + (int)round($tz * 3600));
+        } else if ($timestamp < $mSunsetTs) {
+            $mBaseTs = $mSunriseTs;
+            $mEndTs = $mSunsetTs;
+            $mIsDay = true;
+            $nextRS = getPreciseSunriseSunsetPHP($timestamp + 86400, $lat, $lon, $tz);
+            $mVaaraNum = (int)gmdate('w', $timestamp + (int)round($tz * 3600));
+        } else {
+            $nextRS = getPreciseSunriseSunsetPHP($timestamp + 86400, $lat, $lon, $tz);
+            $mBaseTs = $mSunsetTs;
+            $mEndTs = $nextRS['sunrise'];
+            $mIsDay = false;
+            $mVaaraNum = (int)gmdate('w', $timestamp + (int)round($tz * 3600));
         }
 
+        $mDuration = max(1, $mEndTs - $mBaseTs);
+        $mMuhurthaDuration = $mDuration / 15.0;
+        $mIndex = max(0, min(14, (int)floor(($timestamp - $mBaseTs) / $mMuhurthaDuration)));
+        $mDayMuhurthas = [
+            "Rudra", "Ahi", "Mitra", "Pitru", "Vasu", "Varaaha", "Viswedeva", "Vidhi",
+            "Satamukhi", "Puruhuta", "Vaahini", "Nakshatra", "Varuna", "Aryamana", "Bhaga"
+        ];
+        $mNightMuhurthas = [
+            "Gireesha", "Ajapaada", "Ahir-budha", "Pushya", "Ashwini", "Yama", "Agni",
+            "Vidhaata", "Kanda", "Adithi", "Jiva/Amrutha", "Vishnu", "Dyumadgadyuti", "Brahma", "Samudra"
+        ];
+        $mBadMuhurthas = [
+            "Rudra", "Ahi", "Pitru", "Vaahini", "Nakshatra", "Bhaga",
+            "Gireesha", "Ahir-budha", "Yama", "Agni"
+        ];
+        $mCurrent = $mIsDay ? $mDayMuhurthas[$mIndex] : $mNightMuhurthas[$mIndex];
+        $mEndTime = (int)floor($mBaseTs + ($mIndex + 1) * $mMuhurthaDuration);
+        $mDayDuration = max(1, $mSunsetTs - $mSunriseTs);
+
         $rahuRatios = [0.875, 0.125, 0.75, 0.5, 0.625, 0.375, 0.25];
-        $yamaRatios = [0.5, 0.375, 0.25, 0.125, 0.875, 0.75, 0.625];
+        $yamaRatios = [0.5, 0.375, 0.25, 0.125, 0.0, 0.75, 0.625];
         $gulikaRatios = [0.75, 0.625, 0.5, 0.375, 0.25, 0.125, 0.0];
 
         $rahuStart = $mSunriseTs + (int)floor($mDayDuration * $rahuRatios[$mVaaraNum]);
@@ -1540,10 +1713,10 @@ switch (strtolower($endpoint)) {
             'is_pushkara' => $isPushkara,
             'pushkaramsha_time' => $pushkaraTime,
             'mid_lagna_window' => $midWindow,
-            'current_muhurtha' => 'Mitra',
-            'current_muhurtha_start' => formatTsLocalPHP($timestamp - 1800, $tz),
-            'current_muhurtha_end' => formatTsLocalPHP($timestamp + 1800, $tz),
-            'muhurtha_is_good' => true,
+            'current_muhurtha' => $mCurrent,
+            'current_muhurtha_start' => formatTsLocalPHP((int)floor($mBaseTs + $mIndex * $mMuhurthaDuration), $tz),
+            'current_muhurtha_end' => formatTsLocalPHP($mEndTime, $tz),
+            'muhurtha_is_good' => !in_array($mCurrent, $mBadMuhurthas),
             'panchaka' => $panchakaLabel,
             'panchaka_is_good' => $panchakaGood,
             'rahu_kalam' => formatTsLocalPHP($rahuStart, $tz) . " - " . formatTsLocalPHP($rahuEnd, $tz),

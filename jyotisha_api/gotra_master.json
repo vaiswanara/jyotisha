@@ -1,0 +1,2386 @@
+[
+  {
+    "id": "BHR001",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "ಭೃಗು",
+    "name_en": "Jamadagni",
+    "aliases": [],
+    "name_te": "జమదగ్ని",
+    "name_kn": "ಜಮದಗ್ನಿ",
+    "slug": "jamadagni",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Chyavana",
+      "Apnavana"
+    ],
+    "search_terms": [
+      "jamadagni",
+      "జమదగ్ని",
+      "ಜಮದಗ್ನಿ"
+    ]
+  },
+  {
+    "id": "BHR002",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "ಭೃಗು",
+    "name_en": "Jaabaali",
+    "aliases": [],
+    "name_te": "జాబాలి",
+    "name_kn": "ಜಾಬಾಲಿ",
+    "slug": "jaabaali",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Veetahavya",
+      "Raivasa"
+    ],
+    "search_terms": [
+      "jaabaali",
+      "జాబాలి",
+      "ಜಾಬಾಲಿ"
+    ]
+  },
+  {
+    "id": "BHR003",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "ಭೃಗು",
+    "name_en": "Jaamadagnya",
+    "aliases": [],
+    "name_te": "జామదగ్న్య",
+    "name_kn": "ಜಾಮದಗ್ನ್ಯ",
+    "slug": "jaamadagnya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Aurva",
+      "Jamadagnya"
+    ],
+    "search_terms": [
+      "jaamadagnya",
+      "జామదగ్న్య",
+      "ಜಾಮದಗ್ನ್ಯ"
+    ]
+  },
+  {
+    "id": "BHR004",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "ಭೃಗು",
+    "name_en": "Jaimini",
+    "aliases": [],
+    "name_te": "జైమిని",
+    "name_kn": "ಜೈಮಿನಿ",
+    "slug": "jaimini",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Veetahavya",
+      "Raivasa"
+    ],
+    "search_terms": [
+      "jaimini",
+      "జైమిని",
+      "ಜೈಮಿನಿ"
+    ]
+  },
+  {
+    "id": "BHR005",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "ಭೃಗು",
+    "name_en": "Bhaulathsya",
+    "aliases": [],
+    "name_te": "భౌలత్స్య",
+    "name_kn": "ಭೌಲತ್ಸ್ಯ",
+    "slug": "bhaulathsya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Aurva",
+      "Jamadagnya"
+    ],
+    "search_terms": [
+      "bhaulathsya",
+      "భౌలత్స్య",
+      "ಭೌಲತ್ಸ್ಯ"
+    ]
+  },
+  {
+    "id": "BHR006",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "ಭೃಗು",
+    "name_en": "Maandookeya",
+    "aliases": [],
+    "name_te": "మాండూకేయ",
+    "name_kn": "ಮಾಂಡೂಕೇಯ",
+    "slug": "maandookeya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Aurva",
+      "Jamadagnya"
+    ],
+    "search_terms": [
+      "maandookeya",
+      "మాండూకేయ",
+      "ಮಾಂಡೂಕೇಯ"
+    ]
+  },
+  {
+    "id": "BHR007",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "ಭೃಗು",
+    "name_en": "Maunabhargava",
+    "aliases": [],
+    "name_te": "మౌనభార్గవ",
+    "name_kn": "ಮೌನಭಾರ್ಗವ",
+    "slug": "maunabhargava",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Veetahavya",
+      "Savethasa"
+    ],
+    "search_terms": [
+      "maunabhargava",
+      "మౌనభార్గవ",
+      "ಮೌನಭಾರ್ಗವ"
+    ]
+  },
+  {
+    "id": "BHR008",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "ಭೃಗು",
+    "name_en": "Vathoola",
+    "aliases": [],
+    "name_te": "వాధూల",
+    "name_kn": "ವಾಧೂಲ",
+    "slug": "vathoola",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Veetahavya",
+      "Savethasa"
+    ],
+    "search_terms": [
+      "vathoola",
+      "వాధూల",
+      "ವಾಧೂಲ"
+    ]
+  },
+  {
+    "id": "BHR009",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "ಭೃಗು",
+    "name_en": "Srivathsa",
+    "aliases": [],
+    "name_te": "శ్రీవత్స",
+    "name_kn": "ಶ್ರೀವತ್ಸ",
+    "slug": "srivathsa",
+    "type": "Pancharsheya",
+    "rishis": [
+      "Bhargava",
+      "Chyavana",
+      "Apnavana",
+      "Aurva",
+      "Jamadagnya"
+    ],
+    "search_terms": [
+      "srivathsa",
+      "శ్రీవత్స",
+      "ಶ್ರೀವತ್ಸ"
+    ]
+  },
+  {
+    "id": "BHR010",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "ಭೃಗು",
+    "name_en": "Garthsamatha",
+    "aliases": [],
+    "name_te": "గృత్సమద",
+    "name_kn": "ಗೃತ್ಸಮದ",
+    "slug": "garthsamatha",
+    "type": "Dvayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Grtsamada"
+    ],
+    "search_terms": [
+      "garthsamatha",
+      "గృత్సమద",
+      "ಗೃತ್ಸಮದ"
+    ]
+  },
+  {
+    "id": "BHR011",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "ಭೃಗು",
+    "name_en": "Kanaka",
+    "aliases": [],
+    "name_te": "కనక",
+    "name_kn": "ಕನಕ",
+    "slug": "kanaka",
+    "type": "Dvayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Grtsamada"
+    ],
+    "search_terms": [
+      "kanaka",
+      "కనక",
+      "ಕನಕ"
+    ]
+  },
+  {
+    "id": "BHR012",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "ಭೃಗು",
+    "name_en": "Yagnjapathi",
+    "aliases": [],
+    "name_te": "యజ్ఞపతి",
+    "name_kn": "ಯಜ್ಞಪತಿ",
+    "slug": "yagnjapathi",
+    "type": "Dvayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Grtsamada"
+    ],
+    "search_terms": [
+      "yagnjapathi",
+      "యజ్ఞపతి",
+      "ಯಜ್ಞಪತಿ"
+    ]
+  },
+  {
+    "id": "BHR013",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "ಭೃಗು",
+    "name_en": "Avada",
+    "aliases": [],
+    "name_te": "అవద",
+    "name_kn": "ಅವದ",
+    "slug": "avada",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Aurva",
+      "Jamadagnya"
+    ],
+    "search_terms": [
+      "avada",
+      "అవద",
+      "ಅವದ"
+    ]
+  },
+  {
+    "id": "BHR014",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "ಭೃಗು",
+    "name_en": "AartishENa",
+    "aliases": [],
+    "name_te": "ఆర్ష్టిషేణ",
+    "name_kn": "ಆರ್ಷ್ಟಿಷೇಣ",
+    "slug": "aartishena",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Arshtishena",
+      "Anupa"
+    ],
+    "search_terms": [
+      "aartishena",
+      "ఆర్ష్టిషేణ",
+      "ಆರ್ಷ್ಟಿಷೇಣ"
+    ]
+  },
+  {
+    "id": "BHR015",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "భೃగు",
+    "name_en": "Aaswalaayana",
+    "aliases": [],
+    "name_te": "ఆశ్వలాయన",
+    "name_kn": "ಆಶ್ವಲಾಯನ",
+    "slug": "aaswalaayana",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Vadhryashva",
+      "Daivadasa"
+    ],
+    "search_terms": [
+      "aaswalaayana",
+      "ఆశ్వలాయన",
+      "ಆಶ್ವಲಾಯನ"
+    ]
+  },
+  {
+    "id": "BHR016",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "భೃగు",
+    "name_en": "Kasyapi",
+    "aliases": [],
+    "name_te": "కాశ్యపి",
+    "name_kn": "ಕಾಶ್ಯಪಿ",
+    "slug": "kasyapi",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Veetahavya",
+      "Savethasa"
+    ],
+    "search_terms": [
+      "kasyapi",
+      "కాశ్యపి",
+      "ಕಾಶ್ಯಪಿ"
+    ]
+  },
+  {
+    "id": "BHR017",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "భೃగు",
+    "name_en": "Kaathyaayana",
+    "aliases": [],
+    "name_te": "కాత్యాయన",
+    "name_kn": "ಕಾತ್ಯಾಯನ",
+    "slug": "kaathyaayana",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Arshtishena",
+      "Anupa"
+    ],
+    "search_terms": [
+      "kaathyaayana",
+      "కాత్యాయన",
+      "ಕಾತ್ಯಾಯನ"
+    ]
+  },
+  {
+    "id": "BHR018",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "భೃగు",
+    "name_en": "Kaargya",
+    "aliases": [],
+    "name_te": "కార్గ్య",
+    "name_kn": "ಕಾರ್ಗ್ಯ",
+    "slug": "kaargya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Veetahavya",
+      "Raivasa"
+    ],
+    "search_terms": [
+      "kaargya",
+      "కార్గ్య",
+      "ಕಾರ್ಗ್ಯ"
+    ]
+  },
+  {
+    "id": "BHR019",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "భೃగు",
+    "name_en": "Kruthsamatha",
+    "aliases": [],
+    "name_te": "కృత్సమద",
+    "name_kn": "ಕೃತ್ಸಮದ",
+    "slug": "kruthsamatha",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Shunahotra",
+      "Grtsamada"
+    ],
+    "search_terms": [
+      "kruthsamatha",
+      "కృత్సమద",
+      "ಕೃತ್ಸಮದ"
+    ]
+  },
+  {
+    "id": "BHR020",
+    "group": "BHR",
+    "root_en": "Bhrigu",
+    "root_te": "భృగు",
+    "root_kn": "భೃగు",
+    "name_en": "Nairruthi",
+    "aliases": [],
+    "name_te": "నైరృతి",
+    "name_kn": "ನೈರೃತಿ",
+    "slug": "nairruthi",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Bhargava",
+      "Arshtishena",
+      "Anupa"
+    ],
+    "search_terms": [
+      "nairruthi",
+      "నైరృతి",
+      "ನೈರೃತಿ"
+    ]
+  },
+  {
+    "id": "ANG001",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Uthasatha",
+    "aliases": [
+      "Uthathya"
+    ],
+    "name_te": "ఉతథ్య",
+    "name_kn": "ಉತಥ್ಯ",
+    "slug": "uthasatha",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Utathya",
+      "Gautama"
+    ],
+    "search_terms": [
+      "uthasatha",
+      "uthathya",
+      "ఉతథ్య",
+      "ಉತಥ್ಯ"
+    ]
+  },
+  {
+    "id": "ANG002",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Kamyaangirasa",
+    "aliases": [],
+    "name_te": "కామ్యాంగీరస",
+    "name_kn": "ಕಾಮ್ಯಾಂಗೀರಸ",
+    "slug": "kamyaangirasa",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Aamahavya",
+      "Aurushaya"
+    ],
+    "search_terms": [
+      "kamyaangirasa",
+      "కామ్యాంగీరస",
+      "ಕಾಮ್ಯಾಂಗೀರಸ"
+    ]
+  },
+  {
+    "id": "ANG003",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "GaargEya",
+    "aliases": [],
+    "name_te": "గార్గ్య",
+    "name_kn": "ಗಾರ್ಗ್ಯ",
+    "slug": "gaargeya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Gargya",
+      "Chaitya"
+    ],
+    "search_terms": [
+      "gaargeya",
+      "గార్గ్య",
+      "ಗಾರ್ಗ್ಯ"
+    ]
+  },
+  {
+    "id": "ANG004",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "GaargEya",
+    "aliases": [],
+    "name_te": "గార్గ్య",
+    "name_kn": "ಗಾರ್ಗ್ಯ",
+    "slug": "gaargeya",
+    "type": "Pancharsheya",
+    "rishis": [
+      "Angirasa",
+      "Barhaspatya",
+      "Bharadwaja",
+      "Shainya",
+      "Gargya"
+    ],
+    "search_terms": [
+      "gaargeya",
+      "గార్గ్య",
+      "ಗಾರ್ಗ್ಯ"
+    ]
+  },
+  {
+    "id": "ANG005",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Gautama",
+    "aliases": [],
+    "name_te": "గౌతమ",
+    "name_kn": "ಗೌತಮ",
+    "slug": "gautama",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Ayasya",
+      "Gautama"
+    ],
+    "search_terms": [
+      "gautama",
+      "గౌతమ",
+      "ಗೌತಮ"
+    ]
+  },
+  {
+    "id": "ANG006",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Paurukuthsa",
+    "aliases": [],
+    "name_te": "పౌరుకుత్స",
+    "name_kn": "ಪೌರುಕುತ್ಸ",
+    "slug": "paurukuthsa",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Purukutsa",
+      "Trasadasyu"
+    ],
+    "search_terms": [
+      "paurukuthsa",
+      "పౌరుకుత్స",
+      "ಪೌರುಕುತ್ಸ"
+    ]
+  },
+  {
+    "id": "ANG007",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "PaatharaayaNa",
+    "aliases": [],
+    "name_te": "పాదరాయణ",
+    "name_kn": "ಪಾದರಾಯಣ",
+    "slug": "paatharaayana",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Purukutsa",
+      "Trasadasyu"
+    ],
+    "search_terms": [
+      "paatharaayana",
+      "పాదరాయణ",
+      "ಪಾದರಾಯಣ"
+    ]
+  },
+  {
+    "id": "ANG008",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Mauthgalya",
+    "aliases": [],
+    "name_te": "మౌద్గల్య",
+    "name_kn": "ಮೌದ್ಗಲ್ಯ",
+    "slug": "mauthgalya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Ambarisha",
+      "Maudgalya"
+    ],
+    "search_terms": [
+      "mauthgalya",
+      "మౌద్గల్య",
+      "ಮೌದ್ಗಲ್ಯ"
+    ]
+  },
+  {
+    "id": "ANG009",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Bharadwaja",
+    "aliases": [],
+    "name_te": "భరద్వాజ",
+    "name_kn": "ಭರದ್ವಾಜ",
+    "slug": "bharadwaja",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Barhaspatya",
+      "Bharadwaja"
+    ],
+    "search_terms": [
+      "bharadwaja",
+      "భరద్వాజ",
+      "ಭರದ್ವಾಜ"
+    ]
+  },
+  {
+    "id": "ANG010",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Mauthgalya",
+    "aliases": [],
+    "name_te": "మౌద్గల్య",
+    "name_kn": "ಮೌದ್ಗಲ್ಯ",
+    "slug": "mauthgalya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Bharmyashva",
+      "Maudgalya"
+    ],
+    "search_terms": [
+      "mauthgalya",
+      "మౌద్గల్య",
+      "ಮೌದ್ಗಲ್ಯ"
+    ]
+  },
+  {
+    "id": "ANG011",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Ratheethara",
+    "aliases": [],
+    "name_te": "రథీతర",
+    "name_kn": "ರಥೀತರ",
+    "slug": "ratheethara",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Vairupa",
+      "Rathithara"
+    ],
+    "search_terms": [
+      "ratheethara",
+      "రథీతర",
+      "ರಥೀತರ"
+    ]
+  },
+  {
+    "id": "ANG012",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Vishnuvruththa",
+    "aliases": [],
+    "name_te": "విష్ణువృద్ధ",
+    "name_kn": "ವಿಷ್ಣುವೃದ್ಧ",
+    "slug": "vishnuvruththa",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Purukutsa",
+      "Trasadasyu"
+    ],
+    "search_terms": [
+      "vishnuvruththa",
+      "విష్ణువృద్ధ",
+      "ವಿಷ್ಣುವೃದ್ಧ"
+    ]
+  },
+  {
+    "id": "ANG013",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "ShatamarshNa",
+    "aliases": [],
+    "name_te": "శఠమర్షణ",
+    "name_kn": "ಶಠಮರ್ಷಣ",
+    "slug": "shatamarshna",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Trasadasyu",
+      "Purukutsa"
+    ],
+    "search_terms": [
+      "shatamarshna",
+      "శఠమర్షణ",
+      "ಶಠಮರ್ಷಣ"
+    ]
+  },
+  {
+    "id": "ANG014",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Sankruthi",
+    "aliases": [],
+    "name_te": "సంకృతి",
+    "name_kn": "ಸಂಕೃತಿ",
+    "slug": "sankruthi",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Satya",
+      "Sankritya",
+      "Gaurivita"
+    ],
+    "search_terms": [
+      "sankruthi",
+      "సంకృతి",
+      "ಸಂಕೃತಿ"
+    ]
+  },
+  {
+    "id": "ANG015",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Sankruthi",
+    "aliases": [],
+    "name_te": "సంకృతి",
+    "name_kn": "ಸಂಕೃತಿ",
+    "slug": "sankruthi",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Sankritya",
+      "Gaurivita"
+    ],
+    "search_terms": [
+      "sankruthi",
+      "సంకృతి",
+      "ಸಂಕೃತಿ"
+    ]
+  },
+  {
+    "id": "ANG016",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Haritha",
+    "aliases": [],
+    "name_te": "హరిత",
+    "name_kn": "ಹರಿತ",
+    "slug": "haritha",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Ambarisha",
+      "Yauvanashva"
+    ],
+    "search_terms": [
+      "haritha",
+      "హరిత",
+      "ಹರಿತ"
+    ]
+  },
+  {
+    "id": "ANG017",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Aabasthamba",
+    "aliases": [],
+    "name_te": "ఆపస్తంబ",
+    "name_kn": "ಆಪಸ್ತಂಬ",
+    "slug": "aabasthamba",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Barhaspatya",
+      "Bharadwaja"
+    ],
+    "search_terms": [
+      "aabasthamba",
+      "ఆపస్తంబ",
+      "ಆಪಸ್ತಂಬ"
+    ]
+  },
+  {
+    "id": "ANG018",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Aayaasya",
+    "aliases": [],
+    "name_te": "ఆయాస్య",
+    "name_kn": "ಆಯಾಸ್ಯ",
+    "slug": "aayaasya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Ayasya",
+      "Gautama"
+    ],
+    "search_terms": [
+      "aayaasya",
+      "ఆయాస్య",
+      "ಆಯಾಸ್ಯ"
+    ]
+  },
+  {
+    "id": "ANG019",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "KaNva",
+    "aliases": [],
+    "name_te": "కణ్వ",
+    "name_kn": "ಕಣ್ವ",
+    "slug": "kanva",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Ajamidha",
+      "Kanva"
+    ],
+    "search_terms": [
+      "kanva",
+      "కణ్వ",
+      "ಕಣ್ವ"
+    ]
+  },
+  {
+    "id": "ANG020",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "KaNva",
+    "aliases": [],
+    "name_te": "కణ్వ",
+    "name_kn": "ಕಣ್ವ",
+    "slug": "kanva",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Aamahiyava",
+      "Urukshaya"
+    ],
+    "search_terms": [
+      "kanva",
+      "కణ్వ",
+      "ಕಣ್ವ"
+    ]
+  },
+  {
+    "id": "ANG021",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Kabila",
+    "aliases": [],
+    "name_te": "కపిల",
+    "name_kn": "ಕಪಿಲ",
+    "slug": "kabila",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Aamahiyava",
+      "Urukshaya"
+    ],
+    "search_terms": [
+      "kabila",
+      "కపిల",
+      "ಕಪಿಲ"
+    ]
+  },
+  {
+    "id": "ANG022",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Garga",
+    "aliases": [],
+    "name_te": "గర్గ",
+    "name_kn": "ಗರ್ಗ",
+    "slug": "garga",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Shainya",
+      "Garga"
+    ],
+    "search_terms": [
+      "garga",
+      "గర్గ",
+      "ಗರ್ಗ"
+    ]
+  },
+  {
+    "id": "ANG023",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Kuthsa",
+    "aliases": [],
+    "name_te": "కుత్స",
+    "name_kn": "ಕುತ್ಸ",
+    "slug": "kuthsa",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Ambarisha",
+      "Yauvanashva"
+    ],
+    "search_terms": [
+      "kuthsa",
+      "కుత్స",
+      "ಕುತ್ಸ"
+    ]
+  },
+  {
+    "id": "ANG024",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Kuthsa",
+    "aliases": [],
+    "name_te": "కుత్స",
+    "name_kn": "ಕುತ್ಸ",
+    "slug": "kuthsa",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Mandhatra",
+      "Kutsa"
+    ],
+    "search_terms": [
+      "kuthsa",
+      "కుత్స",
+      "ಕುತ್ಸ"
+    ]
+  },
+  {
+    "id": "ANG025",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Kaundinya",
+    "aliases": [],
+    "name_te": "కౌండిన్య",
+    "name_kn": "ಕೌಂಡಿನ್ಯ",
+    "slug": "kaundinya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Barhaspatya",
+      "Bharadwaja"
+    ],
+    "search_terms": [
+      "kaundinya",
+      "కౌండిన్య",
+      "ಕೌಂಡಿನ್ಯ"
+    ]
+  },
+  {
+    "id": "ANG027",
+    "group": "ANG",
+    "root_en": "Angirasa",
+    "root_te": "అంగీరస",
+    "root_kn": "ಅಂಗೀರಸ",
+    "name_en": "Lohitha",
+    "aliases": [],
+    "name_te": "లోహిత",
+    "name_kn": "ಲೋಹಿತ",
+    "slug": "lohitha",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Angirasa",
+      "Vishvamitra",
+      "Lohita"
+    ],
+    "search_terms": [
+      "lohitha",
+      "లోహిత",
+      "ಲೋಹಿತ"
+    ]
+  },
+  {
+    "id": "ATR001",
+    "group": "ATR",
+    "root_en": "Atri",
+    "root_te": "అత్రి",
+    "root_kn": "ಅತ್ರಿ",
+    "name_en": "Atreya",
+    "aliases": [],
+    "name_te": "ఆత్రేయ",
+    "name_kn": "ಆತ್ರೇಯ",
+    "slug": "atreya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Atreya",
+      "Archananasa",
+      "Shyavashva"
+    ],
+    "search_terms": [
+      "atreya",
+      "ఆత్రేయ",
+      "ಆತ್ರೇಯ"
+    ]
+  },
+  {
+    "id": "ATR002",
+    "group": "ATR",
+    "root_en": "Atri",
+    "root_te": "అత్రి",
+    "root_kn": "ಅತ್ರಿ",
+    "name_en": "Mauthgalya",
+    "aliases": [],
+    "name_te": "మౌద్గాల్య",
+    "name_kn": "ಮೌದ್ಗಾಲ್ಯ",
+    "slug": "mauthgalya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Atreya",
+      "Archananasa",
+      "Purvatitha"
+    ],
+    "search_terms": [
+      "mauthgalya",
+      "మౌద్గాల్య",
+      "ಮೌದ್ಗಾಲ್ಯ"
+    ]
+  },
+  {
+    "id": "ATR003",
+    "group": "ATR",
+    "root_en": "Atri",
+    "root_te": "అత్రి",
+    "root_kn": "ಅತ್ರಿ",
+    "name_en": "Athri",
+    "aliases": [],
+    "name_te": "అత్రి",
+    "name_kn": "ಅತ್ರಿ",
+    "slug": "athri",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Atreya",
+      "Archananasa",
+      "Shyavashva"
+    ],
+    "search_terms": [
+      "athri",
+      "అత్రి",
+      "ಅತ್ರಿ"
+    ]
+  },
+  {
+    "id": "ATR004",
+    "group": "ATR",
+    "root_en": "Atri",
+    "root_te": "అత్రి",
+    "root_kn": "ಅತ್ರಿ",
+    "name_en": "Uthaalaka",
+    "aliases": [],
+    "name_te": "ఉద్దాలక",
+    "name_kn": "ಉದ್ದಾಲಕ",
+    "slug": "uthaalaka",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Atreya",
+      "Archananasa",
+      "Shyavashva"
+    ],
+    "search_terms": [
+      "uthaalaka",
+      "ఉద్దాలక",
+      "ಉದ್ದಾಲಕ"
+    ]
+  },
+  {
+    "id": "ATR005",
+    "group": "ATR",
+    "root_en": "Atri",
+    "root_te": "అత్రి",
+    "root_kn": "ಅತ್ರಿ",
+    "name_en": "Muthkala",
+    "aliases": [],
+    "name_te": "ముద్గల",
+    "name_kn": "ಮುದ್ಗಲ",
+    "slug": "muthkala",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Atreya",
+      "Archananasa",
+      "Purvatitha"
+    ],
+    "search_terms": [
+      "muthkala",
+      "ముద్గల",
+      "ಮುದ್ಗಲ"
+    ]
+  },
+  {
+    "id": "ATR006",
+    "group": "ATR",
+    "root_en": "Atri",
+    "root_te": "అత్రి",
+    "root_kn": "ಅತ್ರಿ",
+    "name_en": "Gauriveetha",
+    "aliases": [],
+    "name_te": "గౌరీవీత",
+    "name_kn": "ಗೌರೀವೀತ",
+    "slug": "gauriveetha",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Atreya",
+      "Archananasa",
+      "Purvatitha"
+    ],
+    "search_terms": [
+      "gauriveetha",
+      "గౌరీవీత",
+      "ಗೌರೀವೀತ"
+    ]
+  },
+  {
+    "id": "ATR007",
+    "group": "ATR",
+    "root_en": "Atri",
+    "root_te": "అత్రి",
+    "root_kn": "ಅತ್ರಿ",
+    "name_en": "Dattathreya",
+    "aliases": [],
+    "name_te": "దత్తాత్రేయ",
+    "name_kn": "ದತ್ತಾತ್ರೇಯ",
+    "slug": "dattathreya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Atreya",
+      "Archananasa",
+      "Shyavashva"
+    ],
+    "search_terms": [
+      "dattathreya",
+      "దత్తాత్రేయ",
+      "ದತ್ತಾತ್ರೇಯ"
+    ]
+  },
+  {
+    "id": "ATR008",
+    "group": "ATR",
+    "root_en": "Atri",
+    "root_te": "అత్రి",
+    "root_kn": "ಅತ್ರಿ",
+    "name_en": "Dhananjaya",
+    "aliases": [],
+    "name_te": "ధనంజయ",
+    "name_kn": "ಧನಂಜಯ",
+    "slug": "dhananjaya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Atreya",
+      "Archananasa",
+      "Gavishtira"
+    ],
+    "search_terms": [
+      "dhananjaya",
+      "ధనంజయ",
+      "ಧನಂಜಯ"
+    ]
+  },
+  {
+    "id": "ATR009",
+    "group": "ATR",
+    "root_en": "Atri",
+    "root_te": "అత్రి",
+    "root_kn": "ಅತ್ರಿ",
+    "name_en": "Dhaksha",
+    "aliases": [
+      "Dakshi"
+    ],
+    "name_te": "దక్ష",
+    "name_kn": "ದಕ್ಷ",
+    "slug": "dhaksha",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Atreya",
+      "Gavishtira",
+      "Purvatitha"
+    ],
+    "search_terms": [
+      "dhaksha",
+      "dakshi",
+      "దక్ష",
+      "ದಕ್ಷ"
+    ]
+  },
+  {
+    "id": "ATR010",
+    "group": "ATR",
+    "root_en": "Atri",
+    "root_te": "అత్రి",
+    "root_kn": "ಅತ್ರಿ",
+    "name_en": "Bhaaleya",
+    "aliases": [],
+    "name_te": "భాలేయ",
+    "name_kn": "ಭಾಲೇಯ",
+    "slug": "bhaaleya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Atreya",
+      "Vamarathya",
+      "Pautrika"
+    ],
+    "search_terms": [
+      "bhaaleya",
+      "భాలేయ",
+      "ಭಾಲೇಯ"
+    ]
+  },
+  {
+    "id": "ATR011",
+    "group": "ATR",
+    "root_en": "Atri",
+    "root_te": "అత్రి",
+    "root_kn": "ಅತ್ರಿ",
+    "name_en": "Pathanjala",
+    "aliases": [],
+    "name_te": "పతంజలి",
+    "name_kn": "ಪತಂಜಲಿ",
+    "slug": "pathanjala",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Atreya",
+      "Archananasa",
+      "Shyavashva"
+    ],
+    "search_terms": [
+      "pathanjala",
+      "పతంజలి",
+      "ಪತಂಜಲಿ"
+    ]
+  },
+  {
+    "id": "ATR012",
+    "group": "ATR",
+    "root_en": "Atri",
+    "root_te": "అత్రి",
+    "root_kn": "ಅತ್ರಿ",
+    "name_en": "Bheejaavaaba",
+    "aliases": [],
+    "name_te": "బీజావాప",
+    "name_kn": "ಬೀಜಾವಾಪ",
+    "slug": "bheejaavaaba",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Atreya",
+      "Archananasa",
+      "Atitha"
+    ],
+    "search_terms": [
+      "bheejaavaaba",
+      "బీజావాప",
+      "ಬೀಜಾವಾಪ"
+    ]
+  },
+  {
+    "id": "VIS001",
+    "group": "VIS",
+    "root_en": "Vishwamitra",
+    "root_te": "విశ్వామిత్ర",
+    "root_kn": "ವಿಶ್ವಾಮಿತ್ರ",
+    "name_en": "Kausika",
+    "aliases": [
+      "Kusika"
+    ],
+    "name_te": "కౌశిక",
+    "name_kn": "ಕೌಶಿಕ",
+    "slug": "kausika",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vishvamitra",
+      "Aghamarshana",
+      "Kaushika"
+    ],
+    "search_terms": [
+      "kausika",
+      "kusika",
+      "కౌశిక",
+      "ಕೌಶಿಕ"
+    ]
+  },
+  {
+    "id": "VIS002",
+    "group": "VIS",
+    "root_en": "Vishwamitra",
+    "root_te": "విశ్వామిత్ర",
+    "root_kn": "ವಿಶ್ವಾಮಿತ್ರ",
+    "name_en": "Lohitha",
+    "aliases": [],
+    "name_te": "లోహిత",
+    "name_kn": "ಲೋಹಿತ",
+    "slug": "lohitha",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vishvamitra",
+      "Ashtaka",
+      "Lohita"
+    ],
+    "search_terms": [
+      "lohitha",
+      "లోహిత",
+      "ಲೋಹಿತ"
+    ]
+  },
+  {
+    "id": "VIS003",
+    "group": "VIS",
+    "root_en": "Vishwamitra",
+    "root_te": "విశ్వామిత్ర",
+    "root_kn": "ವಿಶ್ವಾಮಿತ್ರ",
+    "name_en": "Vishwamitra",
+    "aliases": [],
+    "name_te": "విశ్వామిత్ర",
+    "name_kn": "ವಿಶ್ವಾಮಿತ್ರ",
+    "slug": "vishwamitra",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vishvamitra",
+      "Devarata",
+      "Audala"
+    ],
+    "search_terms": [
+      "vishwamitra",
+      "విశ్వామిత్ర",
+      "ವಿಶ್ವಾಮಿತ್ರ"
+    ]
+  },
+  {
+    "id": "VIS004",
+    "group": "VIS",
+    "root_en": "Vishwamitra",
+    "root_te": "విశ్వామిత్ర",
+    "root_kn": "ವಿಶ್ವಾಮಿತ್ರ",
+    "name_en": "Saalaavatha",
+    "aliases": [],
+    "name_te": "శాలావత",
+    "name_kn": "ಶಾಲಾವತ",
+    "slug": "saalaavatha",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vishvamitra",
+      "Devarata",
+      "Audala"
+    ],
+    "search_terms": [
+      "saalaavatha",
+      "శాలావత",
+      "ಶಾಲಾವತ"
+    ]
+  },
+  {
+    "id": "VIS005",
+    "group": "VIS",
+    "root_en": "Vishwamitra",
+    "root_te": "విశ్వామిత్ర",
+    "root_kn": "ವಿಶ್ವಾಮಿತ್ರ",
+    "name_en": "Kadhaka",
+    "aliases": [],
+    "name_te": "కథక",
+    "name_kn": "ಕಥಕ",
+    "slug": "kadhaka",
+    "type": "Dvayarsheya",
+    "rishis": [
+      "Vishvamitra",
+      "Kadhaka"
+    ],
+    "search_terms": [
+      "kadhaka",
+      "కథక",
+      "ಕಥಕ"
+    ]
+  },
+  {
+    "id": "VIS006",
+    "group": "VIS",
+    "root_en": "Vishwamitra",
+    "root_te": "విశ్వామిత్ర",
+    "root_kn": "ವಿಶ್ವಾಮಿತ್ರ",
+    "name_en": "AagamarshaNa",
+    "aliases": [],
+    "name_te": "అఘమర్షణ",
+    "name_kn": "ಅಘಮರ್ಷಣ",
+    "slug": "aagamarshana",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vishvamitra",
+      "Aghamarshana",
+      "Kaushika"
+    ],
+    "search_terms": [
+      "aagamarshana",
+      "అఘమర్షణ",
+      "ಅಘಮರ್ಷಣ"
+    ]
+  },
+  {
+    "id": "VIS007",
+    "group": "VIS",
+    "root_en": "Vishwamitra",
+    "root_te": "విశ్వామిత్ర",
+    "root_kn": "ವಿಶ್ವಾಮಿತ್ರ",
+    "name_en": "Gatha",
+    "aliases": [],
+    "name_te": "గాథ",
+    "name_kn": "ಗಾಥ",
+    "slug": "gatha",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vishvamitra",
+      "Madhuchhandasa",
+      "Aja"
+    ],
+    "search_terms": [
+      "gatha",
+      "గాథ",
+      "ಗಾಥ"
+    ]
+  },
+  {
+    "id": "VIS008",
+    "group": "VIS",
+    "root_en": "Vishwamitra",
+    "root_te": "విశ్వామిత్ర",
+    "root_kn": "ವಿಶ್ವಾಮಿತ್ರ",
+    "name_en": "Kaathyaayana",
+    "aliases": [],
+    "name_te": "కాత్యాయన",
+    "name_kn": "ಕಾತ್ಯಾಯನ",
+    "slug": "kaathyaayana",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vishvamitra",
+      "Katya",
+      "Ajigita"
+    ],
+    "search_terms": [
+      "kaathyaayana",
+      "కాత్యాయన",
+      "ಕಾತ್ಯಾಯನ"
+    ]
+  },
+  {
+    "id": "VIS009",
+    "group": "VIS",
+    "root_en": "Vishwamitra",
+    "root_te": "విశ్వామిత్ర",
+    "root_kn": "ವಿಶ್ವಾಮಿತ್ರ",
+    "name_en": "Kamakaayana",
+    "aliases": [],
+    "name_te": "కామకాయన",
+    "name_kn": "ಕಾಮಕಾಯನ",
+    "slug": "kamakaayana",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vishvamitra",
+      "Devashravasa",
+      "Daivatarasa"
+    ],
+    "search_terms": [
+      "kamakaayana",
+      "కామకాయన",
+      "ಕಾಮಕಾಯನ"
+    ]
+  },
+  {
+    "id": "VIS010",
+    "group": "VIS",
+    "root_en": "Vishwamitra",
+    "root_te": "విశ్వామిత్ర",
+    "root_kn": "ವಿಶ್వాಮಿತ್ರ",
+    "name_en": "Kaalava",
+    "aliases": [],
+    "name_te": "కాలవ",
+    "name_kn": "ಕಾಲವ",
+    "slug": "kaalava",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vishvamitra",
+      "Devarata",
+      "Audala"
+    ],
+    "search_terms": [
+      "kaalava",
+      "కాలవ",
+      "ಕಾಲವ"
+    ]
+  },
+  {
+    "id": "VIS011",
+    "group": "VIS",
+    "root_en": "Vishwamitra",
+    "root_te": "విశ్వామిత్ర",
+    "root_kn": "ವಿಶ್ವಾಮಿತ್ರ",
+    "name_en": "Kausika",
+    "aliases": [],
+    "name_te": "కౌశిక",
+    "name_kn": "ಕೌಶಿಕ",
+    "slug": "kausika",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vishvamitra",
+      "Salankayana",
+      "Kaushika"
+    ],
+    "search_terms": [
+      "kausika",
+      "కౌశిక",
+      "ಕೌಶಿಕ"
+    ]
+  },
+  {
+    "id": "VIS012",
+    "group": "VIS",
+    "root_en": "Vishwamitra",
+    "root_te": "విశ్వామిత్ర",
+    "root_kn": "ವಿಶ್ವಾಮಿತ್ರ",
+    "name_en": "Jabhala",
+    "aliases": [
+      "Jabali"
+    ],
+    "name_te": "జాబాలి",
+    "name_kn": "ಜಾಬಾಲಿ",
+    "slug": "jabhala",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vishvamitra",
+      "Devarata",
+      "Audala"
+    ],
+    "search_terms": [
+      "jabhala",
+      "jabali",
+      "జాబాలి",
+      "ಜಾಬಾಲಿ"
+    ]
+  },
+  {
+    "id": "VIS013",
+    "group": "VIS",
+    "root_en": "Vishwamitra",
+    "root_te": "విశ్వామిత్ర",
+    "root_kn": "ವಿಶ್ವಾಮಿತ್ರ",
+    "name_en": "Devaraatha",
+    "aliases": [],
+    "name_te": "దేవరాత్",
+    "name_kn": "ದೇವರಾತ್",
+    "slug": "devaraatha",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vishvamitra",
+      "Devarata",
+      "Aulita"
+    ],
+    "search_terms": [
+      "devaraatha",
+      "దేవరాత్",
+      "ದೇವರಾತ್"
+    ]
+  },
+  {
+    "id": "VAS001",
+    "group": "VAS",
+    "root_en": "Vashishta",
+    "root_te": "వసిష్ఠ",
+    "root_kn": "ವಸಿಷ್ಠ",
+    "name_en": "Kaundinya",
+    "aliases": [],
+    "name_te": "కౌండిన్య",
+    "name_kn": "ಕೌಂಡಿನ್ಯ",
+    "slug": "kaundinya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vashishta",
+      "Maitravaruna",
+      "Kaundinya"
+    ],
+    "search_terms": [
+      "kaundinya",
+      "కౌండిన్య",
+      "ಕೌಂಡಿನ್ಯ"
+    ]
+  },
+  {
+    "id": "VAS002",
+    "group": "VAS",
+    "root_en": "Vashishta",
+    "root_te": "వసిష్ఠ",
+    "root_kn": "ವಸಿಷ್ಠ",
+    "name_en": "Parasara",
+    "aliases": [],
+    "name_te": "పరాశర",
+    "name_kn": "ಪರಾಶರ",
+    "slug": "parasara",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vashishta",
+      "Shaktya",
+      "Parasharya"
+    ],
+    "search_terms": [
+      "parasara",
+      "పరాశర",
+      "ಪರಾಶರ"
+    ]
+  },
+  {
+    "id": "VAS003",
+    "group": "VAS",
+    "root_en": "Vashishta",
+    "root_te": "వసిష్ఠ",
+    "root_kn": "ವಸಿಷ್ಠ",
+    "name_en": "Vasishta",
+    "aliases": [],
+    "name_te": "వసిష్ఠ",
+    "name_kn": "ವಸಿಷ್ಠ",
+    "slug": "vasishta",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vashishta",
+      "Maitravaruna",
+      "Kaundinya"
+    ],
+    "search_terms": [
+      "vasishta",
+      "వసిష్ఠ",
+      "ವಸಿಷ್ಠ"
+    ]
+  },
+  {
+    "id": "VAS004",
+    "group": "VAS",
+    "root_en": "Vashishta",
+    "root_te": "వసిష్ఠ",
+    "root_kn": "ವಸಿಷ್ಠ",
+    "name_en": "Vasishta",
+    "aliases": [],
+    "name_te": "వసిష్ఠ",
+    "name_kn": "ವಸಿಷ್ಠ",
+    "slug": "vasishta",
+    "type": "Ekarsheya",
+    "rishis": [
+      "Vashishta"
+    ],
+    "search_terms": [
+      "vasishta",
+      "వసిష్ఠ",
+      "ವಸಿಷ್ಠ"
+    ]
+  },
+  {
+    "id": "VAS005",
+    "group": "VAS",
+    "root_en": "Vashishta",
+    "root_te": "వసిష్ఠ",
+    "root_kn": "ವಸಿಷ್ಠ",
+    "name_en": "Haritha",
+    "aliases": [],
+    "name_te": "హరిత",
+    "name_kn": "ಹರಿತ",
+    "slug": "haritha",
+    "type": "Ekarsheya",
+    "rishis": [
+      "Vashishta"
+    ],
+    "search_terms": [
+      "haritha",
+      "హరిత",
+      "ಹರಿತ"
+    ]
+  },
+  {
+    "id": "VAS006",
+    "group": "VAS",
+    "root_en": "Vashishta",
+    "root_te": "వసిష్ఠ",
+    "root_kn": "ವಸಿಷ್ಠ",
+    "name_en": "Aachvalaayana",
+    "aliases": [],
+    "name_te": "ఆశ్వలాయన",
+    "name_kn": "ಆಶ್ವಲಾಯನ",
+    "slug": "aachvalaayana",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vashishta",
+      "Indrapramada",
+      "Abharadvasu"
+    ],
+    "search_terms": [
+      "aachvalaayana",
+      "ఆశ్వలాయన",
+      "ಆಶ್ವಲಾಯನ"
+    ]
+  },
+  {
+    "id": "VAS007",
+    "group": "VAS",
+    "root_en": "Vashishta",
+    "root_te": "వసిష్ఠ",
+    "root_kn": "ವಸಿಷ್ಠ",
+    "name_en": "Upamanyu",
+    "aliases": [],
+    "name_te": "ఉపమన్యు",
+    "name_kn": "ಉಪಮನ್ಯು",
+    "slug": "upamanyu",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vashishta",
+      "Indrapramada",
+      "Abharadvasu"
+    ],
+    "search_terms": [
+      "upamanyu",
+      "ఉపమన్యు",
+      "ಉಪಮನ್ಯು"
+    ]
+  },
+  {
+    "id": "VAS008",
+    "group": "VAS",
+    "root_en": "Vashishta",
+    "root_te": "వసిష్ఠ",
+    "root_kn": "ವಸಿಷ್ಠ",
+    "name_en": "KaaNva",
+    "aliases": [],
+    "name_te": "కణ్వ",
+    "name_kn": "ಕಣ್ವ",
+    "slug": "kaanva",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vashishta",
+      "Indrapramada",
+      "Abharadvasu"
+    ],
+    "search_terms": [
+      "kaanva",
+      "కణ్వ",
+      "ಕಣ್ವ"
+    ]
+  },
+  {
+    "id": "VAS009",
+    "group": "VAS",
+    "root_en": "Vashishta",
+    "root_te": "వసిష్ఠ",
+    "root_kn": "ವಸಿಷ್ಠ",
+    "name_en": "JaadhookarNya",
+    "aliases": [],
+    "name_te": "జాతూకర్ణ్య",
+    "name_kn": "ಜಾತೂಕರ್ಣ್ಯ",
+    "slug": "jaadhookarnya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vashishta",
+      "Indrapramada",
+      "Abharadvasu"
+    ],
+    "search_terms": [
+      "jaadhookarnya",
+      "జాతూకర్ణ్య",
+      "ಜಾತೂಕರ್ಣ್ಯ"
+    ]
+  },
+  {
+    "id": "VAS010",
+    "group": "VAS",
+    "root_en": "Vashishta",
+    "root_te": "వసిష్ఠ",
+    "root_kn": "ವಸಿಷ್ಠ",
+    "name_en": "Bhodayana",
+    "aliases": [],
+    "name_te": "బోధాయన",
+    "name_kn": "ಬೋಧಾಯನ",
+    "slug": "bhodayana",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vashishta",
+      "Atreya",
+      "Jatukarnya"
+    ],
+    "search_terms": [
+      "bhodayana",
+      "బోధాయన",
+      "ಬೋಧಾಯನ"
+    ]
+  },
+  {
+    "id": "VAS011",
+    "group": "VAS",
+    "root_en": "Vashishta",
+    "root_te": "వసిష్ఠ",
+    "root_kn": "ವಸಿಷ್ಠ",
+    "name_en": "MithraavaruNa",
+    "aliases": [],
+    "name_te": "మిత్రావరుణ",
+    "name_kn": "ಮಿತ್ರಾವರುಣ",
+    "slug": "mithraavaruna",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vashishta",
+      "Maitravaruna",
+      "Kaundinya"
+    ],
+    "search_terms": [
+      "mithraavaruna",
+      "మిత్రావరుణ",
+      "ಮಿತ್ರಾವರುಣ"
+    ]
+  },
+  {
+    "id": "VAS012",
+    "group": "VAS",
+    "root_en": "Vashishta",
+    "root_te": "వసిష్ఠ",
+    "root_kn": "ವಸಿಷ್ಠ",
+    "name_en": "Mauthgala",
+    "aliases": [],
+    "name_te": "మౌద్గల",
+    "name_kn": "ಮೌದ್ಗಲ",
+    "slug": "mauthgala",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vashishta",
+      "Maitravaruna",
+      "Kaundinya"
+    ],
+    "search_terms": [
+      "mauthgala",
+      "మౌద్గల",
+      "ಮೌದ್ಗಲ"
+    ]
+  },
+  {
+    "id": "VAS013",
+    "group": "VAS",
+    "root_en": "Vashishta",
+    "root_te": "వసిష్ఠ",
+    "root_kn": "ವಸಿಷ್ಠ",
+    "name_en": "Vaasida",
+    "aliases": [],
+    "name_te": "వాసిద",
+    "name_kn": "ವಾಸಿದ",
+    "slug": "vaasida",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Vashishta",
+      "Indrapramada",
+      "Abharadvasu"
+    ],
+    "search_terms": [
+      "vaasida",
+      "వాసిద",
+      "ವಾಸಿದ"
+    ]
+  },
+  {
+    "id": "KAS001",
+    "group": "KAS",
+    "root_en": "Kashyapa",
+    "root_te": "కాశ్యప",
+    "root_kn": "ಕಶ್ಯಪ",
+    "name_en": "Naithruva Kasyapa",
+    "aliases": [],
+    "name_te": "నైధ్రువ కాశ్యప",
+    "name_kn": "ನೈಧ್ರುವ ಕಶ್ಯಪ",
+    "slug": "naithruvakasyapa",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Kashyapa",
+      "Avatsara",
+      "Naidhruva"
+    ],
+    "search_terms": [
+      "naithruva kasyapa",
+      "నైధ్రువ కాశ్యప",
+      "ನೈಧ್ರುವ ಕಶ್ಯಪ"
+    ]
+  },
+  {
+    "id": "KAS002",
+    "group": "KAS",
+    "root_en": "Kashyapa",
+    "root_te": "కాశ్యప",
+    "root_kn": "ಕಶ್ಯಪ",
+    "name_en": "Reba Kasyapa",
+    "aliases": [],
+    "name_te": "రేభ కాశ్యప",
+    "name_kn": "ರೇಭ ಕಶ್ಯಪ",
+    "slug": "rebakasyapa",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Kashyapa",
+      "Avatsara",
+      "Rebha"
+    ],
+    "search_terms": [
+      "reba kasyapa",
+      "రేభ కాశ్యప",
+      "ರೇಭ ಕಶ್ಯಪ"
+    ]
+  },
+  {
+    "id": "KAS003",
+    "group": "KAS",
+    "root_en": "Kashyapa",
+    "root_te": "కాశ్యప",
+    "root_kn": "ಕಶ್ಯಪ",
+    "name_en": "Saandilya",
+    "aliases": [],
+    "name_te": "శాండిల్య",
+    "name_kn": "ಶಾಂಡಿಲ್ಯ",
+    "slug": "saandilya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Kashyapa",
+      "Avatsara",
+      "Shandilya"
+    ],
+    "search_terms": [
+      "saandilya",
+      "శాండిల్య",
+      "ಶಾಂಡಿಲ್ಯ"
+    ]
+  },
+  {
+    "id": "KAS004",
+    "group": "KAS",
+    "root_en": "Kashyapa",
+    "root_te": "కాశ్యప",
+    "root_kn": "ಕಶ್ಯಪ",
+    "name_en": "Saandilya",
+    "aliases": [],
+    "name_te": "శాండిల్య",
+    "name_kn": "ಶಾಂಡಿಲ್ಯ",
+    "slug": "saandilya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Kashyapa",
+      "Devala",
+      "Asita"
+    ],
+    "search_terms": [
+      "saandilya",
+      "శాండిల్య",
+      "ಶಾಂಡಿಲ್ಯ"
+    ]
+  },
+  {
+    "id": "KAS005",
+    "group": "KAS",
+    "root_en": "Kashyapa",
+    "root_te": "కాశ్యప",
+    "root_kn": "ಕಶ್ಯಪ",
+    "name_en": "Saandilya",
+    "aliases": [],
+    "name_te": "శాండిల్య",
+    "name_kn": "ಶಾಂಡಿಲ್ಯ",
+    "slug": "saandilya",
+    "type": "Saptharsheya",
+    "rishis": [
+      "Kashyapa",
+      "Avatsara",
+      "Naidhruva",
+      "Rebha",
+      "Raibha",
+      "Shandila",
+      "Shandilya"
+    ],
+    "search_terms": [
+      "saandilya",
+      "శాండిల్య",
+      "ಶಾಂಡಿಲ್ಯ"
+    ]
+  },
+  {
+    "id": "KAS006",
+    "group": "KAS",
+    "root_en": "Kashyapa",
+    "root_te": "కాశ్యప",
+    "root_kn": "ಕಶ್ಯಪ",
+    "name_en": "Kashyapa",
+    "aliases": [],
+    "name_te": "కాశ్యప",
+    "name_kn": "ಕಶ್ಯಪ",
+    "slug": "kashyapa",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Kashyapa",
+      "Asita",
+      "Devala"
+    ],
+    "search_terms": [
+      "kashyapa",
+      "కాశ్యప",
+      "ಕಶ್ಯಪ"
+    ]
+  },
+  {
+    "id": "KAS007",
+    "group": "KAS",
+    "root_en": "Kashyapa",
+    "root_te": "కాశ్యప",
+    "root_kn": "ಕಶ್ಯಪ",
+    "name_en": "Kachyapa",
+    "aliases": [],
+    "name_te": "కాశ్యప",
+    "name_kn": "ಕಶ್ಯಪ",
+    "slug": "kachyapa",
+    "type": "Saptharsheya",
+    "rishis": [
+      "Kashyapa",
+      "Avatsara",
+      "Naidhruva",
+      "Rebha",
+      "Raibha",
+      "Shandila",
+      "Shandilya"
+    ],
+    "search_terms": [
+      "kachyapa",
+      "కాశ్యప",
+      "ಕಶ್ಯಪ"
+    ]
+  },
+  {
+    "id": "KAS008",
+    "group": "KAS",
+    "root_en": "Kashyapa",
+    "root_te": "కాశ్యప",
+    "root_kn": "ಕಶ್ಯಪ",
+    "name_en": "Bruku",
+    "aliases": [],
+    "name_te": "భృగు",
+    "name_kn": "ಭೃಗು",
+    "slug": "bruku",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Kashyapa",
+      "Avatsara",
+      "Naidhruva"
+    ],
+    "search_terms": [
+      "bruku",
+      "భృగు",
+      "ಭೃಗು"
+    ]
+  },
+  {
+    "id": "KAS009",
+    "group": "KAS",
+    "root_en": "Kashyapa",
+    "root_te": "కాశ్యప",
+    "root_kn": "ಕಶ್ಯಪ",
+    "name_en": "Maareesa",
+    "aliases": [],
+    "name_te": "మారీచ",
+    "name_kn": "ಮಾರೀಚ",
+    "slug": "maareesa",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Kashyapa",
+      "Avatsara",
+      "Naidhruva"
+    ],
+    "search_terms": [
+      "maareesa",
+      "మారీచ",
+      "ಮಾರೀಚ"
+    ]
+  },
+  {
+    "id": "KAS010",
+    "group": "KAS",
+    "root_en": "Kashyapa",
+    "root_te": "కాశ్యప",
+    "root_kn": "ಕಶ್ಯಪ",
+    "name_en": "Raibya",
+    "aliases": [
+      "Reba"
+    ],
+    "name_te": "రైభ్య",
+    "name_kn": "ರೈಭ್ಯ",
+    "slug": "raibya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Kashyapa",
+      "Avatsara",
+      "Raibhya"
+    ],
+    "search_terms": [
+      "raibya",
+      "reba",
+      "రైభ్య",
+      "ರೈಭ್ಯ"
+    ]
+  },
+  {
+    "id": "KAS011",
+    "group": "KAS",
+    "root_en": "Kashyapa",
+    "root_te": "కాశ్యప",
+    "root_kn": "ಕಶ್ಯಪ",
+    "name_en": "Baukakshi",
+    "aliases": [],
+    "name_te": "బోధాక్షి",
+    "name_kn": "ಬೋಧಾಕ್ಷಿ",
+    "slug": "baukakshi",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Kashyapa",
+      "Avatsara",
+      "Asita"
+    ],
+    "search_terms": [
+      "baukakshi",
+      "బోధాక్షి",
+      "ಬೋಧಾಕ್ಷಿ"
+    ]
+  },
+  {
+    "id": "KAS012",
+    "group": "KAS",
+    "root_en": "Kashyapa",
+    "root_te": "కాశ్యప",
+    "root_kn": "ಕಶ್ಯಪ",
+    "name_en": "Vaathsya",
+    "aliases": [],
+    "name_te": "వాత్స్య",
+    "name_kn": "ವಾತ್ಸ್ಯ",
+    "slug": "vaathsya",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Kashyapa",
+      "Avatsara",
+      "Raibhya"
+    ],
+    "search_terms": [
+      "vaathsya",
+      "వాత్స్య",
+      "ವಾತ್ಸ್ಯ"
+    ]
+  },
+  {
+    "id": "AGA001",
+    "group": "AGA",
+    "root_en": "Agastya",
+    "root_te": "అగస్త్య",
+    "root_kn": "ಅಗಸ್ತ್ಯ",
+    "name_en": "Agastya",
+    "aliases": [],
+    "name_te": "అగస్త్య",
+    "name_kn": "ಅಗಸ್ತ್ಯ",
+    "slug": "agastya",
+    "type": "Ekarsheya",
+    "rishis": [
+      "Agastya"
+    ],
+    "search_terms": [
+      "agastya",
+      "అగస్త్య",
+      "ಅಗಸ್ತ್ಯ"
+    ]
+  },
+  {
+    "id": "AGA002",
+    "group": "AGA",
+    "root_en": "Agastya",
+    "root_te": "అగస్త్య",
+    "root_kn": "ಅಗಸ್ತ್ಯ",
+    "name_en": "Idhmavaaha",
+    "aliases": [],
+    "name_te": "ఇధ్మవాహ",
+    "name_kn": "ಇಧ್ಮವಾಹ",
+    "slug": "idhmavaaha",
+    "type": "Ekarsheya",
+    "rishis": [
+      "Agastya"
+    ],
+    "search_terms": [
+      "idhmavaaha",
+      "ఇధ్మవాహ",
+      "ಇಧ್ಮವಾಹ"
+    ]
+  },
+  {
+    "id": "AGA003",
+    "group": "AGA",
+    "root_en": "Agastya",
+    "root_te": "అగస్త్య",
+    "root_kn": "ಅಗಸ್ತ್ಯ",
+    "name_en": "Aagasthi",
+    "aliases": [],
+    "name_te": "అగస్త్య",
+    "name_kn": "ಅಗಸ್ತ್ಯ",
+    "slug": "aagasthi",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Agastya",
+      "Mahendra",
+      "Mayobhuva"
+    ],
+    "search_terms": [
+      "aagasthi",
+      "అగస్త్య",
+      "ಅಗಸ್ತ್ಯ"
+    ]
+  },
+  {
+    "id": "AGA004",
+    "group": "AGA",
+    "root_en": "Agastya",
+    "root_te": "అగస్త్య",
+    "root_kn": "ಅಗಸ್ತ್ಯ",
+    "name_en": "Agasthi",
+    "aliases": [],
+    "name_te": "అగస్త్య",
+    "name_kn": "ಅಗಸ್ತ್ಯ",
+    "slug": "agasthi",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Agastya",
+      "Dridhacyuta",
+      "Idhmavaha"
+    ],
+    "search_terms": [
+      "agasthi",
+      "అగస్త్య",
+      "ಅಗಸ್ತ್ಯ"
+    ]
+  },
+  {
+    "id": "AGA005",
+    "group": "AGA",
+    "root_en": "Agastya",
+    "root_te": "అగస్త్య",
+    "root_kn": "ಅಗಸ್ತ್ಯ",
+    "name_en": "Idhmavaaha",
+    "aliases": [],
+    "name_te": "ఇధ్మవాహ",
+    "name_kn": "ಇಧ್ಮವಾಹ",
+    "slug": "idhmavaaha",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Agastya",
+      "Vathyashva",
+      "Idhmavaha"
+    ],
+    "search_terms": [
+      "idhmavaaha",
+      "ఇధ్మవాహ",
+      "ಇಧ್ಮವಾಹ"
+    ]
+  },
+  {
+    "id": "AGA006",
+    "group": "AGA",
+    "root_en": "Agastya",
+    "root_te": "అగస్త్య",
+    "root_kn": "ಅಗಸ್ತ್ಯ",
+    "name_en": "Pulaha",
+    "aliases": [],
+    "name_te": "పులహ",
+    "name_kn": "ಪುಲಹ",
+    "slug": "pulaha",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Agastya",
+      "Mahendra",
+      "Mayobhuva"
+    ],
+    "search_terms": [
+      "pulaha",
+      "పులహ",
+      "ಪುಲಹ"
+    ]
+  },
+  {
+    "id": "AGA007",
+    "group": "AGA",
+    "root_en": "Agastya",
+    "root_te": "అగస్త్య",
+    "root_kn": "ಅಗಸ್ತ್ಯ",
+    "name_en": "Maayobhuva",
+    "aliases": [],
+    "name_te": "మాయోభువ",
+    "name_kn": "ಮಾಯೋಭುವ",
+    "slug": "maayobhuva",
+    "type": "Trayarsheya",
+    "rishis": [
+      "Agastya",
+      "Mahendra",
+      "Mayobhuva"
+    ],
+    "search_terms": [
+      "maayobhuva",
+      "మాయోభువ",
+      "ಮಾಯೋಭುವ"
+    ]
+  }
+]

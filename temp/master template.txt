@@ -1,0 +1,107 @@
+<div class="vaiswanara-master-container">
+    <style>
+        .vaiswanara-master-container {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            border: none;
+            background-color: #ffffff;
+            margin: 0;
+            max-width: 100%;
+        }
+        .vaiswanara-master-container .tab-wrapper {
+            display: flex;
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #eee;
+            padding: 5px 5px 0 5px;
+            justify-content: center;
+        }
+        .vaiswanara-master-container .tab-btn {
+            background: none;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 12px 25px;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
+            color: #555;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+        }
+        .vaiswanara-master-container .tab-btn:hover {
+            background-color: #e9ecef;
+            color: #000;
+        }
+        .vaiswanara-master-container .tab-btn.active {
+            background-color: #ffffff;
+            color: #d35400; 
+            border-bottom: 3px solid #d35400;
+        }
+        .vaiswanara-master-container .tab-content {
+            display: none;
+            padding: 40px 20px;
+            line-height: 1.85;
+            color: #4a4a4a;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        /* మీ హెడ్డింగ్స్ మరియు పారాగ్రాఫ్ స్టైల్స్ */
+        .vaiswanara-master-container .tab-content h2 { font-size: 28px; color: #2c3e50; margin-top: 0; margin-bottom: 20px; text-align: center; }
+        .vaiswanara-master-container .tab-content h3 { font-size: 22px; color: #2c3e50; margin-top: 30px; margin-bottom: 15px; border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; }
+        .vaiswanara-master-container .tab-content p { margin-bottom: 18px; font-size: 16px; text-align: justify; }
+        .vaiswanara-master-container .tab-content ul { margin-top: 10px; margin-bottom: 20px; padding-left: 20px; }
+        .vaiswanara-master-container .tab-content li { margin-bottom: 10px; font-size: 16px; }
+        
+        @media (max-width: 600px) {
+            .vaiswanara-master-container .tab-btn { padding: 10px 15px; font-size: 14px; }
+            .vaiswanara-master-container .tab-content { padding: 25px 15px; }
+        }
+    </style>
+
+    <div class="tab-wrapper">
+
+        <button class="tab-btn active" onclick="openMasterTab(event, 'LangEnglish')">English</button>
+        <button class="tab-btn" onclick="openMasterTab(event, 'LangKannada')">ಕನ್ನಡ</button>
+        <button class="tab-btn" onclick="openMasterTab(event, 'LangTelugu')">తెలుగు</button>
+    </div>
+
+
+
+    <div class="tab-content LangEnglish" style="display: block;">
+        <h2>English Heading Goes Here</h2>
+        <p>Write your first English paragraph here...</p>
+        <h3>Sub Heading (If needed)</h3>
+        <p>Write your second paragraph here...</p>
+    </div>
+
+    <div class="tab-content LangKannada">
+        <h2>ಕನ್ನಡ ಶೀರ್ಷಿಕೆ ಇಲ್ಲಿ ಬರೆಯಿರಿ</h2>
+        <p>ನಿಮ್ಮ ಮೊದಲ ಕನ್ನಡ ಪ್ಯಾರಾಗ್ರಾಫ್ ಅನ್ನು ಇಲ್ಲಿ ಬರೆಯಿರಿ...</p>
+        <h3>ಉಪ ಶೀರ್ಷಿಕೆ (ಅಗತ್ಯವಿದ್ದರೆ)</h3>
+        <p>ನಿಮ್ಮ ಎರಡನೇ ಪ್ಯಾರಾಗ್ರಾಫ್ ಅನ್ನು ಇಲ್ಲಿ ಬರೆಯಿರಿ...</p>
+    </div>
+
+    <div class="tab-content LangTelugu">
+        <h2>తెలుగు హెడ్డింగ్ ఇక్కడ రాయండి</h2>
+        <p>ఇక్కడ మీ తెలుగు ఆర్టికల్ మొదటి పారాగ్రాఫ్ రాయండి...</p>
+        <h3>సబ్ హెడ్డింగ్ (అవసరమైతే)</h3>
+        <p>రెండవ పారాగ్రాఫ్ ఇక్కడ రాయండి...</p>
+    </div>
+
+    <script>
+        function openMasterTab(evt, langClass) {
+            // ఈ స్క్రిప్ట్ ఒకే పేజీలో ఎన్ని బ్లాక్స్ ఉన్నా క్లాష్ అవ్వకుండా చూసుకుంటుంది
+            var container = evt.currentTarget.closest('.vaiswanara-master-container');
+            var tabcontents = container.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabcontents.length; i++) {
+                tabcontents[i].style.display = "none";
+            }
+            var tablinks = container.getElementsByClassName("tab-btn");
+            for (var i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            container.getElementsByClassName(langClass)[0].style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    </script>
+</div>
+

@@ -1,0 +1,2547 @@
+<div id="vaiswanara-philosophy-container">
+    <style>
+        #vaiswanara-philosophy-container {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #2c3e50;
+            background-color: #ffffff;
+            line-height: 1.8;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 10px 14px 60px 14px;
+            box-sizing: border-box;
+        }
+
+        /* Language Tabs Bar */
+        .vphilo-tab-wrapper {
+            display: flex;
+            background-color: #f1f3f5;
+            border-radius: 12px;
+            padding: 4px;
+            gap: 4px;
+            margin-bottom: 24px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .vphilo-tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 11px 16px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #495057;
+            border-radius: 9px;
+            transition: all 0.25s ease;
+            text-align: center;
+        }
+
+        .vphilo-tab-btn:hover {
+            color: #d35400;
+            background-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .vphilo-tab-btn.active {
+            background-color: #ffffff !important;
+            color: #d35400 !important;
+            box-shadow: 0 2px 8px rgba(211, 84, 0, 0.12) !important;
+        }
+
+        /* Tab Content display control */
+        .vphilo-tab-content {
+            display: none !important;
+        }
+
+        .vphilo-tab-content.active {
+            display: block !important;
+        }
+
+        /* Headings */
+        .vphilo-page-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin: 0 0 8px 0;
+            font-weight: 800;
+            text-align: center;
+            line-height: 1.35;
+        }
+
+        .vphilo-page-subtitle {
+            font-size: 15px;
+            color: #7f8c8d;
+            margin: 0 0 22px 0;
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* Intro Box */
+        .vphilo-intro-card {
+            background: #fff9f5;
+            border-left: 4px solid #d35400;
+            border-radius: 0 14px 14px 0;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 12px rgba(211, 84, 0, 0.05);
+        }
+
+        .vphilo-intro-qtitle {
+            font-size: 16px;
+            font-weight: 700;
+            color: #a0492e;
+            margin: 0 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .vphilo-questions-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 14px 0;
+        }
+
+        .vphilo-questions-list li {
+            font-size: 14.5px;
+            line-height: 1.6;
+            color: #495057;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+            font-style: italic;
+        }
+
+        .vphilo-questions-list li::before {
+            content: "💬";
+            position: absolute;
+            left: 0;
+            font-size: 11px;
+            top: 2px;
+        }
+
+        .vphilo-intro-statement {
+            font-size: 14.5px;
+            line-height: 1.7;
+            color: #2b2b2b;
+            margin: 0;
+            border-top: 1px dashed rgba(211, 84, 0, 0.25);
+            padding-top: 12px;
+            font-weight: 500;
+        }
+
+        /* Hint Banner with Font Controls */
+        .vphilo-hint-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff8f2;
+            border: 1px solid #f6ded5;
+            padding: 6px 12px;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            color: #8c3b00;
+            font-size: 12.5px;
+            font-weight: 600;
+            flex-wrap: wrap;
+            gap: 6px;
+            box-sizing: border-box;
+        }
+
+        .vphilo-hint-text {
+            flex: 1;
+            min-width: 200px;
+            line-height: 1.3;
+        }
+
+        .vphilo-hint-right {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .vphilo-hint-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 24px;
+            font-size: 11.5px;
+            color: #a0492e;
+            background: rgba(160, 73, 46, 0.08);
+            padding: 0 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            white-space: nowrap;
+            line-height: 1;
+        }
+
+        /* Mini Font Resizer */
+        .vphilo-mini-font-actions {
+            display: inline-flex;
+            align-items: center;
+            height: 24px;
+            gap: 2px;
+            background: #ffffff;
+            padding: 1px;
+            border-radius: 6px;
+            border: 1px solid #ebd2c8;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            box-sizing: border-box;
+        }
+
+        .vphilo-mini-font-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 20px;
+            min-width: 24px;
+            padding: 0 5px;
+            border: none;
+            background: transparent;
+            color: #7a2b16;
+            font-size: 11px;
+            font-weight: 800;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            line-height: 1;
+            box-sizing: border-box;
+        }
+
+        .vphilo-mini-font-btn:hover {
+            background: #7a2b16;
+            color: #ffffff;
+        }
+
+        /* Section Cards */
+        .vphilo-card {
+            background: #ffffff;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1.5px solid #edf0f2;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            scroll-margin-top: 75px;
+        }
+
+        .vphilo-card:hover {
+            border-color: #e5a48d;
+            box-shadow: 0 4px 14px rgba(160, 73, 46, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .vphilo-card.is-expanded {
+            border-color: #d35400;
+            box-shadow: 0 5px 18px rgba(211, 84, 0, 0.10);
+        }
+
+        /* Clickable Header */
+        .vphilo-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 15px 18px;
+            cursor: pointer;
+            user-select: none;
+            background: #ffffff;
+            transition: background-color 0.2s;
+        }
+
+        .vphilo-card.is-expanded .vphilo-card-header {
+            background: #fffbf8;
+            border-bottom: 1.5px solid #f6ded5;
+        }
+
+        .vphilo-card-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .vphilo-card-title {
+            font-size: 16.5px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+            line-height: 1.4;
+            transition: color 0.2s;
+        }
+
+        .vphilo-card.is-expanded .vphilo-card-title {
+            color: #7a2b16;
+        }
+
+        /* Chevron Icon */
+        .vphilo-chevron {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #fdf2ed;
+            color: #a0492e;
+            font-size: 11px;
+            font-weight: 800;
+            transition: transform 0.25s ease, background-color 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .vphilo-card.is-expanded .vphilo-chevron {
+            background: #a0492e;
+            color: #ffffff;
+            transform: rotate(180deg);
+        }
+
+        .vphilo-card:hover:not(.is-expanded) .vphilo-chevron {
+            background: #fce1d4;
+        }
+
+        /* Read Cue & Copy button display states */
+        .vphilo-header-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .vphilo-read-cue {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #d35400;
+            background: #fff2e6;
+            padding: 3px 8px;
+            border-radius: 10px;
+            border: 1px solid #ffd8b3;
+            white-space: nowrap;
+        }
+
+        .vphilo-card.is-collapsed .vphilo-read-cue {
+            display: inline-flex !important;
+        }
+
+        .vphilo-card.is-expanded .vphilo-read-cue {
+            display: none !important;
+        }
+
+        .vphilo-card:hover .vphilo-read-cue {
+            background: #d35400;
+            color: #ffffff;
+            border-color: #d35400;
+        }
+
+        .vphilo-copy-btn {
+            background: none;
+            border: none;
+            color: #adb5bd;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 3px 6px;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+
+        .vphilo-card.is-collapsed .vphilo-copy-btn {
+            display: none !important;
+        }
+
+        .vphilo-card.is-expanded .vphilo-copy-btn {
+            display: inline-block !important;
+        }
+
+        .vphilo-copy-btn:hover {
+            color: #a0492e;
+            background: #f8f9fa;
+        }
+
+        /* Card Content Body accordion control */
+        .vphilo-card-body {
+            padding: 20px 20px 22px 20px;
+            background: #ffffff;
+        }
+
+        .vphilo-card.is-collapsed .vphilo-card-body {
+            display: none !important;
+        }
+
+        .vphilo-card.is-expanded .vphilo-card-body {
+            display: block !important;
+        }
+
+        .vphilo-p {
+            margin: 0 0 13px 0;
+            color: #333333;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        .vphilo-p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Bullets */
+        .vphilo-bullets {
+            list-style: none;
+            padding: 0;
+            margin: 12px 0;
+            background: #fcfdfd;
+            border-radius: 10px;
+            padding: 10px 14px;
+            border: 1px solid #eef2f5;
+        }
+
+        .vphilo-bullets li {
+            padding-left: 20px;
+            position: relative;
+            margin-bottom: 8px;
+            color: #374151;
+            line-height: 1.6;
+            font-size: 0.98em;
+        }
+
+        .vphilo-bullets li:last-child {
+            margin-bottom: 0;
+        }
+
+        .vphilo-bullets li::before {
+            content: "✦";
+            position: absolute;
+            left: 0;
+            color: #d35400;
+            font-size: 12px;
+            top: 0;
+        }
+
+        /* Quote Highlight */
+        .vphilo-quote {
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            border-left: 3px solid #ea580c;
+            padding: 12px 16px;
+            border-radius: 0 10px 10px 0;
+            margin: 14px 0;
+            font-weight: 600;
+            color: #9a3412;
+            font-style: italic;
+            line-height: 1.6;
+            box-shadow: 0 1px 4px rgba(234, 88, 12, 0.05);
+        }
+
+        /* Closing Card */
+        .vphilo-closing-card {
+            background: linear-gradient(180deg, #ffffff 0%, #fffbf9 100%);
+            border-radius: 16px;
+            padding: 26px 20px;
+            margin-top: 28px;
+            border: 2px solid #f6ded5;
+            box-shadow: 0 6px 24px rgba(160, 73, 46, 0.06);
+        }
+
+        .vphilo-closing-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #7a2b16;
+            margin: 0 0 14px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1.5px solid #f6ded5;
+            padding-bottom: 10px;
+        }
+
+        .vphilo-closing-p {
+            color: #3e2723;
+            line-height: 1.8;
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+
+        .vphilo-mantra-banner {
+            background: #7a2b16;
+            color: #ffffff;
+            padding: 14px 18px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 700;
+            margin: 20px 0 14px 0;
+            letter-spacing: 0.3px;
+        }
+
+        .vphilo-signature {
+            text-align: right;
+            font-size: 16px;
+            font-weight: 800;
+            color: #a0492e;
+            margin-top: 14px;
+            font-style: italic;
+        }
+
+        @media (max-width: 600px) {
+            #vaiswanara-philosophy-container {
+                padding: 8px 6px 40px 6px;
+            }
+
+            .vphilo-tab-btn {
+                padding: 9px 6px;
+                font-size: 13.5px;
+            }
+
+            .vphilo-page-title {
+                font-size: 20px;
+            }
+
+            .vphilo-card-header {
+                padding: 12px 14px;
+            }
+
+            .vphilo-card-body {
+                padding: 14px 14px;
+            }
+
+            .vphilo-card-title {
+                font-size: 15px;
+            }
+
+            .vphilo-p {
+                text-align: left;
+            }
+
+            .vphilo-closing-p {
+                text-align: left;
+            }
+        }
+    </style>
+
+    <!-- Language Tabs Bar -->
+    <div class="vphilo-tab-wrapper">
+        <button class="vphilo-tab-btn active" data-tab-target="VPhiloEnglish">English</button>
+        <button class="vphilo-tab-btn" data-tab-target="VPhiloKannada">ಕನ್ನಡ</button>
+        <button class="vphilo-tab-btn" data-tab-target="VPhiloTelugu">తెలుగు</button>
+    </div>
+
+    <!-- English Content Tab (Default Active) -->
+    <div id="VPhiloEnglish" class="vphilo-tab-content active">
+        <h2 class="vphilo-page-title">Why I Teach Astrology — and How I Choose to Live</h2>
+        <p class="vphilo-page-subtitle">My approach to Astrology, Teaching, Dharma and Life</p>
+
+        <!-- Intro Questions Box -->
+        <div class="vphilo-intro-card">
+            <h3 class="vphilo-intro-qtitle"><span>❓</span> I have been asked many times:</h3>
+            <ul class="vphilo-questions-list">
+                <li>“You teach Astrology. Why do you teach it freely instead of offering consultations and charging a
+                    fee?”</li>
+                <li>“What do you expect from your students?”</li>
+                <li>“If someone supports you financially, do you treat them differently?”</li>
+                <li>“Do you believe Astrology can change a person's life?”</li>
+                <li>“Why don't you make predictions?”</li>
+                <li>“What is your approach to remedies, prayers and donations?”</li>
+            </ul>
+            <p class="vphilo-intro-statement">These are genuine questions. I would therefore like to explain my approach
+                openly and respectfully. This page is not intended to prove that my way is the only right way. It is
+                simply an explanation of how I have chosen to learn, teach and live.</p>
+        </div>
+
+        <!-- Student Hint Banner with Compact Font Resizer -->
+        <div class="vphilo-hint-banner">
+            <span class="vphilo-hint-text">💡 Click any topic below to expand & read</span>
+            <div class="vphilo-hint-right">
+                <span class="vphilo-hint-count">22 Topics</span>
+                <div class="vphilo-mini-font-actions">
+                    <button class="vphilo-mini-font-btn font-dec" title="Decrease Font Size">A-</button>
+                    <button class="vphilo-mini-font-btn font-inc" title="Increase Font Size">A+</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 22 Sections List -->
+        <div class="vphilo-sections-list">
+            <div class="vphilo-card is-expanded" id="en-sec-1" data-card-id="en-sec-1">
+                <div class="vphilo-card-header" data-toggle="en-sec-1" title="Click to collapse">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">1. Why Did I Choose to Learn Astrology?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">I did not learn Astrology with the intention of making money, gaining fame, or
+                        building a profession.</p>
+                    <p class="vphilo-p">Astrology has been part of my family background. My father and grandfather were
+                        also astrologers. However, I did not learn Astrology simply because it was a family tradition.
+                    </p>
+                    <p class="vphilo-p">Certain experiences in my life made me think deeply about the way Astrology is
+                        understood and used.</p>
+                    <p class="vphilo-p">I came to realise that Astrology can influence a person's thinking very deeply.
+                        When it is explained responsibly, it can help a person understand a situation and face life with
+                        greater awareness. But when it is used irresponsibly, it can create fear, dependency and blind
+                        belief.</p>
+                    <p class="vphilo-p">That realisation became one of the reasons for my serious study of Astrology. I
+                        wanted to understand the subject deeply so that I could share whatever I learned for the benefit
+                        and awareness of others.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-2" data-card-id="en-sec-2">
+                <div class="vphilo-card-header" data-toggle="en-sec-2" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">2. Why Do I Teach Astrology?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">My purpose is not to make people dependent on an astrologer. My purpose is
+                        almost the opposite.</p>
+                    <p class="vphilo-p">I want a student to learn Astrology well enough to observe, question, think and
+                        understand.</p>
+                    <p class="vphilo-p">I therefore tell my students: “Do not depend on my guidance more than you depend
+                        on the subject. Learn the subject, understand the principles and develop your own judgement.”
+                    </p>
+                    <p class="vphilo-p">I believe knowledge becomes meaningful when it makes a person more independent.
+                    </p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-3" data-card-id="en-sec-3">
+                <div class="vphilo-card-header" data-toggle="en-sec-3" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">3. I Teach Astrology; I Do Not Offer Personal Consultations</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">My primary role is that of a teacher. I teach Astrology. I do not offer regular
+                        personal horoscope consultations.</p>
+                    <p class="vphilo-p">If a student asks me a question about the subject, I am always willing to
+                        explain it. If the student asks the same question several times because it has not yet become
+                        clear, I do not consider that a problem. Everyone has a different level of understanding.</p>
+                    <p class="vphilo-p">My restriction is only regarding personal consultation, not regarding students'
+                        questions.</p>
+                    <p class="vphilo-p">If someone approaches me with a genuine and serious personal difficulty, I may
+                        offer guidance within my limits. Even then, I do not promise predictions. My intention is to
+                        help the person understand the situation and think about possible ways of dealing with it.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-4" data-card-id="en-sec-4">
+                <div class="vphilo-card-header" data-toggle="en-sec-4" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">4. Why Don't I Make Future Predictions?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">I do not consider Astrology to be a tool for making a person passive.</p>
+                    <p class="vphilo-p">A horoscope may help us understand:</p>
+                    <ul class="vphilo-bullets">
+                        <li>the circumstances surrounding a person,</li>
+                        <li>favourable and unfavourable tendencies,</li>
+                        <li>psychological tendencies,</li>
+                        <li>the kind of environment a person may experience,</li>
+                        <li>and possible challenges or opportunities.</li>
+                    </ul>
+                    <p class="vphilo-p">But that does not mean that every decision a person makes is permanently fixed.
+                    </p>
+                    <p class="vphilo-p">For example, a person's financial circumstances may determine which college he
+                        can initially join. But his marks, rank, learning, discipline and final achievement are not
+                        automatically determined by his financial situation.</p>
+                    <p class="vphilo-p">Circumstances influence us. They do not completely replace our effort and
+                        choices.</p>
+                    <p class="vphilo-p">Therefore, I prefer the word Guidance rather than using Astrology merely as a
+                        tool for prediction.</p>
+                    <p class="vphilo-p">The purpose of Astrology, in my approach, is not to tell a person what will
+                        happen so that he can simply wait for it. It is to help him understand his circumstances so that
+                        he can respond to them wisely.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-5" data-card-id="en-sec-5">
+                <div class="vphilo-card-header" data-toggle="en-sec-5" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">5. Astrology Should Reduce Fear, Not Create Fear</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">When a person comes to an astrologer with a problem, he is often already
+                        anxious. He may be waiting nervously to hear: “What does my horoscope say?”</p>
+                    <p class="vphilo-p">At such a moment, I believe an astrologer should not add more fear to an already
+                        troubled mind. The responsibility of the astrologer is not merely to confirm the person's fear.
+                    </p>
+                    <p class="vphilo-p">First, the problem must be understood. Then we should ask:</p>
+                    <p class="vphilo-p">“What can this person do?” — “What possibilities are available?” — “How can this
+                        person face the situation?”</p>
+                    <p class="vphilo-p">If there is a practical way forward, that should be explained. If the situation
+                        cannot be immediately changed, the person should be helped to develop the mental strength to
+                        face it.</p>
+                    <p class="vphilo-p">This is why I consider psychological awareness to be an important part of
+                        Astrology education.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-6" data-card-id="en-sec-6">
+                <div class="vphilo-card-header" data-toggle="en-sec-6" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">6. Astrology and Psychology</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">I believe that understanding life requires us to consider both time and human
+                        response.</p>
+                    <p class="vphilo-p">Astrology helps us study the dimension of Kāla — Time. Psychological
+                        understanding helps us understand how a human being thinks, feels and responds to circumstances.
+                    </p>
+                    <p class="vphilo-p">A person may face a difficult situation. Two people may experience a similar
+                        circumstance, but they may respond very differently. One may become frightened; another may
+                        become stronger.</p>
+                    <p class="vphilo-p">Therefore, understanding the circumstance alone is not enough. We must also
+                        understand the mind.</p>
+                    <p class="vphilo-p">That is why I include psychological awareness along with Astrology in my
+                        teaching.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-7" data-card-id="en-sec-7">
+                <div class="vphilo-card-header" data-toggle="en-sec-7" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">7. When Should We Consult an Astrologer?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">I tell my students something very simple: “You do not need an astrologer for
+                        every problem in life.”</p>
+                    <p class="vphilo-p">A person in perfect physical health does not need to visit a doctor every day.
+                        Similarly, a person who is mentally strong and understands his situation does not need to
+                        approach an astrologer for every difficulty.</p>
+                    <p class="vphilo-p">If you understand the cause of a problem and know what you need to do, then
+                        there may be no need to look at the horoscope.</p>
+                    <p class="vphilo-p">Astrology becomes useful when: “I do not understand why this situation is
+                        occurring, or I need another perspective to understand it.”</p>
+                    <p class="vphilo-p">Even then, Astrology should support our thinking — not replace it.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-8" data-card-id="en-sec-8">
+                <div class="vphilo-card-header" data-toggle="en-sec-8" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">8. What Do I Tell Students About Their Own Horoscopes?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">When students begin learning Astrology, I generally advise them:</p>
+                    <p class="vphilo-p">“Do not immediately use your own horoscope, or the horoscope of someone to whom
+                        you are emotionally attached, as your main learning example.”</p>
+                    <p class="vphilo-p">Why? Because if we see something we consider negative in our own horoscope, we
+                        may become emotionally disturbed. Once fear enters the learning process, it becomes difficult to
+                        study objectively.</p>
+                    <p class="vphilo-p">When we study a horoscope to which we have no emotional attachment, our mind can
+                        examine it more deeply — sometimes even critically.</p>
+                    <p class="vphilo-p">Therefore, in my classes I use horoscopes as examples without disclosing whose
+                        horoscope it is. The purpose is learning, not emotional involvement.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-9" data-card-id="en-sec-9">
+                <div class="vphilo-card-header" data-toggle="en-sec-9" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">9. My Approach to Serious Personal Problems</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">If someone tells me: “I am facing a genuine and serious problem and I do not
+                        understand what to do,” I first try to understand the problem.</p>
+                    <p class="vphilo-p">Sometimes a person may consider something extremely serious which can actually
+                        be handled with simple practical changes.</p>
+                    <p class="vphilo-p">For example, a parent may say: “My child's education is becoming a very serious
+                        problem.” After discussing the situation, it may become clear that the child spends excessive
+                        time with television, smartphones or other distractions.</p>
+                    <p class="vphilo-p">In such a situation, the first guidance should not be a horoscope or a ritual.
+                        The first guidance may simply be: Change the environment. Set appropriate boundaries. Encourage
+                        effort and discipline.</p>
+                    <p class="vphilo-p">If human effort itself is missing, no ritual can become a substitute for that
+                        effort.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-10" data-card-id="en-sec-10">
+                <div class="vphilo-card-header" data-toggle="en-sec-10" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">10. My Approach to Remedies</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">I respect traditional practices such as prayer, japa, vrata, puja, homa, shanti
+                        practices, and dana. But I do not consider them to be commercial quick fixes for every problem.
+                    </p>
+                    <p class="vphilo-p">When a person is under severe mental pressure, prayer or other spiritual
+                        practices may help calm the mind and restore inner confidence. Once the mind becomes calmer, the
+                        person may become capable of understanding the actual problem and taking appropriate action.</p>
+                    <p class="vphilo-p">Therefore, I see such practices primarily as support for the mind and spirit,
+                        not as a replacement for human effort.</p>
+                    <div class="vphilo-quote">“Prayer may strengthen the mind. Effort must address the problem. Divine
+                        Grace supports the journey.”</div>
+                    <p class="vphilo-p">I do not recommend remedies that require a person to spend money beyond their
+                        means. A person does not have to spend a large amount of money to approach God.</p>
+                    <p class="vphilo-p">Lighting a simple lamp with devotion and sincerely praying in one's own mother
+                        tongue may be more meaningful than spending beyond one's capacity on an elaborate ritual.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-11" data-card-id="en-sec-11">
+                <div class="vphilo-card-header" data-toggle="en-sec-11" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">11. My Understanding of Prayer and Prāyaścitta</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">To me, prayer is not merely: “I have a problem. Please remove it.” There is
+                        another deeper dimension.</p>
+                    <p class="vphilo-p">When a person recognises a mistake, sincerely decides not to repeat it, and
+                        turns towards a better way of living, that inner transformation is important. Traditional
+                        spiritual practices can support such a transformation.</p>
+                    <p class="vphilo-p">Therefore, I do not encourage people to depend on rituals while continuing the
+                        same actions that created the problem.</p>
+                    <p class="vphilo-p">A remedy should lead to awareness and change — not become a substitute for
+                        change.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-12" data-card-id="en-sec-12">
+                <div class="vphilo-card-header" data-toggle="en-sec-12" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">12. I Do Not Teach Death Prediction</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">There is one boundary I maintain clearly. I do not teach or practise death
+                        prediction or death-related timing.</p>
+                    <p class="vphilo-p">I do not want fear of death to become part of a student's learning process.</p>
+                    <p class="vphilo-p">Astrology, in my approach, should help a person understand life and face it with
+                        awareness. It should not become a source of unnecessary fear.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-13" data-card-id="en-sec-13">
+                <div class="vphilo-card-header" data-toggle="en-sec-13" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">13. My Approach to Money and Amṛta Vṛtti</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">I am a householder. I have a family and responsibilities. Money is therefore a
+                        necessity, but I do not want it to become an obsession or the purpose of my teaching.</p>
+                    <p class="vphilo-p">I have chosen what I understand as Amṛta Vṛtti as my way of life.</p>
+                    <p class="vphilo-p">In simple terms, I do not ask people to give me money. I do not fix a fee for my
+                        teaching.</p>
+                    <p class="vphilo-p">If someone voluntarily supports my basic household needs, I receive it as: “Sri
+                        Hari Sankalpa.”</p>
+                    <p class="vphilo-p">I do not consider such support to be a payment for my teaching. Nor do I expect
+                        it.</p>
+                    <p class="vphilo-p">If someone wants to help but I do not need what they are offering, I would
+                        rather request them to help someone who genuinely needs it.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-14" data-card-id="en-sec-14">
+                <div class="vphilo-card-header" data-toggle="en-sec-14" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">14. Financial Support Does Not Buy Special Treatment</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">This is important.</p>
+                    <p class="vphilo-p">A student who supports me financially and a student who does not support me are
+                        equal in my teaching.</p>
+                    <p class="vphilo-p">I do not maintain a list of who contributed, who did not contribute, how much
+                        someone contributed, or who should therefore receive special attention.</p>
+                    <p class="vphilo-p">My teaching is not dependent on financial support. Support does not create
+                        entitlement to personal consultation. And lack of support does not reduce a student's value.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-15" data-card-id="en-sec-15">
+                <div class="vphilo-card-header" data-toggle="en-sec-15" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">15. Dāna and Sevā</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">I make a distinction between Dāna and Sevā.</p>
+                    <p class="vphilo-p">Dāna is giving something that belongs to us, without expecting a personal
+                        return.</p>
+                    <p class="vphilo-p">Sevā is offering our time, effort, ability or energy for the welfare of others.
+                    </p>
+                    <p class="vphilo-p">Both have value. I do not expect either one from my students. I believe that
+                        helping society according to one's ability is itself a meaningful form of Dharma. Paropakāra —
+                        helping others — also strengthens the person who serves.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-16" data-card-id="en-sec-16">
+                <div class="vphilo-card-header" data-toggle="en-sec-16" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">16. Why I Do Not Treat Students Differently</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">There are hundreds of students in my learning groups. I intentionally avoid
+                        creating a system where I know: “This person supported me, and that person did not.”</p>
+                    <p class="vphilo-p">Such a system can unconsciously create expectations and discrimination. I want
+                        my relationship with students to remain centred on learning.</p>
+                    <p class="vphilo-p">Therefore: The classroom is for knowledge, not for financial relationships.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-17" data-card-id="en-sec-17">
+                <div class="vphilo-card-header" data-toggle="en-sec-17" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">17. What Do I Expect From My Students?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">I do not expect money. I do not expect personal loyalty. I do not expect them to
+                        depend on me.</p>
+                    <p class="vphilo-p">What I hope for is much simpler:</p>
+                    <ul class="vphilo-bullets">
+                        <li>Learn sincerely.</li>
+                        <li>Ask questions freely.</li>
+                        <li>Think independently.</li>
+                        <li>Make your own effort.</li>
+                        <li>Develop psychological strength.</li>
+                        <li>Use Astrology responsibly.</li>
+                        <li>Do not blindly follow any person or belief.</li>
+                        <li>And, whenever possible: Help others.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-18" data-card-id="en-sec-18">
+                <div class="vphilo-card-header" data-toggle="en-sec-18" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">18. What Does “Astrological Awareness” Mean to Me?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">For me, Astrological Awareness means coming out of:</p>
+                    <ul class="vphilo-bullets">
+                        <li>blind belief,</li>
+                        <li>unnecessary fear,</li>
+                        <li>superstition,</li>
+                        <li>fatalistic thinking,</li>
+                        <li>and excessive dependence on predictions and remedies.</li>
+                    </ul>
+                    <p class="vphilo-p">A person should not think: “My horoscope says this, therefore I cannot do
+                        anything.”</p>
+                    <p class="vphilo-p">Instead, he should ask: “What is my situation? What is within my control? What
+                        effort can I make? How should I respond? Where do I need Divine Grace?”</p>
+                    <p class="vphilo-p">That shift in thinking is, for me, one of the most valuable purposes of learning
+                        Astrology.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-19" data-card-id="en-sec-19">
+                <div class="vphilo-card-header" data-toggle="en-sec-19" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">19. Why I Want Students to Become Independent</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">A teacher should not create lifelong dependency.</p>
+                    <p class="vphilo-p">During the learning process, I am happy to answer questions repeatedly and
+                        explain concepts as many times as necessary.</p>
+                    <p class="vphilo-p">But the ultimate purpose is not: “Ask the teacher about every problem.” It is:
+                        “Learn enough to understand the subject and think for yourself.”</p>
+                    <p class="vphilo-p">My guidance should be a support during the learning journey — not a substitute
+                        for the student's own understanding.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-20" data-card-id="en-sec-20">
+                <div class="vphilo-card-header" data-toggle="en-sec-20" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">20. Why I Do Not Seek Likes, Shares or Subscribers</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">There is another aspect of my approach that I would like my students to
+                        understand.</p>
+                    <p class="vphilo-p">Today, earning money from astrology is not always done by directly charging a
+                        consultation fee. Social media recognition itself can become a form of reward. Likes, shares,
+                        subscribers, views, comments and channel growth can gradually become goals in themselves. I have
+                        consciously chosen not to make them my goals.</p>
+                    <p class="vphilo-p">I have uploaded 900+ astrology classes, many of them around one hour in
+                        duration. Some of my students have suggested that I enable YouTube monetisation for these
+                        videos. I have consciously chosen not to do so.</p>
+                    <p class="vphilo-p">There are two reasons for this. First, monetisation may result in advertisements
+                        being displayed along with the educational content. I do not want my students to be
+                        unnecessarily distracted by advertisements, particularly advertisements that may have nothing to
+                        do with the subject they are learning.</p>
+                    <p class="vphilo-p">More importantly, earning through these videos does not fit with the Amṛta Vṛtti
+                        that I have chosen for my life.</p>
+                    <p class="vphilo-p">Therefore, I openly tell my students: You do not have to like my videos. You do
+                        not have to subscribe to my channel. You do not have to share my videos or my channel. You do
+                        not have to press the notification bell. None of these things are expected from my students.</p>
+                    <p class="vphilo-p">Then why do I upload the videos? The purpose is very simple. I want the students
+                        who are learning from me to have access to the lessons whenever they need them. Therefore, I
+                        upload the classes to YouTube and share the links with my students. For me, YouTube is simply a
+                        means of delivering educational material, not a means of building popularity.</p>
+                    <p class="vphilo-p">I do not normally promote my videos through WhatsApp Status or other
+                        social-media platforms. I share the video links with the students for whom the lessons are
+                        intended.</p>
+                    <p class="vphilo-p">If I start thinking about numbers and recognition, my attention can gradually
+                        move away from teaching and learning. I would rather remain free from that pressure.</p>
+                    <p class="vphilo-p">If you have learned something useful from these classes, understand it, practise
+                        it, experience it and, when appropriate, share that knowledge with someone who genuinely needs
+                        it. That is more valuable to me than a thousand likes.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-21" data-card-id="en-sec-21">
+                <div class="vphilo-card-header" data-toggle="en-sec-21" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">21. My Measure of Success</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">I do not measure the value of my teaching by the number of students,
+                        subscribers, views, likes or donations.</p>
+                    <p class="vphilo-p">My satisfaction comes from knowing that I am continuing to learn, sharing what I
+                        have understood, and helping a student become sufficiently knowledgeable and confident to
+                        understand life for themselves.</p>
+                    <p class="vphilo-p">If my teaching eventually makes a student less dependent on an astrologer, I
+                        consider that a success — not a failure.</p>
+                    <p class="vphilo-p">And if that student uses the knowledge to bring clarity, courage and awareness
+                        to another person, the purpose of my teaching has been fulfilled. That is the kind of continuity
+                        I wish to create — not a following, but a chain of knowledge.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="en-sec-22" data-card-id="en-sec-22">
+                <div class="vphilo-card-header" data-toggle="en-sec-22" title="Click to expand & read">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">22. My Simple Message to My Students</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">Read ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">I would like my students to remember these few principles:</p>
+                    <ul class="vphilo-bullets">
+                        <li>Keep your mind strong.</li>
+                        <li>Understand your circumstances.</li>
+                        <li>Do not fear your horoscope.</li>
+                        <li>Do not surrender your life to predictions.</li>
+                        <li>Give the first priority to your own effort.</li>
+                        <li>Use prayer to strengthen the mind, not to avoid responsibility.</li>
+                        <li>Seek Divine Grace without abandoning your duty.</li>
+                        <li>Help others whenever you can.</li>
+                        <li>And approach an astrologer only when you genuinely need another perspective.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Closing Message & Guru Sandesham -->
+        <div class="vphilo-closing-card">
+            <h3 class="vphilo-closing-title"><span>🙏</span> Finally, Why Do I Do This?</h3>
+            <p class="vphilo-closing-p">I do not teach Astrology because I want people to remember my name. I do not
+                teach it because I want to build a commercial practice. I do not teach it because I expect every student
+                to support me.</p>
+            <p class="vphilo-closing-p">I teach because the knowledge that came to us from our teachers and ancient
+                traditions should not end with one generation. My teachers gave me knowledge. I did not pay them a
+                commercial fee for that knowledge. Therefore, I consider sharing what I have learned with sincere
+                students to be a responsibility.</p>
+            <p class="vphilo-closing-p">If, through my teaching, even one person becomes less fearful, more thoughtful,
+                more self-reliant, more aware of his responsibilities, and more compassionate towards others, I consider
+                that meaningful.</p>
+            <p class="vphilo-closing-p">My aim is not to create a society that constantly needs astrologers. My aim is
+                to help create people who are strong enough to face life, wise enough to understand their circumstances,
+                humble enough to seek Divine Grace, and compassionate enough to help others.</p>
+
+            <div class="vphilo-mantra-banner">Learn deeply. Think independently. Live responsibly. Seek Divine Grace.
+                Help others.</div>
+            <p class="vphilo-signature">— Srikanth Dharmavaram</p>
+        </div>
+    </div>
+
+    <!-- Kannada Content Tab -->
+    <div id="VPhiloKannada" class="vphilo-tab-content">
+        <h2 class="vphilo-page-title">ನಾನು ಜ್ಯೋತಿಷ್ಯವನ್ನು ಏಕೆ ಬೋಧಿಸುತ್ತೇನೆ — ಮತ್ತು ನಾನು ಬದುಕಲು ಆರಿಸಿಕೊಂಡ ಹಾದಿ</h2>
+        <p class="vphilo-page-subtitle">ಜ್ಯೋತಿಷ್ಯ, ಬೋಧನೆ, ಧರ್ಮ ಮತ್ತು ಜೀವನದ ಕುರಿತು ನನ್ನ ದೃಷ್ಟಿಕೋನ</p>
+
+        <!-- Intro Questions Box -->
+        <div class="vphilo-intro-card">
+            <h3 class="vphilo-intro-qtitle"><span>❓</span> ನನ್ನನ್ನು ಅನೇಕ ಬಾರಿ ಕೇಳಲಾಗಿದೆ:</h3>
+            <ul class="vphilo-questions-list">
+                <li>“ನೀವು ಜ್ಯೋತಿಷ್ಯವನ್ನು ಬೋಧಿಸುತ್ತೀರಿ. ಆದರೆ ಸಮಾಲೋಚನೆಗಳನ್ನು (consultations) ನೀಡಿ ಶುಲ್ಕ ವಿಧಿಸುವ ಬದಲು,
+                    ಅದನ್ನು ಉಚಿತವಾಗಿ ಏಕೆ ಬೋಧಿಸುತ್ತೀರಿ?”</li>
+                <li>“ನಿಮ್ಮ ವಿದ್ಯಾರ್ಥಿಗಳಿಂದ ನೀವು ಏನನ್ನು ನಿರೀಕ್ಷಿಸುತ್ತೀರಿ?”</li>
+                <li>“ಯಾರಾದರೂ ನಿಮಗೆ ಆರ್ಥಿಕವಾಗಿ ಬೆಂಬಲ ನೀಡಿದರೆ, ನೀವು ಅವರನ್ನು ಭಿನ್ನವಾಗಿ ಕಾಣುತ್ತೀರಾ?”</li>
+                <li>“ಜ್ಯೋತಿಷ್ಯವು ಒಬ್ಬ ವ್ಯಕ್ತಿಯ ಜೀವನವನ್ನು ಬದಲಾಯಿಸಬಲ್ಲದು ಎಂದು ನೀವು ನಂಬುತ್ತೀರಾ?”</li>
+                <li>“ನೀವು ಭವಿಷ್ಯ ನುಡಿಯುವುದಿಲ್ಲವೇಕೆ?”</li>
+                <li>“ಪರಿಹಾರಗಳು, ಪ್ರಾರ್ಥನೆಗಳು ಮತ್ತು ದಾನಗಳ ಕುರಿತು ನಿಮ್ಮ ಧೋರಣೆ ಏನು?”</li>
+            </ul>
+            <p class="vphilo-intro-statement">ಇವು ಸಹಜವಾದ ಮತ್ತು ಪ್ರಾಮಾಣಿಕವಾದ ಪ್ರಶ್ನೆಗಳು. ಆದ್ದರಿಂದ ನಾನು ನನ್ನ
+                ದೃಷ್ಟಿಕೋನವನ್ನು ಮುಕ್ತವಾಗಿ ಮತ್ತು ಗೌರವಪೂರ್ವಕವಾಗಿ ವಿವರಿಸಲು ಬಯಸುತ್ತೇನೆ. ಈ ಪುಟವು ನನ್ನ ಮಾರ್ಗವೇ ಏಕೈಕ ಸರಿಯಾದ
+                ಮಾರ್ಗ ಎಂದು ಸಾಬೀತುಪಡಿಸಲು ಉದ್ದೇಶಿಸಿದ್ದಲ್ಲ. ಇದು ಕೇವಲ ನಾನು ಹೇಗೆ ಕಲಿಯಲು, ಬೋಧಿಸಲು ಮತ್ತು ಬದುಕಲು
+                ಆರಿಸಿಕೊಂಡಿದ್ದೇನೆ ಎಂಬುದರ ವಿವರಣೆಯಾಗಿದೆ.</p>
+        </div>
+
+        <!-- Student Hint Banner with Compact Font Resizer -->
+        <div class="vphilo-hint-banner">
+            <span class="vphilo-hint-text">💡 ಯಾವುದೇ ವಿಷಯವನ್ನು ಓದಲು ಅದರ ಮೇಲೆ ಕ್ಲಿಕ್ ಮಾಡಿ</span>
+            <div class="vphilo-hint-right">
+                <span class="vphilo-hint-count">22 ವಿಷಯಗಳು</span>
+                <div class="vphilo-mini-font-actions">
+                    <button class="vphilo-mini-font-btn font-dec" title="Decrease Font Size">A-</button>
+                    <button class="vphilo-mini-font-btn font-inc" title="Increase Font Size">A+</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 22 Sections List -->
+        <div class="vphilo-sections-list">
+            <div class="vphilo-card is-expanded" id="kn-sec-1" data-card-id="kn-sec-1">
+                <div class="vphilo-card-header" data-toggle="kn-sec-1" title="ಕುಗ್ಗಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">1. ನಾನು ಜ್ಯೋತಿಷ್ಯವನ್ನು ಕಲಿಯಲು ಏಕೆ ಆರಿಸಿಕೊಂಡೆ?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ನಾನು ಹಣ ಗಳಿಸುವ, ಪ್ರಸಿದ್ಧಿ ಪಡೆಯುವ ಅಥವಾ ವೃತ್ತಿಯನ್ನು ರೂಪಿಸಿಕೊಳ್ಳುವ ಉದ್ದೇಶದಿಂದ
+                        ಜ್ಯೋತಿಷ್ಯವನ್ನು ಕಲಿಯಲಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ಜ್ಯೋತಿಷ್ಯವು ನನ್ನ ಕೌಟುಂಬಿಕ ಹಿನ್ನೆಲೆಯ ಭಾಗವಾಗಿದೆ. ನನ್ನ ತಂದೆ ಮತ್ತು ತಾತ ಕೂಡ
+                        ಜ್ಯೋತಿಷಿಗಳಾಗಿದ್ದರು. ಆದಾಗ್ಯೂ, ಜ್ಯೋತಿಷ್ಯವು ಕೇವಲ ಒಂದು ಕೌಟುಂಬಿಕ ಸಂಪ್ರದಾಯ ಎಂಬ ಕಾರಣಕ್ಕಾಗಿ ನಾನು ಅದನ್ನು
+                        ಕಲಿಯಲಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ನನ್ನ ಜೀವನದ ಕೆಲವು ಅನುಭವಗಳು ಜ್ಯೋತಿಷ್ಯವನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳುವ ಮತ್ತು ಬಳಸುವ ವಿಧಾನದ
+                        ಬಗ್ಗೆ ಆಳವಾಗಿ ಯೋಚಿಸುವಂತೆ ಮಾಡಿದವು.</p>
+                    <p class="vphilo-p">ಜ್ಯೋತಿಷ್ಯವು ಒಬ್ಬ ವ್ಯಕ್ತಿಯ ಆಲೋಚನೆಯನ್ನು ಅತ್ಯಂತ ಆಳವಾಗಿ ಪ್ರಭಾವಿಸಬಲ್ಲದು ಎಂಬುದನ್ನು
+                        ನಾನು ಅರಿತುಕೊಂಡೆ. ಜವಾಬ್ದಾರಿಯುತವಾಗಿ ವಿವರಿಸಿದಾಗ, ಅದು ಒಬ್ಬ ವ್ಯಕ್ತಿಗೆ ಪರಿಸ್ಥಿತಿಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು
+                        ಮತ್ತು ಹೆಚ್ಚಿನ ಜಾಗೃತಿಯೊಂದಿಗೆ ಜೀವನವನ್ನು ಎದುರಿಸಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ. ಆದರೆ ಅದನ್ನು ಬೇಜವಾಬ್ದಾರಿಯಿಂದ
+                        ಬಳಸಿದಾಗ, ಅದು ಭಯ, ಅವಲಂಬನೆ ಮತ್ತು ಮೂಢನಂಬಿಕೆಯನ್ನು ಸೃಷ್ಟಿಸುತ್ತದೆ.</p>
+                    <p class="vphilo-p">ಆ ಅರಿವೇ ನಾನು ಜ್ಯೋತಿಷ್ಯವನ್ನು ಗಂಭೀರವಾಗಿ ಅಧ್ಯಯನ ಮಾಡಲು ಪ್ರಮುಖ ಕಾರಣವಾಯಿತು. ನಾನು
+                        ಕಲಿತದ್ದನ್ನು ಇತರರ ಒಳಿತಿಗಾಗಿ ಮತ್ತು ಜಾಗೃತಿಗಾಗಿ ಹಂಚಿಕೊಳ್ಳಲು ಅನುವಾಗುವಂತೆ ಈ ವಿಷಯವನ್ನು ಆಳವಾಗಿ
+                        ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ನಾನು ಬಯಸಿದೆ.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-2" data-card-id="kn-sec-2">
+                <div class="vphilo-card-header" data-toggle="kn-sec-2" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">2. ನಾನು ಜ್ಯೋತಿಷ್ಯವನ್ನು ಏಕೆ ಬೋಧಿಸುತ್ತೇನೆ?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ಜನರನ್ನು ಜ್ಯೋತಿಷಿಯ ಮೇಲೆ ಅವಲಂಬಿತರಾಗುವಂತೆ ಮಾಡುವುದು ನನ್ನ ಉದ್ದೇಶವಲ್ಲ. ನನ್ನ ಉದ್ದೇಶವು
+                        ಇದಕ್ಕೆ ತದ್ವಿರುದ್ಧವಾಗಿದೆ.</p>
+                    <p class="vphilo-p">ವಿದ್ಯಾರ್ಥಿಯು ಜ್ಯೋತಿಷ್ಯವನ್ನು ಚೆನ್ನಾಗಿ ಕಲಿತು ಸ್ವತಃ ಗಮನಿಸಲು, ಪ್ರಶ್ನಿಸಲು, ಯೋಚಿಸಲು
+                        ಮತ್ತು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಶಕ್ತನಾಗಬೇಕೆಂದು ನಾನು ಬಯಸುತ್ತೇನೆ.</p>
+                    <p class="vphilo-p">ಆದ್ದರಿಂದ ನಾನು ನನ್ನ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಹೇಳುತ್ತೇನೆ: “ವಿಷಯಕ್ಕಿಂತ ಹೆಚ್ಚಾಗಿ ನನ್ನ
+                        ಮಾರ್ಗದರ್ಶನದ ಮೇಲೆ ಅವಲಂಬಿತರಾಗಬೇಡಿ. ವಿಷಯವನ್ನು ಕಲಿಯಿರಿ, ತತ್ವಗಳನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ ಮತ್ತು ನಿಮ್ಮ ಸ್ವಂತ
+                        ನಿರ್ಧಾರ ಶಕ್ತಿಯನ್ನು ಬೆಳೆಸಿಕೊಳ್ಳಿ.”</p>
+                    <p class="vphilo-p">ಜ್ಞಾನವು ಒಬ್ಬ ವ್ಯಕ್ತಿಯನ್ನು ಹೆಚ್ಚು ಸ್ವಾವಲಂಬಿಯನ್ನಾಗಿ ಮಾಡಿದಾಗ ಮಾತ್ರ ಸಾರ್ಥಕವಾಗುತ್ತದೆ
+                        ಎಂದು ನಾನು ನಂಬುತ್ತೇನೆ.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-3" data-card-id="kn-sec-3">
+                <div class="vphilo-card-header" data-toggle="kn-sec-3" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">3. ನಾನು ಜ್ಯೋತಿಷ್ಯವನ್ನು ಬೋಧಿಸುತ್ತೇನೆ; ವೈಯಕ್ತಿಕ ಸಮಾಲೋಚನೆಗಳನ್ನು
+                            ನೀಡುವುದಿಲ್ಲ</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ನನ್ನ ಪ್ರಮುಖ ಪಾತ್ರವೆಂದರೆ ಒಬ್ಬ ಶಿಕ್ಷಕನದ್ದು. ನಾನು ಜ್ಯೋತಿಷ್ಯವನ್ನು ಬೋಧಿಸುತ್ತೇನೆ. ನಾನು
+                        ನಿಯಮಿತವಾಗಿ ವೈಯಕ್ತಿಕ ಜಾತಕ ಸಮಾಲೋಚನೆಗಳನ್ನು ನೀಡುವುದಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ಒಬ್ಬ ವಿದ್ಯಾರ್ಥಿಯು ಈ ವಿಷಯದ ಬಗ್ಗೆ ನನಗೆ ಪ್ರಶ್ನೆಯನ್ನು ಕೇಳಿದರೆ, ಅದನ್ನು ವಿವರಿಸಲು ನಾನು
+                        ಯಾವಾಗಲೂ ಸಿದ್ಧನಾಗಿರುತ್ತೇನೆ. ವಿಷಯವು ಇನ್ನೂ ಸ್ಪಷ್ಟವಾಗದ ಕಾರಣ ವಿದ್ಯಾರ್ಥಿಯು ಅದೇ ಪ್ರಶ್ನೆಯನ್ನು ಹಲವು ಬಾರಿ
+                        ಕೇಳಿದರೂ, ನಾನು ಅದನ್ನು ಸಮಸ್ಯೆಯಾಗಿ ಪರಿಗಣಿಸುವುದಿಲ್ಲ. ಪ್ರತಿಯೊಬ್ಬರಿಗೂ ವಿಭಿನ್ನ ಮಟ್ಟದ ಗ್ರಹಿಕಾ ಶಕ್ತಿ
+                        ಇರುತ್ತದೆ.</p>
+                    <p class="vphilo-p">ನನ್ನ ಮಿತಿಯು ಕೇವಲ ವೈಯಕ್ತಿಕ ಸಮಾಲೋಚನೆಗೆ ಮಾತ್ರ ಸೀಮಿತವಾಗಿದೆ, ವಿದ್ಯಾರ್ಥಿಗಳ
+                        ಪ್ರಶ್ನೆಗಳಿಗಲ್ಲ.</p>
+                    <p class="vphilo-p">ಯಾರಾದರೂ ನಿಜವಾದ ಮತ್ತು ಗಂಭೀರವಾದ ವೈಯಕ್ತಿಕ ಸಮಸ್ಯೆಯೊಂದಿಗೆ ನನ್ನನ್ನು ಸಂಪರ್ಕಿಸಿದರೆ, ನಾನು
+                        ನನ್ನ ಮಿತಿಯೊಳಗೆ ಮಾರ್ಗದರ್ಶನ ನೀಡಬಹುದು. ಆಗಲೂ ಸಹ, ನಾನು ಭವಿಷ್ಯ ನುಡಿಯುವ ಭರವಸೆ ನೀಡುವುದಿಲ್ಲ. ಆ ವ್ಯಕ್ತಿಗೆ
+                        ಪರಿಸ್ಥಿತಿಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಮತ್ತು ಅದನ್ನು ಎದುರಿಸಲು ಸಂಭವನೀಯ ಮಾರ್ಗಗಳ ಬಗ್ಗೆ ಯೋಚಿಸಲು ಸಹಾಯ ಮಾಡುವುದು
+                        ನನ್ನ ಉದ್ದೇಶವಾಗಿದೆ.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-4" data-card-id="kn-sec-4">
+                <div class="vphilo-card-header" data-toggle="kn-sec-4" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">4. ನಾನು ಭವಿಷ್ಯ ನುಡಿಯುವುದಿಲ್ಲವೇಕೆ?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ಜ್ಯೋತಿಷ್ಯವನ್ನು ಒಬ್ಬ ವ್ಯಕ್ತಿಯನ್ನು ನಿಷ್ಕ್ರಿಯನನ್ನಾಗಿ (passive) ಮಾಡುವ ಸಾಧನವೆಂದು ನಾನು
+                        ಪರಿಗಣಿಸುವುದಿಲ್ಲ. ಜಾತಕವು ನಮಗೆ ಈ ಕೆಳಗಿನವುಗಳನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಸಹಾಯ ಮಾಡಬಹುದು:</p>
+                    <ul class="vphilo-bullets">
+                        <li>ಒಬ್ಬ ವ್ಯಕ್ತಿಯ ಸುತ್ತಲಿನ ಸಂದರ್ಭಗಳು,</li>
+                        <li>ಅನುಕೂಲಕರ ಮತ್ತು ಪ್ರತಿಕೂಲ ಪ್ರವೃತ್ತಿಗಳು,</li>
+                        <li>ಮಾನಸಿಕ ಒಲವುಗಳು,</li>
+                        <li>ಒಬ್ಬ ವ್ಯಕ್ತಿಯು ಅನುಭವಿಸಬಹುದಾದ ಪರಿಸರ,</li>
+                        <li>ಮತ್ತು ಸಂಭವನೀಯ ಸವಾಲುಗಳು ಅಥವಾ ಅವಕಾಶಗಳು.</li>
+                    </ul>
+                    <p class="vphilo-p">ಆದರೆ ಅದರರ್ಥ ಒಬ್ಬ ವ್ಯಕ್ತಿಯು ತೆಗೆದುಕೊಳ್ಳುವ ಪ್ರತಿಯೊಂದು ನಿರ್ಧಾರವೂ ಶಾಶ್ವತವಾಗಿ ಮೊದಲೇ
+                        ನಿಗದಿಯಾಗಿದೆ ಎಂದಲ್ಲ.</p>
+                    <p class="vphilo-p">ಉದಾಹರಣೆಗೆ, ಒಬ್ಬ ವ್ಯಕ್ತಿಯ ಆರ್ಥಿಕ ಪರಿಸ್ಥಿತಿಯು ಅವನು ಆರಂಭದಲ್ಲಿ ಯಾವ ಕಾಲೇಜಿಗೆ
+                        ಸೇರಬೇಕೆಂಬುದನ್ನು ನಿರ್ಧರಿಸಬಹುದು. ಆದರೆ ಅವನ ಅಂಕಗಳು, ಶ್ರೇಣಿ, ಕಲಿಕೆ, ಶಿಸ್ತು ಮತ್ತು ಅಂತಿಮ ಸಾಧನೆಯು ಅವನ
+                        ಆರ್ಥಿಕ ಪರಿಸ್ಥಿತಿಯಿಂದ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ನಿರ್ಧರಿಸಲ್ಪಡುವುದಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ಸಂದರ್ಭಗಳು ನಮ್ಮ ಮೇಲೆ ಪ್ರಭಾವ ಬೀರುತ್ತವೆ. ಆದರೆ ಅವು ನಮ್ಮ ಪ್ರಯತ್ನ ಮತ್ತು ಆಯ್ಕೆಗಳನ್ನು
+                        ಸಂಪೂರ್ಣವಾಗಿ ಬದಲಾಯಿಸುವುದಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ಆದ್ದರಿಂದ, ಜ್ಯೋತಿಷ್ಯವನ್ನು ಕೇವಲ ಭವಿಷ್ಯ ನುಡಿಯುವ ಸಾಧನವಾಗಿ ಬಳಸುವ ಬದಲು ‘ಮಾರ್ಗದರ್ಶನ
+                        (Guidance)’ ಎಂಬ ಪದವನ್ನು ಬಳಸಲು ನಾನು ಆದ್ಯತೆ ನೀಡುತ್ತೇನೆ.</p>
+                    <p class="vphilo-p">ನನ್ನ ವಿಧಾನದಲ್ಲಿ ಜ್ಯೋತಿಷ್ಯದ ಉದ್ದೇಶವೆಂದರೆ ಏನಾಗಲಿದೆ ಎಂದು ಹೇಳಿ ಒಬ್ಬ ವ್ಯಕ್ತಿಯು ಕೇವಲ
+                        ಅದಕ್ಕಾಗಿ ಕಾಯುವಂತೆ ಮಾಡುವುದಲ್ಲ. ಅವನು ತನ್ನ ಸಂದರ್ಭಗಳನ್ನು ಅರ್ಥಮಾಡಿಕೊಂಡು, ಅವುಗಳಿಗೆ ವಿವೇಕದಿಂದ
+                        ಪ್ರತಿಕ್ರಿಯಿಸಲು ಸಹಾಯ ಮಾಡುವುದಾಗಿದೆ.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-5" data-card-id="kn-sec-5">
+                <div class="vphilo-card-header" data-toggle="kn-sec-5" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">5. ಜ್ಯೋತಿಷ್ಯವು ಭಯವನ್ನು ಕಡಿಮೆ ಮಾಡಬೇಕೇ ಹೊರತು, ಭಯವನ್ನು ಹುಟ್ಟಿಸಬಾರದು
+                        </h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ಒಬ್ಬ ವ್ಯಕ್ತಿಯು ಸಮಸ್ಯೆಯೊಂದಿಗೆ ಜ್ಯೋತಿಷಿಯ ಬಳಿಗೆ ಬಂದಾಗ, ಅವನು ಈಗಾಗಲೇ
+                        ಆತಂಕಗೊಂಡಿರುತ್ತಾನೆ. ಅವನು ‘ನನ್ನ ಜಾತಕ ಏನು ಹೇಳುತ್ತದೆ?’ ಎಂದು ಕೇಳಲು ಹೆದರುತ್ತಾ ಕಾಯುತ್ತಿರಬಹುದು.</p>
+                    <p class="vphilo-p">ಅಂತಹ ಸಂದರ್ಭದಲ್ಲಿ, ಜ್ಯೋತಿಷಿಯು ಈಗಾಗಲೇ ತೊಂದರೆಯಲ್ಲಿರುವ ಮನಸ್ಸಿಗೆ ಹೆಚ್ಚಿನ ಭಯವನ್ನು
+                        ತುಂಬಬಾರದು ಎಂದು ನಾನು ನಂಬುತ್ತೇನೆ. ಜ್ಯೋತಿಷಿಯ ಜವಾಬ್ದಾರಿಯು ಕೇವಲ ಆ ವ್ಯಕ್ತಿಯ ಭಯವನ್ನು ದೃಢಪಡಿಸುವುದಷ್ಟೇ
+                        ಅಲ್ಲ.</p>
+                    <p class="vphilo-p">ಮೊದಲಿಗೆ, ಸಮಸ್ಯೆಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಬೇಕು. ನಂತರ ನಾವು ಕೇಳಿಕೊಳ್ಳಬೇಕು:</p>
+                    <p class="vphilo-p">“ಈ ವ್ಯಕ್ತಿ ಏನು ಮಾಡಬಹುದು?” — “ಯಾವ ಸಾಧ್ಯತೆಗಳು ಲಭ್ಯವಿವೆ?” — “ಈ ಪರಿಸ್ಥಿತಿಯನ್ನು ಈ
+                        ವ್ಯಕ್ತಿ ಹೇಗೆ ಎದುರಿಸಬಹುದು?”</p>
+                    <p class="vphilo-p">ಒಂದು ವೇಳೆ ಪ್ರಾಯೋಗಿಕವಾದ ಮುನ್ನಡೆಯ ಹಾದಿ ಇದ್ದರೆ, ಅದನ್ನು ವಿವರಿಸಬೇಕು. ಪರಿಸ್ಥಿತಿಯನ್ನು
+                        ತಕ್ಷಣವೇ ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಾಗದಿದ್ದರೆ, ಅದನ್ನು ಎದುರಿಸಲು ಆ ವ್ಯಕ್ತಿಗೆ ಮಾನಸಿಕ ಶಕ್ತಿಯನ್ನು ಬೆಳೆಸಿಕೊಳ್ಳಲು
+                        ಸಹಾಯ ಮಾಡಬೇಕು.</p>
+                    <p class="vphilo-p">ಇದಕ್ಕಾಗಿಯೇ ನಾನು ಮಾನಸಿಕ ಜಾಗೃತಿಯನ್ನು ಜ್ಯೋತಿಷ್ಯ ಶಿಕ್ಷಣದ ಒಂದು ಪ್ರಮುಖ ಭಾಗವೆಂದು
+                        ಪರಿಗಣಿಸುತ್ತೇನೆ.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-6" data-card-id="kn-sec-6">
+                <div class="vphilo-card-header" data-toggle="kn-sec-6" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">6. ಜ್ಯೋತಿಷ್ಯ ಮತ್ತು ಮನೋವಿಜ್ಞಾನ</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ಜೀವನವನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ನಾವು ಸಮಯ ಮತ್ತು ಮಾನವನ ಪ್ರತಿಕ್ರಿಯೆ ಎರಡನ್ನೂ ಪರಿಗಣಿಸಬೇಕು
+                        ಎಂದು ನಾನು ನಂಬುತ್ತೇನೆ.</p>
+                    <p class="vphilo-p">ಜ್ಯೋತಿಷ್ಯವು ನಮಗೆ ‘ಕಾಲ’ದ ಆಯಾಮವನ್ನು ಅಧ್ಯಯನ ಮಾಡಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ. ಮಾನಸಿಕ
+                        ತಿಳುವಳಿಕೆಯು ಒಬ್ಬ ಮನುಷ್ಯನು ಹೇಗೆ ಯೋಚಿಸುತ್ತಾನೆ, ಭಾವಿಸುತ್ತಾನೆ ಮತ್ತು ಸಂದರ್ಭಗಳಿಗೆ ಹೇಗೆ
+                        ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತಾನೆ ಎಂಬುದನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ.</p>
+                    <p class="vphilo-p">ಒಬ್ಬ ವ್ಯಕ್ತಿಯು ಕಠಿಣ ಪರಿಸ್ಥಿತಿಯನ್ನು ಎದುರಿಸಬಹುದು. ಇಬ್ಬರು ವ್ಯಕ್ತಿಗಳು ಒಂದೇ ರೀತಿಯ
+                        ಪರಿಸ್ಥಿತಿಯನ್ನು ಅನುಭವಿಸಬಹುದು, ಆದರೆ ಅವರ ಪ್ರತಿಕ್ರಿಯೆಗಳು ವಿಭಿನ್ನವಾಗಿರಬಹುದು. ಒಬ್ಬರು ಹೆದರಬಹುದು;
+                        ಮತ್ತೊಬ್ಬರು ಬಲಿಷ್ಠರಾಗಬಹುದು.</p>
+                    <p class="vphilo-p">ಆದ್ದರಿಂದ, ಕೇವಲ ಪರಿಸ್ಥಿತಿಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳುವುದು ಮಾತ್ರ ಸಾಲದು. ನಾವು ಮನಸ್ಸನ್ನೂ
+                        ಅರ್ಥಮಾಡಿಕೊಳ್ಳಬೇಕು. ಅದಕ್ಕಾಗಿಯೇ ನಾನು ನನ್ನ ಬೋಧನೆಯಲ್ಲಿ ಜ್ಯೋತಿಷ್ಯದೊಂದಿಗೆ ಮಾನಸಿಕ ಜಾಗೃತಿಯನ್ನೂ
+                        ಒಳಗೊಂಡಿದ್ದೇನೆ.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-7" data-card-id="kn-sec-7">
+                <div class="vphilo-card-header" data-toggle="kn-sec-7" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">7. ನಾವು ಜ್ಯೋತಿಷಿಯನ್ನು ಯಾವಾಗ ಸಂಪರ್ಕಿಸಬೇಕು?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ನಾನು ನನ್ನ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಒಂದು ಸರಳವಾದ ಮಾತನ್ನು ಹೇಳುತ್ತೇನೆ: “ಜೀವನದ ಪ್ರತಿಯೊಂದು
+                        ಸಮಸ್ಯೆಯಲ್ಲೂ ನಿಮಗೆ ಜ್ಯೋತಿಷಿಯ ಅಗತ್ಯವಿಲ್ಲ.”</p>
+                    <p class="vphilo-p">ಸಂಪೂರ್ಣ ದೈಹಿಕ ಆರೋಗ್ಯ ಹೊಂದಿರುವ ವ್ಯಕ್ತಿಯು ಪ್ರತಿದಿನ ವೈದ್ಯರನ್ನು ಭೇಟಿ ಮಾಡುವ
+                        ಅಗತ್ಯವಿರುವುದಿಲ್ಲ. ಅದೇ ರೀತಿ, ಮಾನಸಿಕವಾಗಿ ಸದೃಢನಾಗಿರುವ ಮತ್ತು ತನ್ನ ಪರಿಸ್ಥಿತಿಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಂಡಿರುವ
+                        ವ್ಯಕ್ತಿಯು ಪ್ರತಿ ಕಷ್ಟಕ್ಕೂ ಜ್ಯೋತಿಷಿಯನ್ನು ಸಂಪರ್ಕಿಸುವ ಅಗತ್ಯವಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ಸಮಸ್ಯೆಯ ಕಾರಣವನ್ನು ನೀವು ಅರ್ಥಮಾಡಿಕೊಂಡು, ನೀವು ಏನು ಮಾಡಬೇಕೆಂದು ನಿಮಗೆ ತಿಳಿದಿದ್ದರೆ, ಆಗ
+                        ಜಾತಕವನ್ನು ನೋಡುವ ಅಗತ್ಯವೇ ಇರುವುದಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ಜ್ಯೋತಿಷ್ಯವು ಯಾವಾಗ ಉಪಯುಕ್ತವಾಗುತ್ತದೆ ಎಂದರೆ: “ಈ ಪರಿಸ್ಥಿತಿ ಏಕೆ ಎದುರಾಗುತ್ತಿದೆ ಎಂದು
+                        ನನಗೆ ಅರ್ಥವಾಗುತ್ತಿಲ್ಲ, ಅಥವಾ ಅದನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ನನಗೆ ಇನ್ನೊಂದು ದೃಷ್ಟಿಕೋನದ ಅಗತ್ಯವಿದೆ” ಎಂದಾಗ
+                        ಮಾತ್ರ. ಅಂತಹ ಸಂದರ್ಭದಲ್ಲೂ, ಜ್ಯೋತಿಷ್ಯವು ನಮ್ಮ ಆಲೋಚನೆಗೆ ಬೆಂಬಲ ನೀಡಬೇಕೇ ಹೊರತು, ಅದನ್ನು ಬದಲಿಸಬಾರದು.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-8" data-card-id="kn-sec-8">
+                <div class="vphilo-card-header" data-toggle="kn-sec-8" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">8. ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಅವರ ಸ್ವಂತ ಜಾತಕಗಳ ಬಗ್ಗೆ ನಾನು ಏನು ಹೇಳುತ್ತೇನೆ?
+                        </h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ವಿದ್ಯಾರ್ಥಿಗಳು ಜ್ಯೋತಿಷ್ಯವನ್ನು ಕಲಿಯಲು ಪ್ರಾರಂಭಿಸಿದಾಗ, ನಾನು ಸಾಮಾನ್ಯವಾಗಿ ಅವರಿಗೆ ಹೀಗೆ
+                        ಸಲಹೆ ನೀಡುತ್ತೇನೆ:</p>
+                    <p class="vphilo-p">“ನಿಮ್ಮ ಸ್ವಂತ ಜಾತಕವನ್ನು ಅಥವಾ ನೀವು ಭಾವನಾತ್ಮಕವಾಗಿ ನಿಕಟವಾಗಿರುವ ವ್ಯಕ್ತಿಯ ಜಾತಕವನ್ನು
+                        ತಕ್ಷಣವೇ ನಿಮ್ಮ ಮುಖ್ಯ ಕಲಿಕೆಯ ಉದಾಹರಣೆಯಾಗಿ ಬಳಸಬೇಡಿ.”</p>
+                    <p class="vphilo-p">ಏಕೆ? ಏಕೆಂದರೆ ನಮ್ಮ ಸ್ವಂತ ಜಾತಕದಲ್ಲಿ ನಕಾರಾತ್ಮಕ ಎಂದು ನಾವು ಭಾವಿಸುವ ಯಾವುದನ್ನಾದರೂ
+                        ನೋಡಿದರೆ, ನಾವು ಭಾವನಾತ್ಮಕವಾಗಿ ತೊಂದರೆಗೆ ಒಳಗಾಗಬಹುದು. ಕಲಿಕೆಯ ಪ್ರಕ್ರಿಯೆಯಲ್ಲಿ ಒಮ್ಮೆ ಭಯವು ಪ್ರವೇಶಿಸಿದರೆ,
+                        ನಿಷ್ಪಕ್ಷಪಾತವಾಗಿ ಅಧ್ಯಯನ ಮಾಡುವುದು ಕಷ್ಟವಾಗುತ್ತದೆ.</p>
+                    <p class="vphilo-p">ನಮಗೆ ಯಾವುದೇ ಭಾವನಾತ್ಮಕ ಸಂಬಂಧವಿಲ್ಲದ ಜಾತಕವನ್ನು ನಾವು ಅಧ್ಯಯನ ಮಾಡಿದಾಗ, ನಮ್ಮ ಮನಸ್ಸು
+                        ಅದನ್ನು ಹೆಚ್ಚು ಆಳವಾಗಿ — ಕೆಲವೊಮ್ಮೆ ವಿಮರ್ಶಾತ್ಮಕವಾಗಿಯೂ ಸಹ ಪರಿಶೀಲಿಸಬಹುದು.</p>
+                    <p class="vphilo-p">ಆದ್ದರಿಂದ, ನನ್ನ ತರಗತಿಗಳಲ್ಲಿ ನಾನು ಜಾತಕ ಯಾರದ್ದು ಎಂದು ಬಹಿರಂಗಪಡಿಸದೆ ಉದಾಹರಣೆಗಳಾಗಿ
+                        ಬಳಸುತ್ತೇನೆ. ಇದರ ಉದ್ದೇಶ ಕಲಿಕೆಯೇ ಹೊರತು, ಭಾವನಾತ್ಮಕವಾಗಿ ಸಿಲುಕಿಕೊಳ್ಳುವುದಲ್ಲ.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-9" data-card-id="kn-sec-9">
+                <div class="vphilo-card-header" data-toggle="kn-sec-9" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">9. ಗಂಭೀರ ವೈಯಕ್ತಿಕ ಸಮಸ್ಯೆಗಳ ಕುರಿತು ನನ್ನ ಧೋರಣೆ</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ಯಾರಾದರೂ ನನಗೆ: “ನಾನು ನಿಜವಾದ ಮತ್ತು ಗಂಭೀರವಾದ ಸಮಸ್ಯೆಯನ್ನು ಎದುರಿಸುತ್ತಿದ್ದೇನೆ ಮತ್ತು
+                        ಏನು ಮಾಡಬೇಕೆಂದು ನನಗೆ ತಿಳಿಯುತ್ತಿಲ್ಲ,” ಎಂದು ಹೇಳಿದರೆ, ನಾನು ಮೊದಲು ಸಮಸ್ಯೆಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು
+                        ಪ್ರಯತ್ನಿಸುತ್ತೇನೆ.</p>
+                    <p class="vphilo-p">ಕೆಲವೊಮ್ಮೆ ಒಬ್ಬ ವ್ಯಕ್ತಿಯು ಅತ್ಯಂತ ಗಂಭೀರ ಎಂದು ಭಾವಿಸುವ ವಿಷಯವನ್ನು ವಾಸ್ತವವಾಗಿ ಸರಳವಾದ
+                        ಪ್ರಾಯೋಗಿಕ ಬದಲಾವಣೆಗಳ ಮೂಲಕ ಪರಿಹರಿಸಬಹುದು.</p>
+                    <p class="vphilo-p">ಉದಾಹರಣೆಗೆ, ಪೋಷಕರು ಹೇಳಬಹುದು: “ನನ್ನ ಮಗುವಿನ ಶಿಕ್ಷಣವು ತುಂಬಾ ಗಂಭೀರ ಸಮಸ್ಯೆಯಾಗುತ್ತಿದೆ.”
+                        ಪರಿಸ್ಥಿತಿಯ ಬಗ್ಗೆ ಚರ್ಚಿಸಿದ ನಂತರ, ಮಗು ದೂರದರ್ಶನ, ಸ್ಮಾರ್ಟ್‌ಫೋನ್ ಅಥವಾ ಇತರ ಗಮನವನ್ನು ಬೇರೆಡೆಗೆ ಸೆಳೆಯುವ
+                        ಸಾಧನಗಳೊಂದಿಗೆ ಅತಿಯಾದ ಸಮಯವನ್ನು ಕಳೆಯುತ್ತಿದೆ ಎಂಬುದು ಸರಳವಾಗಿ ಸ್ಪಷ್ಟವಾಗಬಹುದು.</p>
+                    <p class="vphilo-p">ಅಂತಹ ಪರಿಸ್ಥಿತಿಯಲ್ಲಿ, ಮೊದಲ ಮಾರ್ಗದರ್ಶನವು ಜಾತಕ ಅಥವಾ ಧಾರ್ಮಿಕ ಆಚರಣೆಯಾಗಿರಬಾರದು. ಮೊದಲ
+                        ಮಾರ್ಗದರ್ಶನವು ಕೇವಲ ಹೀಗಿರಬಹುದು: ಪರಿಸರವನ್ನು ಬದಲಾಯಿಸಿ. ಸೂಕ್ತವಾದ ಮಿತಿಗಳನ್ನು ನಿಗದಿಪಡಿಸಿ. ಶ್ರಮ ಮತ್ತು
+                        ಶಿಸ್ತನ್ನು ಪ್ರೋತ್ಸಾಹಿಸಿ.</p>
+                    <p class="vphilo-p">ಮಾನವನ ಪ್ರಯತ್ನವೇ ಇಲ್ಲದಿದ್ದಾಗ, ಯಾವುದೇ ಆಚರಣೆಯು ಆ ಪ್ರಯತ್ನಕ್ಕೆ ಪರ್ಯಾಯವಾಗಲು
+                        ಸಾಧ್ಯವಿಲ್ಲ.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-10" data-card-id="kn-sec-10">
+                <div class="vphilo-card-header" data-toggle="kn-sec-10" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">10. ಪರಿಹಾರಗಳ ಕುರಿತು ನನ್ನ ಧೋರಣೆ</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ನಾನು ಸಾಂಪ್ರದಾಯಿಕ ಆಚರಣೆಗಳನ್ನು ಗೌರವಿಸುತ್ತೇನೆ, ಉದಾಹರಣೆಗೆ: ಪ್ರಾರ್ಥನೆ, ಜಪ, ವ್ರತ,
+                        ಪೂಜೆ, ಹೋಮ, ಶಾಂತಿ ಪ್ರಕ್ರಿಯೆಗಳು, ಮತ್ತು ದಾನ. ಆದರೆ ನಾನು ಅವುಗಳನ್ನು ಪ್ರತಿಯೊಂದು ಸಮಸ್ಯೆಗೂ ವಾಣಿಜ್ಯಕವಾದ
+                        ಶೀಘ್ರ ಪರಿಹಾರಗಳು (commercial quick fixes) ಎಂದು ಪರಿಗಣಿಸುವುದಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ಒಬ್ಬ ವ್ಯಕ್ತಿಯು ತೀವ್ರ ಮಾನಸಿಕ ಒತ್ತಡದಲ್ಲಿದ್ದಾಗ, ಪ್ರಾರ್ಥನೆ ಅಥವಾ ಇತರ ಆಧ್ಯಾತ್ಮಿಕ
+                        ಆಚರಣೆಗಳು ಮನಸ್ಸನ್ನು ಶಾಂತಗೊಳಿಸಲು ಮತ್ತು ಆಂತರಿಕ ಆತ್ಮವಿಶ್ವಾಸವನ್ನು ಮರುಸ್ಥಾಪಿಸಲು ಸಹಾಯ ಮಾಡಬಹುದು. ಮನಸ್ಸು
+                        ಶಾಂತವಾದ ನಂತರ, ಆ ವ್ಯಕ್ತಿಯು ನಿಜವಾದ ಸಮಸ್ಯೆಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಮತ್ತು ಸೂಕ್ತ ಕ್ರಮ ತೆಗೆದುಕೊಳ್ಳಲು
+                        ಶಕ್ತನಾಗಬಹುದು.</p>
+                    <p class="vphilo-p">ಆದ್ದರಿಂದ, ನಾನು ಅಂತಹ ಆಚರಣೆಗಳನ್ನು ಪ್ರಾಥಮಿಕವಾಗಿ ಮನಸ್ಸು ಮತ್ತು ಆತ್ಮಕ್ಕೆ ನೀಡುವ
+                        ಬೆಂಬಲವೆಂದು ನೋಡುತ್ತೇನೆಯೇ ಹೊರತು, ಮಾನವನ ಪ್ರಯತ್ನಕ್ಕೆ ಪರ್ಯಾಯವಾಗಿ ಅಲ್ಲ.</p>
+                    <div class="vphilo-quote">“ಪ್ರಾರ್ಥನೆಯು ಮನಸ್ಸನ್ನು ಬಲಪಡಿಸಬಹುದು. ಪ್ರಯತ್ನವು ಸಮಸ್ಯೆಯನ್ನು ಪರಿಹರಿಸಬೇಕು.
+                        ದೈವಿಕ ಕೃಪೆಯು ಪ್ರಯಾಣವನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ.”</div>
+                    <p class="vphilo-p">ಒಬ್ಬ ವ್ಯಕ್ತಿಯು ತನ್ನ ಶಕ್ತಿಗೂ ಮೀರಿ ಹಣವನ್ನು ಖರ್ಚು ಮಾಡಬೇಕಾಗುವ ಪರಿಹಾರಗಳನ್ನು ನಾನು
+                        ಶಿಫಾರಸು ಮಾಡುವುದಿಲ್ಲ. ದೇವರನ್ನು ತಲುಪಲು ಒಬ್ಬ ವ್ಯಕ್ತಿಯು ಹೆಚ್ಚಿನ ಹಣವನ್ನು ಖರ್ಚು ಮಾಡಬೇಕಾಗಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ಭಕ್ತಿಯಿಂದ ಒಂದು ಸರಳ ದೀಪವನ್ನು ಹಚ್ಚಿ, ತನ್ನದೇ ಮಾತೃಭಾಷೆಯಲ್ಲಿ ಪ್ರಾಮಾಣಿಕವಾಗಿ
+                        ಪ್ರಾರ್ಥಿಸುವುದು, ಶಕ್ತಿಗೂ ಮೀರಿ ಅದ್ದೂರಿ ಆಚರಣೆಗೆ ಹಣ ವ್ಯಯಿಸುವುದಕ್ಕಿಂತ ಹೆಚ್ಚು ಅರ್ಥಪೂರ್ಣವಾಗಿರುತ್ತದೆ.
+                    </p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-11" data-card-id="kn-sec-11">
+                <div class="vphilo-card-header" data-toggle="kn-sec-11" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">11. ಪ್ರಾರ್ಥನೆ ಮತ್ತು ಪ್ರಾಯಶ್ಚಿತ್ತದ ಕುರಿತು ನನ್ನ ತಿಳುವಳಿಕೆ</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ನನ್ನ ಮಟ್ಟಿಗೆ, ಪ್ರಾರ್ಥನೆ ಎಂದರೆ ಕೇವಲ: “ನನಗೆ ಒಂದು ಸಮಸ್ಯೆ ಇದೆ. ದಯವಿಟ್ಟು ಅದನ್ನು
+                        ನಿವಾರಿಸು” ಎಂದಷ್ಟೇ ಅಲ್ಲ. ಅದರಲ್ಲಿ ಮತ್ತೊಂದು ಆಳವಾದ ಆಯಾಮವಿದೆ.</p>
+                    <p class="vphilo-p">ಒಬ್ಬ ವ್ಯಕ್ತಿಯು ತನ್ನ ತಪ್ಪನ್ನು ಗುರುತಿಸಿ, ಅದನ್ನು ಪುನರಾವರ್ತಿಸದಿರಲು ಪ್ರಾಮಾಣಿಕವಾಗಿ
+                        ನಿರ್ಧರಿಸಿ, ಉತ್ತಮ ಜೀವನದ ಕಡೆಗೆ ಮುಖ ಮಾಡಿದಾಗ, ಆ ಆಂತರಿಕ ರೂಪಾಂತರವು ಮುಖ್ಯವಾಗುತ್ತದೆ. ಸಾಂಪ್ರದಾಯಿಕ
+                        ಆಧ್ಯಾತ್ಮಿಕ ಆಚರಣೆಗಳು ಅಂತಹ ರೂಪಾಂತರವನ್ನು ಬೆಂಬಲಿಸುತ್ತವೆ.</p>
+                    <p class="vphilo-p">ಆದ್ದರಿಂದ, ಸಮಸ್ಯೆಯನ್ನು ಸೃಷ್ಟಿಸಿದ ಅದೇ ತಪ್ಪು ಕ್ರಮಗಳನ್ನು ಮುಂದುವರಿಸುತ್ತಾ, ಕೇವಲ
+                        ಧಾರ್ಮಿಕ ಆಚರಣೆಗಳ ಮೇಲೆ ಅವಲಂಬಿತರಾಗುವುದನ್ನು ನಾನು ಪ್ರೋತ್ಸಾಹಿಸುವುದಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ಒಂದು ಪರಿಹಾರವು ಜಾಗೃತಿ ಮತ್ತು ಬದಲಾವಣೆಗೆ ಕಾರಣವಾಗಬೇಕೇ ಹೊರತು, ಬದಲಾವಣೆಗೆ
+                        ಪರ್ಯಾಯವಾಗಬಾರದು.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-12" data-card-id="kn-sec-12">
+                <div class="vphilo-card-header" data-toggle="kn-sec-12" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">12. ನಾನು ಮರಣದ ಭವಿಷ್ಯ ನುಡಿಯುವುದನ್ನು ಕಲಿಸುವುದಿಲ್ಲ</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ನಾನು ಸ್ಪಷ್ಟವಾಗಿ ಕಾಯ್ದುಕೊಳ್ಳುವ ಒಂದು ಗಡಿ ಇದೆ. ನಾನು ಮರಣದ ಭವಿಷ್ಯ ನುಡಿಯುವುದನ್ನು ಅಥವಾ
+                        ಮರಣಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಸಮಯವನ್ನು ಲೆಕ್ಕಾಚಾರ ಮಾಡುವುದನ್ನು ಕಲಿಸುವುದಿಲ್ಲ ಅಥವಾ ಅಭ್ಯಾಸ ಮಾಡುವುದಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ಮರಣದ ಭಯವು ವಿದ್ಯಾರ್ಥಿಯ ಕಲಿಕೆಯ ಪ್ರಕ್ರಿಯೆಯ ಭಾಗವಾಗುವುದನ್ನು ನಾನು ಬಯಸುವುದಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ನನ್ನ ದೃಷ್ಟಿಕೋನದಲ್ಲಿ ಜ್ಯೋತಿಷ್ಯವು ಒಬ್ಬ ವ್ಯಕ್ತಿಗೆ ಜೀವನವನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಮತ್ತು
+                        ಜಾಗೃತಿಯೊಂದಿಗೆ ಅದನ್ನು ಎದುರಿಸಲು ಸಹಾಯ ಮಾಡಬೇಕು. ಅದು ಅನಗತ್ಯ ಭಯದ ಮೂಲವಾಗಬಾರದು.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-13" data-card-id="kn-sec-13">
+                <div class="vphilo-card-header" data-toggle="kn-sec-13" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">13. ಹಣ ಮತ್ತು ಅಮೃತ ವೃತ್ತಿಯ ಕುರಿತು ನನ್ನ ಧೋರಣೆ</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ನಾನು ಒಬ್ಬ ಗೃಹಸ್ಥ. ನನಗೆ ಕುಟುಂಬ ಮತ್ತು ಜವಾಬ್ದಾರಿಗಳಿವೆ. ಆದ್ದರಿಂದ ಹಣವು
+                        ಅನಿವಾರ್ಯವಾಗಿದೆ, ಆದರೆ ಅದು ನನ್ನ ಹುಚ್ಚು ಹಠ (obsession) ಅಥವಾ ನನ್ನ ಬೋಧನೆಯ ಉದ್ದೇಶವಾಗುವುದನ್ನು ನಾನು
+                        ಬಯಸುವುದಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ನನ್ನ ತಿಳುವಳಿಕೆಗೆ ಅನುಗುಣವಾಗಿ ನಾನು 'ಅಮೃತ ವೃತ್ತಿ'ಯನ್ನು ನನ್ನ ಜೀವನ ವಿಧಾನವಾಗಿ
+                        ಆರಿಸಿಕೊಂಡಿದ್ದೇನೆ.</p>
+                    <p class="vphilo-p">ಸರಳವಾಗಿ ಹೇಳುವುದಾದರೆ, ನಾನು ಜನರನ್ನು ನನಗೆ ಹಣ ನೀಡುವಂತೆ ಕೇಳುವುದಿಲ್ಲ. ನನ್ನ ಬೋಧನೆಗೆ
+                        ನಾನು ಯಾವುದೇ ಶುಲ್ಕವನ್ನು ನಿಗದಿಪಡಿಸುವುದಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ಯಾರಾದರೂ ಸ್ವಯಂಪ್ರೇರಿತರಾಗಿ ನನ್ನ ಮೂಲಭೂತ ಗೃಹಬಳಕೆಯ ಅಗತ್ಯಗಳನ್ನು ಬೆಂಬಲಿಸಿದರೆ, ನಾನು
+                        ಅದನ್ನು “ಶ್ರೀಹರಿ ಸಂಕಲ್ಪ” ಎಂದು ಸ್ವೀಕರಿಸುತ್ತೇನೆ.</p>
+                    <p class="vphilo-p">ಅಂತಹ ಬೆಂಬಲವನ್ನು ನನ್ನ ಬೋಧನೆಗೆ ನೀಡಿದ ಶುಲ್ಕ ಎಂದು ನಾನು ಪರಿಗಣಿಸುವುದಿಲ್ಲ, ಅಥವಾ ಅದನ್ನು
+                        ನಿರೀಕ್ಷಿಸುವುದೂ ಇಲ್ಲ.</p>
+                    <p class="vphilo-p">ಯಾರಾದರೂ ಸಹಾಯ ಮಾಡಲು ಬಯಸಿದರೆ ಆದರೆ ಅವರು ನೀಡುತ್ತಿರುವುದು ನನಗೆ ಅಗತ್ಯವಿಲ್ಲದಿದ್ದರೆ,
+                        ನಿಜವಾಗಿಯೂ ಅಗತ್ಯವಿರುವ ಯಾರಿಗಾದರೂ ಸಹಾಯ ಮಾಡಲು ನಾನು ಅವರನ್ನು ವಿನಂತಿಸುತ್ತೇನೆ.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-14" data-card-id="kn-sec-14">
+                <div class="vphilo-card-header" data-toggle="kn-sec-14" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">14. ಆರ್ಥಿಕ ಬೆಂಬಲವು ಯಾವುದೇ ವಿಶೇಷ ಆದ್ಯತೆಯನ್ನು ತರುವುದಿಲ್ಲ</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ಇದು ಬಹಳ ಮುಖ್ಯವಾದದ್ದು.</p>
+                    <p class="vphilo-p">ನನಗೆ ಆರ್ಥಿಕವಾಗಿ ಬೆಂಬಲ ನೀಡುವ ವಿದ್ಯಾರ್ಥಿ ಮತ್ತು ಬೆಂಬಲ ನೀಡದ ವಿದ್ಯಾರ್ಥಿ ಇಬ್ಬರೂ ನನ್ನ
+                        ಬೋಧನೆಯಲ್ಲಿ ಸಮಾನರು.</p>
+                    <p class="vphilo-p">ನಾನು ಇಂತಹ ಯಾವುದೇ ಪಟ್ಟಿಯನ್ನು ಇಟ್ಟುಕೊಳ್ಳುವುದಿಲ್ಲ: ಯಾರು ಕೊಡುಗೆ ನೀಡಿದ್ದಾರೆ, ಯಾರು
+                        ಕೊಡುಗೆ ನೀಡಿಲ್ಲ, ಯಾರಾದರೂ ಎಷ್ಟು ಕೊಡುಗೆ ನೀಡಿದ್ದಾರೆ, ಅಥವಾ ಯಾರು ವಿಶೇಷ ಗಮನವನ್ನು ಪಡೆಯಬೇಕು.</p>
+                    <p class="vphilo-p">ನನ್ನ ಬೋಧನೆಯು ಆರ್ಥಿಕ ಬೆಂಬಲದ ಮೇಲೆ ಅವಲಂಬಿತವಾಗಿಲ್ಲ. ಬೆಂಬಲ ನೀಡುವುದರಿಂದ ವೈಯಕ್ತಿಕ
+                        ಸಮಾಲೋಚನೆಯ ಹಕ್ಕು ಲಭಿಸುವುದಿಲ್ಲ. ಮತ್ತು ಬೆಂಬಲದ ಕೊರತೆಯು ವಿದ್ಯಾರ್ಥಿಯ ಮೌಲ್ಯವನ್ನು ಕಡಿಮೆ ಮಾಡುವುದಿಲ್ಲ.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-15" data-card-id="kn-sec-15">
+                <div class="vphilo-card-header" data-toggle="kn-sec-15" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">15. ದಾನ ಮತ್ತು ಸೇವೆ</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ನಾನು ದಾನ ಮತ್ತು ಸೇವೆಯ ನಡುವೆ ವ್ಯತ್ಯಾಸವನ್ನು ಗುರುತಿಸುತ್ತೇನೆ.</p>
+                    <p class="vphilo-p">ದಾನ ಎಂದರೆ ನಮಗೆ ಸೇರಿದುದನ್ನು ವೈಯಕ್ತಿಕ ಪ್ರತಿಫಲಾಪೇಕ್ಷೆಯಿಲ್ಲದೆ ನೀಡುವುದು.</p>
+                    <p class="vphilo-p">ಸೇವೆ ಎಂದರೆ ಇತರರ ಕಲ್ಯಾಣಕ್ಕಾಗಿ ನಮ್ಮ ಸಮಯ, ಶ್ರಮ, ಸಾಮರ್ಥ್ಯ ಅಥವಾ ಶಕ್ತಿಯನ್ನು
+                        ಅರ್ಪಿಸುವುದು.</p>
+                    <p class="vphilo-p">ಎರಡಕ್ಕೂ ಮೌಲ್ಯವಿದೆ. ನನ್ನ ವಿದ್ಯಾರ್ಥಿಗಳಿಂದ ನಾನು ಇವೆರಡನ್ನೂ ನಿರೀಕ್ಷಿಸುವುದಿಲ್ಲ.
+                        ಪ್ರತಿಯೊಬ್ಬರೂ ತಮ್ಮ ಸಾಮರ್ಥ್ಯಕ್ಕೆ ತಕ್ಕಂತೆ ಸಮಾಜಕ್ಕೆ ಸಹಾಯ ಮಾಡುವುದು ಧರ್ಮದ ಒಂದು ಅರ್ಥಪೂರ್ಣ ರೂಪ ಎಂದು ನಾನು
+                        ನಂಬುತ್ತೇನೆ. ಪರೋಪಕಾರವು — ಇತರರಿಗೆ ಸಹಾಯ ಮಾಡುವುದು — ಸೇವೆ ಮಾಡುವ ವ್ಯಕ್ತಿಯನ್ನೂ ಬಲಪಡಿಸುತ್ತದೆ.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-16" data-card-id="kn-sec-16">
+                <div class="vphilo-card-header" data-toggle="kn-sec-16" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">16. ನಾನು ವಿದ್ಯಾರ್ಥಿಗಳನ್ನು ಭಿನ್ನವಾಗಿ ಏಕೆ ಕಾಣುವುದಿಲ್ಲ?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ನನ್ನ ಕಲಿಕಾ ಗುಂಪುಗಳಲ್ಲಿ ನೂರಾರು ವಿದ್ಯಾರ್ಥಿಗಳಿದ್ದಾರೆ. ನಾನು ಉದ್ದೇಶಪೂರ್ವಕವಾಗಿ ಇಂತಹ
+                        ವ್ಯವಸ್ಥೆಯನ್ನು ಸೃಷ್ಟಿಸುವುದನ್ನು ತಪ್ಪಿಸುತ್ತೇನೆ: “ಈ ವ್ಯಕ್ತಿ ನನಗೆ ಬೆಂಬಲ ನೀಡಿದ್ದಾರೆ ಮತ್ತು ಆ ವ್ಯಕ್ತಿ
+                        ನೀಡಲಿಲ್ಲ.”</p>
+                    <p class="vphilo-p">ಅಂತಹ ವ್ಯವಸ್ಥೆಯು ಅರಿವಿಲ್ಲದೆಯೇ ನಿರೀಕ್ಷೆಗಳನ್ನು ಮತ್ತು ತಾರತಮ್ಯವನ್ನು ಸೃಷ್ಟಿಸಬಹುದು.
+                        ವಿದ್ಯಾರ್ಥಿಗಳೊಂದಿಗೆ ನನ್ನ ಸಂಬಂಧವು ಕೇವಲ ಕಲಿಕೆಯ ಮೇಲೆ ಕೇಂದ್ರೀಕೃತವಾಗಿರಬೇಕೆಂದು ನಾನು ಬಯಸುತ್ತೇನೆ.</p>
+                    <p class="vphilo-p">ಆದ್ದರಿಂದ: ತರಗತಿಯು ಜ್ಞಾನಕ್ಕಾಗಿ ಇರುವುದೇ ಹೊರತು, ಆರ್ಥಿಕ ಸಂಬಂಧಗಳಿಗಾಗಿ ಅಲ್ಲ.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-17" data-card-id="kn-sec-17">
+                <div class="vphilo-card-header" data-toggle="kn-sec-17" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">17. ನನ್ನ ವಿದ್ಯಾರ್ಥಿಗಳಿಂದ ನಾನು ಏನನ್ನು ನಿರೀಕ್ಷಿಸುತ್ತೇನೆ?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ನಾನು ಹಣವನ್ನು ನಿರೀಕ್ಷಿಸುವುದಿಲ್ಲ. ನಾನು ವೈಯಕ್ತಿಕ ನಿಷ್ಠೆಯನ್ನು ನಿರೀಕ್ಷಿಸುವುದಿಲ್ಲ.
+                        ಅವರು ನನ್ನ ಮೇಲೆ ಅವಲಂಬಿತರಾಗಬೇಕೆಂದು ನಾನು ಬಯಸುವುದಿಲ್ಲ. ನಾನು ಆಶಿಸುವುದು ಅತ್ಯಂತ ಸರಳವಾದುದು:</p>
+                    <ul class="vphilo-bullets">
+                        <li>ಪ್ರಾಮಾಣಿಕವಾಗಿ ಕಲಿಯಿರಿ.</li>
+                        <li>ಮುಕ್ತವಾಗಿ ಪ್ರಶ್ನೆಗಳನ್ನು ಕೇಳಿ.</li>
+                        <li>ಸ್ವತಂತ್ರವಾಗಿ ಯೋಚಿಸಿ.</li>
+                        <li>ನಿಮ್ಮ ಸ್ವಂತ ಶ್ರಮವನ್ನು ಹಾಕಿ.</li>
+                        <li>ಮಾನಸಿಕ ಶಕ್ತಿಯನ್ನು ಬೆಳೆಸಿಕೊಳ್ಳಿ.</li>
+                        <li>ಜ್ಯೋತಿಷ್ಯವನ್ನು ಜವಾಬ್ದಾರಿಯುತವಾಗಿ ಬಳಸಿ.</li>
+                        <li>ಯಾವುದೇ ವ್ಯಕ್ತಿಯನ್ನು ಅಥವಾ ನಂಬಿಕೆಯನ್ನು ಕುರುಡಾಗಿ ಅನುಸರಿಸಬೇಡಿ.</li>
+                        <li>ಮತ್ತು ಸಾಧ್ಯವಾದಾಗಲೆಲ್ಲಾ: ಇತರರಿಗೆ ಸಹಾಯ ಮಾಡಿ.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-18" data-card-id="kn-sec-18">
+                <div class="vphilo-card-header" data-toggle="kn-sec-18" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">18. ನನ್ನ ಪ್ರಕಾರ ‘ಜ್ಯೋತಿಷ್ಯ ಜಾಗೃತಿ’ ಎಂದರೇನು?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ನನ್ನ ಮಟ್ಟಿಗೆ, ಜ್ಯೋತಿಷ್ಯ ಜಾಗೃತಿ ಎಂದರೆ ಇವುಗಳಿಂದ ಹೊರಬರುವುದು:</p>
+                    <ul class="vphilo-bullets">
+                        <li>ಕುರುಡು ನಂಬಿಕೆ,</li>
+                        <li>ಅನಗತ್ಯ ಭಯ,</li>
+                        <li>ಮೂಢನಂಬಿಕೆ,</li>
+                        <li>ಹಣೆಬರಹದ ತತ್ವದ ಆಲೋಚನೆ (fatalistic thinking),</li>
+                        <li>ಮತ್ತು ಭವಿಷ್ಯವಾಣಿಗಳು ಹಾಗೂ ಪರಿಹಾರಗಳ ಮೇಲಿನ ಅತಿಯಾದ ಅವಲಂಬನೆ.</li>
+                    </ul>
+                    <p class="vphilo-p">ಒಬ್ಬ ವ್ಯಕ್ತಿಯು, “ನನ್ನ ಜಾತಕ ಹೀಗೆ ಹೇಳುತ್ತದೆ, ಆದ್ದರಿಂದ ನಾನು ಏನನ್ನೂ ಮಾಡಲು
+                        ಸಾಧ್ಯವಿಲ್ಲ,” ಎಂದು ಯೋಚಿಸಬಾರದು.</p>
+                    <p class="vphilo-p">ಬದಲಾಗಿ, ಅವನು ಹೀಗೆ ಕೇಳಿಕೊಳ್ಳಬೇಕು: “ನನ್ನ ಪರಿಸ್ಥಿತಿ ಏನು? ನನ್ನ ನಿಯಂತ್ರಣದಲ್ಲಿ ಏನಿದೆ?
+                        ನಾನು ಯಾವ ಪ್ರಯತ್ನವನ್ನು ಮಾಡಬಹುದು? ನಾನು ಹೇಗೆ ಪ್ರತಿಕ್ರಿಯಿಸಬೇಕು? ನನಗೆ ದೈವಿಕ ಕೃಪೆ ಎಲ್ಲಿ ಬೇಕು?”</p>
+                    <p class="vphilo-p">ಈ ಆಲೋಚನೆಯ ಬದಲಾವಣೆಯೇ ಜ್ಯೋತಿಷ್ಯ ಕಲಿಕೆಯ ಅತ್ಯಂತ ಮೌಲ್ಯಯುತ ಉದ್ದೇಶಗಳಲ್ಲಿ ಒಂದಾಗಿದೆ ಎಂದು
+                        ನಾನು ನಂಬುತ್ತೇನೆ.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-19" data-card-id="kn-sec-19">
+                <div class="vphilo-card-header" data-toggle="kn-sec-19" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">19. ವಿದ್ಯಾರ್ಥಿಗಳು ಸ್ವಾವಲಂಬಿಗಳಾಗಬೇಕೆಂದು ನಾನು ಏಕೆ ಬಯಸುತ್ತೇನೆ?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ಶಿಕ್ಷಕನು ಜೀವಿತಾವಧಿಯ ಅವಲಂಬನೆಯನ್ನು ಸೃಷ್ಟಿಸಬಾರದು.</p>
+                    <p class="vphilo-p">ಕಲಿಕೆಯ ಪ್ರಕ್ರಿಯೆಯಲ್ಲಿ, ಪ್ರಶ್ನೆಗಳಿಗೆ ಪದೇ ಪದೇ ಉತ್ತರಿಸಲು ಮತ್ತು ಅಗತ್ಯವಿರುವಷ್ಟು ಬಾರಿ
+                        ಪರಿಕಲ್ಪನೆಗಳನ್ನು ವಿವರಿಸಲು ನಾನು ಸಂತೋಷಪಡುತ್ತೇನೆ.</p>
+                    <p class="vphilo-p">ಆದರೆ ಅಂತಿಮ ಉದ್ದೇಶವು: “ಪ್ರತಿಯೊಂದು ಸಮಸ್ಯೆಯ ಬಗ್ಗೆಯೂ ಶಿಕ್ಷಕರನ್ನು ಕೇಳಿ” ಎಂದಲ್ಲ. ಅದು:
+                        “ವಿಷಯವನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಮತ್ತು ನಿಮಗಾಗಿ ನೀವೇ ಯೋಚಿಸಲು ಸಾಕಷ್ಟು ಕಲಿಯಿರಿ” ಎಂಬುದಾಗಿದೆ.</p>
+                    <p class="vphilo-p">ನನ್ನ ಮಾರ್ಗದರ್ಶನವು ಕಲಿಕೆಯ ಪ್ರಯಾಣದ ಸಮಯದಲ್ಲಿ ಬೆಂಬಲವಾಗಿರಬೇಕೇ ಹೊರತು, ವಿದ್ಯಾರ್ಥಿಯ
+                        ಸ್ವಂತ ತಿಳುವಳಿಕೆಗೆ ಪರ್ಯಾಯವಾಗಬಾರದು.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-20" data-card-id="kn-sec-20">
+                <div class="vphilo-card-header" data-toggle="kn-sec-20" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">20. ನಾನು ಲೈಕ್, ಶೇರ್ ಅಥವಾ ಸಬ್‌ಸ್ಕ್ರೈಬ್‌ಗಳನ್ನು ಏಕೆ ಬಯಸುವುದಿಲ್ಲ?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ನನ್ನ ಧೋರಣೆಯ ಮತ್ತೊಂದು ಮುಖವನ್ನು ನನ್ನ ವಿದ್ಯಾರ್ಥಿಗಳು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಬೇಕೆಂದು ನಾನು
+                        ಬಯಸುತ್ತೇನೆ. ಇಂದು, ಜ್ಯೋತಿಷ್ಯದಿಂದ ಹಣ ಗಳಿಸುವುದು ಕೇವಲ ವೈಯಕ್ತಿಕ ಸಮಾಲೋಚನೆ ಶುಲ್ಕ ವಿಧಿಸುವುದರಿಂದ ಮಾತ್ರವೇ
+                        ಆಗುತ್ತಿಲ್ಲ. ಸಾಮಾಜಿಕ ಜಾಲತಾಣಗಳಲ್ಲಿನ ಮಾನ್ಯತೆ ಕೂಡ ಒಂದು ರೀತಿಯ ಆದಾಯ ಅಥವಾ ಪ್ರತಿಫಲವಾಗಬಹುದು. ಲೈಕ್‌ಗಳು,
+                        ಶೇರ್‌ಗಳು, ಸಬ್‌ಸ್ಕ್ರೈಬರ್‌ಗಳು, ವೀಕ್ಷಣೆಗಳು, ಕಾಮೆಂಟ್‌ಗಳು ಮತ್ತು ಚಾನೆಲ್‌ನ ಬೆಳವಣಿಗೆಯೇ ಕ್ರಮೇಣ ಸ್ವತಃ
+                        ಗುರಿಗಳಾಗಬಹುದು. ನಾನು ಪ್ರಜ್ಞಾಪೂರ್ವಕವಾಗಿ ಇವುಗಳನ್ನು ನನ್ನ ಗುರಿಗಳನ್ನಾಗಿ ಮಾಡಿಕೊಳ್ಳದಿರಲು
+                        ನಿರ್ಧರಿಸಿದ್ದೇನೆ.</p>
+                    <p class="vphilo-p">ನಾನು 900ಕ್ಕೂ ಹೆಚ್ಚು ಜ್ಯೋತಿಷ್ಯ ತರಗತಿಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ್ದೇನೆ, ಅವುಗಳಲ್ಲಿ
+                        ಹೆಚ್ಚಿನವು ಸುಮಾರು ಒಂದು ಗಂಟೆಯ ಅವಧಿಯದ್ದಾಗಿವೆ. ಈ ವೀಡಿಯೊಗಳಿಗೆ ಯೂಟ್ಯೂಬ್ ಮಾನಿಟೈಸೇಶನ್ (YouTube
+                        monetization) ಸಕ್ರಿಯಗೊಳಿಸಲು ನನ್ನ ಕೆಲವು ವಿದ್ಯಾರ್ಥಿಗಳು ಸೂಚಿಸಿದ್ದರು. ನಾನು ಪ್ರಜ್ಞಾಪೂರ್ವಕವಾಗಿ ಹಾಗೆ
+                        ಮಾಡದಿರಲು ನಿರ್ಧರಿಸಿದ್ದೇನೆ.</p>
+                    <p class="vphilo-p">ಇದಕ್ಕೆ ಎರಡು ಕಾರಣಗಳಿವೆ. ಮೊದಲನೆಯದಾಗಿ, ಮಾನಿಟೈಸೇಶನ್ ಸಕ್ರಿಯಗೊಳಿಸುವುದರಿಂದ ಶೈಕ್ಷಣಿಕ
+                        ವಿಷಯದ ಜೊತೆಗೆ ಜಾಹೀರಾತುಗಳು ಪ್ರದರ್ಶಿತವಾಗಬಹುದು. ನನ್ನ ವಿದ್ಯಾರ್ಥಿಗಳು ಜಾಹೀರಾತುಗಳಿಂದ ಅನಗತ್ಯವಾಗಿ ಗಮನ
+                        ಕಳೆದುಕೊಳ್ಳುವುದನ್ನು ನಾನು ಬಯಸುವುದಿಲ್ಲ, ವಿಶೇಷವಾಗಿ ಅವರು ಕಲಿಯುತ್ತಿರುವ ವಿಷಯಕ್ಕೂ ಆ ಜಾಹೀರಾತುಗಳಿಗೂ ಯಾವುದೇ
+                        ಸಂಬಂಧವಿಲ್ಲದಿರುವಾಗ. ಎಲ್ಲಕ್ಕಿಂತ ಮುಖ್ಯವಾಗಿ, ಈ ವೀಡಿಯೊಗಳ ಮೂಲಕ ಹಣ ಗಳಿಸುವುದು ನಾನು ನನ್ನ ಜೀವನಕ್ಕಾಗಿ
+                        ಆರಿಸಿಕೊಂಡಿರುವ ‘ಅಮೃತ ವೃತ್ತಿ’ಗೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ಆದ್ದರಿಂದ, ನಾನು ನನ್ನ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಮುಕ್ತವಾಗಿ ಹೇಳುತ್ತೇನೆ: ನೀವು ನನ್ನ ವೀಡಿಯೊಗಳನ್ನು
+                        ಲೈಕ್ ಮಾಡಬೇಕಾಗಿಲ್ಲ. ನನ್ನ ಚಾನೆಲ್‌ಗೆ ಸಬ್‌ಸ್ಕ್ರೈಬ್ ಮಾಡಬೇಕಾಗಿಲ್ಲ. ನನ್ನ ವೀಡಿಯೊಗಳನ್ನು ಅಥವಾ ನನ್ನ ಚಾನೆಲ್
+                        ಅನ್ನು ಶೇರ್ ಮಾಡಬೇಕಾಗಿಲ್ಲ. ನೋಟಿಫಿಕೇಶನ್ ಬೆಲ್ ಪ್ರೆಸ್ ಮಾಡಬೇಕಾಗಿಲ್ಲ. ನನ್ನ ವಿದ್ಯಾರ್ಥಿಗಳಿಂದ ಇವುಗಳಲ್ಲಿ
+                        ಯಾವುದನ್ನೂ ನಿರೀಕ್ಷಿಸುವುದಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ಹಾಗಾದರೆ ನಾನು ಈ ವೀಡಿಯೊಗಳನ್ನು ಏಕೆ ಅಪ್‌ಲೋಡ್ ಮಾಡುತ್ತೇನೆ? ಇದರ ಉದ್ದೇಶ ತುಂಬಾ ಸರಳವಾಗಿದೆ.
+                        ನನ್ನಿಂದ ಕಲಿಯುತ್ತಿರುವ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ತಮಗೆ ಅಗತ್ಯವಿದ್ದಾಗಲೆಲ್ಲಾ ಪಾಠಗಳು ಲಭ್ಯವಿರಬೇಕೆಂದು ನಾನು
+                        ಬಯಸುತ್ತೇನೆ. ಆದ್ದರಿಂದ, ನಾನು ತರಗತಿಗಳನ್ನು ಯೂಟ್ಯೂಬ್‌ಗೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಲಿಂಕ್‌ಗಳನ್ನು ನನ್ನ
+                        ವಿದ್ಯಾರ್ಥಿಗಳೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳುತ್ತೇನೆ. ನನ್ನ ಮಟ್ಟಿಗೆ, ಯೂಟ್ಯೂಬ್ ಕೇವಲ ಶೈಕ್ಷಣಿಕ ಸಾಮಗ್ರಿಗಳನ್ನು ತಲುಪಿಸುವ
+                        ಒಂದು ಮಾಧ್ಯಮವೇ ಹೊರತು ಪ್ರಸಿದ್ಧಿ ಗಳಿಸುವ ಮಾರ್ಗವಲ್ಲ.</p>
+                    <p class="vphilo-p">ನಾನು ಸಾಮಾನ್ಯವಾಗಿ ನನ್ನ ವೀಡಿಯೊಗಳನ್ನು ವಾಟ್ಸಾಪ್ ಸ್ಟೇಟಸ್ ಅಥವಾ ಇತರ ಸಾಮಾಜಿಕ ಮಾಧ್ಯಮ
+                        ವೇದಿಕೆಗಳ ಮೂಲಕ ಪ್ರಚಾರ ಮಾಡುವುದಿಲ್ಲ. ಯಾವ ವಿದ್ಯಾರ್ಥಿಗಳಿಗಾಗಿ ಈ ಪಾಠಗಳನ್ನು ವಿನ್ಯಾಸಗೊಳಿಸಲಾಗಿದೆಯೋ ಅವರಿಗೆ
+                        ಮಾತ್ರ ನಾನು ವೀಡಿಯೊ ಲಿಂಕ್‌ಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತೇನೆ.</p>
+                    <p class="vphilo-p">ನಾನು ಸಂಖ್ಯೆಗಳು ಮತ್ತು ಮಾನ್ಯತೆಯ ಬಗ್ಗೆ ಯೋಚಿಸಲು ಪ್ರಾರಂಭಿಸಿದರೆ, ನನ್ನ ಗಮನವು ಕ್ರಮೇಣ
+                        ಬೋಧನೆ ಮತ್ತು ಕಲಿಕೆಯಿಂದ ದೂರ ಸರಿದು ಮಾನ್ಯತೆ ಮತ್ತು ಸಂಖ್ಯೆಗಳ ಕಡೆಗೆ ಹರಡಬಹುದು. ನಾನು ಆ ಒತ್ತಡದಿಂದ
+                        ಮುಕ್ತನಾಗಿರಲು ಬಯಸುತ್ತೇನೆ.</p>
+                    <p class="vphilo-p">ಈ ತರಗತಿಗಳಿಂದ ನೀವು ಉಪಯುಕ್ತವಾದದ್ದನ್ನು ಕಲಿತಿದ್ದರೆ, ಅದನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ, ಅಭ್ಯಾಸ
+                        ಮಾಡಿ, ಅನುಭವಿಸಿ ಮತ್ತು ಸೂಕ್ತ ಸಂದರ್ಭದಲ್ಲಿ ಆ ಜ್ಞಾನವನ್ನು ನಿಜವಾಗಿಯೂ ಅಗತ್ಯವಿರುವ ಯಾರೊಂದಿಗಾದರೂ
+                        ಹಂಚಿಕೊಳ್ಳಿ. ಇದು ನನಗೆ ಸಾವಿರ ಲೈಕ್‌ಗಳಿಗಿಂತ ಹೆಚ್ಚು ಮೌಲ್ಯಯುತವಾಗಿದೆ.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-21" data-card-id="kn-sec-21">
+                <div class="vphilo-card-header" data-toggle="kn-sec-21" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">21. ನನ್ನ ಯಶಸ್ಸಿನ ಮಾಪನ</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ನನ್ನ ಬೋಧನೆಯ ಮೌಲ್ಯವನ್ನು ನಾನು ವಿದ್ಯಾರ್ಥಿಗಳು, ಸಬ್‌ಸ್ಕ್ರೈಬರ್‌ಗಳು, ವೀಕ್ಷಣೆಗಳು,
+                        ಲೈಕ್‌ಗಳು ಅಥವಾ ದೇಣಿಗೆಗಳ ಸಂಖ್ಯೆಯಿಂದ ಅಳೆಯುವುದಿಲ್ಲ.</p>
+                    <p class="vphilo-p">ನನ್ನ ತೃಪ್ತಿಯು ನಾನು ನಿರಂತರವಾಗಿ ಕಲಿಯುತ್ತಿದ್ದೇನೆ, ನಾನು ಅರ್ಥಮಾಡಿಕೊಂಡಿದ್ದನ್ನು
+                        ಹಂಚಿಕೊಳ್ಳುತ್ತಿದ್ದೇನೆ ಮತ್ತು ವಿದ್ಯಾರ್ಥಿಯು ತನ್ನ ಜೀವನವನ್ನು ಸ್ವತಃ ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಸಾಕಷ್ಟು ಜ್ಞಾನ ಮತ್ತು
+                        ಆತ್ಮವಿಶ್ವಾಸವನ್ನು ಪಡೆಯಲು ಸಹಾಯ ಮಾಡುತ್ತಿದ್ದೇನೆ ಎಂಬ ಅರಿವಿನಿಂದ ಬರುತ್ತದೆ.</p>
+                    <p class="vphilo-p">ನನ್ನ ಬೋಧನೆಯು ಅಂತಿಮವಾಗಿ ವಿದ್ಯಾರ್ಥಿಯನ್ನು ಜ್ಯೋತಿಷಿಯ ಮೇಲಿನ ಅವಲಂಬನೆಯಿಂದ
+                        ಮುಕ್ತಗೊಳಿಸಿದರೆ, ನಾನು ಅದನ್ನು ಯಶಸ್ಸು ಎಂದು ಪರಿಗಣಿಸುತ್ತೇನೆ — ವಿಫಲತೆಯಲ್ಲ. ಮತ್ತು ಆ ವಿದ್ಯಾರ್ಥಿಯು ಈ
+                        ಜ್ಞಾನವನ್ನು ಮತ್ತೊಬ್ಬ ವ್ಯಕ್ತಿಗೆ ಸ್ಪಷ್ಟತೆ, ಧೈರ್ಯ ಮತ್ತು ಜಾಗೃತಿಯನ್ನು ತರಲು ಬಳಸಿದರೆ, ನನ್ನ ಬೋಧನೆಯ
+                        ಉದ್ದೇಶವು ಈಡೇರಿದಂತಾಗುತ್ತದೆ. ನಾನು ಸೃಷ್ಟಿಸಲು ಬಯಸುವ ನಿರಂತರತೆ ಇಂತಹುದೇ ಆಗಿದೆ — ಕೇವಲ ಅನುಯಾಯಿಗಳ ಗುಂಪಲ್ಲ,
+                        ಬದಲಿಗೆ ಜ್ಞಾನದ ಸರಪಳಿ.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="kn-sec-22" data-card-id="kn-sec-22">
+                <div class="vphilo-card-header" data-toggle="kn-sec-22" title="ಓದಲು ಕ್ಲಿಕ್ ಮಾಡಿ">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">22. ನನ್ನ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ನನ್ನ ಸರಳ ಸಂದೇಶ</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">ಓದಿ ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ನನ್ನ ವಿದ್ಯಾರ್ಥಿಗಳು ಈ ಕೆಲವು ತತ್ವಗಳನ್ನು ನೆನಪಿನಲ್ಲಿಟ್ಟುಕೊಳ್ಳಬೇಕೆಂದು ನಾನು
+                        ಬಯಸುತ್ತೇನೆ:</p>
+                    <ul class="vphilo-bullets">
+                        <li>ನಿಮ್ಮ ಮನಸ್ಸನ್ನು ಬಲವಾಗಿಟ್ಟುಕೊಳ್ಳಿ.</li>
+                        <li>ನಿಮ್ಮ ಸಂದರ್ಭಗಳನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ.</li>
+                        <li>ನಿಮ್ಮ ಜಾತಕಕ್ಕೆ ಹೆದರಬೇಡಿ.</li>
+                        <li>ಭವಿಷ್ಯವಾಣಿಗಳಿಗೆ ನಿಮ್ಮ ಜೀವನವನ್ನು ಒಪ್ಪಿಸಬೇಡಿ.</li>
+                        <li>ನಿಮ್ಮ ಸ್ವಂತ ಶ್ರಮಕ್ಕೆ ಮೊದಲ ಆದ್ಯತೆ ನೀಡಿ.</li>
+                        <li>ಪ್ರಾರ್ಥನೆಯನ್ನು ಮನಸ್ಸನ್ನು ಬಲಪಡಿಸಲು ಬಳಸಿ, ಜವಾಬ್ದಾರಿಯಿಂದ ನುಣುಚಿಕೊಳ್ಳಲು ಅಲ್ಲ.</li>
+                        <li>ನಿಮ್ಮ ಕರ್ತವ್ಯವನ್ನು ಬಿಡದೆ ದೈವಿಕ ಕೃಪೆಯನ್ನು ಹುಡುಕಿ.</li>
+                        <li>ಸಾಧ್ಯವಾದಾಗಲೆಲ್ಲಾ ಇತರರಿಗೆ ಸಹಾಯ ಮಾಡಿ.</li>
+                        <li>ಮತ್ತು ನಿಮಗೆ ನಿಜವಾಗಿಯೂ ಮತ್ತೊಂದು ದೃಷ್ಟಿಕೋನದ ಅಗತ್ಯವಿದ್ದಾಗ ಮಾತ್ರ ಜ್ಯೋತಿಷಿಯನ್ನು ಸಂಪರ್ಕಿಸಿ.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Closing Message & Guru Sandesham -->
+        <div class="vphilo-closing-card">
+            <h3 class="vphilo-closing-title"><span>🙏</span> ಕೊನೆಯದಾಗಿ, ನಾನು ಇದನ್ನು ಏಕೆ ಮಾಡುತ್ತೇನೆ?</h3>
+            <p class="vphilo-closing-p">ಜನರು ನನ್ನ ಹೆಸರನ್ನು ನೆನಪಿಟ್ಟುಕೊಳ್ಳಬೇಕೆಂದು ನಾನು ಜ್ಯೋತಿಷ್ಯವನ್ನು ಬೋಧಿಸುತ್ತಿಲ್ಲ. ನಾನು
+                ವ್ಯವಹಾರಿಕ ವೃತ್ತಿಯನ್ನು (commercial practice) ಸ್ಥಾಪಿಸಲು ಇದನ್ನು ಬೋಧಿಸುತ್ತಿಲ್ಲ. ಪ್ರತಿಯೊಬ್ಬ ವಿದ್ಯಾರ್ಥಿಯೂ ನನಗೆ
+                ಬೆಂಬಲ ನೀಡಬೇಕೆಂದು ನಿರೀಕ್ಷಿಸಿ ನಾನು ಇದನ್ನು ಬೋಧಿಸುತ್ತಿಲ್ಲ. ನಮ್ಮ ಗುರುಗಳಿಂದ ಮತ್ತು ಪ್ರಾಚೀನ ಸಂಪ್ರದಾಯಗಳಿಂದ ನಮಗೆ
+                ಬಂದ ಜ್ಞಾನವು ಕೇವಲ ಒಂದು ಪೀಳಿಗೆಯೊಂದಿಗೆ ಕೊನೆಗೊಳ್ಳಬಾರದು ಎಂಬ ಕಾರಣಕ್ಕಾಗಿ ನಾನು ಬೋಧಿಸುತ್ತೇನೆ.</p>
+            <p class="vphilo-closing-p">ನನ್ನ ಶಿಕ್ಷಕರು ನನಗೆ ಜ್ಞಾನವನ್ನು ನೀಡಿದರು. ಆ ಜ್ಞಾನಕ್ಕಾಗಿ ನಾನು ಅವರಿಗೆ ಯಾವುದೇ
+                ವ್ಯವಹಾರಿಕ ಶುಲ್ಕವನ್ನು ಪಾವತಿಸಲಿಲ್ಲ. ಆದ್ದರಿಂದ, ನಾನು ಕಲಿತದ್ದನ್ನು ಪ್ರಾಮಾಣಿಕ ವಿದ್ಯಾರ್ಥಿಗಳೊಂದಿಗೆ
+                ಹಂಚಿಕೊಳ್ಳುವುದನ್ನು ನನ್ನ ಜವಾಬ್ದಾರಿ ಎಂದು ಪರಿಗಣಿಸುತ್ತೇನೆ. ನನ್ನ ಬೋಧನೆಯ ಮೂಲಕ ಕನಿಷ್ಠ ಒಬ್ಬ ವ್ಯಕ್ತಿಯಾದರೂ ತನ್ನ
+                ಭಯವನ್ನು ಕಡಿಮೆ ಮಾಡಿಕೊಂಡು, ಹೆಚ್ಚು ಆಲೋಚನಾಶೀಲನಾಗಿ, ಹೆಚ್ಚು ಸ್ವಾವಲಂಬಿಯಾಗಿ, ತನ್ನ ಜವಾಬ್ದಾರಿಗಳ ಬಗ್ಗೆ ಹೆಚ್ಚು
+                ಜಾಗೃತನಾಗಿ ಮತ್ತು ಇತರರ ಕಡೆಗೆ ಹೆಚ್ಚು ಕರುಣಾಳುವಾಗಲು ಸಾಧ್ಯವಾದರೆ, ಅದನ್ನು ನಾನು ಸಾರ್ಥಕ ಎಂದು ಪರಿಗಣಿಸುತ್ತೇನೆ.</p>
+            <p class="vphilo-closing-p">ನಿರಂತರವಾಗಿ ಜ್ಯೋತಿಷಿಗಳ ಅಗತ್ಯವಿರುವ ಸಮಾಜವನ್ನು ನಿರ್ಮಿಸುವುದು ನನ್ನ ಉದ್ದೇಶವಲ್ಲ. ನನ್ನ
+                ಉದ್ದೇಶವೇನೆಂದರೆ — ಜೀವನವನ್ನು ಎದುರಿಸಲು ಸಾಕಷ್ಟು ಬಲಶಾಲಿಗಳಾದ, ತಮ್ಮ ಸಂದರ್ಭಗಳನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಸಾಕಷ್ಟು
+                ಬುದ್ಧಿವಂತರಾದ, ದೈವಿಕ ಕೃಪೆಯನ್ನು ಪಡೆಯಲು ಸಾಕಷ್ಟು ವಿನಮ್ರರಾದ ಮತ್ತು ಇತರರಿಗೆ ಸಹಾಯ ಮಾಡಲು ಸಾಕಷ್ಟು ಕರುಣಾಳುಗಳಾದ
+                ಜನರನ್ನು ರೂಪಿಸಲು ಸಹಾಯ ಮಾಡುವುದಾಗಿದೆ.</p>
+
+            <div class="vphilo-mantra-banner">ಆಳವಾಗಿ ಕಲಿಯಿರಿ. ಸ್ವತಂತ್ರವಾಗಿ ಯೋಚಿಸಿ. ಜವಾಬ್ದಾರಿಯುತವಾಗಿ ಬದುಕಿ. ದೈವಿಕ
+                ಕೃಪೆಯನ್ನು ಹುಡುಕಿ. ಇತರರಿಗೆ ಸಹಾಯ ಮಾಡಿ.</div>
+            <p class="vphilo-signature">— ಶ್ರೀಕಾಂತ್ ಧರ್ಮವರಂ</p>
+        </div>
+    </div>
+
+    <!-- Telugu Content Tab -->
+    <div id="VPhiloTelugu" class="vphilo-tab-content">
+        <h2 class="vphilo-page-title">నేను జ్యోతిష్యాన్ని ఎందుకు బోధిస్తున్నాను — మరియు నేను ఎంచుకున్న జీవన మార్గం</h2>
+        <p class="vphilo-page-subtitle">జ్యోతిష్యం, బోధన, ధర్మం మరియు జీవితంపై నా దృక్పథం</p>
+
+        <!-- Intro Questions Box -->
+        <div class="vphilo-intro-card">
+            <h3 class="vphilo-intro-qtitle"><span>❓</span> నాకు చాలా సార్లు ఈ ప్రశ్నలు ఎదురయ్యాయి:</h3>
+            <ul class="vphilo-questions-list">
+                <li>“మీరు జ్యోతిష్యాన్ని బోధిస్తున్నారు. మరి కన్సల్టేషన్లు (సలహాలు) ఇస్తూ ఫీజు వసూలు చేయకుండా, ఉచితంగా
+                    ఎందుకు బోధిస్తున్నారు?”</li>
+                <li>“మీ విద్యార్థుల నుండి మీరేం ఆశిస్తున్నారు?”</li>
+                <li>“ఎవరైనా మీకు ఆర్థికంగా సహాయం చేస్తే, మీరు వారిని ప్రత్యేకంగా చూస్తారా?”</li>
+                <li>“జ్యోతిష్యం ఒక వ్యక్తి జీవితాన్ని మార్చగలదని మీరు నమ్ముతున్నారా?”</li>
+                <li>“మీరు భవిష్యత్తు ఎందుకు చెప్పరు?”</li>
+                <li>“పరిహారాలు, ప్రార్థనలు మరియు దానాల గురించి మీ వైఖరి ఏమిటి?”</li>
+            </ul>
+            <p class="vphilo-intro-statement">ఇవి చాలా సహజమైన మరియు ప్రామాణికమైన ప్రశ్నలు. అందుకే నా దృక్పథాన్ని
+                బహిరంగంగా మరియు గౌరవపూర్వకంగా వివరించాలనుకుంటున్నాను. నా మార్గమే ఏకైక సరైన మార్గం అని నిరూపించడం ఈ పేజీ
+                యొక్క ఉద్దేశం కాదు. ఇది నేను ఎలా నేర్చుకోవడానికి, బోధించడానికి మరియు జీవించడానికి ఎంచుకున్నానో తెలిపే ఒక
+                వివరణ మాత్రమే.</p>
+        </div>
+
+        <!-- Student Hint Banner with Compact Font Resizer -->
+        <div class="vphilo-hint-banner">
+            <span class="vphilo-hint-text">💡 ఏదైనా అంశంపై క్లిక్ చేసి చదవవచ్చు</span>
+            <div class="vphilo-hint-right">
+                <span class="vphilo-hint-count">22 అంశాలు</span>
+                <div class="vphilo-mini-font-actions">
+                    <button class="vphilo-mini-font-btn font-dec" title="Decrease Font Size">A-</button>
+                    <button class="vphilo-mini-font-btn font-inc" title="Increase Font Size">A+</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 22 Sections List -->
+        <div class="vphilo-sections-list">
+            <div class="vphilo-card is-expanded" id="te-sec-1" data-card-id="te-sec-1">
+                <div class="vphilo-card-header" data-toggle="te-sec-1" title="కుదించడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">1. నేను జ్యోతిష్యాన్ని నేర్చుకోవడానికి ఎందుకు ఎంచుకున్నాను?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">నేను డబ్బు సంపాదించాలనో, కీర్తి ప్రతిష్టలు సాధించాలనో లేదా ఒక వృత్తిని
+                        నిర్మించుకోవాలనో జ్యోతిష్యాన్ని నేర్చుకోలేదు.</p>
+                    <p class="vphilo-p">జ్యోతిష్యం నా కుటుంబ నేపథ్యానికి సంబంధించినది. నా తండ్రి, తాతగారు కూడా
+                        జ్యోతిష్యులే. అయినప్పటికీ, కేవలం అది ఒక కుటుంబ సంప్రదాయం అనే కారణంతో నేను జ్యోతిష్యాన్ని
+                        నేర్చుకోలేదు.</p>
+                    <p class="vphilo-p">నా జీవితంలోని కొన్ని అనుభవాలు జ్యోతిష్యాన్ని అర్థం చేసుకునే మరియు ఉపయోగించే
+                        విధానం గురించి నన్ను లోతుగా ఆలోచించేలా చేశాయి.</p>
+                    <p class="vphilo-p">జ్యోతిష్యం ఒక వ్యక్తి ఆలోచనా సరళిని ఎంత లోతుగా ప్రభావితం చేయగలదో నేను
+                        గ్రహించాను. బాధ్యతాయుతంగా వివరించినప్పుడు, అది ఒక వ్యక్తికి పరిస్థితిని అర్థం చేసుకోవడానికి
+                        మరియు మరింత అవగాహనతో జీవితాన్ని ఎదుర్కోవడానికి సహాయపడుతుంది. కానీ దాన్ని బాధ్యతారహితంగా
+                        ఉపయోగించినప్పుడు, అది భయం, పరాయివారిపై ఆధారపడటం మరియు మూఢనమ్మకాలను సృష్టిస్తుంది.</p>
+                    <p class="vphilo-p">ఆ గ్రహింపే నేను జ్యోతిష్యాన్ని లోతుగా అధ్యయనం చేయడానికి ప్రధాన కారణమైంది. నేను
+                        నేర్చుకున్నదానిని ఇతరుల శ్రేయస్సు మరియు అవగాహన కొరకు పంచుకోవడానికి వీలుగా ఈ విషయాన్ని లోతుగా
+                        అర్థం చేసుకోవాలని నేను కోరుకున్నాను.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-2" data-card-id="te-sec-2">
+                <div class="vphilo-card-header" data-toggle="te-sec-2" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">2. నేను జ్యోతిష్యాన్ని ఎందుకు బోధిస్తున్నాను?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ప్రజలు ఒక జ్యోతిష్యుడిపై ఆధారపడేలా చేయడం నా ఉద్దేశం కాదు. నా ఉద్దేశం దీనికి
+                        పూర్తిగా భిన్నమైనది.</p>
+                    <p class="vphilo-p">విద్యార్థి జ్యోతిష్యాన్ని చక్కగా నేర్చుకుని స్వయంగా గమనించడానికి,
+                        ప్రశ్నించడానికి, ఆలోచించడానికి మరియు అర్థం చేసుకోవడానికి సమర్థుడు కావాలని నేను కోరుకుంటున్నాను.
+                    </p>
+                    <p class="vphilo-p">అందుకే నేను నా విద్యార్థులకు ఇలా చెబుతాను: “విషయం కంటే ఎక్కువగా నా
+                        మార్గదర్శకత్వంపై ఆధారపడకండి. విషయాన్ని నేర్చుకోండి, సూత్రాలను అర్థం చేసుకోండి మరియు మీ స్వంత
+                        నిర్ణయాధికారాన్ని పెంపొందించుకోండి.”</p>
+                    <p class="vphilo-p">జ్ఞానం ఒక వ్యక్తిని మరింత స్వతంత్రుడిగా (స్వాలంబకుడిగా) చేసినప్పుడే దానికి
+                        సార్థకత లభిస్తుందని నేను నమ్ముతాను.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-3" data-card-id="te-sec-3">
+                <div class="vphilo-card-header" data-toggle="te-sec-3" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">3. నేను జ్యోతిష్యాన్ని బోధిస్తాను; వ్యక్తిగత కన్సల్టేషన్లు ఇవ్వను
+                        </h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">నా ప్రాథమిక పాత్ర ఒక గురువుగా ఉండటమే. నేను జ్యోతిష్యాన్ని బోధిస్తాను. నేను క్రమం
+                        తప్పకుండా వ్యక్తిగత జాతక పరిశీలనలు (కన్సల్టేషన్లు) చేయను.</p>
+                    <p class="vphilo-p">ఒక విద్యార్థికి ఈ విషయానికి సంబంధించి ఏదైనా సందేహం ఉంటే, దాన్ని వివరించడానికి
+                        నేను ఎల్లప్పుడూ సిద్ధంగా ఉంటాను. ఆ విషయం ఇంకా స్పష్టం కాకపోవడం వల్ల విద్యార్థి అదే ప్రశ్నను పదే
+                        పదే అడిగినా, నేను దాన్ని సమస్యగా భావించను. ప్రతి ఒక్కరికీ భిన్నమైన గ్రహణ శక్తి ఉంటుంది.</p>
+                    <p class="vphilo-p">నా పరిమితి కేవలం వ్యక్తిగత కన్సల్టేషన్లకు మాత్రమే సంబంధించింది, విద్యార్థుల
+                        ప్రశ్నలకు కాదు.</p>
+                    <p class="vphilo-p">ఎవరైనా నిజమైన మరియు తీవ్రమైన వ్యక్తిగత సమస్యతో నన్ను సంప్రదిస్తే, నేను నా
+                        పరిమితులకు లోబడి మార్గదర్శకత్వం అందించవచ్చు. అప్పుడు కూడా, నేను భవిష్యత్తు చెబుతానని వాగ్దానం
+                        చేయను. నా ఉద్దేశం ఆ వ్యక్తికి వారి పరిస్థితిని అర్థం చేసుకోవడానికి మరియు దాన్ని ఎదుర్కొనే
+                        మార్గాల గురించి ఆలోచించడానికి సహాయపడటమే.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-4" data-card-id="te-sec-4">
+                <div class="vphilo-card-header" data-toggle="te-sec-4" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">4. నేను భవిష్యత్తు ఎందుకు చెప్పను? (భవిష్యత్ అంచనాలు ఎందుకు
+                            చేయను?)</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">జ్యోతిష్యాన్ని ఒక వ్యక్తిని నిష్క్రియుడిగా (passive) మార్చే సాధనంగా నేను
+                        భావించను. జాతకం మనకు ఈ క్రింది విషయాలను అర్థం చేసుకోవడానికి సహాయపడవచ్చు:</p>
+                    <ul class="vphilo-bullets">
+                        <li>ఒక వ్యక్తి చుట్టూ ఉన్న పరిస్థితులు,</li>
+                        <li>అనుకూల మరియు ప్రతికూల ధోరణులు,</li>
+                        <li>మానసిక ప్రవృత్తులు,</li>
+                        <li>ఒక వ్యక్తి అనుభవించే వాతావరణం,</li>
+                        <li>మరియు సంభావ్య సవాళ్లు లేదా అవకాశాలు.</li>
+                    </ul>
+                    <p class="vphilo-p">కానీ దాని అర్థం ఒక వ్యక్తి తీసుకునే ప్రతి నిర్ణయం శాశ్వతంగా ముందే
+                        నిర్ణయించబడిందని కాదు.</p>
+                    <p class="vphilo-p">ఉదాహరణకు, ఒక వ్యక్తి యొక్క ఆర్థిక పరిస్థితి అతను మొదట ఏ కళాశాలలో చేరాలో
+                        నిర్ణయించవచ్చు. కానీ అతని మార్కులు, ర్యాంక్, అభ్యాసం, క్రమశిక్షణ మరియు అంతిమ విజయం అతని ఆర్థిక
+                        పరిస్థితి ద్వారా స్వయంచాలకంగా నిర్ణయించబడవు.</p>
+                    <p class="vphilo-p">పరిస్థితులు మనల్ని ప్రభావితం చేస్తాయి. కానీ అవి మన ప్రయత్నాన్ని మరియు ఎంపికలను
+                        పూర్తిగా భర్తీ చేయలేవు.</p>
+                    <p class="vphilo-p">అందువల్ల, జ్యోతిష్యాన్ని కేవలం భవిష్యత్తు అంచనా వేసే సాధనంగా కాకుండా
+                        'మార్గదర్శకత్వం (Guidance)' అనే పదాన్ని ఉపయోగించడానికే నేను ప్రాధాన్యత ఇస్తాను.</p>
+                    <p class="vphilo-p">నా విధానంలో జ్యోతిష్యం యొక్క ఉద్దేశం ఏమి జరగబోతుందో చెప్పి ఒక వ్యక్తి కేవలం దాని
+                        కోసం ఎదురుచూసేలా చేయడం కాదు. ఆ వ్యక్తి తన పరిస్థితులను అర్థం చేసుకుని, వాటికి వివేకంతో
+                        స్పందించేలా చేయడమే.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-5" data-card-id="te-sec-5">
+                <div class="vphilo-card-header" data-toggle="te-sec-5" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">5. జ్యోతిష్యం భయాన్ని తగ్గించాలే తప్ప, భయాన్ని కలిగించకూడదు</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ఒక వ్యక్తి సమస్యతో జ్యోతిష్యుడి వద్దకు వచ్చినప్పుడు, అతను ఇప్పటికే ఆందోళనతో
+                        ఉంటాడు. అతను ‘నా జాతకం ఏం చెబుతుంది?’ అని భయపడుతూ వేచి ఉండవచ్చు.</p>
+                    <p class="vphilo-p">అటువంటి పరిస్థితిలో, జ్యోతిష్యుడు ఇప్పటికే ఇబ్బందిలో ఉన్న మనస్సుకు మరింత భయాన్ని
+                        నూరిపోయకూడదని నేను నమ్ముతాను. జ్యోతిష్యుడి బాధ్యత కేవలం ఆ వ్యక్తి భయాన్ని పెంచడం కాదు.</p>
+                    <p class="vphilo-p">మొదట, సమస్యను అర్థం చేసుకోవాలి. ఆ తర్వాత మనం ఇలా ప్రశ్నించుకోవాలి:</p>
+                    <p class="vphilo-p">“ఈ వ్యక్తి ఇప్పుడు ఏం చేయగలడు?” — “ఏ ఏ అవకాశాలు అందుబాటులో ఉన్నాయి?” — “ఈ
+                        పరిస్థితిని ఈ వ్యక్తి ఎలా ఎదుర్కోవచ్చు?”</p>
+                    <p class="vphilo-p">ఒకవేళ ప్రయోగాత్మకమైన (ఆచరణాత్మకమైన) మార్గం ఉంటే, దాన్ని వివరించాలి. పరిస్థితిని
+                        వెంటనే మార్చడం సాధ్యం కాకపోతే, దాన్ని ఎదుర్కోవడానికి ఆ వ్యక్తికి మానసిక శక్తిని
+                        పెంపొందించుకోవడంలో సహాయపడాలి.</p>
+                    <p class="vphilo-p">ఇందుకోసమే నేను మానసిక అవగాహనను జ్యోతిష్య విద్యలో ఒక ముఖ్యమైన భాగంగా భావిస్తాను.
+                    </p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-6" data-card-id="te-sec-6">
+                <div class="vphilo-card-header" data-toggle="te-sec-6" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">6. జ్యోతిష్యం మరియు మనస్తత్వశాస్త్రం (సైకాలజీ)</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">జీవితాన్ని అర్థం చేసుకోవడానికి మనం సమయం మరియు మానవ ప్రతిస్పందన రెండింటినీ
+                        పరిగణనలోకి తీసుకోవాలని నేను నమ్ముతాను.</p>
+                    <p class="vphilo-p">జ్యోతిష్యం మనకు ‘కాల’ పరిమాణాన్ని అధ్యయనం చేయడానికి సహాయపడుతుంది. మానసిక అవగాహన
+                        అనేది ఒక మనుష్యుడు ఎలా ఆలోచిస్తాడు, అనుభూతి చెందుతాడు మరియు పరిస్థితులకు ఎలా ప్రతిస్పందిస్తాడు
+                        అనే విషయాలను అర్థం చేసుకోవడానికి సహాయపడుతుంది.</p>
+                    <p class="vphilo-p">ఒక వ్యక్తి కఠినమైన పరిస్థితిని ఎదుర్కోవచ్చు. ఇద్దరు వ్యక్తులు ఒకే విధమైన
+                        పరిస్థితిని అనుభవించవచ్చు, కానీ వారి ప్రతిస్పందనలు భిన్నంగా ఉండవచ్చు. ఒకరు భయపడవచ్చు; మరొకరు
+                        మరింత దృఢంగా మారవచ్చు.</p>
+                    <p class="vphilo-p">అందువల్ల, కేవలం పరిస్థితిని అర్థం చేసుకోవడం మాత్రమే సరిపోదు. మనం మనస్సును కూడా
+                        అర్థం చేసుకోవాలి. అందుకే నా బోధనలో జ్యోతిష్యంతో పాటు మానసిక అవగాహనను కూడా చేర్చాను.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-7" data-card-id="te-sec-7">
+                <div class="vphilo-card-header" data-toggle="te-sec-7" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">7. మనం జ్యోతిష్యుడిని ఎప్పుడు సంప్రదించాలి?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">నేను నా విద్యార్థులకు ఒక సరళమైన మాట చెబుతాను: “జీవితంలోని ప్రతి సమస్యకూ మీకు
+                        జ్యోతిష్యుడి అవసరం లేదు.”</p>
+                    <p class="vphilo-p">సంపూర్ణ శారీరక ఆరోగ్యంతో ఉన్న వ్యక్తి ప్రతిరోజూ వైద్యుడిని కలవాల్సిన అవసరం లేదు.
+                        అదేవిధంగా, మానసికంగా బలంగా ఉండి, తన పరిస్థితిని అర్థం చేసుకున్న వ్యక్తి ప్రతి చిన్న కష్టానికి
+                        జ్యోతిష్యుడిని సంప్రదించాల్సిన అవసరం లేదు.</p>
+                    <p class="vphilo-p">సమస్యకు గల కారణాన్ని మీరు అర్థం చేసుకుని, మీరేం చేయాలో మీకు తెలిస్తే, అప్పుడు
+                        జాతకాన్ని చూడాల్సిన అవసరమే ఉండదు.</p>
+                    <p class="vphilo-p">జ్యోతిష్యం ఎప్పుడు ఉపయోగపడుతుంది అంటే: “ఈ పరిస్థితి ఎందుకు ఎదురవుతుందో నాకు
+                        అర్థం కావడం లేదు, లేదా దీన్ని అర్థం చేసుకోవడానికి నాకు మరొక కోణం (దృక్పథం) అవసరం”
+                        అనిపించినప్పుడు మాత్రమే. అటువంటప్పుడు కూడా, జ్యోతిష్యం మన ఆలోచనకు మద్దతు ఇవ్వాలే తప్ప, మన
+                        ఆలోచనను భర్తీ చేయకూడదు.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-8" data-card-id="te-sec-8">
+                <div class="vphilo-card-header" data-toggle="te-sec-8" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">8. విద్యార్థులకు వారి స్వంత జాతకాల గురించి నేనేం చెబుతాను?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">విద్యార్థులు జ్యోతిష్యాన్ని నేర్చుకోవడం ప్రారంభించినప్పుడు, నేను సాధారణంగా
+                        వారికి ఇలా సలహా ఇస్తాను:</p>
+                    <p class="vphilo-p">“మీ స్వంత జాతకాన్ని లేదా మీరు మానసికంగా ఎక్కువగా ముడిపడి ఉన్న వ్యక్తి జాతకాన్ని
+                        నేర్చుకోవడానికి ప్రాథమిక ఉదాహరణగా వెంటనే ఉపయోగించకండి.”</p>
+                    <p class="vphilo-p">ఎందుకు? ఎందుకంటే మన స్వంత జాతకంలో ఏదైనా ప్రతికూలమైనది చూసినప్పుడు, మనం మానసికంగా
+                        కలత చెందుతాము. నేర్చుకునే ప్రక్రియలో ఒక్కసారి భయం ప్రవేశిస్తే, నిష్పక్షపాతంగా అధ్యయనం చేయడం
+                        కష్టమవుతుంది.</p>
+                    <p class="vphilo-p">మనకు ఎటువంటి మానసిక అనుబంధం లేని జాతకాన్ని మనం అధ్యయనం చేసినప్పుడు, మన మనస్సు
+                        దాన్ని మరింత లోతుగా — కొన్నిసార్లు విమర్శనాత్మకంగా కూడా పరిశీలించగలదు.</p>
+                    <p class="vphilo-p">అందువల్ల, నా తరగతుల్లో జాతకం ఎవరిదనే విషయాన్ని వెల్లడించకుండా ఉదాహరణలుగా
+                        ఉపయోగిస్తాను. దీని ఉద్దేశం నేర్చుకోవడమే తప్ప, మానసికంగా చిక్కుకుపోవడం కాదు.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-9" data-card-id="te-sec-9">
+                <div class="vphilo-card-header" data-toggle="te-sec-9" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">9. తీవ్రమైన వ్యక్తిగత సమస్యల పట్ల నా వైఖరి</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ఎవరైనా నాతో: “నేను నిజమైన మరియు తీవ్రమైన సమస్యను ఎదుర్కొంటున్నాను, నాకేం చేయాలో
+                        తోచడం లేదు,” అని చెబితే, నేను మొదట సమస్యను అర్థం చేసుకోవడానికి ప్రయత్నిస్తాను.</p>
+                    <p class="vphilo-p">కొన్నిసార్లు ఒక వ్యక్తి అత్యంత తీవ్రమైనదిగా భావించే సమస్యను వాస్తవానికి సాధారణ
+                        ఆచరణాత్మక మార్పుల ద్వారా పరిష్కరించవచ్చు.</p>
+                    <p class="vphilo-p">ఉదాహరణకు, తల్లిదండ్రులు ఇలా చెప్పవచ్చు: “నా బిడ్డ చదువు చాలా పెద్ద సమస్యగా
+                        మారింది.” ఆ పరిస్థితి గురించి చర్చించిన తర్వాత, ఆ పిల్లవాడు టెలివిజన్, స్మార్ట్‌ఫోన్ లేదా ఇతర
+                        వ్యాపకాలతో ఎక్కువ సమయం గడుపుతున్నాడని స్పష్టంగా తెలియవచ్చు.</p>
+                    <p class="vphilo-p">అటువంటి పరిస్థితిలో, మొదటి మార్గదర్శకత్వం జాతకం లేదా ధార్మిక ఆచరణలు కాకూడదు.
+                        మొదటి మార్గదర్శకత్వం కేవలం ఇలా ఉండాలి: వాతావరణాన్ని మార్చండి. తగిన పరిమితులను నిర్ణయించండి.
+                        శ్రమను, క్రమశిక్షణను ప్రోత్సహించండి.</p>
+                    <p class="vphilo-p">మానవ ప్రయత్నమే లేనప్పుడు, ఏ పూజ లేదా ఆచరణ ఆ ప్రయత్నానికి ప్రత్యామ్నాయం కాలేదు.
+                    </p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-10" data-card-id="te-sec-10">
+                <div class="vphilo-card-header" data-toggle="te-sec-10" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">10. పరిహారాల పట్ల నా వైఖరి</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">నేను సాంప్రదాయక ఆచరణలను గౌరవిస్తాను, ఉదాహరణకు: ప్రార్థన, జపం, వ్రతం, పూజ, హోమం,
+                        శాంతి ప్రక్రియలు, మరియు దానం. కానీ నేను వాటిని ప్రతి సమస్యకూ వాణిజ్యపరమైన తక్షణ పరిష్కారాలుగా
+                        (commercial quick fixes) పరిగణించను.</p>
+                    <p class="vphilo-p">ఒక వ్యక్తి తీవ్రమైన మానసిక ఒత్తిడిలో ఉన్నప్పుడు, ప్రార్థన లేదా ఇతర ఆధ్యాత్మిక
+                        ఆచరణలు మనస్సును ప్రశాంత పరచడానికి మరియు అంతర్గత విశ్వాసాన్ని తిరిగి పొందడానికి సహాయపడతాయి.
+                        మనస్సు ప్రశాంత పడిన తర్వాత, ఆ వ్యక్తి అసలు సమస్యను అర్థం చేసుకుని, సరైన చర్యలు తీసుకోవడానికి
+                        సమర్థుడవుతాడు.</p>
+                    <p class="vphilo-p">అందువల్ల, నేను అటువంటి ఆచరణలను ప్రాథమికంగా మనస్సుకు మరియు ఆత్మకు ఇచ్చే మద్దతుగా
+                        చూస్తానే తప్ప, మానవ ప్రయత్నానికి ప్రత్యామ్నాయంగా కాదు.</p>
+                    <div class="vphilo-quote">“ప్రార్థన మనస్సును బలపరుస్తుంది. ప్రయత్నమే సమస్యను పరిష్కరించాలి. దైవకృప
+                        ప్రయాణానికి తోడ్పడుతుంది.”</div>
+                    <p class="vphilo-p">ఒక వ్యక్తి తన శక్తికి మించి డబ్బు ఖర్చు చేయాల్సి వచ్చే పరిహారాలను నేను సిఫార్సు
+                        చేయను. దేవుడిని చేరుకోవడానికి ఒక వ్యక్తి భారీగా డబ్బు ఖర్చు చేయాల్సిన అవసరం లేదు.</p>
+                    <p class="vphilo-p">భక్తితో ఒక సాధారణ దీపం వెలిగించి, తన స్వంత మాతృభాషలో హృదయపూర్వకంగా ప్రార్థించడం,
+                        తన శక్తికి మించి భారీ ఆచరణల కోసం డబ్బు వృధా చేయడం కంటే ఎంతో అర్థవంతంగా ఉంటుంది.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-11" data-card-id="te-sec-11">
+                <div class="vphilo-card-header" data-toggle="te-sec-11" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">11. ప్రార్థన మరియు ప్రాయశ్చిత్తం గురించి నా అవగాహన</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">నా దృష్టిలో, ప్రార్థన అంటే కేవలం: “నాకు ఒక సమస్య ఉంది. దయచేసి దాన్ని తొలగించు”
+                        అని కోరడం మాత్రమే కాదు. అందులో మరొక లోతైన కోణం ఉంది.</p>
+                    <p class="vphilo-p">ఒక వ్యక్తి తన తప్పును గుర్తించి, దాన్ని మళ్లీ చేయకూడదని హృదయపూర్వకంగా
+                        నిర్ణయించుకుని, మంచి జీవితం వైపు అడుగులు వేసినప్పుడు, ఆ అంతర్గత పరివర్తన ముఖ్యమైనది. సాంప్రదాయ
+                        ఆధ్యాత్మిక ఆచరణలు అటువంటి పరివర్తనకు తోడ్పడతాయి.</p>
+                    <p class="vphilo-p">అందువల్ల, సమస్యను సృష్టించిన అదే తప్పు చర్యలను కొనసాగిస్తూ, కేవలం ధార్మిక
+                        ఆచరణలపై ఆధారపడటాన్ని నేను ప్రోత్సహించను.</p>
+                    <p class="vphilo-p">ఒక పరిహారం అనేది అవగాహనకు మరియు మార్పునకు దారితీయాలే తప్ప, మార్పునకు
+                        ప్రత్యామ్నాయం కాకూడదు.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-12" data-card-id="te-sec-12">
+                <div class="vphilo-card-header" data-toggle="te-sec-12" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">12. నేను మరణ భవిష్యత్తును బోధించను</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">నేను స్పష్టంగా పాటించే ఒక సరిహద్దు ఉంది. నేను మరణ భవిష్యత్తును చెప్పడం లేదా
+                        మరణానికి సంబంధించిన సమయాన్ని లెక్కించడాన్ని బోధించను మరియు ఆచరించను.</p>
+                    <p class="vphilo-p">మరణ భయం విద్యార్థి నేర్చుకునే ప్రక్రియలో భాగం కావాలని నేను కోరుకోను.</p>
+                    <p class="vphilo-p">నా దృక్పథంలో జ్యోతిష్యం ఒక వ్యక్తికి జీవితాన్ని అర్థం చేసుకోవడానికి మరియు
+                        అవగాహనతో దాన్ని ఎదుర్కోవడానికి సహాయపడాలి. అది అనవసరమైన భయానికి కారణం కాకూడదు.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-13" data-card-id="te-sec-13">
+                <div class="vphilo-card-header" data-toggle="te-sec-13" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">13. డబ్బు మరియు అమృత వృత్తి పట్ల నా వైఖరి</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">నేను ఒక గృహస్థుడిని. నాకు కుటుంబం మరియు బాధ్యతలు ఉన్నాయి. అందువల్ల డబ్బు అవసరమే,
+                        కానీ అది నా పిచ్చిగా (వ్యామోహంగా) లేదా నా బోధన యొక్క ఉద్దేశంగా మారాలని నేను కోరుకోను.</p>
+                    <p class="vphilo-p">నా అవగాహన మేరకు నేను 'అమృత వృత్తి'ని నా జీవన విధానంగా ఎంచుకున్నాను.</p>
+                    <p class="vphilo-p">సరళంగా చెప్పాలంటే, నేను డబ్బు ఇవ్వమని ప్రజలను అడగను. నా బోధనకు ఎటువంటి ఫీజును
+                        నిర్ణయించను.</p>
+                    <p class="vphilo-p">ఎవరైనా స్వచ్ఛందంగా నా ప్రాథమిక గృహ అవసరాలను తీర్చడానికి మద్దతు ఇస్తే, నేను
+                        దాన్ని “శ్రీహరి సంకల్పం”గా స్వీకరిస్తాను.</p>
+                    <p class="vphilo-p">అటువంటి మద్దతును నా బోధనకు ఇచ్చే ఫీజుగా నేను భావించను, అలాగని ఆశించను కూడా.</p>
+                    <p class="vphilo-p">ఎవరైనా సహాయం చేయాలనుకున్నా, వారు ఇస్తున్నది నాకు అవసరం లేకపోతే, నిజంగా అవసరంలో
+                        ఉన్న మరెవరికైనా సహాయం చేయమని నేను వారిని కోరతాను.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-14" data-card-id="te-sec-14">
+                <div class="vphilo-card-header" data-toggle="te-sec-14" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">14. ఆర్థిక మద్దతు ఎటువంటి ప్రత్యేక ప్రాధాన్యతను తీసుకురాదు</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">ఇది చాలా ముఖ్యమైనది.</p>
+                    <p class="vphilo-p">నాకు ఆర్థికంగా మద్దతు ఇచ్చే విద్యార్థి మరియు మద్దతు ఇవ్వని విద్యార్థి ఇద్దరూ నా
+                        బోధనలో సమానమే.</p>
+                    <p class="vphilo-p">నేను ఇలాంటి ఎటువంటి జాబితాను ఉంచుకోను: ఎవరు విరాళం ఇచ్చారు, ఎవరు ఇవ్వలేదు,
+                        ఎవరెంత ఇచ్చారు, లేదా ఎవరికి ప్రత్యేక శ్రద్ధ చూపించాలి.</p>
+                    <p class="vphilo-p">నా బోధన ఆర్థిక మద్దతుపై ఆధారపడి లేదు. మద్దతు ఇవ్వడం వల్ల వ్యక్తిగత కన్సల్టేషన్
+                        హక్కు లభించదు. మరియు మద్దతు ఇవ్వకపోవడం వల్ల విద్యార్థి విలువ తగ్గదు.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-15" data-card-id="te-sec-15">
+                <div class="vphilo-card-header" data-toggle="te-sec-15" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">15. దానం మరియు సేవ</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">నేను దానానికి మరియు సేవకు మధ్య వ్యత్యాసాన్ని గుర్తిస్తాను.</p>
+                    <p class="vphilo-p">దానం అంటే మనకు చెందినదానిని ఎటువంటి వ్యక్తిగత ప్రతిఫలాపేక్ష లేకుండా ఇవ్వడం.</p>
+                    <p class="vphilo-p">సేవ అంటే ఇతరుల శ్రేయస్సు కోసం మన సమయం, శ్రమ, సామర్థ్యం లేదా శక్తిని అర్పించడం.
+                    </p>
+                    <p class="vphilo-p">రెండింటికీ విలువ ఉంది. నా విద్యార్థుల నుండి నేను వీటిలో దేన్నీ ఆశించను. ప్రతి
+                        ఒక్కరూ తమ సామర్థ్యానికి తగినట్లుగా సమాజానికి సహాయం చేయడం ధర్మానికి ఒక అర్థవంతమైన రూపం అని నేను
+                        నమ్ముతాను. పరోపకారం — ఇతరులకు సహాయం చేయడం — సేవ చేసే వ్యక్తిని కూడా బలోపేతం చేస్తుంది.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-16" data-card-id="te-sec-16">
+                <div class="vphilo-card-header" data-toggle="te-sec-16" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">16. నేను విద్యార్థులను భిన్నంగా ఎందుకు చూడను?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">నా లర్నింగ్ గ్రూపులలో వందలాది మంది విద్యార్థులు ఉన్నారు. నేను ఉద్దేశపూర్వకంగా
+                        ఇటువంటి వ్యవస్థను సృష్టించడాన్ని నివారిస్తాను: “ఈ వ్యక్తి నాకు మద్దతు ఇచ్చారు మరియు ఆ వ్యక్తి
+                        ఇవ్వలేదు.”</p>
+                    <p class="vphilo-p">అటువంటి వ్యవస్థ తెలియకుండానే అంచనాలను మరియు వివక్షను సృష్టించగలదు. విద్యార్థులతో
+                        నా సంబంధం కేవలం నేర్చుకోవడంపైనే కేంద్రీకృతమై ఉండాలని నేను కోరుకుంటున్నాను.</p>
+                    <p class="vphilo-p">అందువల్ల: తరగతి గది కేవలం జ్ఞానం కోసమే, ఆర్థిక సంబంధాల కోసం కాదు.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-17" data-card-id="te-sec-17">
+                <div class="vphilo-card-header" data-toggle="te-sec-17" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">17. నా విద్యార్థుల నుండి నేనేం ఆశిస్తున్నాను?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">నేను డబ్బు ఆశించను. నేను వ్యక్తిగత విధేయతను ఆశించను. వారు నాపై ఆధారపడాలని నేను
+                        కోరుకోను. నేను ఆశించేది చాలా సరళమైనది:</p>
+                    <ul class="vphilo-bullets">
+                        <li>హృదయపూర్వకంగా నేర్చుకోండి.</li>
+                        <li>స్వేచ్ఛగా ప్రశ్నలు అడగండి.</li>
+                        <li>స్వతంత్రంగా ఆలోచించండి.</li>
+                        <li>మీ స్వంత ప్రయత్నం చేయండి.</li>
+                        <li>మానసిక బలాన్ని పెంపొందించుకోండి.</li>
+                        <li>జ్యోతిష్యాన్ని బాధ్యతాయుతంగా ఉపయోగించండి.</li>
+                        <li>ఏ వ్యక్తిని లేదా నమ్మకాన్ని గుడ్డిగా అనుసరించకండి.</li>
+                        <li>మరియు వీలైనప్పుడల్లా: ఇతరులకు సహాయం చేయండి.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-18" data-card-id="te-sec-18">
+                <div class="vphilo-card-header" data-toggle="te-sec-18" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">18. నా దృష్టిలో ‘జ్యోతిష్య అవగాహన’ (Astrological Awareness) అంటే
+                            ఏమిటి?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">నా దృష్టిలో, జ్యోతిష్య అవగాహన అంటే వీటి నుండి బయటపడటం:</p>
+                    <ul class="vphilo-bullets">
+                        <li>గుడ్డి నమ్మకం,</li>
+                        <li>అనవసరమైన భయం,</li>
+                        <li>మూఢనమ్మకాలు,</li>
+                        <li>విధివాద ఆలోచన (fatalistic thinking),</li>
+                        <li>మరియు భవిష్యత్తు అంచనాలు, పరిహారాలపై అతిగా ఆధారపడటం.</li>
+                    </ul>
+                    <p class="vphilo-p">ఒక వ్యక్తి, “నా జాతకం ఇలా చెబుతోంది, కాబట్టి నేను ఏమీ చేయలేను,” అని
+                        ఆలోచించకూడదు.</p>
+                    <p class="vphilo-p">బదులుగా, అతను ఇలా ప్రశ్నించుకోవాలి: “నా పరిస్థితి ఏమిటి? నా నియంత్రణలో ఏముంది?
+                        నేను ఎలాంటి ప్రయత్నం చేయగలను? నేను ఎలా స్పందించాలి? నాకు దైవకృప ఎక్కడ అవసరం?”</p>
+                    <p class="vphilo-p">ఈ ఆలోచనా సరళిలో మార్పే జ్యోతిష్యాన్ని నేర్చుకోవడంలో అత్యంత విలువైన ఉద్దేశాలలో
+                        ఒకటి అని నేను నమ్ముతాను.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-19" data-card-id="te-sec-19">
+                <div class="vphilo-card-header" data-toggle="te-sec-19" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">19. విద్యార్థులు స్వవలంబకులుగా మారాలని నేను ఎందుకు
+                            కోరుకుంటున్నాను?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">గురువు జీవితకాల పరాయి ఆధారపడటాన్ని సృష్టించకూడదు.</p>
+                    <p class="vphilo-p">నేర్చుకునే ప్రక్రియలో, ప్రశ్నలకు పదే పదే సమాధానం ఇవ్వడానికి మరియు భావనలను
+                        అవసరమైనన్ని సార్లు వివరించడానికి నేను సంతోషిస్తాను.</p>
+                    <p class="vphilo-p">కానీ అంతిమ ఉద్దేశం: “ప్రతి సమస్య గురించీ గురువును అడగడం” కాదు. అది: “విషయాన్ని
+                        అర్థం చేసుకోవడానికి మరియు మీ కోసం మీరే ఆలోచించుకోవడానికి తగినంత నేర్చుకోవడం.”</p>
+                    <p class="vphilo-p">నా మార్గదర్శకత్వం నేర్చుకునే ప్రయాణంలో మద్దతుగా ఉండాలే తప్ప, విద్యార్థి యొక్క
+                        స్వంత అవగాహనకు ప్రత్యామ్నాయం కాకూడదు.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-20" data-card-id="te-sec-20">
+                <div class="vphilo-card-header" data-toggle="te-sec-20" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">20. నేను లైక్, షేర్ లేదా సబ్‌స్క్రైబ్‌లను ఎందుకు ఆశించను?</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">నా వైఖరిలోని మరొక కోణాన్ని నా విద్యార్థులు అర్థం చేసుకోవాలని నేను
+                        కోరుకుంటున్నాను. ఈ రోజుల్లో, జ్యోతిష్యం ద్వారా డబ్బు సంపాదించడం కేవలం వ్యక్తిగత కన్సల్టేషన్ ఫీజు
+                        వసూలు చేయడం ద్వారా మాత్రమే జరగడం లేదు. సోషల్ మీడియాలో వచ్చే గుర్తింపు కూడా ఒక రకమైన ప్రతిఫలం
+                        కావచ్చు. లైకులు, షేర్లు, సబ్‌స్క్రైబర్లు, వీక్షణలు (views), కామెంట్లు మరియు ఛానల్ వృద్ధి క్రమంగా
+                        అవే లక్ష్యాలుగా మారిపోవచ్చు. నేను స్పృహతో వీటిని నా లక్ష్యాలుగా చేసుకోకూడదని నిర్ణయించుకున్నాను.
+                    </p>
+                    <p class="vphilo-p">నేను 900కు పైగా జ్యోతిష్య తరగతులను అప్‌లోడ్ చేశాను, వాటిలో చాలా వరకు ఒక గంట
+                        నిడివి గలవి. ఈ వీడియోలకు యూట్యూబ్ మానిటైజేషన్ (YouTube monetization) ప్రారంభించాలని నా
+                        విద్యార్థులు కొందరు సూచించారు. నేను స్పృహతో అలా చేయకూడదని నిర్ణయించుకున్నాను.</p>
+                    <p class="vphilo-p">దీనికి రెండు కారణాలు ఉన్నాయి. మొదటిది, మానిటైజేషన్ ప్రారంభించడం వల్ల విద్యా
+                        విషయాలతో పాటు ప్రకటనలు (ads) కూడా ప్రదర్శించబడతాయి. నా విద్యార్థులు ప్రకటనల వల్ల అనవసరంగా దృష్టి
+                        మరల్చుకోవాలని నేను కోరుకోను, ముఖ్యంగా వారు నేర్చుకుంటున్న విషయానికి ఆ ప్రకటనలకు ఎటువంటి సంబంధం
+                        లేనప్పుడు. అన్నింటికంటే ముఖ్యంగా, ఈ వీడియోల ద్వారా సంపాదించడం నేను నా జీవితం కోసం ఎంచుకున్న
+                        ‘అమృత వృత్తి’కి సరిపోదు.</p>
+                    <p class="vphilo-p">అందువల్ల, నేను నా విద్యార్థులకు స్పష్టంగా చెబుతాను: మీరు నా వీడియోలను లైక్
+                        చేయాల్సిన అవసరం లేదు. నా ఛానల్‌కు సబ్‌స్క్రైబ్ చేయాల్సిన అవసరం లేదు. నా వీడియోలను లేదా నా
+                        ఛానల్‌ను షేర్ చేయాల్సిన అవసరం లేదు. నోటిఫికేషన్ బెల్ నొక్కాల్సిన అవసరం లేదు. నా విద్యార్థుల
+                        నుండి వీటిలో దేన్నీ ఆశించడం లేదు.</p>
+                    <p class="vphilo-p">మరి నేనెందుకు వీడియోలను అప్‌లోడ్ చేస్తున్నాను? దీని ఉద్దేశం చాలా సరళమైనది. నా
+                        దగ్గర నేర్చుకుంటున్న విద్యార్థులకు వారికి అవసరమైనప్పుడల్లా పాఠాలు అందుబాటులో ఉండాలని నేను
+                        కోరుకుంటున్నాను. అందువల్ల, నేను తరగతులను యూట్యూబ్‌కు అప్‌లోడ్ చేసి, లింక్‌లను నా విద్యార్థులతో
+                        పంచుకుంటాను. నా దృష్టిలో, యూట్యూబ్ కేవలం విద్యా సామగ్రిని చేరవేసే ఒక మాధ్యమం మాత్రమే, కీర్తి
+                        ప్రతిష్టలు సంపాదించే మార్గం కాదు.</p>
+                    <p class="vphilo-p">నేను సాధారణంగా నా వీడియోలను వాట్సాప్ స్టేటస్ లేదా ఇతర సోషల్ మీడియా
+                        ప్లాట్‌ఫారమ్‌ల ద్వారా ప్రచారం చేయను. ఏ విద్యార్థుల కోసం ఈ పాఠాలు రూపొందించబడ్డాయో వారికి మాత్రమే
+                        నేను వీడియో లింక్‌లను పంచుకుంటాను.</p>
+                    <p class="vphilo-p">నేను సంఖ్యల మరియు గుర్తింపు గురించి ఆలోచించడం ప్రారంభిస్తే, నా దృష్టి క్రమంగా
+                        బోధన మరియు నేర్చుకోవడం నుండి గుర్తింపు మరియు అంకెల వైపు మళ్ళవచ్చు. నేను ఆ ఒత్తిడి నుండి
+                        విముక్తంగా ఉండాలని కోరుకుంటున్నాను.</p>
+                    <p class="vphilo-p">ఈ తరగతుల నుండి మీరు ఉపయోగకరమైనది ఏదైనా నేర్చుకుంటే, దాన్ని అర్థం చేసుకోండి, సాధన
+                        చేయండి, అనుభవించండి మరియు సరైన సమయంలో ఆ జ్ఞానాన్ని నిజంగా అవసరమైన మరెవరితోనైనా పంచుకోండి. ఇది
+                        నాకు వెయ్యి లైకుల కంటే ఎంతో విలువైనది.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-21" data-card-id="te-sec-21">
+                <div class="vphilo-card-header" data-toggle="te-sec-21" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">21. నా విజయాన్ని కొలిచే కొలమానం</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">నా బోధన యొక్క విలువను నేను విద్యార్థులు, సబ్‌స్క్రైబర్లు, వీక్షణలు, లైకులు లేదా
+                        విరాళాల సంఖ్యతో కొలవను.</p>
+                    <p class="vphilo-p">నా సంతృప్తి అంతా నేను నిరంతరం నేర్చుకుంటున్నాననే, నేను అర్థం చేసుకున్నదాన్ని
+                        పంచుకుంటున్నాననే మరియు విద్యార్థి తన జీవితాన్ని స్వయంగా అర్థం చేసుకోవడానికి తగినంత జ్ఞానం మరియు
+                        ఆత్మవిశ్వాసం పొందేలా సహాయం చేస్తున్నాననే అవగాహన నుండి వస్తుంది.</p>
+                    <p class="vphilo-p">నా బోధన అల్టిమేట్‌గా విద్యార్థిని జ్యోతిష్యుడిపై ఆధారపడటం నుండి విముక్తం చేస్తే,
+                        నేను దాన్ని విజయంగా భావిస్తాను — వైఫల్యంగా కాదు. మరియు ఆ విద్యార్థి ఆ జ్ఞానాన్ని మరొక వ్యక్తికి
+                        స్పష్టత, ధైర్యం మరియు అవగాహన తీసుకురావడానికి ఉపయోగిస్తే, నా బోధన యొక్క ఉద్దేశం నెరవేరినట్లే.
+                        నేను సృష్టించాలనుకుంటున్న నిరంతరత అటువంటిదే — కేవలం అనుయాయుల సమూహం కాదు, జ్ఞానపు గొలుసు.</p>
+                </div>
+            </div>
+            <div class="vphilo-card is-collapsed" id="te-sec-22" data-card-id="te-sec-22">
+                <div class="vphilo-card-header" data-toggle="te-sec-22" title="చదవడానికి క్లిక్ చేయండి">
+                    <div class="vphilo-card-title-wrap">
+                        <span class="vphilo-chevron">▼</span>
+                        <h3 class="vphilo-card-title">22. నా విద్యార్థులకు నా సరళమైన సందేశం</h3>
+                    </div>
+                    <div class="vphilo-header-right">
+                        <span class="vphilo-read-cue">చదవండి ▾</span>
+                        <button class="vphilo-copy-btn" title="Copy Section">📋</button>
+                    </div>
+                </div>
+                <div class="vphilo-card-body">
+                    <p class="vphilo-p">నా విద్యార్థులు ఈ కొన్ని సూత్రాలను గుర్తుంచుకోవాలని నేను కోరుకుంటున్నాను:</p>
+                    <ul class="vphilo-bullets">
+                        <li>మీ మనస్సును బలంగా ఉంచుకోండి.</li>
+                        <li>మీ పరిస్థితులను అర్థం చేసుకోండి.</li>
+                        <li>మీ జాతకానికి భయపడకండి.</li>
+                        <li>భవిష్యత్తు అంచనాలకు మీ జీవితాన్ని అప్పగించకండి.</li>
+                        <li>మీ స్వంత ప్రయత్నానికి మొదటి ప్రాధాన్యత ఇవ్వండి.</li>
+                        <li>ప్రార్థనను మనస్సును బలోపేతం చేయడానికి ఉపయోగించండి, బాధ్యత నుండి తప్పించుకోవడానికి కాదు.</li>
+                        <li>మీ కర్తవ్యాన్ని వదలకుండా దైవకృపను అన్వేషించండి.</li>
+                        <li>వీలైనప్పుడల్లా ఇతరులకు సహాయం చేయండి.</li>
+                        <li>మరియు మీకు నిజంగా మరొక దృక్పథం అవసరమైనప్పుడు మాత్రమే జ్యోతిష్యుడిని సంప్రదించండి.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Closing Message & Guru Sandesham -->
+        <div class="vphilo-closing-card">
+            <h3 class="vphilo-closing-title"><span>🙏</span> చివరిగా, నేనెందుకు ఇలా చేస్తున్నాను?</h3>
+            <p class="vphilo-closing-p">ప్రజలు నా పేరును గుర్తుంచుకోవాలని నేను జ్యోతిష్యాన్ని బోధించడం లేదు. నేను ఒక
+                వ్యాపార ప్రాక్టీస్ (commercial practice) స్థాపించడానికి దీన్ని బోధించడం లేదు. ప్రతి విద్యార్థి నాకు
+                ఆర్థికంగా మద్దతు ఇవ్వాలని ఆశించి నేను దీన్ని బోధించడం లేదు. మన గురువుల నుండి మరియు ప్రాచీన సంప్రదాయాల
+                నుండి మనకు వచ్చిన జ్ఞానం కేవలం ఒక తరంతో ముగిసిపోకూడదనే కారణంతో నేను బోధిస్తున్నాను.</p>
+            <p class="vphilo-closing-p">నా గురువులు నాకు జ్ఞానాన్ని ఇచ్చారు. ఆ జ్ఞానం కోసం నేను వారికి ఎటువంటి వ్యాపార
+                రుసుమును చెల్లించలేదు. అందువల్ల, నేను నేర్చుకున్నదానిని హృదయపూర్వక విద్యార్థులతో పంచుకోవడాన్ని నా
+                బాధ్యతగా భావిస్తాను. నా బోధన ద్వారా కనీసం ఒక్క వ్యక్తి అయినా తన భయాన్ని తగ్గించుకుని, మరింత
+                ఆలోచనాపరుడిగా, మరింత స్వవలంబిగా, తన బాధ్యతల పట్ల మరింత అవగాహనతో మరియు ఇతరుల పట్ల మరింత దయతో ఉండగలిగితే,
+                దాన్ని నేను సార్థకం అని భావిస్తాను.</p>
+            <p class="vphilo-closing-p">నిరంతరం జ్యోతిష్యుల అవసరం ఉన్న సమాజాన్ని నిర్మించడం నా ఉద్దేశం కాదు. నా ఉద్దేశం
+                ఏమిటంటే — జీవితాన్ని ఎదుర్కొనేంత బలవంతులుగా, తమ పరిస్థితులను అర్థం చేసుకునేంత తెలివైనవారిగా, దైవకృపను
+                కోరుకునేంత వినమ్రులుగా మరియు ఇతరులకు సహాయం చేసేంత దయాగుణం ఉన్నవారిగా ప్రజలను తీర్చిదిద్దడంలో సహాయపడటమే.
+            </p>
+
+            <div class="vphilo-mantra-banner">లోతుగా నేర్చుకోండి. స్వతంత్రంగా ఆలోచించండి. బాధ్యతాయుతంగా జీవించండి.
+                దైవకృపను అన్వేషించండి. ఇతరులకు సహాయం చేయండి.</div>
+            <p class="vphilo-signature">— శ్రీకాంత్ ధర్మవరం</p>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var currentFontSize = 16;
+            var container = document.getElementById("vaiswanara-philosophy-container");
+            if (!container) return;
+
+            // Global tab switcher function
+            window.vphiloOpenLang = function (tabId, btnEl) {
+                var allTabs = container.querySelectorAll(".vphilo-tab-content");
+                allTabs.forEach(function (tab) {
+                    tab.classList.remove("active");
+                });
+                var allBtns = container.querySelectorAll(".vphilo-tab-btn");
+                allBtns.forEach(function (b) {
+                    b.classList.remove("active");
+                });
+
+                var target = document.getElementById(tabId);
+                if (target) target.classList.add("active");
+                if (btnEl) btnEl.classList.add("active");
+            };
+
+            // Global accordion toggle function
+            window.vphiloToggle = function (cardId) {
+                var card = document.getElementById(cardId);
+                if (!card) return;
+                var parentTab = card.closest(".vphilo-tab-content");
+                var isOpening = card.classList.contains("is-collapsed");
+
+                // Collapse all cards in this tab
+                if (parentTab) {
+                    var tabCards = parentTab.querySelectorAll(".vphilo-card");
+                    tabCards.forEach(function (c) {
+                        c.classList.remove("is-expanded");
+                        c.classList.add("is-collapsed");
+                    });
+                }
+
+                // If it was collapsed, expand it
+                if (isOpening) {
+                    card.classList.remove("is-collapsed");
+                    card.classList.add("is-expanded");
+
+                    setTimeout(function () {
+                        var topOffset = 80;
+                        var elemRect = card.getBoundingClientRect().top;
+                        var offsetPos = elemRect + window.pageYOffset - topOffset;
+                        window.scrollTo({ top: Math.max(0, offsetPos), behavior: "smooth" });
+                    }, 80);
+                }
+            };
+
+            // Global font size adjustment
+            window.vphiloAdjustFont = function (delta) {
+                currentFontSize += delta;
+                if (currentFontSize < 13) currentFontSize = 13;
+                if (currentFontSize > 24) currentFontSize = 24;
+
+                var cardBodies = container.querySelectorAll(".vphilo-card-body");
+                cardBodies.forEach(function (el) {
+                    el.style.fontSize = currentFontSize + "px";
+                });
+                var closingBodies = container.querySelectorAll(".vphilo-closing-card");
+                closingBodies.forEach(function (el) {
+                    el.style.fontSize = currentFontSize + "px";
+                });
+            };
+
+            // Event Delegation on container (100% reliable even if inline onclick is stripped by WordPress)
+            container.addEventListener("click", function (e) {
+                // Tab button click
+                var tabBtn = e.target.closest(".vphilo-tab-btn");
+                if (tabBtn) {
+                    var targetId = tabBtn.getAttribute("data-tab-target");
+                    if (targetId) {
+                        window.vphiloOpenLang(targetId, tabBtn);
+                        return;
+                    }
+                }
+
+                // Copy button click
+                var copyBtn = e.target.closest(".vphilo-copy-btn");
+                if (copyBtn) {
+                    e.stopPropagation();
+                    var cardEl = copyBtn.closest(".vphilo-card");
+                    if (cardEl) {
+                        var titleEl = cardEl.querySelector(".vphilo-card-title");
+                        var bodyEl = cardEl.querySelector(".vphilo-card-body");
+                        var tText = titleEl ? titleEl.innerText : "";
+                        var bText = bodyEl ? bodyEl.innerText : "";
+                        var fullText = tText + "\n\n" + bText + "\n\n— Srikanth Dharmavaram (https://vaiswanara.com)";
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(fullText).then(function () {
+                                copyBtn.innerText = "✔️";
+                                setTimeout(function () { copyBtn.innerText = "📋"; }, 2000);
+                            });
+                        }
+                    }
+                    return;
+                }
+
+                // Font size buttons
+                var fontDec = e.target.closest(".font-dec");
+                if (fontDec) {
+                    window.vphiloAdjustFont(-1);
+                    return;
+                }
+                var fontInc = e.target.closest(".font-inc");
+                if (fontInc) {
+                    window.vphiloAdjustFont(1);
+                    return;
+                }
+
+                // Card header click (accordion toggle)
+                var header = e.target.closest(".vphilo-card-header");
+                if (header) {
+                    var cId = header.getAttribute("data-toggle");
+                    if (cId) {
+                        window.vphiloToggle(cId);
+                        return;
+                    }
+                }
+            });
+        })();
+    </script>
+</div>

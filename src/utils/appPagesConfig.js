@@ -11,10 +11,12 @@ export const ALL_CONFIGURABLE_PAGES = [
   { id: "Profiles", label: "e-Profiles", icon: "👥", desc: "Saved Birth Charts & Horoscopes" },
   { id: "e-PATA", label: "e-PATA", icon: "📖", desc: "Gurukulam Video Lessons" },
   { id: "e-Library", label: "e-Library", icon: "📚", desc: "Digital Astrology E-Library" },
+  { id: "StudyLibrary", label: "Study Library", icon: "🏛️", desc: "Interactive Digital Learning System" },
   { id: "VoiceQuery", label: "e-Voice Query", icon: "🎙️", desc: "Speech-to-WhatsApp Assistant" },
   { id: "StudentRegistration", label: "Student Registration", icon: "🎓", desc: "Online Batch Enrollment" },
   { id: "PrecisionTest", label: "Precision Test", icon: "🔬", desc: "Calculation Accuracy Tester" },
   { id: "Help", label: "Help & FAQ", icon: "📖", desc: "FAQ & User Guide" },
+  { id: "MyPhilosophy", label: "My Philosophy", icon: "✨", desc: "Teaching Philosophy & Approach" },
   { id: "e-Support", label: "Support & Donate", icon: "🤝", desc: "Dakshina & Contributions" },
   { id: "Privacy", label: "Privacy Policy", icon: "🛡️", desc: "Privacy & Terms of Service" },
   { id: "e-Install", label: "Install App", icon: "📲", desc: "PWA Home Screen Installation" },
@@ -30,7 +32,21 @@ export function getAdminEnabledPages() {
     const raw = localStorage.getItem("vaiswanara_admin_enabled_pages");
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed)) {
+        let updated = false;
+        DEFAULT_ENABLED_PAGE_IDS.forEach((id) => {
+          if (!parsed.includes(id)) {
+            parsed.push(id);
+            updated = true;
+          }
+        });
+        if (updated) {
+          try {
+            localStorage.setItem("vaiswanara_admin_enabled_pages", JSON.stringify(parsed));
+          } catch (_) {}
+        }
+        return parsed;
+      }
     }
   } catch (_) {}
   return DEFAULT_ENABLED_PAGE_IDS;

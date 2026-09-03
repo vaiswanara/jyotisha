@@ -116,10 +116,19 @@ app.use(apiPaths, (req, res, next) => {
 // Layer 3: రేట్ లిమిటింగ్ (DDoS మరియు బ్రూట్ ఫోర్స్ ఎటాక్స్ నివారించడానికి)
 const apiLimiter = (0, express_rate_limit_1.default)({
     windowMs: 60 * 1000, // 1 నిమిషం విండో
-    max: 30, // ఒక్కో IP కి 1 నిమిషంలో గరిష్టంగా 30 రిక్వెస్ట్‌లు మాత్రమే
+    max: parseInt(process.env.RATE_LIMIT_MAX || "600", 10), // ఒక్కో IP కి 1 నిమిషంలో 600 రిక్వెస్ట్‌లు
+    skip: (req) => {
+        // లైవ్ ప్రొడక్షన్‌లో ఎట్టిపరిస్థితుల్లోనూ బైపాస్ అవ్వదు (రేట్ లిమిటింగ్ ఎల్లప్పుడూ ఆన్‌లో ఉంటుంది)
+        if (process.env.NODE_ENV === "production")
+            return false;
+        // లోకల్ డెవలప్‌మెంట్‌లో మాత్రమే డెవలపర్ కోసం స్కిప్ చేయడం
+        const ip = req.ip || req.socket.remoteAddress || "";
+        const host = req.hostname || req.headers.host || "";
+        return ip.includes("127.0.0.1") || ip.includes("::1") || host.includes("localhost");
+    },
     message: {
         error: "Too many requests",
-        detail: "Slow down! Max 30 requests per minute.",
+        detail: "Slow down! Request limit reached.",
     },
     standardHeaders: true,
     legacyHeaders: false,
@@ -153,6 +162,16 @@ app.use(apiPaths, (req, res, next) => {
     }
     next();
 });
+// అడ్మిన్ పాస్‌వర్డ్ వెరిఫికేషన్ హెల్పర్ (SHA-256)
+function verifyAdminPassword(inputPwd, headerPwd) {
+    const adminPwd = headerPwd || inputPwd;
+    const REAL_ADMIN_PWD_HASH = process.env.ADMIN_PASSWORD_HASH;
+    if (!REAL_ADMIN_PWD_HASH || !adminPwd || typeof adminPwd !== "string") {
+        return false;
+    }
+    const hashedInput = crypto_1.default.createHash("sha256").update(adminPwd).digest("hex");
+    return hashedInput === REAL_ADMIN_PWD_HASH;
+}
 // --- MUHURTHA & PANCHANGA HELPER FUNCTIONS ---
 function findExactTime(approxTs, type, targetVal, lat, lon, tz, ayKey, fastMode = false) {
     let ts = approxTs;
@@ -2325,9 +2344,7 @@ app.all(apiPaths, async (req, res) => {
             }
         }
         else if (endpoint === "save_lessons") {
-            const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-            const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-            if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+            if (!verifyAdminPassword(input.admin_password, req.headers["x-admin-password"])) {
                 return res
                     .status(403)
                     .json({ error: "Forbidden: Invalid Admin Password" });
@@ -2388,9 +2405,7 @@ app.all(apiPaths, async (req, res) => {
             }
         }
         else if (endpoint === "save_library") {
-            const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-            const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-            if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+            if (!verifyAdminPassword(input.admin_password, req.headers["x-admin-password"])) {
                 return res
                     .status(403)
                     .json({ error: "Forbidden: Invalid Admin Password" });
@@ -2457,9 +2472,7 @@ app.all(apiPaths, async (req, res) => {
             }
         }
         else if (endpoint === "save_ticker") {
-            const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-            const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-            if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+            if (!verifyAdminPassword(input.admin_password, req.headers["x-admin-password"])) {
                 return res.status(403).json({ error: "Forbidden: Invalid Admin Password" });
             }
             const { ticker } = input;
@@ -2529,9 +2542,7 @@ app.all(apiPaths, async (req, res) => {
             }
         }
         else if (endpoint === "save_in_app_message") {
-            const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-            const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-            if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+            if (!verifyAdminPassword(input.admin_password, req.headers["x-admin-password"])) {
                 return res.status(403).json({ error: "Forbidden: Invalid Admin Password" });
             }
             const { messages } = input;
@@ -2603,9 +2614,7 @@ app.all(apiPaths, async (req, res) => {
         }
         else if (endpoint === "admin_get_all") {
             // అడ్మిన్ ప్యానెల్ లో డేటా చూపించడానికి కొత్త ఎండ్‌పాయింట్
-            const adminPwd = req.headers["x-admin-password"] || input.admin_password;
-            const REAL_ADMIN_PWD = process.env.ADMIN_PASSWORD;
-            if (!REAL_ADMIN_PWD || adminPwd !== REAL_ADMIN_PWD) {
+            if (!verifyAdminPassword(input.admin_password, req.headers["x-admin-password"])) {
                 return res
                     .status(403)
                     .json({ error: "Forbidden: Invalid Admin Password" });
@@ -2628,6 +2637,968 @@ app.all(apiPaths, async (req, res) => {
                 users: [],
                 enableUserSync: false,
             });
+        }
+        else if (endpoint === "get_students" || endpoint === "students") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const students = readJsonFile("students.json", []);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ success: true, students });
+        }
+        else if (endpoint === "register_student") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const writeJsonFile = (filename, data) => {
+                const str = JSON.stringify(data, null, 2);
+                fs_1.default.writeFileSync(path_1.default.join(process.cwd(), filename), str);
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(pubPath))) {
+                    try {
+                        fs_1.default.writeFileSync(pubPath, str);
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(phpPath))) {
+                    try {
+                        fs_1.default.writeFileSync(phpPath, str);
+                    }
+                    catch (e) { }
+                }
+            };
+            const firstName = String(input.first_name || "").trim();
+            const lastName = String(input.last_name || "").trim();
+            const countryCode = String(input.country_code || "+91").trim();
+            const whatsappNumber = String(input.whatsapp_number || "").trim();
+            const language = String(input.language || "Telugu").trim();
+            const courses = Array.isArray(input.courses) ? input.courses : (input.courses ? [input.courses] : []);
+            const email = String(input.email || "").trim();
+            const address = String(input.address || "").trim();
+            if (!firstName || !lastName || !whatsappNumber) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Validation Error",
+                    message: "First Name, Last Name, and WhatsApp Number are required.",
+                });
+            }
+            const cleanWhatsapp = whatsappNumber.replace(/[^0-9]/g, "");
+            const students = readJsonFile("students.json", []);
+            const existing = students.find((s) => {
+                const existingClean = (s.whatsapp_number || "").replace(/[^0-9]/g, "");
+                const existingCountry = s.country_code || "+91";
+                return existingClean === cleanWhatsapp && existingCountry === countryCode;
+            });
+            if (existing) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Already Registered",
+                    message: `A student with this WhatsApp number (${countryCode} ${whatsappNumber}) is already registered.`,
+                });
+            }
+            const currentYear = new Date().getFullYear().toString();
+            const prefix = `STU-${currentYear}-`;
+            let maxSeq = 0;
+            for (const s of students) {
+                if (s.id && typeof s.id === "string" && s.id.startsWith(prefix)) {
+                    const val = parseInt(s.id.substring(prefix.length), 10);
+                    if (!isNaN(val) && val > maxSeq)
+                        maxSeq = val;
+                }
+            }
+            if (maxSeq === 0 && students.length > 0) {
+                maxSeq = students.filter((s) => (s.created_at || "").startsWith(currentYear)).length;
+            }
+            const nextSeq = maxSeq + 1;
+            const studentId = `${prefix}${String(nextSeq).padStart(4, "0")}`;
+            const batchId = String(input.batch_id || input.batch || "").trim();
+            const batchList = batchId ? [batchId] : (Array.isArray(input.batches) ? input.batches : []);
+            const newStudent = {
+                id: studentId,
+                first_name: firstName,
+                last_name: lastName,
+                country_code: countryCode,
+                whatsapp_number: whatsappNumber,
+                full_phone: `${countryCode} ${whatsappNumber}`,
+                language,
+                courses: courses.length ? courses : ["Jyotisha"],
+                batch_id: batchId,
+                batches: batchList,
+                email,
+                address,
+                status: "pending",
+                created_at: new Date().toISOString(),
+            };
+            students.push(newStudent);
+            writeJsonFile("students.json", students);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({
+                success: true,
+                message: "Student registered successfully!",
+                student: newStudent,
+            });
+        }
+        else if (endpoint === "update_student") {
+            const writeJsonFile = (filename, data) => {
+                const str = JSON.stringify(data, null, 2);
+                fs_1.default.writeFileSync(path_1.default.join(process.cwd(), filename), str);
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(pubPath))) {
+                    try {
+                        fs_1.default.writeFileSync(pubPath, str);
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(phpPath))) {
+                    try {
+                        fs_1.default.writeFileSync(phpPath, str);
+                    }
+                    catch (e) { }
+                }
+            };
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const studentId = String(input.student_id || "").trim();
+            if (!studentId) {
+                return res.status(400).json({ success: false, message: "Student ID required." });
+            }
+            const students = readJsonFile("students.json", []);
+            const idx = students.findIndex((s) => s.id === studentId);
+            if (idx === -1) {
+                return res.status(404).json({ success: false, message: "Student not found." });
+            }
+            if (input.first_name !== undefined)
+                students[idx].first_name = String(input.first_name).trim();
+            if (input.last_name !== undefined)
+                students[idx].last_name = String(input.last_name).trim();
+            if (input.whatsapp_number !== undefined)
+                students[idx].whatsapp_number = String(input.whatsapp_number).trim();
+            if (input.country_code !== undefined)
+                students[idx].country_code = String(input.country_code).trim();
+            if (input.language !== undefined)
+                students[idx].language = String(input.language).trim();
+            if (input.courses !== undefined)
+                students[idx].courses = Array.isArray(input.courses) ? input.courses : [input.courses];
+            if (input.batch_id !== undefined)
+                students[idx].batch_id = String(input.batch_id).trim();
+            if (input.email !== undefined)
+                students[idx].email = String(input.email).trim();
+            if (input.address !== undefined)
+                students[idx].address = String(input.address).trim();
+            students[idx].full_phone = `${students[idx].country_code || "+91"} ${students[idx].whatsapp_number || ""}`;
+            students[idx].updated_at = new Date().toISOString();
+            writeJsonFile("students.json", students);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ success: true, message: "Student updated successfully." });
+        }
+        else if (endpoint === "add_student_admin") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const writeJsonFile = (filename, data) => {
+                const str = JSON.stringify(data, null, 2);
+                fs_1.default.writeFileSync(path_1.default.join(process.cwd(), filename), str);
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(pubPath))) {
+                    try {
+                        fs_1.default.writeFileSync(pubPath, str);
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(phpPath))) {
+                    try {
+                        fs_1.default.writeFileSync(phpPath, str);
+                    }
+                    catch (e) { }
+                }
+            };
+            const students = readJsonFile("students.json", []);
+            const currentYear = new Date().getFullYear().toString();
+            const prefix = `STU-${currentYear}-`;
+            let maxSeq = 0;
+            for (const s of students) {
+                if (s.id && typeof s.id === "string" && s.id.startsWith(prefix)) {
+                    const val = parseInt(s.id.substring(prefix.length), 10);
+                    if (!isNaN(val) && val > maxSeq)
+                        maxSeq = val;
+                }
+            }
+            const nextSeq = maxSeq + 1;
+            const studentId = `${prefix}${String(nextSeq).padStart(4, "0")}`;
+            const countryCode = String(input.country_code || "+91").trim();
+            const whatsappNumber = String(input.whatsapp_number || "").trim();
+            const newStudent = {
+                id: studentId,
+                first_name: String(input.first_name || "").trim(),
+                last_name: String(input.last_name || "").trim(),
+                country_code: countryCode,
+                whatsapp_number: whatsappNumber,
+                full_phone: `${countryCode} ${whatsappNumber}`,
+                language: String(input.language || "Kannada").trim(),
+                courses: Array.isArray(input.courses) ? input.courses : ["Jyotisha", "ManaShastra"],
+                batch_id: String(input.batch_id || "JK-2026-OCT").trim(),
+                email: String(input.email || "").trim(),
+                address: String(input.address || "").trim(),
+                status: "activated",
+                created_at: new Date().toISOString(),
+            };
+            students.push(newStudent);
+            writeJsonFile("students.json", students);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ success: true, message: "Student added successfully!", student: newStudent });
+        }
+        else if (endpoint === "approve_student") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const writeJsonFile = (filename, data) => {
+                const str = JSON.stringify(data, null, 2);
+                fs_1.default.writeFileSync(path_1.default.join(process.cwd(), filename), str);
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(pubPath))) {
+                    try {
+                        fs_1.default.writeFileSync(pubPath, str);
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(phpPath))) {
+                    try {
+                        fs_1.default.writeFileSync(phpPath, str);
+                    }
+                    catch (e) { }
+                }
+            };
+            const studentId = String(input.student_id || "").trim();
+            if (!studentId)
+                return res.status(400).json({ success: false, message: "Student ID required." });
+            const students = readJsonFile("students.json", []);
+            const stu = students.find((s) => s.id === studentId);
+            if (!stu)
+                return res.status(404).json({ success: false, message: "Student not found." });
+            stu.status = "activated";
+            stu.approved_at = new Date().toISOString();
+            writeJsonFile("students.json", students);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ success: true, message: "Student approved and activated." });
+        }
+        else if (endpoint === "toggle_student_status") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const writeJsonFile = (filename, data) => {
+                const str = JSON.stringify(data, null, 2);
+                fs_1.default.writeFileSync(path_1.default.join(process.cwd(), filename), str);
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(pubPath))) {
+                    try {
+                        fs_1.default.writeFileSync(pubPath, str);
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(phpPath))) {
+                    try {
+                        fs_1.default.writeFileSync(phpPath, str);
+                    }
+                    catch (e) { }
+                }
+            };
+            const studentId = String(input.student_id || "").trim();
+            if (!studentId)
+                return res.status(400).json({ success: false, message: "Student ID required." });
+            const students = readJsonFile("students.json", []);
+            const stu = students.find((s) => s.id === studentId);
+            if (!stu)
+                return res.status(404).json({ success: false, message: "Student not found." });
+            const newStatus = stu.status === "deactivated" ? "activated" : "deactivated";
+            stu.status = newStatus;
+            writeJsonFile("students.json", students);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ success: true, message: "Status updated.", status: newStatus });
+        }
+        else if (endpoint === "delete_student") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const writeJsonFile = (filename, data) => {
+                const str = JSON.stringify(data, null, 2);
+                fs_1.default.writeFileSync(path_1.default.join(process.cwd(), filename), str);
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(pubPath))) {
+                    try {
+                        fs_1.default.writeFileSync(pubPath, str);
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(phpPath))) {
+                    try {
+                        fs_1.default.writeFileSync(phpPath, str);
+                    }
+                    catch (e) { }
+                }
+            };
+            const studentId = String(input.student_id || "").trim();
+            if (!studentId)
+                return res.status(400).json({ success: false, message: "Student ID required." });
+            let students = readJsonFile("students.json", []);
+            const initialCount = students.length;
+            students = students.filter((s) => s.id !== studentId);
+            if (students.length === initialCount) {
+                return res.status(404).json({ success: false, message: "Student not found." });
+            }
+            writeJsonFile("students.json", students);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ success: true, message: "Student deleted successfully." });
+        }
+        else if (endpoint === "get_batches" || endpoint === "batches") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const batches = readJsonFile("batches.json", []);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ success: true, batches });
+        }
+        else if (endpoint === "save_batch" || endpoint === "save_batches") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const writeJsonFile = (filename, data) => {
+                const str = JSON.stringify(data, null, 2);
+                fs_1.default.writeFileSync(path_1.default.join(process.cwd(), filename), str);
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(pubPath))) {
+                    try {
+                        fs_1.default.writeFileSync(pubPath, str);
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(phpPath))) {
+                    try {
+                        fs_1.default.writeFileSync(phpPath, str);
+                    }
+                    catch (e) { }
+                }
+            };
+            let batches = readJsonFile("batches.json", []);
+            if (Array.isArray(input.batches)) {
+                batches = input.batches;
+            }
+            else if (input.id || input.name) {
+                const batchData = { ...input };
+                let bId = String(batchData.id || "").trim();
+                if (!bId) {
+                    bId = String(batchData.name || "BATCH-" + new Date().getFullYear()).trim().toUpperCase().replace(/\s+/g, "-");
+                    batchData.id = bId;
+                }
+                const idx = batches.findIndex((b) => b.id === bId);
+                if (idx !== -1) {
+                    batches[idx] = { ...batches[idx], ...batchData };
+                }
+                else {
+                    batches.push(batchData);
+                }
+            }
+            writeJsonFile("batches.json", batches);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ success: true, message: "Batches saved successfully.", batches });
+        }
+        else if (endpoint === "delete_batch") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const writeJsonFile = (filename, data) => {
+                const str = JSON.stringify(data, null, 2);
+                fs_1.default.writeFileSync(path_1.default.join(process.cwd(), filename), str);
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(pubPath))) {
+                    try {
+                        fs_1.default.writeFileSync(pubPath, str);
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(phpPath))) {
+                    try {
+                        fs_1.default.writeFileSync(phpPath, str);
+                    }
+                    catch (e) { }
+                }
+            };
+            const bId = String(input.id || "").trim();
+            if (!bId)
+                return res.status(400).json({ success: false, message: "Batch ID required." });
+            let batches = readJsonFile("batches.json", []);
+            batches = batches.filter((b) => b.id !== bId);
+            writeJsonFile("batches.json", batches);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ success: true, message: "Batch deleted successfully.", batches });
+        }
+        else if (endpoint === "get_courses" || endpoint === "courses") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const courses = readJsonFile("courses.json", []);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ success: true, courses });
+        }
+        else if (endpoint === "save_course" || endpoint === "save_courses") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const writeJsonFile = (filename, data) => {
+                const str = JSON.stringify(data, null, 2);
+                fs_1.default.writeFileSync(path_1.default.join(process.cwd(), filename), str);
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(pubPath))) {
+                    try {
+                        fs_1.default.writeFileSync(pubPath, str);
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(phpPath))) {
+                    try {
+                        fs_1.default.writeFileSync(phpPath, str);
+                    }
+                    catch (e) { }
+                }
+            };
+            let courses = readJsonFile("courses.json", []);
+            if (Array.isArray(input.courses)) {
+                courses = input.courses;
+            }
+            else if (input.id || input.title) {
+                const cData = { ...input };
+                let cId = String(cData.id || "").trim();
+                if (!cId) {
+                    cId = String(cData.code || cData.title || "COURSE-" + new Date().getFullYear()).trim().toUpperCase();
+                    cData.id = cId;
+                }
+                const idx = courses.findIndex((c) => c.id === cId);
+                if (idx !== -1) {
+                    courses[idx] = { ...courses[idx], ...cData };
+                }
+                else {
+                    courses.push(cData);
+                }
+            }
+            writeJsonFile("courses.json", courses);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ success: true, message: "Courses saved successfully.", courses });
+        }
+        else if (endpoint === "delete_course") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const writeJsonFile = (filename, data) => {
+                const str = JSON.stringify(data, null, 2);
+                fs_1.default.writeFileSync(path_1.default.join(process.cwd(), filename), str);
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(pubPath))) {
+                    try {
+                        fs_1.default.writeFileSync(pubPath, str);
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(phpPath))) {
+                    try {
+                        fs_1.default.writeFileSync(phpPath, str);
+                    }
+                    catch (e) { }
+                }
+            };
+            const cId = String(input.id || "").trim();
+            if (!cId)
+                return res.status(400).json({ success: false, message: "Course ID required." });
+            let courses = readJsonFile("courses.json", []);
+            courses = courses.filter((c) => c.id !== cId);
+            writeJsonFile("courses.json", courses);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ success: true, message: "Course deleted successfully.", courses });
+        }
+        else if (endpoint === "get_templates" || endpoint === "templates") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const templates = readJsonFile("templates.json", []);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ success: true, templates });
+        }
+        else if (endpoint === "save_template" || endpoint === "save_templates") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const writeJsonFile = (filename, data) => {
+                const str = JSON.stringify(data, null, 2);
+                fs_1.default.writeFileSync(path_1.default.join(process.cwd(), filename), str);
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(pubPath))) {
+                    try {
+                        fs_1.default.writeFileSync(pubPath, str);
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(phpPath))) {
+                    try {
+                        fs_1.default.writeFileSync(phpPath, str);
+                    }
+                    catch (e) { }
+                }
+            };
+            let templates = readJsonFile("templates.json", []);
+            if (Array.isArray(input.templates)) {
+                templates = input.templates;
+            }
+            else {
+                const tData = { ...input };
+                let tId = String(tData.id || "").trim();
+                if (!tId) {
+                    tId = "TPL-" + String(templates.length + 1).padStart(3, "0");
+                    tData.id = tId;
+                }
+                const idx = templates.findIndex((t) => t.id === tId);
+                if (idx !== -1) {
+                    templates[idx] = { ...templates[idx], ...tData };
+                }
+                else {
+                    templates.push(tData);
+                }
+            }
+            writeJsonFile("templates.json", templates);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ success: true, message: "Template saved successfully.", templates });
+        }
+        else if (endpoint === "delete_template") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const writeJsonFile = (filename, data) => {
+                const str = JSON.stringify(data, null, 2);
+                fs_1.default.writeFileSync(path_1.default.join(process.cwd(), filename), str);
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(pubPath))) {
+                    try {
+                        fs_1.default.writeFileSync(pubPath, str);
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(phpPath))) {
+                    try {
+                        fs_1.default.writeFileSync(phpPath, str);
+                    }
+                    catch (e) { }
+                }
+            };
+            const tId = String(input.id || "").trim();
+            if (!tId)
+                return res.status(400).json({ success: false, message: "Template ID required." });
+            let templates = readJsonFile("templates.json", []);
+            templates = templates.filter((t) => t.id !== tId);
+            writeJsonFile("templates.json", templates);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ success: true, message: "Template deleted successfully.", templates });
+        }
+        else if (endpoint === "get_gotram" || endpoint === "get_gotra_master") {
+            const readJsonFile = (filename, defaultVal = []) => {
+                const filePath = path_1.default.join(process.cwd(), filename);
+                if (fs_1.default.existsSync(filePath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(pubPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(pubPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(phpPath)) {
+                    try {
+                        return JSON.parse(fs_1.default.readFileSync(phpPath, "utf-8"));
+                    }
+                    catch (e) { }
+                }
+                return defaultVal;
+            };
+            const gotraData = readJsonFile("gotra_master.json", []);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json(gotraData);
+        }
+        else if (endpoint === "save_gotram" || endpoint === "save_gotra_master") {
+            if (!verifyAdminPassword(input.admin_password, req.headers["x-admin-password"])) {
+                return res.status(403).json({ error: "Forbidden: Invalid Admin Password" });
+            }
+            const writeJsonFile = (filename, data) => {
+                const str = JSON.stringify(data, null, 2);
+                fs_1.default.writeFileSync(path_1.default.join(process.cwd(), filename), str);
+                const pubPath = path_1.default.join(process.cwd(), "..", "public", "static", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(pubPath))) {
+                    try {
+                        fs_1.default.writeFileSync(pubPath, str);
+                    }
+                    catch (e) { }
+                }
+                const phpPath = path_1.default.join(process.cwd(), "..", "jyotisha_php_api", filename);
+                if (fs_1.default.existsSync(path_1.default.dirname(phpPath))) {
+                    try {
+                        fs_1.default.writeFileSync(phpPath, str);
+                    }
+                    catch (e) { }
+                }
+            };
+            const gotraData = input.gotraData || input.gotras || input;
+            writeJsonFile("gotra_master.json", gotraData);
+            res.setHeader("X-Cache", "BYPASS");
+            return res.json({ status: "success", success: true, message: "Gotra data saved successfully." });
         }
         return res.status(400).json({ error: "Unknown endpoint" });
     }

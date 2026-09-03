@@ -18,6 +18,10 @@ export function Sidebar({ isOpen, logoUrl, onClose, activePage, onNavigate, prof
   const refreshVisibilitySettings = () => {
     try {
       const prefs = JSON.parse(localStorage.getItem("eclock_prefs") || "{}");
+      if (prefs.sidebar_pages && Array.isArray(prefs.sidebar_pages) && !prefs.sidebar_pages.includes("StudyLibrary")) {
+        prefs.sidebar_pages.push("StudyLibrary");
+        try { localStorage.setItem("eclock_prefs", JSON.stringify(prefs)); } catch (_) {}
+      }
       setVisiblePages(prefs.sidebar_pages || null);
       setIsRegistrationOpen(localStorage.getItem("vaiswanara_show_registration_form") !== "false");
       setAdminEnabledPages(getAdminEnabledPages());
@@ -55,10 +59,12 @@ export function Sidebar({ isOpen, logoUrl, onClose, activePage, onNavigate, prof
     { id: "Profiles", icon: "👥", label: t("Profiles", "e-Profiles") },
     { id: "e-PATA", icon: "📖", label: t("e-PATA", "e-PATA") },
     { id: "e-Library", icon: "📚", label: t("e-Library", "e-Library") },
+    { id: "StudyLibrary", icon: "🏛️", label: "Study Library", subLabel: "(New)" },
     { id: "VoiceQuery", icon: "🎙️", label: t("VoiceQuery", "e-Voice Query"), subLabel: "(New)" },
     ...(isRegistrationOpen ? [{ id: "StudentRegistration", icon: "🎓", label: t("StudentRegistration", "Student Registration") }] : []),
     { id: "PrecisionTest", icon: "🔬", label: t("PrecisionTest", "Precision Test") },
     { id: "Help", icon: "📖", label: t("Help", "FAQ") },
+    { id: "MyPhilosophy", icon: "✨", label: t("MyPhilosophy", "My Philosophy") },
     { id: "e-Support", icon: "🤝", label: t("Support", "Donate") },
     { id: "Privacy", icon: "🛡️", label: t("Privacy", "Privacy Policy") },
     { id: "Settings", icon: "⚙️", label: t("Settings", "Settings") },

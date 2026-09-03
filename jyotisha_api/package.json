@@ -1,6 +1,7 @@
 {
   "main": "dist/server.js",
   "scripts": {
+    "build": "tsc",
     "start": "node dist/server.js",
     "postinstall": "node -e \"const p=require('path'),cp=require('child_process');cp.fork(p.join(p.dirname(process.env.npm_package_json||'.'),'build-swetest.js'));\""
   },
